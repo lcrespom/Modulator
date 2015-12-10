@@ -58,7 +58,7 @@
 	gr.addNode(n3);
 	n1.addInput(n2);
 	n2.addInput(n3);
-	gr.addNode(new graph_1.Node(30, 250));
+	gr.draw();
 
 
 /***/ },

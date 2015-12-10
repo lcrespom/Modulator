@@ -15,3 +15,4 @@ gr.addNode(n2);
 gr.addNode(n3);
 n1.addInput(n2);
 n2.addInput(n3);
+gr.draw();
