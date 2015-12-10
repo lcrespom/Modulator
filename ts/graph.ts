@@ -52,6 +52,9 @@ interface Point {
 	y: number
 }
 
+/**
+ * A node in a graph. Nodes can be connected to other nodes.
+ */
 export class Node {
 	x: number;
 	y: number;
@@ -65,6 +68,11 @@ export class Node {
 		this.y = y;
 	}
 
+	/**
+	 * Connects two nodes by adding a given node as input.
+	 * Warning: nodes should be connected only after they have been added to the graph.
+	 * @param n the node to connect as input
+	 */
 	addInput(n: Node) {
 		this.inputs.push(n);
 	}
@@ -92,7 +100,7 @@ function drawArrow(gc: CanvasRenderingContext2D, srcNode: Node, dstNode: Node) {
 function drawArrowTip(gc: CanvasRenderingContext2D, src: Point, dst: Point) {
 	const mx = (src.x + dst.x) / 2;
 	const my = (src.y + dst.y) / 2;
-	const headlen = 10;   // length of head in pixels
+	const headlen = 10;
 	var angle = Math.atan2(dst.y - src.y, dst.x - src.x);
 	gc.beginPath();
 	gc.moveTo(mx, my);
