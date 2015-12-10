@@ -53,24 +53,12 @@
 	var n1 = new graph_1.Node(10, 10);
 	var n2 = new graph_1.Node(30, 100);
 	var n3 = new graph_1.Node(60, 200);
-	n1.addInput(n2);
-	n2.addInput(n3);
 	gr.addNode(n1);
 	gr.addNode(n2);
 	gr.addNode(n3);
-	gr.draw();
-	$('.node').draggable({
-	    containment: 'parent',
-	    cursor: 'move',
-	    distance: 5,
-	    stack: '.node',
-	    drag: function (event, ui) {
-	        var n = ui.helper.data('node');
-	        n.x = ui.position.left;
-	        n.y = ui.position.top;
-	        gr.draw();
-	    }
-	});
+	n1.addInput(n2);
+	n2.addInput(n3);
+	gr.addNode(new graph_1.Node(30, 250));
 
 
 /***/ },
@@ -88,10 +76,11 @@
 	    Graph.prototype.addNode = function (n) {
 	        n.element = $('<div>')
 	            .addClass('node')
-	            .css({ left: n.x, top: n.y })
-	            .data('node', n);
+	            .css({ left: n.x, top: n.y });
 	        this.nodeCanvas.append(n.element);
 	        this.nodes.push(n);
+	        this.setupDnD(n);
+	        this.draw();
 	    };
 	    Graph.prototype.draw = function () {
 	        clearCanvas(this.gc, this.canvas);
@@ -104,6 +93,20 @@
 	                drawArrow(this.gc, nsrc, ndst);
 	            }
 	        }
+	    };
+	    Graph.prototype.setupDnD = function (n) {
+	        var _this = this;
+	        n.element.draggable({
+	            containment: 'parent',
+	            cursor: 'move',
+	            distance: 5,
+	            stack: '.node',
+	            drag: function (event, ui) {
+	                n.x = ui.position.left;
+	                n.y = ui.position.top;
+	                _this.draw();
+	            }
+	        });
 	    };
 	    return Graph;
 	})();

@@ -15,10 +15,11 @@ export class Graph {
 	addNode(n: Node) {
 		n.element = $('<div>')
 		.addClass('node')
-		.css({ left: n.x, top: n.y })
-		.data('node', n);
+		.css({ left: n.x, top: n.y });
 		this.nodeCanvas.append(n.element);
 		this.nodes.push(n);
+		this.setupDnD(n);
+		this.draw();
 	}
 
 	draw() {
@@ -28,6 +29,20 @@ export class Graph {
 		for (const ndst of this.nodes)
 			for (const nsrc of ndst.inputs)
 				drawArrow(this.gc, nsrc, ndst);
+	}
+
+	setupDnD(n: Node) {
+		n.element.draggable({
+			containment: 'parent',
+			cursor: 'move',
+			distance: 5,
+			stack: '.node',
+			drag: (event, ui) => {
+				n.x = ui.position.left;
+				n.y = ui.position.top;
+				this.draw();
+			}
+		});
 	}
 }
 
