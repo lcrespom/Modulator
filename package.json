@@ -1,0 +1,24 @@
+{
+	"name": "graph",
+	"version": "1.0.0",
+	"description": "Grap Editor",
+	"main": "start.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"tsc": "tsc",
+		"build": "webpack --progress --colors --display-error-details --display-reasons",
+		"watch": "webpack --progress --colors --watch",
+		"serve": "http-server -c-1"
+	},
+	"keywords": [
+		"graph"
+	],
+	"author": "Luis Crespo",
+	"license": "ISC",
+	"devDependencies": {
+		"http-server": "^0.8.5",
+		"ts-loader": "^0.7.1",
+		"typescript": "^1.6.2",
+		"webpack": "^1.12.9"
+	}
+}

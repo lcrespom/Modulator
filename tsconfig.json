@@ -1,0 +1,13 @@
+{
+	"compilerOptions": {
+		"target": "ES5",
+		"module": "commonjs",
+		"sourceMap": true,
+		"outDir": "build"
+	},
+	"exclude": [
+		".", ".git",
+		"js", "build", "node_modules",
+		"css", "img", "templates"
+	]
+}

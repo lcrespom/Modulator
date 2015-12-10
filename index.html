@@ -1,0 +1,40 @@
+<!doctype html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<title>Graph</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<style>
+		.graph {
+			padding: 0; margin: 0;
+		}
+		.canvas-box {
+			border: 1px solid gray;
+			padding: 0;
+			margin: 0;
+			overflow: hidden;
+			position: relative;
+			display: inline-block;
+		}
+		.node {
+			position: absolute;
+			background: #8F8;
+			border: 2px solid #080;
+			border-radius: 5px;
+			width: 80px; height: 60px;
+		}
+		.arrow {
+			display: none;
+			color: #080;
+		}
+	</style>
+</head>
+<body>
+	<div class="canvas-box">
+		<canvas id="graph-canvas" class="graph" width="600" height="400"></canvas>
+	</div>
+    <script src="js/vendor/jquery-1.11.2.min.js"></script>
+	<script src="js/vendor/jquery-ui.min.js"></script>
+    <script src="js/bundle.js"></script>
+</body>
+</html>
