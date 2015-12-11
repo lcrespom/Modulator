@@ -99,10 +99,12 @@ class GraphInteraction {
 	}
 }
 
+
 interface Point {
 	x: number,
 	y: number
 }
+
 
 class GraphDraw {
 
