@@ -1,17 +1,18 @@
 export class Graph {
 
-	canvas: HTMLCanvasElement;
-	gc: CanvasRenderingContext2D;
 	nodeCanvas: JQuery;
 	nodes: Node[] = [];
-	arrowColor: string = "black";
 	mouseInside = false;
+	graphDraw: GraphDraw;
 
 	constructor(canvas: HTMLCanvasElement) {
-		this.canvas = canvas;
-		this.gc = canvas.getContext('2d');
 		this.nodeCanvas = $(canvas.parentElement);
 		this._setupConnectHandler();
+		this.graphDraw = new GraphDraw(canvas.getContext('2d'), canvas);
+	}
+
+	set arrowColor(color: string) {
+		this.graphDraw.arrowColor = color;
 	}
 
 	addNode(n: Node) {
@@ -25,12 +26,7 @@ export class Graph {
 	}
 
 	draw() {
-		clearCanvas(this.gc, this.canvas);
-		this.gc.strokeStyle = this.arrowColor;
-		this.gc.lineWidth = 2;
-		for (const ndst of this.nodes)
-			for (const nsrc of ndst.inputs)
-				drawArrow(this.gc, nsrc, ndst);
+		this.graphDraw.draw(this.nodes);
 	}
 
 	_setupDnD(n: Node) {
@@ -60,11 +56,6 @@ export class Graph {
 	}
 }
 
-
-interface Point {
-	x: number,
-	y: number
-}
 
 /**
  * A node in a graph. Nodes can be connected to other nodes.
@@ -96,41 +87,67 @@ export class Node {
 
 //------------------------- Privates -------------------------
 
-function clearCanvas(gc:CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
-	gc.clearRect(0, 0, canvas.width, canvas.height);
+interface Point {
+	x: number,
+	y: number
 }
 
-function drawArrow(gc: CanvasRenderingContext2D, srcNode: Node, dstNode: Node) {
-	const srcPoint = getNodeCenter(srcNode);
-	const dstPoint = getNodeCenter(dstNode);
-	gc.beginPath();
-	gc.moveTo(srcPoint.x, srcPoint.y);
-	gc.lineTo(dstPoint.x, dstPoint.y);
-	drawArrowTip(gc, srcPoint, dstPoint);
-	gc.closePath();
-	gc.stroke();
-}
+class GraphDraw {
 
-function drawArrowTip(gc: CanvasRenderingContext2D, src: Point, dst: Point) {
-	const posCoef = 0.6;
-	const mx = src.x + (dst.x - src.x) * posCoef;
-	const my = src.y + (dst.y - src.y) * posCoef;
-	const headlen = 10;
-	var angle = Math.atan2(dst.y - src.y, dst.x - src.x);
-	gc.moveTo(mx, my);
-	gc.lineTo(
-		mx - headlen * Math.cos(angle - Math.PI/6),
-		my - headlen * Math.sin(angle - Math.PI/6)
-	);
-	gc.moveTo(mx, my);
-	gc.lineTo(
-		mx - headlen * Math.cos(angle + Math.PI/6),
-		my - headlen * Math.sin(angle + Math.PI/6)
-	);
- }
+	gc: CanvasRenderingContext2D;
+	canvas: HTMLCanvasElement;
+	arrowColor: string = "black";
 
-function getNodeCenter(n: Node): Point {
-	n.w = n.w || n.element.outerWidth();
-	n.h = n.h || n.element.outerHeight();
-	return { x: n.x + n.w / 2, y: n.y + n.h / 2 };
+	constructor(gc: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
+		this.gc = gc;
+		this.canvas = canvas;
+	}
+
+	draw(nodes: Node[]) {
+		this.clearCanvas();
+		this.gc.strokeStyle = this.arrowColor;
+		this.gc.lineWidth = 2;
+		for (const ndst of nodes)
+			for (const nsrc of ndst.inputs)
+				this.drawArrow(nsrc, ndst);
+	}
+
+	clearCanvas() {
+		this.gc.clearRect(0, 0, this.canvas.width, this.canvas.height);
+	}
+
+	drawArrow(srcNode: Node, dstNode: Node) {
+		const srcPoint = this.getNodeCenter(srcNode);
+		const dstPoint = this.getNodeCenter(dstNode);
+		this.gc.beginPath();
+		this.gc.moveTo(srcPoint.x, srcPoint.y);
+		this.gc.lineTo(dstPoint.x, dstPoint.y);
+		this.drawArrowTip(srcPoint, dstPoint);
+		this.gc.closePath();
+		this.gc.stroke();
+	}
+
+	drawArrowTip(src: Point, dst: Point) {
+		const posCoef = 0.6;
+		const mx = src.x + (dst.x - src.x) * posCoef;
+		const my = src.y + (dst.y - src.y) * posCoef;
+		const headlen = 10;
+		var angle = Math.atan2(dst.y - src.y, dst.x - src.x);
+		this.gc.moveTo(mx, my);
+		this.gc.lineTo(
+			mx - headlen * Math.cos(angle - Math.PI/6),
+			my - headlen * Math.sin(angle - Math.PI/6)
+		);
+		this.gc.moveTo(mx, my);
+		this.gc.lineTo(
+			mx - headlen * Math.cos(angle + Math.PI/6),
+			my - headlen * Math.sin(angle + Math.PI/6)
+		);
+	}
+
+	getNodeCenter(n: Node): Point {
+		n.w = n.w || n.element.outerWidth();
+		n.h = n.h || n.element.outerHeight();
+		return { x: n.x + n.w / 2, y: n.y + n.h / 2 };
+	}
 }

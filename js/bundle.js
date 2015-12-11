@@ -72,13 +72,18 @@
 	var Graph = (function () {
 	    function Graph(canvas) {
 	        this.nodes = [];
-	        this.arrowColor = "black";
 	        this.mouseInside = false;
-	        this.canvas = canvas;
-	        this.gc = canvas.getContext('2d');
 	        this.nodeCanvas = $(canvas.parentElement);
 	        this._setupConnectHandler();
+	        this.graphDraw = new GraphDraw(canvas.getContext('2d'), canvas);
 	    }
+	    Object.defineProperty(Graph.prototype, "arrowColor", {
+	        set: function (color) {
+	            this.graphDraw.arrowColor = color;
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
 	    Graph.prototype.addNode = function (n) {
 	        n.element = $('<div>')
 	            .addClass('node')
@@ -89,16 +94,7 @@
 	        this.draw();
 	    };
 	    Graph.prototype.draw = function () {
-	        clearCanvas(this.gc, this.canvas);
-	        this.gc.strokeStyle = this.arrowColor;
-	        this.gc.lineWidth = 2;
-	        for (var _i = 0, _a = this.nodes; _i < _a.length; _i++) {
-	            var ndst = _a[_i];
-	            for (var _b = 0, _c = ndst.inputs; _b < _c.length; _b++) {
-	                var nsrc = _c[_b];
-	                drawArrow(this.gc, nsrc, ndst);
-	            }
-	        }
+	        this.graphDraw.draw(this.nodes);
 	    };
 	    Graph.prototype._setupDnD = function (n) {
 	        var _this = this;
@@ -152,36 +148,55 @@
 	    return Node;
 	})();
 	exports.Node = Node;
-	//------------------------- Privates -------------------------
-	function clearCanvas(gc, canvas) {
-	    gc.clearRect(0, 0, canvas.width, canvas.height);
-	}
-	function drawArrow(gc, srcNode, dstNode) {
-	    var srcPoint = getNodeCenter(srcNode);
-	    var dstPoint = getNodeCenter(dstNode);
-	    gc.beginPath();
-	    gc.moveTo(srcPoint.x, srcPoint.y);
-	    gc.lineTo(dstPoint.x, dstPoint.y);
-	    drawArrowTip(gc, srcPoint, dstPoint);
-	    gc.closePath();
-	    gc.stroke();
-	}
-	function drawArrowTip(gc, src, dst) {
-	    var posCoef = 0.6;
-	    var mx = src.x + (dst.x - src.x) * posCoef;
-	    var my = src.y + (dst.y - src.y) * posCoef;
-	    var headlen = 10;
-	    var angle = Math.atan2(dst.y - src.y, dst.x - src.x);
-	    gc.moveTo(mx, my);
-	    gc.lineTo(mx - headlen * Math.cos(angle - Math.PI / 6), my - headlen * Math.sin(angle - Math.PI / 6));
-	    gc.moveTo(mx, my);
-	    gc.lineTo(mx - headlen * Math.cos(angle + Math.PI / 6), my - headlen * Math.sin(angle + Math.PI / 6));
-	}
-	function getNodeCenter(n) {
-	    n.w = n.w || n.element.outerWidth();
-	    n.h = n.h || n.element.outerHeight();
-	    return { x: n.x + n.w / 2, y: n.y + n.h / 2 };
-	}
+	var GraphDraw = (function () {
+	    function GraphDraw(gc, canvas) {
+	        this.arrowColor = "black";
+	        this.gc = gc;
+	        this.canvas = canvas;
+	    }
+	    GraphDraw.prototype.draw = function (nodes) {
+	        this.clearCanvas();
+	        this.gc.strokeStyle = this.arrowColor;
+	        this.gc.lineWidth = 2;
+	        for (var _i = 0; _i < nodes.length; _i++) {
+	            var ndst = nodes[_i];
+	            for (var _a = 0, _b = ndst.inputs; _a < _b.length; _a++) {
+	                var nsrc = _b[_a];
+	                this.drawArrow(nsrc, ndst);
+	            }
+	        }
+	    };
+	    GraphDraw.prototype.clearCanvas = function () {
+	        this.gc.clearRect(0, 0, this.canvas.width, this.canvas.height);
+	    };
+	    GraphDraw.prototype.drawArrow = function (srcNode, dstNode) {
+	        var srcPoint = this.getNodeCenter(srcNode);
+	        var dstPoint = this.getNodeCenter(dstNode);
+	        this.gc.beginPath();
+	        this.gc.moveTo(srcPoint.x, srcPoint.y);
+	        this.gc.lineTo(dstPoint.x, dstPoint.y);
+	        this.drawArrowTip(srcPoint, dstPoint);
+	        this.gc.closePath();
+	        this.gc.stroke();
+	    };
+	    GraphDraw.prototype.drawArrowTip = function (src, dst) {
+	        var posCoef = 0.6;
+	        var mx = src.x + (dst.x - src.x) * posCoef;
+	        var my = src.y + (dst.y - src.y) * posCoef;
+	        var headlen = 10;
+	        var angle = Math.atan2(dst.y - src.y, dst.x - src.x);
+	        this.gc.moveTo(mx, my);
+	        this.gc.lineTo(mx - headlen * Math.cos(angle - Math.PI / 6), my - headlen * Math.sin(angle - Math.PI / 6));
+	        this.gc.moveTo(mx, my);
+	        this.gc.lineTo(mx - headlen * Math.cos(angle + Math.PI / 6), my - headlen * Math.sin(angle + Math.PI / 6));
+	    };
+	    GraphDraw.prototype.getNodeCenter = function (n) {
+	        n.w = n.w || n.element.outerWidth();
+	        n.h = n.h || n.element.outerHeight();
+	        return { x: n.x + n.w / 2, y: n.y + n.h / 2 };
+	    };
+	    return GraphDraw;
+	})();
 
 
 /***/ }
