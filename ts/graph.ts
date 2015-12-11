@@ -22,7 +22,7 @@ export class Graph {
 		.css({ left: n.x, top: n.y });
 		this.nodeCanvas.append(n.element);
 		this.nodes.push(n);
-		this.graphInteract.registerNode(n, () => this.draw());
+		this.graphInteract.registerNode(n);
 		this.draw();
 	}
 
@@ -33,9 +33,6 @@ export class Graph {
 }
 
 
-/**
- * A node in a graph. Nodes can be connected to other nodes.
- */
 export class Node {
 	x: number;
 	y: number;
@@ -49,11 +46,6 @@ export class Node {
 		this.y = y;
 	}
 
-	/**
-	 * Connects two nodes by adding a given node as input.
-	 * Warning: nodes should be connected only after they have been added to the graph.
-	 * @param n the node to connect as input
-	 */
 	addInput(n: Node) {
 		this.inputs.push(n);
 	}
@@ -80,7 +72,7 @@ class GraphInteraction {
 		this.setupConnectHandler();
 	}
 
-	registerNode(n: Node, draw: () => void) {
+	registerNode(n: Node) {
 		n.element.draggable({
 			containment: 'parent',
 			cursor: 'move',
@@ -89,33 +81,37 @@ class GraphInteraction {
 			drag: (event, ui) => {
 				n.x = ui.position.left;
 				n.y = ui.position.top;
-				draw();
+				this.grDraw.draw();
 			}
 		});
 	}
 
 	setupConnectHandler() {
+		let mouseIsDown = false;
+		let srcn: Node;
 		$('body').keydown(evt => {
-			if (evt.keyCode != 16  || this.connecting) return;
-			const srcNode = this.getNodeUnderMouse();
-			if (!srcNode) return;
-			console.log('>>> src node:', srcNode);
+			if (evt.keyCode != 16  || this.connecting || mouseIsDown) return;
+			srcn = this.getNodeFromDOM(this.getElementUnderMouse());
+			if (!srcn) return;
 			this.nodeCanvas.css('cursor', 'crosshair');
 			this.connecting = true;
-			this.registerRubberBanding(srcNode);
+			this.registerRubberBanding(srcn);
 		})
 		.keyup(evt => {
 			if (evt.keyCode != 16) return;
 			this.connecting = false;
 			this.nodeCanvas.css('cursor', '');
 			this.deregisterRubberBanding();
-			const dstNode = this.getNodeUnderMouse();
-			if (!dstNode) return;
-			console.log('>>> dest node:', dstNode);
-		});
+			const dstn = this.getNodeFromDOM(this.getElementUnderMouse());
+			if (!dstn) return;
+			dstn.addInput(srcn);
+			this.grDraw.draw();
+		})
+		.mousedown(evt => mouseIsDown = true)
+		.mouseup(evt => mouseIsDown = false);
 	}
 
-	getNodeUnderMouse(): JQuery {
+	getElementUnderMouse(): JQuery {
 		const hovered = $(':hover');
 		if (hovered.length <= 0) return null;
 		const jqNode = $(hovered.get(hovered.length - 1));
@@ -123,13 +119,11 @@ class GraphInteraction {
 		return jqNode;
 	}
 
-	registerRubberBanding(srcNode: JQuery) {
-		const srcn = this.getNodeFromDOM(srcNode);
-		if (!srcn) return;
+	registerRubberBanding(srcn: Node) {
 		const ofs = this.nodeCanvas.offset();
 		const dstn = new Node(0, 0);
-		dstn.w = .01;
-		dstn.h = .01;
+		dstn.w = 0;
+		dstn.h = 0;
 		$(this.nodeCanvas).on('mousemove', evt => {
 			dstn.x = evt.clientX - ofs.left;
 			dstn.y = evt.clientY - ofs.top;
@@ -147,6 +141,7 @@ class GraphInteraction {
 	}
 
 	getNodeFromDOM(jqNode: JQuery) {
+		if (!jqNode) return null;
 		for (const n of this.nodes)
 			if (n.element[0] == jqNode[0]) return n;
 		return null;
@@ -216,8 +211,8 @@ class GraphDraw {
 	}
 
 	getNodeCenter(n: Node): Point {
-		n.w = n.w || n.element.outerWidth();
-		n.h = n.h || n.element.outerHeight();
+		n.w = n.w !== undefined ? n.w : n.element.outerWidth();
+		n.h = n.h !== undefined ? n.h : n.element.outerHeight();
 		return { x: n.x + n.w / 2, y: n.y + n.h / 2 };
 	}
 }

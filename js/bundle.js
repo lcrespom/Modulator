@@ -53,12 +53,12 @@
 	var n1 = new graph_1.Node(10, 10);
 	var n2 = new graph_1.Node(30, 100);
 	var n3 = new graph_1.Node(60, 200);
-	gr.addNode(n1);
-	gr.addNode(n2);
-	gr.addNode(n3);
-	n1.addInput(n2);
-	n2.addInput(n3);
-	gr.draw();
+	// gr.addNode(n1);
+	// gr.addNode(n2);
+	// gr.addNode(n3);
+	// n1.addInput(n2);
+	// n2.addInput(n3);
+	// gr.draw();
 	$('.palette > .node').click(function (evt) {
 	    var n = new graph_1.Node(260, 180);
 	    gr.addNode(n);
@@ -85,13 +85,12 @@
 	        configurable: true
 	    });
 	    Graph.prototype.addNode = function (n) {
-	        var _this = this;
 	        n.element = $('<div>')
 	            .addClass('node')
 	            .css({ left: n.x, top: n.y });
 	        this.nodeCanvas.append(n.element);
 	        this.nodes.push(n);
-	        this.graphInteract.registerNode(n, function () { return _this.draw(); });
+	        this.graphInteract.registerNode(n);
 	        this.draw();
 	    };
 	    Graph.prototype.draw = function () {
@@ -100,20 +99,12 @@
 	    return Graph;
 	})();
 	exports.Graph = Graph;
-	/**
-	 * A node in a graph. Nodes can be connected to other nodes.
-	 */
 	var Node = (function () {
 	    function Node(x, y) {
 	        this.inputs = [];
 	        this.x = x;
 	        this.y = y;
 	    }
-	    /**
-	     * Connects two nodes by adding a given node as input.
-	     * Warning: nodes should be connected only after they have been added to the graph.
-	     * @param n the node to connect as input
-	     */
 	    Node.prototype.addInput = function (n) {
 	        this.inputs.push(n);
 	    };
@@ -130,7 +121,8 @@
 	        this.grDraw = grDraw;
 	        this.setupConnectHandler();
 	    }
-	    GraphInteraction.prototype.registerNode = function (n, draw) {
+	    GraphInteraction.prototype.registerNode = function (n) {
+	        var _this = this;
 	        n.element.draggable({
 	            containment: 'parent',
 	            cursor: 'move',
@@ -139,22 +131,23 @@
 	            drag: function (event, ui) {
 	                n.x = ui.position.left;
 	                n.y = ui.position.top;
-	                draw();
+	                _this.grDraw.draw();
 	            }
 	        });
 	    };
 	    GraphInteraction.prototype.setupConnectHandler = function () {
 	        var _this = this;
+	        var mouseIsDown = false;
+	        var srcn;
 	        $('body').keydown(function (evt) {
-	            if (evt.keyCode != 16 || _this.connecting)
+	            if (evt.keyCode != 16 || _this.connecting || mouseIsDown)
 	                return;
-	            var srcNode = _this.getNodeUnderMouse();
-	            if (!srcNode)
+	            srcn = _this.getNodeFromDOM(_this.getElementUnderMouse());
+	            if (!srcn)
 	                return;
-	            console.log('>>> src node:', srcNode);
 	            _this.nodeCanvas.css('cursor', 'crosshair');
 	            _this.connecting = true;
-	            _this.registerRubberBanding(srcNode);
+	            _this.registerRubberBanding(srcn);
 	        })
 	            .keyup(function (evt) {
 	            if (evt.keyCode != 16)
@@ -162,13 +155,16 @@
 	            _this.connecting = false;
 	            _this.nodeCanvas.css('cursor', '');
 	            _this.deregisterRubberBanding();
-	            var dstNode = _this.getNodeUnderMouse();
-	            if (!dstNode)
+	            var dstn = _this.getNodeFromDOM(_this.getElementUnderMouse());
+	            if (!dstn)
 	                return;
-	            console.log('>>> dest node:', dstNode);
-	        });
+	            dstn.addInput(srcn);
+	            _this.grDraw.draw();
+	        })
+	            .mousedown(function (evt) { return mouseIsDown = true; })
+	            .mouseup(function (evt) { return mouseIsDown = false; });
 	    };
-	    GraphInteraction.prototype.getNodeUnderMouse = function () {
+	    GraphInteraction.prototype.getElementUnderMouse = function () {
 	        var hovered = $(':hover');
 	        if (hovered.length <= 0)
 	            return null;
@@ -177,15 +173,12 @@
 	            return null;
 	        return jqNode;
 	    };
-	    GraphInteraction.prototype.registerRubberBanding = function (srcNode) {
+	    GraphInteraction.prototype.registerRubberBanding = function (srcn) {
 	        var _this = this;
-	        var srcn = this.getNodeFromDOM(srcNode);
-	        if (!srcn)
-	            return;
 	        var ofs = this.nodeCanvas.offset();
 	        var dstn = new Node(0, 0);
-	        dstn.w = .01;
-	        dstn.h = .01;
+	        dstn.w = 0;
+	        dstn.h = 0;
 	        $(this.nodeCanvas).on('mousemove', function (evt) {
 	            dstn.x = evt.clientX - ofs.left;
 	            dstn.y = evt.clientY - ofs.top;
@@ -201,6 +194,8 @@
 	        this.grDraw.draw();
 	    };
 	    GraphInteraction.prototype.getNodeFromDOM = function (jqNode) {
+	        if (!jqNode)
+	            return null;
 	        for (var _i = 0, _a = this.nodes; _i < _a.length; _i++) {
 	            var n = _a[_i];
 	            if (n.element[0] == jqNode[0])
@@ -254,8 +249,8 @@
 	        this.gc.lineTo(mx - this.arrowHeadLen * Math.cos(angle + Math.PI / 6), my - this.arrowHeadLen * Math.sin(angle + Math.PI / 6));
 	    };
 	    GraphDraw.prototype.getNodeCenter = function (n) {
-	        n.w = n.w || n.element.outerWidth();
-	        n.h = n.h || n.element.outerHeight();
+	        n.w = n.w !== undefined ? n.w : n.element.outerWidth();
+	        n.h = n.h !== undefined ? n.h : n.element.outerHeight();
 	        return { x: n.x + n.w / 2, y: n.y + n.h / 2 };
 	    };
 	    return GraphDraw;
