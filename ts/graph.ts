@@ -2,13 +2,13 @@ export class Graph {
 
 	nodeCanvas: JQuery;
 	nodes: Node[] = [];
-	mouseInside = false;
 	graphDraw: GraphDraw;
+	graphInteract: GraphInteraction;
 
 	constructor(canvas: HTMLCanvasElement) {
 		this.nodeCanvas = $(canvas.parentElement);
-		this._setupConnectHandler();
 		this.graphDraw = new GraphDraw(canvas.getContext('2d'), canvas);
+		this.graphInteract = new GraphInteraction(this.nodeCanvas);
 	}
 
 	set arrowColor(color: string) {
@@ -21,7 +21,7 @@ export class Graph {
 		.css({ left: n.x, top: n.y });
 		this.nodeCanvas.append(n.element);
 		this.nodes.push(n);
-		this._setupDnD(n);
+		this.graphInteract.setupDnD(n, () => this.draw());
 		this.draw();
 	}
 
@@ -29,31 +29,6 @@ export class Graph {
 		this.graphDraw.draw(this.nodes);
 	}
 
-	_setupDnD(n: Node) {
-		n.element.draggable({
-			containment: 'parent',
-			cursor: 'move',
-			distance: 5,
-			stack: '.node',
-			drag: (event, ui) => {
-				n.x = ui.position.left;
-				n.y = ui.position.top;
-				this.draw();
-			}
-		});
-	}
-
-	_setupConnectHandler() {
-		this.nodeCanvas.mouseenter(evt => this.mouseInside = true);
-		this.nodeCanvas.mouseleave(evt => this.mouseInside = false);
-		$('body').keydown(evt => {
-			if (evt.keyCode != 16) return;
-			if (this.mouseInside) this.nodeCanvas.css('cursor', 'crosshair');
-		})
-		.keyup(evt => {
-			if (evt.keyCode == 16) this.nodeCanvas.css('cursor', '');
-		});
-	}
 }
 
 
@@ -86,6 +61,43 @@ export class Node {
 
 
 //------------------------- Privates -------------------------
+
+class GraphInteraction {
+
+	nodeCanvas: JQuery;
+	mouseInside = false;
+
+	constructor(nodeCanvas: JQuery) {
+		this.nodeCanvas = nodeCanvas;
+		this.setupConnectHandler();
+	}
+
+	setupConnectHandler() {
+		this.nodeCanvas.mouseenter(evt => this.mouseInside = true);
+		this.nodeCanvas.mouseleave(evt => this.mouseInside = false);
+		$('body').keydown(evt => {
+			if (evt.keyCode != 16) return;
+			if (this.mouseInside) this.nodeCanvas.css('cursor', 'crosshair');
+		})
+		.keyup(evt => {
+			if (evt.keyCode == 16) this.nodeCanvas.css('cursor', '');
+		});
+	}
+
+	setupDnD(n: Node, draw: () => void) {
+		n.element.draggable({
+			containment: 'parent',
+			cursor: 'move',
+			distance: 5,
+			stack: '.node',
+			drag: (event, ui) => {
+				n.x = ui.position.left;
+				n.y = ui.position.top;
+				draw();
+			}
+		});
+	}
+}
 
 interface Point {
 	x: number,

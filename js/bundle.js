@@ -72,10 +72,9 @@
 	var Graph = (function () {
 	    function Graph(canvas) {
 	        this.nodes = [];
-	        this.mouseInside = false;
 	        this.nodeCanvas = $(canvas.parentElement);
-	        this._setupConnectHandler();
 	        this.graphDraw = new GraphDraw(canvas.getContext('2d'), canvas);
+	        this.graphInteract = new GraphInteraction(this.nodeCanvas);
 	    }
 	    Object.defineProperty(Graph.prototype, "arrowColor", {
 	        set: function (color) {
@@ -85,45 +84,17 @@
 	        configurable: true
 	    });
 	    Graph.prototype.addNode = function (n) {
+	        var _this = this;
 	        n.element = $('<div>')
 	            .addClass('node')
 	            .css({ left: n.x, top: n.y });
 	        this.nodeCanvas.append(n.element);
 	        this.nodes.push(n);
-	        this._setupDnD(n);
+	        this.graphInteract.setupDnD(n, function () { return _this.draw(); });
 	        this.draw();
 	    };
 	    Graph.prototype.draw = function () {
 	        this.graphDraw.draw(this.nodes);
-	    };
-	    Graph.prototype._setupDnD = function (n) {
-	        var _this = this;
-	        n.element.draggable({
-	            containment: 'parent',
-	            cursor: 'move',
-	            distance: 5,
-	            stack: '.node',
-	            drag: function (event, ui) {
-	                n.x = ui.position.left;
-	                n.y = ui.position.top;
-	                _this.draw();
-	            }
-	        });
-	    };
-	    Graph.prototype._setupConnectHandler = function () {
-	        var _this = this;
-	        this.nodeCanvas.mouseenter(function (evt) { return _this.mouseInside = true; });
-	        this.nodeCanvas.mouseleave(function (evt) { return _this.mouseInside = false; });
-	        $('body').keydown(function (evt) {
-	            if (evt.keyCode != 16)
-	                return;
-	            if (_this.mouseInside)
-	                _this.nodeCanvas.css('cursor', 'crosshair');
-	        })
-	            .keyup(function (evt) {
-	            if (evt.keyCode == 16)
-	                _this.nodeCanvas.css('cursor', '');
-	        });
 	    };
 	    return Graph;
 	})();
@@ -148,6 +119,43 @@
 	    return Node;
 	})();
 	exports.Node = Node;
+	//------------------------- Privates -------------------------
+	var GraphInteraction = (function () {
+	    function GraphInteraction(nodeCanvas) {
+	        this.mouseInside = false;
+	        this.nodeCanvas = nodeCanvas;
+	        this.setupConnectHandler();
+	    }
+	    GraphInteraction.prototype.setupConnectHandler = function () {
+	        var _this = this;
+	        this.nodeCanvas.mouseenter(function (evt) { return _this.mouseInside = true; });
+	        this.nodeCanvas.mouseleave(function (evt) { return _this.mouseInside = false; });
+	        $('body').keydown(function (evt) {
+	            if (evt.keyCode != 16)
+	                return;
+	            if (_this.mouseInside)
+	                _this.nodeCanvas.css('cursor', 'crosshair');
+	        })
+	            .keyup(function (evt) {
+	            if (evt.keyCode == 16)
+	                _this.nodeCanvas.css('cursor', '');
+	        });
+	    };
+	    GraphInteraction.prototype.setupDnD = function (n, draw) {
+	        n.element.draggable({
+	            containment: 'parent',
+	            cursor: 'move',
+	            distance: 5,
+	            stack: '.node',
+	            drag: function (event, ui) {
+	                n.x = ui.position.left;
+	                n.y = ui.position.top;
+	                draw();
+	            }
+	        });
+	    };
+	    return GraphInteraction;
+	})();
 	var GraphDraw = (function () {
 	    function GraphDraw(gc, canvas) {
 	        this.arrowColor = "black";
