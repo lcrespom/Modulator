@@ -73,8 +73,9 @@
 	    function Graph(canvas) {
 	        this.nodes = [];
 	        this.nodeCanvas = $(canvas.parentElement);
-	        this.graphDraw = new GraphDraw(canvas.getContext('2d'), canvas);
-	        this.graphInteract = new GraphInteraction(this.nodeCanvas);
+	        var gc = canvas.getContext('2d');
+	        this.graphDraw = new GraphDraw(gc, canvas, this.nodes);
+	        this.graphInteract = new GraphInteraction(gc, this.nodeCanvas, this.nodes, this.graphDraw);
 	    }
 	    Object.defineProperty(Graph.prototype, "arrowColor", {
 	        set: function (color) {
@@ -90,11 +91,11 @@
 	            .css({ left: n.x, top: n.y });
 	        this.nodeCanvas.append(n.element);
 	        this.nodes.push(n);
-	        this.graphInteract.setupDnD(n, function () { return _this.draw(); });
+	        this.graphInteract.registerNode(n, function () { return _this.draw(); });
 	        this.draw();
 	    };
 	    Graph.prototype.draw = function () {
-	        this.graphDraw.draw(this.nodes);
+	        this.graphDraw.draw();
 	    };
 	    return Graph;
 	})();
@@ -121,27 +122,15 @@
 	exports.Node = Node;
 	//------------------------- Privates -------------------------
 	var GraphInteraction = (function () {
-	    function GraphInteraction(nodeCanvas) {
-	        this.mouseInside = false;
+	    function GraphInteraction(gc, nodeCanvas, nodes, grDraw) {
+	        this.connecting = false;
+	        this.gc = gc;
 	        this.nodeCanvas = nodeCanvas;
+	        this.nodes = nodes;
+	        this.grDraw = grDraw;
 	        this.setupConnectHandler();
 	    }
-	    GraphInteraction.prototype.setupConnectHandler = function () {
-	        var _this = this;
-	        this.nodeCanvas.mouseenter(function (evt) { return _this.mouseInside = true; });
-	        this.nodeCanvas.mouseleave(function (evt) { return _this.mouseInside = false; });
-	        $('body').keydown(function (evt) {
-	            if (evt.keyCode != 16)
-	                return;
-	            if (_this.mouseInside)
-	                _this.nodeCanvas.css('cursor', 'crosshair');
-	        })
-	            .keyup(function (evt) {
-	            if (evt.keyCode == 16)
-	                _this.nodeCanvas.css('cursor', '');
-	        });
-	    };
-	    GraphInteraction.prototype.setupDnD = function (n, draw) {
+	    GraphInteraction.prototype.registerNode = function (n, draw) {
 	        n.element.draggable({
 	            containment: 'parent',
 	            cursor: 'move',
@@ -154,22 +143,89 @@
 	            }
 	        });
 	    };
+	    GraphInteraction.prototype.setupConnectHandler = function () {
+	        var _this = this;
+	        $('body').keydown(function (evt) {
+	            if (evt.keyCode != 16 || _this.connecting)
+	                return;
+	            var srcNode = _this.getNodeUnderMouse();
+	            if (!srcNode)
+	                return;
+	            console.log('>>> src node:', srcNode);
+	            _this.nodeCanvas.css('cursor', 'crosshair');
+	            _this.connecting = true;
+	            _this.registerRubberBanding(srcNode);
+	        })
+	            .keyup(function (evt) {
+	            if (evt.keyCode != 16)
+	                return;
+	            _this.connecting = false;
+	            _this.nodeCanvas.css('cursor', '');
+	            _this.deregisterRubberBanding();
+	            var dstNode = _this.getNodeUnderMouse();
+	            if (!dstNode)
+	                return;
+	            console.log('>>> dest node:', dstNode);
+	        });
+	    };
+	    GraphInteraction.prototype.getNodeUnderMouse = function () {
+	        var hovered = $(':hover');
+	        if (hovered.length <= 0)
+	            return null;
+	        var jqNode = $(hovered.get(hovered.length - 1));
+	        if (!jqNode.hasClass('node'))
+	            return null;
+	        return jqNode;
+	    };
+	    GraphInteraction.prototype.registerRubberBanding = function (srcNode) {
+	        var _this = this;
+	        var srcn = this.getNodeFromDOM(srcNode);
+	        if (!srcn)
+	            return;
+	        var ofs = this.nodeCanvas.offset();
+	        var dstn = new Node(0, 0);
+	        dstn.w = .01;
+	        dstn.h = .01;
+	        $(this.nodeCanvas).on('mousemove', function (evt) {
+	            dstn.x = evt.clientX - ofs.left;
+	            dstn.y = evt.clientY - ofs.top;
+	            _this.grDraw.draw();
+	            _this.gc.save();
+	            _this.gc.setLineDash([10]);
+	            _this.grDraw.drawArrow(srcn, dstn);
+	            _this.gc.restore();
+	        });
+	    };
+	    GraphInteraction.prototype.deregisterRubberBanding = function () {
+	        this.nodeCanvas.off('mousemove');
+	        this.grDraw.draw();
+	    };
+	    GraphInteraction.prototype.getNodeFromDOM = function (jqNode) {
+	        for (var _i = 0, _a = this.nodes; _i < _a.length; _i++) {
+	            var n = _a[_i];
+	            if (n.element[0] == jqNode[0])
+	                return n;
+	        }
+	        return null;
+	    };
 	    return GraphInteraction;
 	})();
 	var GraphDraw = (function () {
-	    function GraphDraw(gc, canvas) {
+	    function GraphDraw(gc, canvas, nodes) {
 	        this.arrowColor = "black";
+	        this.arrowHeadLen = 10;
 	        this.gc = gc;
 	        this.canvas = canvas;
+	        this.nodes = nodes;
 	    }
-	    GraphDraw.prototype.draw = function (nodes) {
+	    GraphDraw.prototype.draw = function () {
 	        this.clearCanvas();
 	        this.gc.strokeStyle = this.arrowColor;
 	        this.gc.lineWidth = 2;
-	        for (var _i = 0; _i < nodes.length; _i++) {
-	            var ndst = nodes[_i];
-	            for (var _a = 0, _b = ndst.inputs; _a < _b.length; _a++) {
-	                var nsrc = _b[_a];
+	        for (var _i = 0, _a = this.nodes; _i < _a.length; _i++) {
+	            var ndst = _a[_i];
+	            for (var _b = 0, _c = ndst.inputs; _b < _c.length; _b++) {
+	                var nsrc = _c[_b];
 	                this.drawArrow(nsrc, ndst);
 	            }
 	        }
@@ -191,12 +247,11 @@
 	        var posCoef = 0.6;
 	        var mx = src.x + (dst.x - src.x) * posCoef;
 	        var my = src.y + (dst.y - src.y) * posCoef;
-	        var headlen = 10;
 	        var angle = Math.atan2(dst.y - src.y, dst.x - src.x);
 	        this.gc.moveTo(mx, my);
-	        this.gc.lineTo(mx - headlen * Math.cos(angle - Math.PI / 6), my - headlen * Math.sin(angle - Math.PI / 6));
+	        this.gc.lineTo(mx - this.arrowHeadLen * Math.cos(angle - Math.PI / 6), my - this.arrowHeadLen * Math.sin(angle - Math.PI / 6));
 	        this.gc.moveTo(mx, my);
-	        this.gc.lineTo(mx - headlen * Math.cos(angle + Math.PI / 6), my - headlen * Math.sin(angle + Math.PI / 6));
+	        this.gc.lineTo(mx - this.arrowHeadLen * Math.cos(angle + Math.PI / 6), my - this.arrowHeadLen * Math.sin(angle + Math.PI / 6));
 	    };
 	    GraphDraw.prototype.getNodeCenter = function (n) {
 	        n.w = n.w || n.element.outerWidth();

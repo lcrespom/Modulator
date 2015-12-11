@@ -7,8 +7,9 @@ export class Graph {
 
 	constructor(canvas: HTMLCanvasElement) {
 		this.nodeCanvas = $(canvas.parentElement);
-		this.graphDraw = new GraphDraw(canvas.getContext('2d'), canvas);
-		this.graphInteract = new GraphInteraction(this.nodeCanvas);
+		const gc = canvas.getContext('2d'); 
+		this.graphDraw = new GraphDraw(gc, canvas, this.nodes);
+		this.graphInteract = new GraphInteraction(gc, this.nodeCanvas, this.nodes, this.graphDraw);
 	}
 
 	set arrowColor(color: string) {
@@ -21,12 +22,12 @@ export class Graph {
 		.css({ left: n.x, top: n.y });
 		this.nodeCanvas.append(n.element);
 		this.nodes.push(n);
-		this.graphInteract.setupDnD(n, () => this.draw());
+		this.graphInteract.registerNode(n, () => this.draw());
 		this.draw();
 	}
 
 	draw() {
-		this.graphDraw.draw(this.nodes);
+		this.graphDraw.draw();
 	}
 
 }
@@ -64,27 +65,22 @@ export class Node {
 
 class GraphInteraction {
 
+	gc: CanvasRenderingContext2D;
 	nodeCanvas: JQuery;
-	mouseInside = false;
+	nodes: Node[];
+	grDraw: GraphDraw;
+	connecting = false;
 
-	constructor(nodeCanvas: JQuery) {
+	constructor(gc: CanvasRenderingContext2D,
+		nodeCanvas: JQuery, nodes: Node[], grDraw: GraphDraw) {
+		this.gc = gc;
 		this.nodeCanvas = nodeCanvas;
+		this.nodes = nodes;
+		this.grDraw = grDraw;
 		this.setupConnectHandler();
 	}
 
-	setupConnectHandler() {
-		this.nodeCanvas.mouseenter(evt => this.mouseInside = true);
-		this.nodeCanvas.mouseleave(evt => this.mouseInside = false);
-		$('body').keydown(evt => {
-			if (evt.keyCode != 16) return;
-			if (this.mouseInside) this.nodeCanvas.css('cursor', 'crosshair');
-		})
-		.keyup(evt => {
-			if (evt.keyCode == 16) this.nodeCanvas.css('cursor', '');
-		});
-	}
-
-	setupDnD(n: Node, draw: () => void) {
+	registerNode(n: Node, draw: () => void) {
 		n.element.draggable({
 			containment: 'parent',
 			cursor: 'move',
@@ -96,6 +92,64 @@ class GraphInteraction {
 				draw();
 			}
 		});
+	}
+
+	setupConnectHandler() {
+		$('body').keydown(evt => {
+			if (evt.keyCode != 16  || this.connecting) return;
+			const srcNode = this.getNodeUnderMouse();
+			if (!srcNode) return;
+			console.log('>>> src node:', srcNode);
+			this.nodeCanvas.css('cursor', 'crosshair');
+			this.connecting = true;
+			this.registerRubberBanding(srcNode);
+		})
+		.keyup(evt => {
+			if (evt.keyCode != 16) return;
+			this.connecting = false;
+			this.nodeCanvas.css('cursor', '');
+			this.deregisterRubberBanding();
+			const dstNode = this.getNodeUnderMouse();
+			if (!dstNode) return;
+			console.log('>>> dest node:', dstNode);
+		});
+	}
+
+	getNodeUnderMouse(): JQuery {
+		const hovered = $(':hover');
+		if (hovered.length <= 0) return null;
+		const jqNode = $(hovered.get(hovered.length - 1));
+		if (!jqNode.hasClass('node')) return null;
+		return jqNode;
+	}
+
+	registerRubberBanding(srcNode: JQuery) {
+		const srcn = this.getNodeFromDOM(srcNode);
+		if (!srcn) return;
+		const ofs = this.nodeCanvas.offset();
+		const dstn = new Node(0, 0);
+		dstn.w = .01;
+		dstn.h = .01;
+		$(this.nodeCanvas).on('mousemove', evt => {
+			dstn.x = evt.clientX - ofs.left;
+			dstn.y = evt.clientY - ofs.top;
+			this.grDraw.draw();
+			this.gc.save();
+			this.gc.setLineDash([10]);
+			this.grDraw.drawArrow(srcn, dstn);
+			this.gc.restore();
+		});
+	}
+
+	deregisterRubberBanding() {
+		this.nodeCanvas.off('mousemove');
+		this.grDraw.draw();
+	}
+
+	getNodeFromDOM(jqNode: JQuery) {
+		for (const n of this.nodes)
+			if (n.element[0] == jqNode[0]) return n;
+		return null;
 	}
 }
 
@@ -111,17 +165,20 @@ class GraphDraw {
 	gc: CanvasRenderingContext2D;
 	canvas: HTMLCanvasElement;
 	arrowColor: string = "black";
+	arrowHeadLen = 10;
+	nodes: Node[];
 
-	constructor(gc: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
+	constructor(gc: CanvasRenderingContext2D, canvas: HTMLCanvasElement, nodes: Node[]) {
 		this.gc = gc;
 		this.canvas = canvas;
+		this.nodes = nodes;
 	}
 
-	draw(nodes: Node[]) {
+	draw() {
 		this.clearCanvas();
 		this.gc.strokeStyle = this.arrowColor;
 		this.gc.lineWidth = 2;
-		for (const ndst of nodes)
+		for (const ndst of this.nodes)
 			for (const nsrc of ndst.inputs)
 				this.drawArrow(nsrc, ndst);
 	}
@@ -145,17 +202,16 @@ class GraphDraw {
 		const posCoef = 0.6;
 		const mx = src.x + (dst.x - src.x) * posCoef;
 		const my = src.y + (dst.y - src.y) * posCoef;
-		const headlen = 10;
 		var angle = Math.atan2(dst.y - src.y, dst.x - src.x);
 		this.gc.moveTo(mx, my);
 		this.gc.lineTo(
-			mx - headlen * Math.cos(angle - Math.PI/6),
-			my - headlen * Math.sin(angle - Math.PI/6)
+			mx - this.arrowHeadLen * Math.cos(angle - Math.PI/6),
+			my - this.arrowHeadLen * Math.sin(angle - Math.PI/6)
 		);
 		this.gc.moveTo(mx, my);
 		this.gc.lineTo(
-			mx - headlen * Math.cos(angle + Math.PI/6),
-			my - headlen * Math.sin(angle + Math.PI/6)
+			mx - this.arrowHeadLen * Math.cos(angle + Math.PI/6),
+			my - this.arrowHeadLen * Math.sin(angle + Math.PI/6)
 		);
 	}
 
