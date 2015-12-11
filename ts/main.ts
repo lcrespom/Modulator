@@ -16,3 +16,8 @@ gr.addNode(n3);
 n1.addInput(n2);
 n2.addInput(n3);
 gr.draw();
+
+$('.palette > .node').click(evt => {
+	const n = new Node(260, 180);
+	gr.addNode(n);
+});

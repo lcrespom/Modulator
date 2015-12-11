@@ -5,6 +5,9 @@
 	<title>Graph</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<style>
+		body {
+			font-family: sans-serif;
+		}
 		.graph {
 			padding: 0; margin: 0;
 		}
@@ -22,16 +25,33 @@
 			border: 2px solid #080;
 			border-radius: 5px;
 			width: 80px; height: 60px;
+			text-align: center;
+			line-height: 60px;
 		}
 		.arrow {
 			display: none;
 			color: #080;
+		}
+		.palette {
+			border: 1px solid gray;
+			margin-left: 5px;
+			display: inline-block;
+			height: 404px;
+			vertical-align: top;
+		}
+		.palette > .node {
+			position: static;
+			margin: 5px 5px 0px 5px;
+			cursor: copy;
 		}
 	</style>
 </head>
 <body>
 	<div class="canvas-box">
 		<canvas id="graph-canvas" class="graph" width="600" height="400"></canvas>
+	</div>
+	<div class="palette">
+		<div class="node" data-type="osc">Osc</div>
 	</div>
     <script src="js/vendor/jquery-1.11.2.min.js"></script>
 	<script src="js/vendor/jquery-ui.min.js"></script>
