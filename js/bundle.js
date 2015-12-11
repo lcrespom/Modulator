@@ -50,15 +50,6 @@
 	$('body').append(tmp);
 	gr.arrowColor = tmp.css('color');
 	tmp.remove();
-	var n1 = new graph_1.Node(10, 10);
-	var n2 = new graph_1.Node(30, 100);
-	var n3 = new graph_1.Node(60, 200);
-	// gr.addNode(n1);
-	// gr.addNode(n2);
-	// gr.addNode(n3);
-	// n1.addInput(n2);
-	// n2.addInput(n3);
-	// gr.draw();
 	$('.palette > .node').click(function (evt) {
 	    var n = new graph_1.Node(260, 180);
 	    gr.addNode(n);
