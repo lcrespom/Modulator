@@ -51,9 +51,11 @@
 	gr.arrowColor = tmp.css('color');
 	tmp.remove();
 	$('.palette > .node').click(function (evt) {
-	    var n = new graph_1.Node(260, 180);
+	    var n = new graph_1.Node(260, 180, $(this).text());
 	    gr.addNode(n);
 	});
+	var out = new graph_1.Node(500, 180, 'Out');
+	gr.addNode(out);
 
 
 /***/ },
@@ -78,7 +80,8 @@
 	    Graph.prototype.addNode = function (n) {
 	        n.element = $('<div>')
 	            .addClass('node')
-	            .css({ left: n.x, top: n.y });
+	            .text(n.name)
+	            .css({ left: n.x, top: n.y, cursor: 'inherit' });
 	        this.nodeCanvas.append(n.element);
 	        this.nodes.push(n);
 	        this.graphInteract.registerNode(n);
@@ -91,10 +94,11 @@
 	})();
 	exports.Graph = Graph;
 	var Node = (function () {
-	    function Node(x, y) {
+	    function Node(x, y, name) {
 	        this.inputs = [];
 	        this.x = x;
 	        this.y = y;
+	        this.name = name;
 	    }
 	    Node.prototype.addInput = function (n) {
 	        this.inputs.push(n);
@@ -116,14 +120,16 @@
 	        var _this = this;
 	        n.element.draggable({
 	            containment: 'parent',
-	            cursor: 'move',
+	            //cursor: 'move',
 	            distance: 5,
 	            stack: '.node',
 	            drag: function (event, ui) {
 	                n.x = ui.position.left;
 	                n.y = ui.position.top;
 	                _this.grDraw.draw();
-	            }
+	            },
+	            start: function (event, ui) { return ui.helper.css('cursor', 'move'); },
+	            stop: function (event, ui) { return ui.helper.css('cursor', 'default'); }
 	        });
 	    };
 	    GraphInteraction.prototype.setupConnectHandler = function () {
@@ -167,7 +173,7 @@
 	    GraphInteraction.prototype.registerRubberBanding = function (srcn) {
 	        var _this = this;
 	        var ofs = this.nodeCanvas.offset();
-	        var dstn = new Node(0, 0);
+	        var dstn = new Node(0, 0, '');
 	        dstn.w = 0;
 	        dstn.h = 0;
 	        $(this.nodeCanvas).on('mousemove', function (evt) {

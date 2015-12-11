@@ -19,7 +19,8 @@ export class Graph {
 	addNode(n: Node) {
 		n.element = $('<div>')
 		.addClass('node')
-		.css({ left: n.x, top: n.y });
+		.text(n.name)
+		.css({ left: n.x, top: n.y, cursor: 'inherit' });
 		this.nodeCanvas.append(n.element);
 		this.nodes.push(n);
 		this.graphInteract.registerNode(n);
@@ -36,14 +37,16 @@ export class Graph {
 export class Node {
 	x: number;
 	y: number;
+	name: string;
 	inputs: Node[] = [];
 	element: JQuery;
 	w: number;
 	h: number;
 
-	constructor(x: number, y: number) {
+	constructor(x: number, y: number, name: string) {
 		this.x = x;
 		this.y = y;
+		this.name = name;
 	}
 
 	addInput(n: Node) {
@@ -75,14 +78,16 @@ class GraphInteraction {
 	registerNode(n: Node) {
 		n.element.draggable({
 			containment: 'parent',
-			cursor: 'move',
+			//cursor: 'move',
 			distance: 5,
 			stack: '.node',
 			drag: (event, ui) => {
 				n.x = ui.position.left;
 				n.y = ui.position.top;
 				this.grDraw.draw();
-			}
+			},
+			start: (event, ui) => ui.helper.css('cursor', 'move'),
+			stop: (event, ui) => ui.helper.css('cursor', 'default')
 		});
 	}
 
@@ -121,7 +126,7 @@ class GraphInteraction {
 
 	registerRubberBanding(srcn: Node) {
 		const ofs = this.nodeCanvas.offset();
-		const dstn = new Node(0, 0);
+		const dstn = new Node(0, 0, '');
 		dstn.w = 0;
 		dstn.h = 0;
 		$(this.nodeCanvas).on('mousemove', evt => {

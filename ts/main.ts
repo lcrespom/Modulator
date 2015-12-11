@@ -7,7 +7,10 @@ $('body').append(tmp);
 gr.arrowColor = tmp.css('color');
 tmp.remove();
 
-$('.palette > .node').click(evt => {
-	const n = new Node(260, 180);
+$('.palette > .node').click(function(evt) {
+	const n = new Node(260, 180, $(this).text());
 	gr.addNode(n);
 });
+
+const out = new Node(500, 180, 'Out');
+gr.addNode(out);
