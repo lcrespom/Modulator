@@ -62,7 +62,7 @@
 	    };
 	    SynthNode.prototype.removeInput = function (np) {
 	        var removed = _super.prototype.removeInput.call(this, np);
-	        //TODO disconnect audio nodes
+	        removed.anode.disconnect();
 	        return removed;
 	    };
 	    SynthNode.prototype.canBeSource = function () {
@@ -80,9 +80,9 @@
 	    setArrowColor();
 	    registerPaletteHandler();
 	    registerPlayHandler();
-	    addOuptutNode();
+	    addOutputNode();
 	}
-	function addOuptutNode() {
+	function addOutputNode() {
 	    var out = new SynthNode(500, 180, 'Out');
 	    out.anode = synth.ac.destination;
 	    out.type = 'Speaker';
@@ -93,14 +93,25 @@
 	    var $playBut = $('#play-stop');
 	    $playBut.click(function (_) {
 	        if (playing) {
-	            synth.stop();
+	            stop();
 	            $playBut.text('Play');
 	        }
 	        else {
-	            synth.play();
+	            play();
 	            $playBut.text('Stop');
 	        }
+	        playing = !playing;
 	    });
+	}
+	function play() {
+	    gr.nodes
+	        .filter(function (n) { return n.anode.start; })
+	        .forEach(function (n) { return n.anode.start(); });
+	}
+	function stop() {
+	    gr.nodes
+	        .filter(function (n) { return n.anode.stop; })
+	        .forEach(function (n) { return n.anode.stop(); });
 	}
 	function registerPaletteHandler() {
 	    $('.palette > .node').click(function (evt) {
@@ -383,10 +394,6 @@
 	            anode[param].value = def.audioParams[param];
 	        }
 	        return anode;
-	    };
-	    Synth.prototype.play = function () {
-	    };
-	    Synth.prototype.stop = function () {
 	    };
 	    return Synth;
 	})();

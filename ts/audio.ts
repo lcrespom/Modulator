@@ -18,12 +18,6 @@ export class Synth {
 		return anode;
 	}
 
-	play() {
-	}
-
-	stop() {
-	}
-
 }
 
 var palette = {

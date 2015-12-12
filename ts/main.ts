@@ -11,9 +11,9 @@ class SynthNode extends Node {
 		n.anode.connect(this.anode);
 	}
 
-	removeInput(np: Node | number): Node {
-		const removed = super.removeInput(np);
-		//TODO disconnect audio nodes
+	removeInput(np: SynthNode | number): Node {
+		const removed: SynthNode = <SynthNode>super.removeInput(np);
+		removed.anode.disconnect();
 		return removed;
 	}
 
@@ -36,10 +36,10 @@ function main() {
 	setArrowColor();
 	registerPaletteHandler();
 	registerPlayHandler();
-	addOuptutNode();
+	addOutputNode();
 }
 
-function addOuptutNode() {
+function addOutputNode() {
 	const out = new SynthNode(500, 180, 'Out');
 	out.anode = synth.ac.destination;
 	out.type = 'Speaker';
@@ -51,14 +51,27 @@ function registerPlayHandler() {
 	const $playBut = $('#play-stop');
 	$playBut.click(_ => {
 		if (playing) {
-			synth.stop();
+			stop();
 			$playBut.text('Play');
 		}
 		else {
-			synth.play();
+			play();
 			$playBut.text('Stop');
 		}
+		playing = !playing;
 	});
+}
+
+function play() {
+	gr.nodes
+		.filter(n => (<any>n).anode.start)
+		.forEach(n => (<any>n).anode.start())
+}
+
+function stop() {
+	gr.nodes
+		.filter(n => (<any>n).anode.stop)
+		.forEach(n => (<any>n).anode.stop())
 }
 
 function registerPaletteHandler() {
