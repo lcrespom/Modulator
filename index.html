@@ -30,7 +30,7 @@
 		}
 		.node.selected {
 			border: 2px solid #060;
-			box-shadow: 5px 5px 3px gray;
+			box-shadow: 5px 5px 2px rgba(0,0,0,0.4);
 		}
 		.arrow {
 			display: none;
@@ -40,7 +40,7 @@
 			border: 1px solid gray;
 			margin-left: 5px;
 			display: inline-block;
-			height: 404px;
+			height: 504px;
 			vertical-align: top;
 		}
 		.palette > .node {
@@ -48,10 +48,10 @@
 			margin: 5px 5px 0px 5px;
 			cursor: copy;
 		}
-		.control-box {
+		.params-box {
 			border: 1px solid gray;
 			height: 200px;
-			width: 705px;
+			width: 805px;
 			margin-top: 5px;
 			margin-bottom: 10px;
 			overflow: auto;
@@ -60,13 +60,13 @@
 </head>
 <body>
 	<div class="canvas-box">
-		<canvas id="graph-canvas" class="graph" width="600" height="400"></canvas>
+		<canvas id="graph-canvas" class="graph" width="700" height="500"></canvas>
 	</div>
 	<div class="palette">
 		<div class="node" data-type="Oscillator">Osc</div>
 		<div class="node" data-type="Gain">Gain</div>
 	</div>
-	<div class="control-box">
+	<div class="params-box">
 	</div>
 	<div>
 		<button id="play-stop">Play</button>

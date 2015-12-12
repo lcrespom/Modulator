@@ -1,10 +1,12 @@
 export class Synth {
 	ac: FullAudioContext;
-	
+	palette: any;
+
 	constructor() {
 		const CtxClass: any = window.AudioContext || window.webkitAudioContext;
 		this.ac = new CtxClass();
 		this.stop();
+		this.palette = palette;
 	}
 
 	createNode(type: string): AudioNode {
@@ -37,7 +39,7 @@ var palette = {
 		audioParams: {
 			frequency: 220
 		},
-		paramValues: {
+		paramTypes: {
 			type: ['sine', 'square', 'sawtooth', 'triangle']
 		}
 	},
@@ -50,10 +52,11 @@ var palette = {
 };
 
 
-interface NodeDef {
+export interface NodeDef {
 	constructor: string,
 	params?: any,
-	audioParams?: any	
+	audioParams?: any,
+	paramTypes?: any
 }
 
 interface WindowWithAudio extends Window {

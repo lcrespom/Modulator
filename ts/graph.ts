@@ -9,7 +9,7 @@ export class Graph {
 		this.nodeCanvas = $(canvas.parentElement);
 		const gc = canvas.getContext('2d');
 		this.graphDraw = new GraphDraw(gc, canvas, this.nodes);
-		this.graphInteract = new GraphInteraction(gc, this.nodeCanvas, this.nodes, this.graphDraw);
+		this.graphInteract = new GraphInteraction(this, gc);
 	}
 
 	set arrowColor(color: string) {
@@ -26,6 +26,8 @@ export class Graph {
 		this.graphInteract.registerNode(n);
 		this.draw();
 	}
+
+	nodeSelected(n: Node) {}
 
 	draw() {
 		this.graphDraw.draw();
@@ -85,20 +87,15 @@ export class Node {
 
 class GraphInteraction {
 
+	graph: Graph;
 	gc: CanvasRenderingContext2D;
-	nodeCanvas: JQuery;
-	nodes: Node[];
-	grDraw: GraphDraw;
 	connecting = false;
 	dragging = false;
 	selectedNode: Node;
 
-	constructor(gc: CanvasRenderingContext2D,
-		nodeCanvas: JQuery, nodes: Node[], grDraw: GraphDraw) {
+	constructor(graph: Graph, gc: CanvasRenderingContext2D) {
+		this.graph = graph;
 		this.gc = gc;
-		this.nodeCanvas = nodeCanvas;
-		this.nodes = nodes;
-		this.grDraw = grDraw;
 		this.setupConnectHandler();
 	}
 
@@ -110,7 +107,7 @@ class GraphInteraction {
 			drag: (event, ui) => {
 				n.x = ui.position.left;
 				n.y = ui.position.top;
-				this.grDraw.draw();
+				this.graph.draw();
 			},
 			start: (event, ui) => {
 				this.dragging = true;
@@ -123,10 +120,12 @@ class GraphInteraction {
 		});
 		n.element.click(_ => {
 			if (this.dragging) return;
+			if (this.selectedNode == n) return;
 			if (this.selectedNode)
 				this.selectedNode.element.removeClass('selected');
 			n.element.addClass('selected');
 			this.selectedNode = n;
+			this.graph.nodeSelected(n);
 		});
 	}
 
@@ -141,21 +140,21 @@ class GraphInteraction {
 				srcn.element.css('cursor', 'not-allowed');
 				return;
 			}
-			this.nodeCanvas.css('cursor', 'crosshair');
-			this.nodeCanvas.find('.node').css('cursor', 'crosshair');
+			this.graph.nodeCanvas.css('cursor', 'crosshair');
+			this.graph.nodeCanvas.find('.node').css('cursor', 'crosshair');
 			this.connecting = true;
 			this.registerRubberBanding(srcn);
 		})
 		.keyup(evt => {
 			if (evt.keyCode != 16) return;
 			this.connecting = false;
-			this.nodeCanvas.css('cursor', '');
-			this.nodeCanvas.find('.node').css('cursor', 'default');
+			this.graph.nodeCanvas.css('cursor', '');
+			this.graph.nodeCanvas.find('.node').css('cursor', 'default');
 			this.deregisterRubberBanding();
 			const dstn = this.getNodeFromDOM(this.getElementUnderMouse());
 			if (!dstn) return;
 			this.connectOrDisconnect(srcn, dstn);
-			this.grDraw.draw();
+			this.graph.draw();
 		})
 		.mousedown(_ => mouseIsDown = true)
 		.mouseup(_ => mouseIsDown = false);
@@ -178,32 +177,32 @@ class GraphInteraction {
 	}
 
 	registerRubberBanding(srcn: Node) {
-		const ofs = this.nodeCanvas.offset();
+		const ofs = this.graph.nodeCanvas.offset();
 		const dstn = new Node(0, 0, '');
 		dstn.w = 0;
 		dstn.h = 0;
-		$(this.nodeCanvas).on('mousemove', evt => {
+		$(this.graph.nodeCanvas).on('mousemove', evt => {
 			dstn.x = evt.clientX - ofs.left;
 			dstn.y = evt.clientY - ofs.top;
-			this.grDraw.draw();
+			this.graph.draw();
 			this.gc.save();
 			this.gc.setLineDash([10]);
-			this.grDraw.drawArrow(srcn, dstn);
+			this.graph.graphDraw.drawArrow(srcn, dstn);
 			this.gc.restore();
 		});
-		for (const n of this.nodes)
+		for (const n of this.graph.nodes)
 			if (n != srcn && !n.canConnectInput(srcn))
 				n.element.css('cursor', 'not-allowed');
 	}
 
 	deregisterRubberBanding() {
-		this.nodeCanvas.off('mousemove');
-		this.grDraw.draw();
+		this.graph.nodeCanvas.off('mousemove');
+		this.graph.graphDraw.draw();
 	}
 
 	getNodeFromDOM(jqNode: JQuery) {
 		if (!jqNode) return null;
-		for (const n of this.nodes)
+		for (const n of this.graph.nodes)
 			if (n.element[0] == jqNode[0]) return n;
 		return null;
 	}

@@ -1,5 +1,6 @@
 import { Graph, Node } from './graph';
-import { Synth } from './audio';
+import { Synth } from './synth';
+import { renderParams } from './paramsUI';
 
 
 class SynthNode extends Node {
@@ -33,10 +34,17 @@ const synth = new Synth();
 main();
 
 function main() {
+	registerNodeSelection();
 	setArrowColor();
 	registerPaletteHandler();
 	registerPlayHandler();
 	addOutputNode();
+}
+
+function registerNodeSelection() {
+	gr.nodeSelected = function(n: SynthNode) {
+		renderParams(n, synth.palette[n.type], $('.params-box'));
+	}
 }
 
 function addOutputNode() {
