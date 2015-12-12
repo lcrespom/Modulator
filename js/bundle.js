@@ -254,10 +254,9 @@
 	    };
 	    GraphInteraction.prototype.setupConnectHandler = function () {
 	        var _this = this;
-	        var mouseIsDown = false;
 	        var srcn;
 	        $('body').keydown(function (evt) {
-	            if (evt.keyCode != 16 || _this.connecting || mouseIsDown)
+	            if (evt.keyCode != 16 || _this.connecting)
 	                return;
 	            srcn = _this.getNodeFromDOM(_this.getElementUnderMouse());
 	            if (!srcn)
@@ -283,9 +282,7 @@
 	                return;
 	            _this.connectOrDisconnect(srcn, dstn);
 	            _this.graph.draw();
-	        })
-	            .mousedown(function (_) { return mouseIsDown = true; })
-	            .mouseup(function (_) { return mouseIsDown = false; });
+	        });
 	    };
 	    GraphInteraction.prototype.connectOrDisconnect = function (srcn, dstn) {
 	        if (srcn == dstn)
@@ -293,7 +290,7 @@
 	        var pos = dstn.inputs.indexOf(srcn);
 	        if (pos >= 0)
 	            dstn.removeInput(pos);
-	        else if (dstn.canConnectInput(srcn))
+	        else if (srcn.canBeSource() && dstn.canConnectInput(srcn))
 	            dstn.addInput(srcn);
 	    };
 	    GraphInteraction.prototype.getElementUnderMouse = function () {

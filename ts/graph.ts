@@ -61,7 +61,7 @@ export class Node {
 		let result: Node;
 		if (np instanceof Node) {
 			pos = this.inputs.indexOf(<Node>np);
-			result = np; 
+			result = np;
 		}
 		else {
 			pos = <number>np;
@@ -130,10 +130,9 @@ class GraphInteraction {
 	}
 
 	setupConnectHandler() {
-		let mouseIsDown = false;
 		let srcn: Node;
 		$('body').keydown(evt => {
-			if (evt.keyCode != 16  || this.connecting || mouseIsDown) return;
+			if (evt.keyCode != 16  || this.connecting) return;
 			srcn = this.getNodeFromDOM(this.getElementUnderMouse());
 			if (!srcn) return;
 			if (!srcn.canBeSource()) {
@@ -155,16 +154,14 @@ class GraphInteraction {
 			if (!dstn) return;
 			this.connectOrDisconnect(srcn, dstn);
 			this.graph.draw();
-		})
-		.mousedown(_ => mouseIsDown = true)
-		.mouseup(_ => mouseIsDown = false);
+		});
 	}
 
 	connectOrDisconnect(srcn: Node, dstn: Node) {
 		if (srcn == dstn) return;	// duh!
 		const pos = dstn.inputs.indexOf(srcn);
 		if (pos >= 0) dstn.removeInput(pos);
-		else if (dstn.canConnectInput(srcn))
+		else if (srcn.canBeSource() && dstn.canConnectInput(srcn))
 			dstn.addInput(srcn);
 	}
 
