@@ -91,27 +91,22 @@
 	function registerPlayHandler() {
 	    var playing = false;
 	    var $playBut = $('#play-stop');
-	    $playBut.click(function (_) {
+	    $playBut.click(togglePlayStop);
+	    $('body').keypress(function (evt) {
+	        if (evt.keyCode == 32)
+	            togglePlayStop();
+	    });
+	    function togglePlayStop() {
 	        if (playing) {
-	            stop();
+	            synth.stop();
 	            $playBut.text('Play');
 	        }
 	        else {
-	            play();
+	            synth.play();
 	            $playBut.text('Stop');
 	        }
 	        playing = !playing;
-	    });
-	}
-	function play() {
-	    gr.nodes
-	        .filter(function (n) { return n.anode.start; })
-	        .forEach(function (n) { return n.anode.start(); });
-	}
-	function stop() {
-	    gr.nodes
-	        .filter(function (n) { return n.anode.stop; })
-	        .forEach(function (n) { return n.anode.stop(); });
+	    }
 	}
 	function registerPaletteHandler() {
 	    $('.palette > .node').click(function (evt) {
@@ -123,6 +118,10 @@
 	        if (!n.anode) {
 	            console.warn("No AudioNode found for '" + n.type + "'");
 	            n.element.css('background-color', '#BBB');
+	        }
+	        else {
+	            if (n.anode['start'])
+	                n.anode['start']();
 	        }
 	    });
 	}
@@ -379,6 +378,7 @@
 	    function Synth() {
 	        var CtxClass = window.AudioContext || window.webkitAudioContext;
 	        this.ac = new CtxClass();
+	        this.stop();
 	    }
 	    Synth.prototype.createNode = function (type) {
 	        var def = palette[type];
@@ -395,6 +395,12 @@
 	        }
 	        return anode;
 	    };
+	    Synth.prototype.play = function () {
+	        this.ac.resume();
+	    };
+	    Synth.prototype.stop = function () {
+	        this.ac.suspend();
+	    };
 	    return Synth;
 	})();
 	exports.Synth = Synth;
@@ -405,10 +411,16 @@
 	            type: 'sawtooth'
 	        },
 	        audioParams: {
-	            frequency: 220
+	            frequency: 220 + Math.random() * 200 - 100
 	        },
 	        paramValues: {
 	            type: ['sine', 'square', 'sawtooth', 'triangle']
+	        }
+	    },
+	    Gain: {
+	        constructor: 'createGain',
+	        audioParams: {
+	            gain: 1
 	        }
 	    }
 	};

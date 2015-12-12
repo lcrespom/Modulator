@@ -48,30 +48,26 @@ function addOutputNode() {
 
 function registerPlayHandler() {
 	let playing = false;
+	
 	const $playBut = $('#play-stop');
-	$playBut.click(_ => {
+	$playBut.click(togglePlayStop);
+	$('body').keypress(evt => {
+		if (evt.keyCode == 32)
+			togglePlayStop();
+	});
+
+	function togglePlayStop() {
 		if (playing) {
-			stop();
+			synth.stop();
 			$playBut.text('Play');
 		}
 		else {
-			play();
+			synth.play();
 			$playBut.text('Stop');
 		}
 		playing = !playing;
-	});
-}
+	}
 
-function play() {
-	gr.nodes
-		.filter(n => (<any>n).anode.start)
-		.forEach(n => (<any>n).anode.start())
-}
-
-function stop() {
-	gr.nodes
-		.filter(n => (<any>n).anode.stop)
-		.forEach(n => (<any>n).anode.stop())
 }
 
 function registerPaletteHandler() {
@@ -84,6 +80,9 @@ function registerPaletteHandler() {
 		if (!n.anode) {
 			console.warn(`No AudioNode found for '${n.type}'`);
 			n.element.css('background-color', '#BBB');
+		}
+		else {
+			if (n.anode['start']) n.anode['start']();
 		}
 	});
 }

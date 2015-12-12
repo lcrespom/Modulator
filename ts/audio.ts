@@ -1,9 +1,10 @@
 export class Synth {
-	ac: AudioContext;
+	ac: FullAudioContext;
 	
 	constructor() {
 		const CtxClass: any = window.AudioContext || window.webkitAudioContext;
 		this.ac = new CtxClass();
+		this.stop();
 	}
 
 	createNode(type: string): AudioNode {
@@ -18,6 +19,13 @@ export class Synth {
 		return anode;
 	}
 
+	play() {
+		this.ac.resume();
+	}
+
+	stop() {
+		this.ac.suspend();
+	}
 }
 
 var palette = {
@@ -27,10 +35,16 @@ var palette = {
 			type: 'sawtooth'
 		},
 		audioParams: {
-			frequency: 220
+			frequency: 220 + Math.random() * 200 - 100
 		},
 		paramValues: {
 			type: ['sine', 'square', 'sawtooth', 'triangle']
+		}
+	},
+	Gain: {
+		constructor: 'createGain',
+		audioParams: {
+			gain: 1
 		}
 	}
 };
@@ -47,3 +61,8 @@ interface WindowWithAudio extends Window {
 	webkitAudioContext: AudioContext
 }
 declare var window: WindowWithAudio;
+
+interface FullAudioContext extends AudioContext {
+	suspend: () => void,
+	resume: () => void,	
+}
