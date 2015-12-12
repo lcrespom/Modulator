@@ -70,6 +70,14 @@ export class Node {
 		return result;
 	}
 
+	canBeSource(): boolean {
+		return true;
+	}
+
+	canConnectInput(n: Node): boolean {
+		return true;
+	}
+
 }
 
 
@@ -114,6 +122,10 @@ class GraphInteraction {
 			if (evt.keyCode != 16  || this.connecting || mouseIsDown) return;
 			srcn = this.getNodeFromDOM(this.getElementUnderMouse());
 			if (!srcn) return;
+			if (!srcn.canBeSource()) {
+				srcn.element.css('cursor', 'not-allowed');
+				return;
+			}
 			this.nodeCanvas.css('cursor', 'crosshair');
 			this.nodeCanvas.find('.node').css('cursor', 'crosshair');
 			this.connecting = true;
@@ -135,9 +147,11 @@ class GraphInteraction {
 	}
 
 	connectOrDisconnect(srcn: Node, dstn: Node) {
+		if (srcn == dstn) return;	// duh!
 		const pos = dstn.inputs.indexOf(srcn);
 		if (pos >= 0) dstn.removeInput(pos);
-		else dstn.addInput(srcn);
+		else if (dstn.canConnectInput(srcn))
+			dstn.addInput(srcn);
 	}
 
 	getElementUnderMouse(): JQuery {
@@ -162,6 +176,9 @@ class GraphInteraction {
 			this.grDraw.drawArrow(srcn, dstn);
 			this.gc.restore();
 		});
+		for (const n of this.nodes)
+			if (n != srcn && !n.canConnectInput(srcn))
+				n.element.css('cursor', 'not-allowed');
 	}
 
 	deregisterRubberBanding() {

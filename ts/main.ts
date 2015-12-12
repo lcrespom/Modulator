@@ -16,6 +16,14 @@ class SynthNode extends Node {
 		//TODO disconnect audio nodes
 		return removed;
 	}
+
+	canBeSource(): boolean {
+		return this.anode.numberOfOutputs > 0;
+	}
+
+	canConnectInput(n: Node): boolean {
+		return this.anode.numberOfInputs > 0;
+	}
 }
 
 

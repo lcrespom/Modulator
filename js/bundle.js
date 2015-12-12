@@ -65,6 +65,12 @@
 	        //TODO disconnect audio nodes
 	        return removed;
 	    };
+	    SynthNode.prototype.canBeSource = function () {
+	        return this.anode.numberOfOutputs > 0;
+	    };
+	    SynthNode.prototype.canConnectInput = function (n) {
+	        return this.anode.numberOfInputs > 0;
+	    };
 	    return SynthNode;
 	})(graph_1.Node);
 	var gr = new graph_1.Graph($('#graph-canvas')[0]);
@@ -178,6 +184,12 @@
 	            this.inputs.splice(np, 1);
 	        return result;
 	    };
+	    Node.prototype.canBeSource = function () {
+	        return true;
+	    };
+	    Node.prototype.canConnectInput = function (n) {
+	        return true;
+	    };
 	    return Node;
 	})();
 	exports.Node = Node;
@@ -216,6 +228,10 @@
 	            srcn = _this.getNodeFromDOM(_this.getElementUnderMouse());
 	            if (!srcn)
 	                return;
+	            if (!srcn.canBeSource()) {
+	                srcn.element.css('cursor', 'not-allowed');
+	                return;
+	            }
 	            _this.nodeCanvas.css('cursor', 'crosshair');
 	            _this.nodeCanvas.find('.node').css('cursor', 'crosshair');
 	            _this.connecting = true;
@@ -238,10 +254,12 @@
 	            .mouseup(function (evt) { return mouseIsDown = false; });
 	    };
 	    GraphInteraction.prototype.connectOrDisconnect = function (srcn, dstn) {
+	        if (srcn == dstn)
+	            return; // duh!
 	        var pos = dstn.inputs.indexOf(srcn);
 	        if (pos >= 0)
 	            dstn.removeInput(pos);
-	        else
+	        else if (dstn.canConnectInput(srcn))
 	            dstn.addInput(srcn);
 	    };
 	    GraphInteraction.prototype.getElementUnderMouse = function () {
@@ -268,6 +286,11 @@
 	            _this.grDraw.drawArrow(srcn, dstn);
 	            _this.gc.restore();
 	        });
+	        for (var _i = 0, _a = this.nodes; _i < _a.length; _i++) {
+	            var n = _a[_i];
+	            if (n != srcn && !n.canConnectInput(srcn))
+	                n.element.css('cursor', 'not-allowed');
+	        }
 	    };
 	    GraphInteraction.prototype.deregisterRubberBanding = function () {
 	        this.nodeCanvas.off('mousemove');
