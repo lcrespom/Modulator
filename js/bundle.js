@@ -439,14 +439,27 @@
 	            frequency: 220
 	        },
 	        paramTypes: {
-	            type: ['sine', 'square', 'sawtooth', 'triangle']
+	            type: ['sine', 'square', 'sawtooth', 'triangle'],
+	            frequency: {
+	                min: 50,
+	                max: 20000
+	            }
 	        }
 	    },
 	    Gain: {
 	        constructor: 'createGain',
 	        audioParams: {
 	            gain: 1
+	        },
+	        paramTypes: {
+	            gain: {
+	                min: 0,
+	                max: 1
+	            }
 	        }
+	    },
+	    Speaker: {
+	        constructor: null
 	    }
 	};
 
@@ -455,10 +468,28 @@
 /* 3 */
 /***/ function(module, exports) {
 
+	//TODO refactor main so that SynthNode is available
 	function renderParams(n, ndef, panel) {
-	    console.log(n.name);
+	    var form = $('<form>');
+	    form.submit(function (_) { console.log('submit'); return false; });
+	    panel.empty().append(form);
+	    for (var _i = 0, _a = Object.keys(ndef.audioParams || {}); _i < _a.length; _i++) {
+	        var param = _a[_i];
+	        renderAudioParam(n, ndef, param, form);
+	    }
+	    for (var _b = 0, _c = Object.keys(ndef.params || {}); _b < _c.length; _b++) {
+	        var param = _c[_b];
+	        renderOtherParam(n, ndef, param, form);
+	    }
 	}
 	exports.renderParams = renderParams;
+	function renderAudioParam(n, ndef, param, panel) {
+	    panel.append($("<label>" + param + "</label>"));
+	    panel.append($("<input type=\"number\" name=\"" + param + "\"\n\t\tvalue=\"" + n.anode[param].value + "\">"));
+	}
+	function renderOtherParam(n, ndef, param, panel) {
+	    console.log(n.name, param);
+	}
 
 
 /***/ }

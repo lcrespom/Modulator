@@ -30,7 +30,7 @@ export class Synth {
 	}
 }
 
-var palette = {
+var palette: NodeDefPalette = {
 	Oscillator: {
 		constructor: 'createOscillator',
 		params: {
@@ -40,17 +40,33 @@ var palette = {
 			frequency: 220
 		},
 		paramTypes: {
-			type: ['sine', 'square', 'sawtooth', 'triangle']
+			type: ['sine', 'square', 'sawtooth', 'triangle'],
+			frequency: {
+				min: 50,
+				max: 20000
+			}
 		}
 	},
 	Gain: {
 		constructor: 'createGain',
 		audioParams: {
 			gain: 1
+		},
+		paramTypes: {
+			gain: {
+				min: 0,
+				max: 1
+			}
 		}
+	},
+	Speaker: {
+		constructor: null
 	}
 };
 
+export interface NodeDefPalette {
+	[key: string]: NodeDef
+}
 
 export interface NodeDef {
 	constructor: string,

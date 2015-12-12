@@ -6,4 +6,7 @@ to be used with the
 ##ToDo
 - Parameters panel
 - Integrate with Bootstrap
+- Help button explaining how to connect etc.
+- Support FireFox (does not have AudioContext.suspend/resume)
+- Test in Safari
 - Remove hardcoded dimensions from canvas
