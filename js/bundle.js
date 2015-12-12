@@ -58,9 +58,12 @@
 	    }
 	    SynthNode.prototype.addInput = function (n) {
 	        _super.prototype.addInput.call(this, n);
+	        n.anode.connect(this.anode);
 	    };
-	    SynthNode.prototype.removeInput = function (n) {
-	        _super.prototype.removeInput.call(this, n);
+	    SynthNode.prototype.removeInput = function (np) {
+	        var removed = _super.prototype.removeInput.call(this, np);
+	        //TODO disconnect audio nodes
+	        return removed;
 	    };
 	    return SynthNode;
 	})(graph_1.Node);
@@ -161,10 +164,19 @@
 	        //TODO check if connections are accepted, both at source and destination nodes
 	    };
 	    Node.prototype.removeInput = function (np) {
-	        if (np instanceof Node)
-	            np = this.inputs.indexOf(np);
+	        var pos;
+	        var result;
+	        if (np instanceof Node) {
+	            pos = this.inputs.indexOf(np);
+	            result = np;
+	        }
+	        else {
+	            pos = np;
+	            result = this.inputs[pos];
+	        }
 	        if (np >= 0)
 	            this.inputs.splice(np, 1);
+	        return result;
 	    };
 	    return Node;
 	})();
@@ -205,7 +217,7 @@
 	            if (!srcn)
 	                return;
 	            _this.nodeCanvas.css('cursor', 'crosshair');
-	            $('.node').css('cursor', 'crosshair');
+	            _this.nodeCanvas.find('.node').css('cursor', 'crosshair');
 	            _this.connecting = true;
 	            _this.registerRubberBanding(srcn);
 	        })
@@ -214,7 +226,7 @@
 	                return;
 	            _this.connecting = false;
 	            _this.nodeCanvas.css('cursor', '');
-	            $('.node').css('cursor', 'default');
+	            _this.nodeCanvas.find('.node').css('cursor', 'default');
 	            _this.deregisterRubberBanding();
 	            var dstn = _this.getNodeFromDOM(_this.getElementUnderMouse());
 	            if (!dstn)

@@ -7,11 +7,14 @@ class SynthNode extends Node {
 	type: string;
 
 	addInput(n: SynthNode) {
-		super.addInput(n);		
+		super.addInput(n);
+		n.anode.connect(this.anode);
 	}
 
-	removeInput(n: SynthNode | number) {
-		super.removeInput(n);
+	removeInput(np: Node | number): Node {
+		const removed = super.removeInput(np);
+		//TODO disconnect audio nodes
+		return removed;
 	}
 }
 
@@ -37,7 +40,7 @@ function addOuptutNode() {
 
 function registerPlayHandler() {
 	let playing = false;
-	const $playBut = $('#play-stop'); 
+	const $playBut = $('#play-stop');
 	$playBut.click(_ => {
 		if (playing) {
 			synth.stop();

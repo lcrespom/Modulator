@@ -54,11 +54,20 @@ export class Node {
 		//TODO check if connections are accepted, both at source and destination nodes
 	}
 
-	removeInput(np: Node | number) {
-		if (np instanceof Node)
-			np = this.inputs.indexOf(<Node>np);
+	removeInput(np: Node | number): Node {
+		let pos: number;
+		let result: Node;
+		if (np instanceof Node) {
+			pos = this.inputs.indexOf(<Node>np);
+			result = np; 
+		}
+		else {
+			pos = <number>np;
+			result = this.inputs[pos];
+		}
 		if (np >= 0)
 			this.inputs.splice(<number>np, 1);
+		return result;
 	}
 
 }
@@ -106,7 +115,7 @@ class GraphInteraction {
 			srcn = this.getNodeFromDOM(this.getElementUnderMouse());
 			if (!srcn) return;
 			this.nodeCanvas.css('cursor', 'crosshair');
-			$('.node').css('cursor', 'crosshair');
+			this.nodeCanvas.find('.node').css('cursor', 'crosshair');
 			this.connecting = true;
 			this.registerRubberBanding(srcn);
 		})
@@ -114,7 +123,7 @@ class GraphInteraction {
 			if (evt.keyCode != 16) return;
 			this.connecting = false;
 			this.nodeCanvas.css('cursor', '');
-			$('.node').css('cursor', 'default');
+			this.nodeCanvas.find('.node').css('cursor', 'default');
 			this.deregisterRubberBanding();
 			const dstn = this.getNodeFromDOM(this.getElementUnderMouse());
 			if (!dstn) return;
