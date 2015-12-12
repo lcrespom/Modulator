@@ -207,6 +207,7 @@
 	var GraphInteraction = (function () {
 	    function GraphInteraction(gc, nodeCanvas, nodes, grDraw) {
 	        this.connecting = false;
+	        this.dragging = false;
 	        this.gc = gc;
 	        this.nodeCanvas = nodeCanvas;
 	        this.nodes = nodes;
@@ -224,8 +225,22 @@
 	                n.y = ui.position.top;
 	                _this.grDraw.draw();
 	            },
-	            start: function (event, ui) { return ui.helper.css('cursor', 'move'); },
-	            stop: function (event, ui) { return ui.helper.css('cursor', 'default'); }
+	            start: function (event, ui) {
+	                _this.dragging = true;
+	                ui.helper.css('cursor', 'move');
+	            },
+	            stop: function (event, ui) {
+	                ui.helper.css('cursor', 'default');
+	                _this.dragging = false;
+	            }
+	        });
+	        n.element.click(function (_) {
+	            if (_this.dragging)
+	                return;
+	            if (_this.selectedNode)
+	                _this.selectedNode.element.removeClass('selected');
+	            n.element.addClass('selected');
+	            _this.selectedNode = n;
 	        });
 	    };
 	    GraphInteraction.prototype.setupConnectHandler = function () {
@@ -260,8 +275,8 @@
 	            _this.connectOrDisconnect(srcn, dstn);
 	            _this.grDraw.draw();
 	        })
-	            .mousedown(function (evt) { return mouseIsDown = true; })
-	            .mouseup(function (evt) { return mouseIsDown = false; });
+	            .mousedown(function (_) { return mouseIsDown = true; })
+	            .mouseup(function (_) { return mouseIsDown = false; });
 	    };
 	    GraphInteraction.prototype.connectOrDisconnect = function (srcn, dstn) {
 	        if (srcn == dstn)

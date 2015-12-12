@@ -90,6 +90,8 @@ class GraphInteraction {
 	nodes: Node[];
 	grDraw: GraphDraw;
 	connecting = false;
+	dragging = false;
+	selectedNode: Node;
 
 	constructor(gc: CanvasRenderingContext2D,
 		nodeCanvas: JQuery, nodes: Node[], grDraw: GraphDraw) {
@@ -110,8 +112,21 @@ class GraphInteraction {
 				n.y = ui.position.top;
 				this.grDraw.draw();
 			},
-			start: (event, ui) => ui.helper.css('cursor', 'move'),
-			stop: (event, ui) => ui.helper.css('cursor', 'default')
+			start: (event, ui) => {
+				this.dragging = true;
+				ui.helper.css('cursor', 'move');
+			},
+			stop: (event, ui) => {
+				ui.helper.css('cursor', 'default');
+				this.dragging = false;
+			}
+		});
+		n.element.click(_ => {
+			if (this.dragging) return;
+			if (this.selectedNode)
+				this.selectedNode.element.removeClass('selected');
+			n.element.addClass('selected');
+			this.selectedNode = n;
 		});
 	}
 
@@ -142,8 +157,8 @@ class GraphInteraction {
 			this.connectOrDisconnect(srcn, dstn);
 			this.grDraw.draw();
 		})
-		.mousedown(evt => mouseIsDown = true)
-		.mouseup(evt => mouseIsDown = false);
+		.mousedown(_ => mouseIsDown = true)
+		.mouseup(_ => mouseIsDown = false);
 	}
 
 	connectOrDisconnect(srcn: Node, dstn: Node) {
