@@ -51,21 +51,32 @@
 	};
 	var graph_1 = __webpack_require__(1);
 	var audio_1 = __webpack_require__(2);
-	var gr = new graph_1.Graph($('#graph-canvas')[0]);
-	var synth = new audio_1.Synth();
-	setArrowColor();
-	registerPaletteHandler();
-	registerPlayHandler();
-	addOuptutNode();
 	var SynthNode = (function (_super) {
 	    __extends(SynthNode, _super);
 	    function SynthNode() {
 	        _super.apply(this, arguments);
 	    }
+	    SynthNode.prototype.addInput = function (n) {
+	        _super.prototype.addInput.call(this, n);
+	    };
+	    SynthNode.prototype.removeInput = function (n) {
+	        _super.prototype.removeInput.call(this, n);
+	    };
 	    return SynthNode;
 	})(graph_1.Node);
+	var gr = new graph_1.Graph($('#graph-canvas')[0]);
+	var synth = new audio_1.Synth();
+	main();
+	function main() {
+	    setArrowColor();
+	    registerPaletteHandler();
+	    registerPlayHandler();
+	    addOuptutNode();
+	}
 	function addOuptutNode() {
-	    var out = new graph_1.Node(500, 180, 'Out');
+	    var out = new SynthNode(500, 180, 'Out');
+	    out.anode = synth.ac.destination;
+	    out.type = 'Speaker';
 	    gr.addNode(out);
 	}
 	function registerPlayHandler() {

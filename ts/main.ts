@@ -1,21 +1,37 @@
 import { Graph, Node } from './graph';
 import { Synth } from './audio';
 
-const gr = new Graph(<HTMLCanvasElement>$('#graph-canvas')[0]);
-const synth = new Synth();
-
-setArrowColor();
-registerPaletteHandler();
-registerPlayHandler();
-addOuptutNode();
 
 class SynthNode extends Node {
 	anode: AudioNode;
 	type: string;
+
+	addInput(n: SynthNode) {
+		super.addInput(n);		
+	}
+
+	removeInput(n: SynthNode | number) {
+		super.removeInput(n);
+	}
+}
+
+
+const gr = new Graph(<HTMLCanvasElement>$('#graph-canvas')[0]);
+const synth = new Synth();
+
+main();
+
+function main() {
+	setArrowColor();
+	registerPaletteHandler();
+	registerPlayHandler();
+	addOuptutNode();
 }
 
 function addOuptutNode() {
-	const out = new Node(500, 180, 'Out');
+	const out = new SynthNode(500, 180, 'Out');
+	out.anode = synth.ac.destination;
+	out.type = 'Speaker';
 	gr.addNode(out);
 }
 
