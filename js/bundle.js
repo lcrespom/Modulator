@@ -468,7 +468,7 @@
 	//TODO refactor main so that SynthNode is available
 	function renderParams(n, ndef, panel) {
 	    var form = $('<form>');
-	    form.submit(function (_) { console.log('submit'); return false; });
+	    form.submit(function (_) { return handleForm(form, n.anode); });
 	    panel.empty().append(form);
 	    for (var _i = 0, _a = Object.keys(ndef.audioParams || {}); _i < _a.length; _i++) {
 	        var param = _a[_i];
@@ -486,6 +486,14 @@
 	}
 	function renderOtherParam(n, ndef, param, panel) {
 	    console.log(n.name, param);
+	}
+	function handleForm(form, n) {
+	    form.find(':input').each(function (i, e) {
+	        var $e = $(e);
+	        //TODO set linear...
+	        n[$e.attr('name')].setValueAtTime($e.val(), 0);
+	    });
+	    return false;
 	}
 
 
