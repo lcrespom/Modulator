@@ -472,28 +472,48 @@
 	    panel.empty().append(form);
 	    for (var _i = 0, _a = Object.keys(ndef.audioParams || {}); _i < _a.length; _i++) {
 	        var param = _a[_i];
-	        renderAudioParam(n, ndef, param, form);
+	        renderAudioParam(n.anode, ndef, param, form);
 	    }
 	    for (var _b = 0, _c = Object.keys(ndef.params || {}); _b < _c.length; _b++) {
 	        var param = _c[_b];
-	        renderOtherParam(n, ndef, param, form);
+	        renderOtherParam(n.anode, ndef, param, form);
 	    }
 	}
 	exports.renderParams = renderParams;
-	function renderAudioParam(n, ndef, param, panel) {
-	    panel.append($("<label>" + param + "</label>"));
-	    panel.append($("<input type=\"number\" name=\"" + param + "\"\n\t\tvalue=\"" + n.anode[param].value + "\">"));
+	function renderAudioParam(anode, ndef, param, panel) {
+	    var sliderBox = $('<div class="slider-box">');
+	    var slider = $('<input type="range" orient="vertical">')
+	        .attr('min', 0)
+	        .attr('max', 1)
+	        .attr('step', 0.001)
+	        .attr('value', 0.5)
+	        .on('input', function (_) {
+	        updateAudioParam(anode, ndef.paramTypes[param], param, slider.val());
+	    });
+	    sliderBox.append(slider);
+	    slider.after('<br/>' + ucfirst(param));
+	    panel.append(sliderBox);
 	}
 	function renderOtherParam(n, ndef, param, panel) {
 	    console.log(n.name, param);
+	}
+	function updateAudioParam(anode, ndef, param, svalue) {
+	    //TODO use log scale
+	    var value = parseFloat(svalue);
+	    value = ndef.min + value * (ndef.max - ndef.min);
+	    anode[param].setValueAtTime(value, 0);
 	}
 	function handleForm(form, n) {
 	    form.find(':input').each(function (i, e) {
 	        var $e = $(e);
 	        //TODO set linear...
+	        //TODO ramp with frame rate time
 	        n[$e.attr('name')].setValueAtTime($e.val(), 0);
 	    });
 	    return false;
+	}
+	function ucfirst(str) {
+	    return str[0].toUpperCase() + str.substring(1);
 	}
 
 

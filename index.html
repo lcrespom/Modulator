@@ -2,75 +2,32 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-	<title>Graph</title>
+	<title>Visual Synth</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<style>
-		body {
-			font-family: sans-serif;
-		}
-		.graph {
-			padding: 0; margin: 0;
-		}
-		.canvas-box {
-			border: 1px solid gray;
-			padding: 0;
-			margin: 0;
-			overflow: hidden;
-			position: relative;
-			display: inline-block;
-		}
-		.node {
-			position: absolute;
-			background: #8F8;
-			border: 2px solid #080;
-			border-radius: 5px;
-			width: 80px; height: 60px;
-			text-align: center;
-			line-height: 60px;
-		}
-		.node.selected {
-			border: 2px solid #060;
-			box-shadow: 5px 5px 2px rgba(0,0,0,0.4);
-		}
-		.arrow {
-			display: none;
-			color: #080;
-		}
-		.palette {
-			border: 1px solid gray;
-			margin-left: 5px;
-			display: inline-block;
-			height: 504px;
-			vertical-align: top;
-		}
-		.palette > .node {
-			position: static;
-			margin: 5px 5px 0px 5px;
-			cursor: copy;
-		}
-		.params-box {
-			border: 1px solid gray;
-			height: 200px;
-			width: 805px;
-			margin-top: 5px;
-			margin-bottom: 10px;
-			overflow: auto;
-		}
-	</style>
+    <link rel="stylesheet" type="text/css" href="css/main.css">
 </head>
 <body>
+
+	<!--------------- Graph canvas --------------->
 	<div class="canvas-box">
 		<canvas id="graph-canvas" class="graph" width="700" height="500"></canvas>
 	</div>
+
+	<!--------------- Node palette --------------->
 	<div class="palette">
 		<div class="node" data-type="Oscillator">Osc</div>
 		<div class="node" data-type="Gain">Gain</div>
 	</div>
+
+	<!--------------- Current node parameters --------------->
 	<div class="params-box">
 	</div>
+
+	<!--------------- Misc controls --------------->
 	<div>
 		<button id="play-stop">Play</button>
 	</div>
+
     <script src="js/vendor/jquery-1.11.2.min.js"></script>
 	<script src="js/vendor/jquery-ui.min.js"></script>
     <script src="js/bundle.js"></script>
