@@ -28,6 +28,10 @@
 			text-align: center;
 			line-height: 60px;
 		}
+		.node.selected {
+			border: 2px solid #060;
+			box-shadow: 5px 5px 3px gray;
+		}
 		.arrow {
 			display: none;
 			color: #080;
@@ -44,6 +48,14 @@
 			margin: 5px 5px 0px 5px;
 			cursor: copy;
 		}
+		.control-box {
+			border: 1px solid gray;
+			height: 200px;
+			width: 705px;
+			margin-top: 5px;
+			margin-bottom: 10px;
+			overflow: auto;
+		}
 	</style>
 </head>
 <body>
@@ -53,6 +65,8 @@
 	<div class="palette">
 		<div class="node" data-type="Oscillator">Osc</div>
 		<div class="node" data-type="Gain">Gain</div>
+	</div>
+	<div class="control-box">
 	</div>
 	<div>
 		<button id="play-stop">Play</button>
