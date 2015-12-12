@@ -81,7 +81,7 @@
 	        n.element = $('<div>')
 	            .addClass('node')
 	            .text(n.name)
-	            .css({ left: n.x, top: n.y, cursor: 'inherit' });
+	            .css({ left: n.x, top: n.y, cursor: 'default' });
 	        this.nodeCanvas.append(n.element);
 	        this.nodes.push(n);
 	        this.graphInteract.registerNode(n);
@@ -103,6 +103,12 @@
 	    Node.prototype.addInput = function (n) {
 	        this.inputs.push(n);
 	    };
+	    Node.prototype.removeInput = function (np) {
+	        if (np instanceof Node)
+	            np = this.inputs.indexOf(np);
+	        if (np >= 0)
+	            this.inputs.splice(np, 1);
+	    };
 	    return Node;
 	})();
 	exports.Node = Node;
@@ -120,7 +126,6 @@
 	        var _this = this;
 	        n.element.draggable({
 	            containment: 'parent',
-	            //cursor: 'move',
 	            distance: 5,
 	            stack: '.node',
 	            drag: function (event, ui) {
@@ -143,6 +148,7 @@
 	            if (!srcn)
 	                return;
 	            _this.nodeCanvas.css('cursor', 'crosshair');
+	            $('.node').css('cursor', 'crosshair');
 	            _this.connecting = true;
 	            _this.registerRubberBanding(srcn);
 	        })
@@ -151,15 +157,23 @@
 	                return;
 	            _this.connecting = false;
 	            _this.nodeCanvas.css('cursor', '');
+	            $('.node').css('cursor', 'default');
 	            _this.deregisterRubberBanding();
 	            var dstn = _this.getNodeFromDOM(_this.getElementUnderMouse());
 	            if (!dstn)
 	                return;
-	            dstn.addInput(srcn);
+	            _this.connectOrDisconnect(srcn, dstn);
 	            _this.grDraw.draw();
 	        })
 	            .mousedown(function (evt) { return mouseIsDown = true; })
 	            .mouseup(function (evt) { return mouseIsDown = false; });
+	    };
+	    GraphInteraction.prototype.connectOrDisconnect = function (srcn, dstn) {
+	        var pos = dstn.inputs.indexOf(srcn);
+	        if (pos >= 0)
+	            dstn.removeInput(pos);
+	        else
+	            dstn.addInput(srcn);
 	    };
 	    GraphInteraction.prototype.getElementUnderMouse = function () {
 	        var hovered = $(':hover');

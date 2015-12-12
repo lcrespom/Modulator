@@ -7,7 +7,7 @@ export class Graph {
 
 	constructor(canvas: HTMLCanvasElement) {
 		this.nodeCanvas = $(canvas.parentElement);
-		const gc = canvas.getContext('2d'); 
+		const gc = canvas.getContext('2d');
 		this.graphDraw = new GraphDraw(gc, canvas, this.nodes);
 		this.graphInteract = new GraphInteraction(gc, this.nodeCanvas, this.nodes, this.graphDraw);
 	}
@@ -20,7 +20,7 @@ export class Graph {
 		n.element = $('<div>')
 		.addClass('node')
 		.text(n.name)
-		.css({ left: n.x, top: n.y, cursor: 'inherit' });
+		.css({ left: n.x, top: n.y, cursor: 'default' });
 		this.nodeCanvas.append(n.element);
 		this.nodes.push(n);
 		this.graphInteract.registerNode(n);
@@ -53,6 +53,13 @@ export class Node {
 		this.inputs.push(n);
 	}
 
+	removeInput(np: Node | number) {
+		if (np instanceof Node)
+			np = this.inputs.indexOf(<Node>np);
+		if (np >= 0)
+			this.inputs.splice(<number>np, 1);
+	}
+
 }
 
 
@@ -78,7 +85,6 @@ class GraphInteraction {
 	registerNode(n: Node) {
 		n.element.draggable({
 			containment: 'parent',
-			//cursor: 'move',
 			distance: 5,
 			stack: '.node',
 			drag: (event, ui) => {
@@ -99,6 +105,7 @@ class GraphInteraction {
 			srcn = this.getNodeFromDOM(this.getElementUnderMouse());
 			if (!srcn) return;
 			this.nodeCanvas.css('cursor', 'crosshair');
+			$('.node').css('cursor', 'crosshair');
 			this.connecting = true;
 			this.registerRubberBanding(srcn);
 		})
@@ -106,14 +113,21 @@ class GraphInteraction {
 			if (evt.keyCode != 16) return;
 			this.connecting = false;
 			this.nodeCanvas.css('cursor', '');
+			$('.node').css('cursor', 'default');
 			this.deregisterRubberBanding();
 			const dstn = this.getNodeFromDOM(this.getElementUnderMouse());
 			if (!dstn) return;
-			dstn.addInput(srcn);
+			this.connectOrDisconnect(srcn, dstn);
 			this.grDraw.draw();
 		})
 		.mousedown(evt => mouseIsDown = true)
 		.mouseup(evt => mouseIsDown = false);
+	}
+
+	connectOrDisconnect(srcn: Node, dstn: Node) {
+		const pos = dstn.inputs.indexOf(srcn);
+		if (pos >= 0) dstn.removeInput(pos);
+		else dstn.addInput(srcn);
 	}
 
 	getElementUnderMouse(): JQuery {
