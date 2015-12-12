@@ -1,16 +1,57 @@
 import { Graph, Node } from './graph';
+import { Synth } from './audio';
 
 const gr = new Graph(<HTMLCanvasElement>$('#graph-canvas')[0]);
+const synth = new Synth();
 
-const tmp = $('<div>').addClass('arrow');
-$('body').append(tmp);
-gr.arrowColor = tmp.css('color');
-tmp.remove();
+setArrowColor();
+registerPaletteHandler();
+registerPlayHandler();
+addOuptutNode();
 
-$('.palette > .node').click(function(evt) {
-	const n = new Node(260, 180, $(this).text());
-	gr.addNode(n);
-});
+class SynthNode extends Node {
+	anode: AudioNode;
+	type: string;
+}
 
-const out = new Node(500, 180, 'Out');
-gr.addNode(out);
+function addOuptutNode() {
+	const out = new Node(500, 180, 'Out');
+	gr.addNode(out);
+}
+
+function registerPlayHandler() {
+	let playing = false;
+	const $playBut = $('#play-stop'); 
+	$playBut.click(_ => {
+		if (playing) {
+			synth.stop();
+			$playBut.text('Play');
+		}
+		else {
+			synth.play();
+			$playBut.text('Stop');
+		}
+	});
+}
+
+function registerPaletteHandler() {
+	$('.palette > .node').click(function(evt) {
+		const elem = $(this);
+		const n = new SynthNode(260, 180, elem.text());
+		n.type = elem.attr('data-type');
+		n.anode = synth.createNode(n.type);
+		gr.addNode(n);
+		if (!n.anode) {
+			console.warn(`No AudioNode found for '${n.type}'`);
+			n.element.css('background-color', '#BBB');
+		}
+	});
+}
+
+
+function setArrowColor() {
+	const tmp = $('<div>').addClass('arrow');
+	$('body').append(tmp);
+	gr.arrowColor = tmp.css('color');
+	tmp.remove();	
+}

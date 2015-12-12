@@ -44,18 +44,63 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
 	var graph_1 = __webpack_require__(1);
+	var audio_1 = __webpack_require__(2);
 	var gr = new graph_1.Graph($('#graph-canvas')[0]);
-	var tmp = $('<div>').addClass('arrow');
-	$('body').append(tmp);
-	gr.arrowColor = tmp.css('color');
-	tmp.remove();
-	$('.palette > .node').click(function (evt) {
-	    var n = new graph_1.Node(260, 180, $(this).text());
-	    gr.addNode(n);
-	});
-	var out = new graph_1.Node(500, 180, 'Out');
-	gr.addNode(out);
+	var synth = new audio_1.Synth();
+	setArrowColor();
+	registerPaletteHandler();
+	registerPlayHandler();
+	addOuptutNode();
+	var SynthNode = (function (_super) {
+	    __extends(SynthNode, _super);
+	    function SynthNode() {
+	        _super.apply(this, arguments);
+	    }
+	    return SynthNode;
+	})(graph_1.Node);
+	function addOuptutNode() {
+	    var out = new graph_1.Node(500, 180, 'Out');
+	    gr.addNode(out);
+	}
+	function registerPlayHandler() {
+	    var playing = false;
+	    var $playBut = $('#play-stop');
+	    $playBut.click(function (_) {
+	        if (playing) {
+	            synth.stop();
+	            $playBut.text('Play');
+	        }
+	        else {
+	            synth.play();
+	            $playBut.text('Stop');
+	        }
+	    });
+	}
+	function registerPaletteHandler() {
+	    $('.palette > .node').click(function (evt) {
+	        var elem = $(this);
+	        var n = new SynthNode(260, 180, elem.text());
+	        n.type = elem.attr('data-type');
+	        n.anode = synth.createNode(n.type);
+	        gr.addNode(n);
+	        if (!n.anode) {
+	            console.warn("No AudioNode found for '" + n.type + "'");
+	            n.element.css('background-color', '#BBB');
+	        }
+	    });
+	}
+	function setArrowColor() {
+	    var tmp = $('<div>').addClass('arrow');
+	    $('body').append(tmp);
+	    gr.arrowColor = tmp.css('color');
+	    tmp.remove();
+	}
 
 
 /***/ },
@@ -102,6 +147,7 @@
 	    }
 	    Node.prototype.addInput = function (n) {
 	        this.inputs.push(n);
+	        //TODO check if connections are accepted, both at source and destination nodes
 	    };
 	    Node.prototype.removeInput = function (np) {
 	        if (np instanceof Node)
@@ -266,6 +312,53 @@
 	    };
 	    return GraphDraw;
 	})();
+
+
+/***/ },
+/* 2 */
+/***/ function(module, exports) {
+
+	var Synth = (function () {
+	    function Synth() {
+	        var CtxClass = window.AudioContext || window.webkitAudioContext;
+	        this.ac = new CtxClass();
+	    }
+	    Synth.prototype.createNode = function (type) {
+	        var def = palette[type];
+	        if (!def || !this.ac[def.constructor])
+	            return null;
+	        var anode = this.ac[def.constructor]();
+	        for (var _i = 0, _a = Object.keys(def.params || {}); _i < _a.length; _i++) {
+	            var param = _a[_i];
+	            anode[param] = def.params[param];
+	        }
+	        for (var _b = 0, _c = Object.keys(def.audioParams || {}); _b < _c.length; _b++) {
+	            var param = _c[_b];
+	            anode[param].value = def.audioParams[param];
+	        }
+	        return anode;
+	    };
+	    Synth.prototype.play = function () {
+	    };
+	    Synth.prototype.stop = function () {
+	    };
+	    return Synth;
+	})();
+	exports.Synth = Synth;
+	var palette = {
+	    Oscillator: {
+	        constructor: 'createOscillator',
+	        params: {
+	            type: 'sawtooth'
+	        },
+	        audioParams: {
+	            frequency: 220
+	        },
+	        paramValues: {
+	            type: ['sine', 'square', 'sawtooth', 'triangle']
+	        }
+	    }
+	};
 
 
 /***/ }
