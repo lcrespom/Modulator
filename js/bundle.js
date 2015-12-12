@@ -411,7 +411,7 @@
 	            type: 'sawtooth'
 	        },
 	        audioParams: {
-	            frequency: 220 + Math.random() * 200 - 100
+	            frequency: 220
 	        },
 	        paramValues: {
 	            type: ['sine', 'square', 'sawtooth', 'triangle']
