@@ -439,6 +439,7 @@
 	    max: 20000
 	};
 	var palette = {
+	    // Sources
 	    Oscillator: {
 	        constructor: 'createOscillator',
 	        params: {
@@ -450,6 +451,7 @@
 	            }
 	        }
 	    },
+	    // Effects
 	    Gain: {
 	        constructor: 'createGain',
 	        params: {
@@ -478,6 +480,22 @@
 	                    'lowshelf', 'highshelf', 'peaking', 'notch', 'allpass']
 	            }
 	        },
+	    },
+	    // Controllers
+	    LFO: {
+	        constructor: 'createOscillator',
+	        params: {
+	            frequency: {
+	                initial: 2,
+	                min: 0.01,
+	                max: 200
+	            },
+	            detune: OCTAVE_DETUNE,
+	            type: {
+	                initial: 'sawtooth',
+	                choices: ['sine', 'square', 'sawtooth', 'triangle']
+	            }
+	        }
 	    },
 	    Speaker: {
 	        constructor: null,

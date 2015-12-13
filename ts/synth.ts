@@ -65,6 +65,7 @@ const FREQUENCY: NodeParamDef = {
 };
 
 var palette: NodePalette = {
+	// Sources
 	Oscillator: {
 		constructor: 'createOscillator',
 		params: {
@@ -76,6 +77,7 @@ var palette: NodePalette = {
 			}
 		}
 	},
+	// Effects
 	Gain: {
 		constructor: 'createGain',
 		params: {
@@ -105,6 +107,22 @@ var palette: NodePalette = {
 			}
 		},
 	},
+	// Controllers
+	LFO: {
+		constructor: 'createOscillator',
+		params: {
+			frequency: {
+				initial: 2,
+				min: 0.01,
+				max: 200
+			},
+			detune: OCTAVE_DETUNE,
+			type: {
+				initial: 'sawtooth',
+				choices: ['sine', 'square', 'sawtooth', 'triangle']
+			}
+		}
+	},	// Output
 	Speaker: {
 		constructor: null,
 		params: null
