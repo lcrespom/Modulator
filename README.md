@@ -12,7 +12,6 @@ to be used with the
 	- Dislay osc/fft using AnalyserNode
 	- Load/save instruments
 - UI
-	- Integrate with Bootstrap
 	- Help button explaining how to connect etc.
 	- Remove hardcoded dimensions from canvas
 	- Branding
