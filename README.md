@@ -12,6 +12,8 @@ to be used with the
 	- Display editable parameter values numerically under slider
 	- Dislay osc/fft using AnalyserNode
 	- Load/save instruments
+	- When adding a node from the palette, place it on an empty
+		spot and select it
 - UI
 	- Help button explaining how to connect etc.
 	- Remove hardcoded dimensions from canvas
