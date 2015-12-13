@@ -39,18 +39,29 @@ function logarithm(base: number, x: number): number {
 }
 
 function param2slider(paramValue: number, range: ParamRange): number {
-	const logRange = logarithm(LOG_BASE, range.max - range.min);
-	return logarithm(LOG_BASE, paramValue - range.min) / logRange;
+	if (range.linear) {
+		return (paramValue - range.min) / (range.max - range.min);
+	}
+	else {
+		const logRange = logarithm(LOG_BASE, range.max - range.min);
+		return logarithm(LOG_BASE, paramValue - range.min) / logRange;
+	}
 }
 
 function slider2param(sliderValue: number, range: ParamRange): number {
-	const logRange = logarithm(LOG_BASE, range.max - range.min);
-	return range.min + Math.pow(LOG_BASE, sliderValue * logRange);
+	if (range.linear) {
+		return range.min + sliderValue * (range.max - range.min);
+	}
+	else {
+		const logRange = logarithm(LOG_BASE, range.max - range.min);
+		return range.min + Math.pow(LOG_BASE, sliderValue * logRange);
+	}
 }
 
 interface ParamRange {
 	min: number,
-	max: number
+	max: number,
+	linear?: boolean
 }
 
 //-------------------- Misc utilities --------------------

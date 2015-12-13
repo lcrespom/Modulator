@@ -38,13 +38,19 @@ var palette: NodeDefPalette = {
 			type: 'sawtooth'
 		},
 		audioParams: {
-			frequency: 220
+			frequency: 220,
+			detune: 0
 		},
 		paramTypes: {
 			type: ['sine', 'square', 'sawtooth', 'triangle'],
 			frequency: {
 				min: 20,
 				max: 20000
+			},
+			detune: {
+				min: -1200,
+				max: 1200,
+				linear: true
 			}
 		}
 	},
@@ -56,9 +62,32 @@ var palette: NodeDefPalette = {
 		paramTypes: {
 			gain: {
 				min: 0,
-				max: 1
+				max: 1,
+				linear: true
 			}
 		}
+	},
+	Filter: {
+		constructor: 'createBiquadFilter',
+		params: {
+			type: 'lowpass'
+		},
+		audioParams: {
+			frequency: 220,
+			Q: 0
+		},
+		paramTypes: {
+			type: ['sine', 'square', 'sawtooth', 'triangle'],
+			frequency: {
+				min: 20,
+				max: 20000
+			},
+			Q: {
+				min: 0,
+				max: 100
+			}
+		}
+
 	},
 	Speaker: {
 		constructor: null

@@ -434,13 +434,19 @@
 	            type: 'sawtooth'
 	        },
 	        audioParams: {
-	            frequency: 220
+	            frequency: 220,
+	            detune: 0
 	        },
 	        paramTypes: {
 	            type: ['sine', 'square', 'sawtooth', 'triangle'],
 	            frequency: {
 	                min: 20,
 	                max: 20000
+	            },
+	            detune: {
+	                min: -1200,
+	                max: 1200,
+	                linear: true
 	            }
 	        }
 	    },
@@ -452,7 +458,29 @@
 	        paramTypes: {
 	            gain: {
 	                min: 0,
-	                max: 1
+	                max: 1,
+	                linear: true
+	            }
+	        }
+	    },
+	    Filter: {
+	        constructor: 'createBiquadFilter',
+	        params: {
+	            type: 'lowpass'
+	        },
+	        audioParams: {
+	            frequency: 220,
+	            Q: 0
+	        },
+	        paramTypes: {
+	            type: ['sine', 'square', 'sawtooth', 'triangle'],
+	            frequency: {
+	                min: 20,
+	                max: 20000
+	            },
+	            Q: {
+	                min: 0,
+	                max: 100
 	            }
 	        }
 	    },
@@ -504,12 +532,22 @@
 	    return Math.log(x) / Math.log(base);
 	}
 	function param2slider(paramValue, range) {
-	    var logRange = logarithm(LOG_BASE, range.max - range.min);
-	    return logarithm(LOG_BASE, paramValue - range.min) / logRange;
+	    if (range.linear) {
+	        return (paramValue - range.min) / (range.max - range.min);
+	    }
+	    else {
+	        var logRange = logarithm(LOG_BASE, range.max - range.min);
+	        return logarithm(LOG_BASE, paramValue - range.min) / logRange;
+	    }
 	}
 	function slider2param(sliderValue, range) {
-	    var logRange = logarithm(LOG_BASE, range.max - range.min);
-	    return range.min + Math.pow(LOG_BASE, sliderValue * logRange);
+	    if (range.linear) {
+	        return range.min + sliderValue * (range.max - range.min);
+	    }
+	    else {
+	        var logRange = logarithm(LOG_BASE, range.max - range.min);
+	        return range.min + Math.pow(LOG_BASE, sliderValue * logRange);
+	    }
 	}
 	//-------------------- Misc utilities --------------------
 	function ucfirst(str) {
