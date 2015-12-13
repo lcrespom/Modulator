@@ -63,7 +63,7 @@
 	    };
 	    SynthNode.prototype.removeInput = function (np) {
 	        var removed = _super.prototype.removeInput.call(this, np);
-	        removed.anode.disconnect();
+	        removed.anode.disconnect(this.anode);
 	        return removed;
 	    };
 	    SynthNode.prototype.canBeSource = function () {

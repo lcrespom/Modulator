@@ -14,7 +14,7 @@ class SynthNode extends Node {
 
 	removeInput(np: SynthNode | number): Node {
 		const removed: SynthNode = <SynthNode>super.removeInput(np);
-		removed.anode.disconnect();
+		(<any>removed).anode.disconnect(this.anode);
 		return removed;
 	}
 

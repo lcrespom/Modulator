@@ -7,6 +7,7 @@ to be used with the
 - Functionality
 	- Keyboard trigger
 	- Control nodes
+	- Support fan-out by connecting and disconnecting to/from multiple modules
 	- Test multiple outputs from an audio node
 	- More audio nodes (reverb, etc.)
 	- Display editable parameter values numerically under slider
