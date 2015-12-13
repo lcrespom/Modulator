@@ -471,6 +471,7 @@
 	                min: 0,
 	                max: 100
 	            },
+	            //TODO gain
 	            detune: OCTAVE_DETUNE,
 	            type: {
 	                initial: 'lowpass',
@@ -521,7 +522,22 @@
 	    panel.append(sliderBox);
 	}
 	function renderOtherParam(anode, ndef, param, panel) {
-	    console.log("TODO: render non-AudioParam " + param + " = " + ndef.params[param].initial);
+	    var pdef = ndef.params[param];
+	    var choiceBox = $('<div class="choice-box">');
+	    var combo = $('<select>').attr('size', pdef.choices.length);
+	    for (var _i = 0, _a = pdef.choices; _i < _a.length; _i++) {
+	        var choice = _a[_i];
+	        var option = $('<option>').text(choice);
+	        if (choice == anode[param])
+	            option.attr('selected', 'selected');
+	        combo.append(option);
+	    }
+	    choiceBox.append(combo);
+	    combo.after('<br/><br/>' + ucfirst(param));
+	    panel.append(choiceBox);
+	    combo.on('input', function (_) {
+	        anode[param] = combo.val();
+	    });
 	}
 	var LOG_BASE = 2;
 	function logarithm(base, x) {

@@ -96,6 +96,7 @@ var palette: NodePalette = {
 				min: 0,
 				max: 100
 			},
+			//TODO gain
 			detune: OCTAVE_DETUNE,
 			type: {
 				initial: 'lowpass',

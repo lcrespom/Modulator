@@ -31,7 +31,20 @@ function renderAudioParam(anode: AudioNode, ndef: NodeDef, param: string, panel:
 }
 
 function renderOtherParam(anode: AudioNode, ndef: NodeDef, param: string, panel: JQuery) {
-	console.log(`TODO: render non-AudioParam ${param} = ${ndef.params[param].initial}`);
+	const pdef: NodeParamDef = ndef.params[param];
+	const choiceBox = $('<div class="choice-box">');
+	const combo = $('<select>').attr('size', pdef.choices.length);
+	for (const choice of pdef.choices) {
+		const option = $('<option>').text(choice);
+		if (choice == anode[param]) option.attr('selected', 'selected');
+		combo.append(option);
+	}
+	choiceBox.append(combo);
+	combo.after('<br/><br/>' + ucfirst(param));
+	panel.append(choiceBox);
+	combo.on('input', _ => {
+		anode[param] = combo.val();
+	});
 }
 
 const LOG_BASE = 2;
@@ -67,5 +80,3 @@ function slider2param(sliderValue: number, pdef: NodeParamDef): number {
 function ucfirst(str: string) {
 	return str[0].toUpperCase() + str.substring(1);
 }
-
-

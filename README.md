@@ -7,6 +7,7 @@ to be used with the
 - Functionality
 	- Keyboard trigger
 	- Control nodes
+	- Test multiple outputs from an audio node
 	- More audio nodes (reverb, etc.)
 	- Display editable parameter values numerically under slider
 	- Dislay osc/fft using AnalyserNode

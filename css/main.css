@@ -80,3 +80,16 @@ input[type=range][orient=vertical] {
 	font-size: 90%;
 	line-height: 1.4em;
 }
+
+.choice-box {
+	display: inline-block;
+	text-align: center;
+	width: 100px;
+	margin-top: 15px;
+	font-size: 90%;
+	line-height: 1.4em;
+}
+
+.choice-box select {
+	border-radius: 3px;
+}
