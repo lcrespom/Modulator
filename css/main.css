@@ -18,8 +18,8 @@ body {
 
 .node {
 	position: absolute;
-	background: #8F8;
-	border: 2px solid #080;
+	background: #BFF2FF;
+	border: 2px solid #5DA6FF;
 	border-radius: 5px;
 	width: 80px; height: 60px;
 	text-align: center;
@@ -27,13 +27,13 @@ body {
 }
 
 .node.selected {
-	border: 2px solid #060;
+	border: 2px solid #004ACF;
 	box-shadow: 5px 5px 2px rgba(0,0,0,0.4);
 }
 
 .arrow {
 	display: none;
-	color: #080;
+	color: #5DA6FF;
 }
 
 .palette {
