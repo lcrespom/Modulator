@@ -4,9 +4,24 @@ to be used with the
 [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API).
 
 ##ToDo
-- Parameters panel
-- Integrate with Bootstrap
-- Help button explaining how to connect etc.
-- Support FireFox (does not have AudioContext.suspend/resume)
-- Test in Safari
-- Remove hardcoded dimensions from canvas
+- Functionality
+	- Keyboard trigger
+	- Control nodes
+	- More audio nodes (reverb, etc.)
+	- Display editable parameter values numerically under slider
+	- Dislay osc/fft using AnalyserNode
+	- Load/save instruments
+- UI
+	- Integrate with Bootstrap
+	- Help button explaining how to connect etc.
+	- Remove hardcoded dimensions from canvas
+	- Branding
+	- Naming
+	- Logo
+- Support
+	- Support FireFox (does not have AudioContext.suspend/resume)
+	- Test in Safari
+- Share
+	- Document
+	- Present in meetup
+	- Invite contributors
