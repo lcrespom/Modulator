@@ -86,7 +86,7 @@
 	}
 	function registerNodeSelection() {
 	    gr.nodeSelected = function (n) {
-	        paramsUI_1.renderParams(n, synth.palette[n.type], $('.params-box'));
+	        paramsUI_1.renderParams(n.anode, synth.palette[n.type], $('.params-box'));
 	    };
 	}
 	function addOutputNode() {
@@ -490,15 +490,14 @@
 /* 3 */
 /***/ function(module, exports) {
 
-	//TODO refactor main so that SynthNode is available and 'n' can be typed
-	function renderParams(n, ndef, panel) {
+	function renderParams(anode, ndef, panel) {
 	    panel.empty();
 	    for (var _i = 0, _a = Object.keys(ndef.params || {}); _i < _a.length; _i++) {
 	        var param = _a[_i];
-	        if (n.anode[param] instanceof AudioParam)
-	            renderAudioParam(n.anode, ndef, param, panel);
+	        if (anode[param] instanceof AudioParam)
+	            renderAudioParam(anode, ndef, param, panel);
 	        else
-	            renderOtherParam(n.anode, ndef, param, panel);
+	            renderOtherParam(anode, ndef, param, panel);
 	    }
 	}
 	exports.renderParams = renderParams;

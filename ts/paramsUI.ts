@@ -1,14 +1,13 @@
 import { Node } from './graph';
 import { NodeDef, NodeParamDef } from './synth';
 
-//TODO refactor main so that SynthNode is available and 'n' can be typed
-export function renderParams(n: any, ndef: NodeDef, panel: JQuery) {
+export function renderParams(anode: AudioNode, ndef: NodeDef, panel: JQuery) {
 	panel.empty();
 	for (const param of Object.keys(ndef.params || {}))
-		if (n.anode[param] instanceof AudioParam)
-			renderAudioParam(n.anode, ndef, param, panel);
+		if (anode[param] instanceof AudioParam)
+			renderAudioParam(anode, ndef, param, panel);
 		else
-			renderOtherParam(n.anode, ndef, param, panel);
+			renderOtherParam(anode, ndef, param, panel);
 }
 
 function renderAudioParam(anode: AudioNode, ndef: NodeDef, param: string, panel: JQuery) {

@@ -43,7 +43,7 @@ function main() {
 
 function registerNodeSelection() {
 	gr.nodeSelected = function(n: SynthNode) {
-		renderParams(n, synth.palette[n.type], $('.params-box'));
+		renderParams(n.anode, synth.palette[n.type], $('.params-box'));
 	}
 }
 
@@ -56,7 +56,7 @@ function addOutputNode() {
 
 function registerPlayHandler() {
 	let playing = false;
-	
+
 	const $playBut = $('#play-stop');
 	$playBut.click(togglePlayStop);
 	$('body').keypress(evt => {
@@ -100,5 +100,5 @@ function setArrowColor() {
 	const tmp = $('<div>').addClass('arrow');
 	$('body').append(tmp);
 	gr.arrowColor = tmp.css('color');
-	tmp.remove();	
+	tmp.remove();
 }
