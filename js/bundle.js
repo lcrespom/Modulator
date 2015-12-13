@@ -429,6 +429,7 @@
 	var palette = {
 	    Oscillator: {
 	        constructor: 'createOscillator',
+	        //TODO reorganize
 	        params: {
 	            type: 'sawtooth'
 	        },
@@ -438,7 +439,7 @@
 	        paramTypes: {
 	            type: ['sine', 'square', 'sawtooth', 'triangle'],
 	            frequency: {
-	                min: 50,
+	                min: 20,
 	                max: 20000
 	            }
 	        }
@@ -467,28 +468,29 @@
 
 	//TODO refactor main so that SynthNode is available
 	function renderParams(n, ndef, panel) {
-	    var form = $('<form>');
-	    form.submit(function (_) { return handleForm(form, n.anode); });
-	    panel.empty().append(form);
+	    panel.empty();
 	    for (var _i = 0, _a = Object.keys(ndef.audioParams || {}); _i < _a.length; _i++) {
 	        var param = _a[_i];
-	        renderAudioParam(n.anode, ndef, param, form);
+	        renderAudioParam(n.anode, ndef, param, panel);
 	    }
 	    for (var _b = 0, _c = Object.keys(ndef.params || {}); _b < _c.length; _b++) {
 	        var param = _c[_b];
-	        renderOtherParam(n.anode, ndef, param, form);
+	        renderOtherParam(n.anode, ndef, param, panel);
 	    }
 	}
 	exports.renderParams = renderParams;
 	function renderAudioParam(anode, ndef, param, panel) {
+	    var range = ndef.paramTypes[param];
+	    var aparam = anode[param];
 	    var sliderBox = $('<div class="slider-box">');
 	    var slider = $('<input type="range" orient="vertical">')
 	        .attr('min', 0)
 	        .attr('max', 1)
 	        .attr('step', 0.001)
-	        .attr('value', 0.5)
+	        .attr('value', param2slider(aparam.value, range))
 	        .on('input', function (_) {
-	        updateAudioParam(anode, ndef.paramTypes[param], param, slider.val());
+	        var value = slider2param(parseFloat(slider.val()), range);
+	        aparam.setValueAtTime(value, 0);
 	    });
 	    sliderBox.append(slider);
 	    slider.after('<br/>' + ucfirst(param));
@@ -497,24 +499,21 @@
 	function renderOtherParam(n, ndef, param, panel) {
 	    console.log(n.name, param);
 	}
-	function updateAudioParam(anode, ndef, param, svalue) {
-	    //TODO use log scale
-	    var value = parseFloat(svalue);
-	    value = ndef.min + value * (ndef.max - ndef.min);
-	    anode[param].setValueAtTime(value, 0);
+	function param2slider(paramValue, range) {
+	    var logRange = Math.log10(range.max - range.min);
+	    return Math.log10(paramValue - range.min) / logRange;
 	}
-	function handleForm(form, n) {
-	    form.find(':input').each(function (i, e) {
-	        var $e = $(e);
-	        //TODO set linear...
-	        //TODO ramp with frame rate time
-	        n[$e.attr('name')].setValueAtTime($e.val(), 0);
-	    });
-	    return false;
+	function slider2param(sliderValue, range) {
+	    var logRange = Math.log10(range.max - range.min);
+	    return range.min + Math.pow(10, sliderValue * logRange);
 	}
+	//-------------------- Misc utilities --------------------
 	function ucfirst(str) {
 	    return str[0].toUpperCase() + str.substring(1);
 	}
+	Math.log10 = Math.log10 || function (x) {
+	    return Math.log(x) / Math.LN10;
+	};
 
 
 /***/ }

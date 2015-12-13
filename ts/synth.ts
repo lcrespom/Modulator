@@ -33,6 +33,7 @@ export class Synth {
 var palette: NodeDefPalette = {
 	Oscillator: {
 		constructor: 'createOscillator',
+		//TODO reorganize
 		params: {
 			type: 'sawtooth'
 		},
@@ -42,7 +43,7 @@ var palette: NodeDefPalette = {
 		paramTypes: {
 			type: ['sine', 'square', 'sawtooth', 'triangle'],
 			frequency: {
-				min: 50,
+				min: 20,
 				max: 20000
 			}
 		}
@@ -83,5 +84,5 @@ declare var window: WindowWithAudio;
 
 interface FullAudioContext extends AudioContext {
 	suspend: () => void,
-	resume: () => void,	
+	resume: () => void,
 }
