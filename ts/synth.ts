@@ -32,7 +32,7 @@ export class Synth {
 	}
 }
 
-export interface NodeDefPalette {
+export interface NodePalette {
 	[key: string]: NodeDef
 }
 
@@ -51,21 +51,25 @@ export interface NodeParamDef {
 
 //-------------------- Node palette definition --------------------
 
-var palette: NodeDefPalette = {
+const OCTAVE_DETUNE: NodeParamDef = {
+	initial: 0,
+	min: -1200,
+	max: 1200,
+	linear: true
+};
+
+const FREQUENCY: NodeParamDef = {
+	initial: 220,
+	min: 20,
+	max: 20000
+};
+
+var palette: NodePalette = {
 	Oscillator: {
 		constructor: 'createOscillator',
 		params: {
-			frequency: {
-				initial: 200,
-				min: 20,
-				max: 20000
-			},
-			detune: {
-				initial: 0,
-				min: -1200,
-				max: 1200,
-				linear: true
-			},
+			frequency: FREQUENCY,
+			detune: OCTAVE_DETUNE,
 			type: {
 				initial: 'sawtooth',
 				choices: ['sine', 'square', 'sawtooth', 'triangle']
@@ -86,19 +90,17 @@ var palette: NodeDefPalette = {
 	Filter: {
 		constructor: 'createBiquadFilter',
 		params: {
-			frequency: {
-				initial: 220,
-				min: 20,
-				max: 20000
-			},
+			frequency: FREQUENCY,
 			Q: {
 				initial: 0,
 				min: 0,
 				max: 100
 			},
+			detune: OCTAVE_DETUNE,
 			type: {
 				initial: 'lowpass',
-				choices: ['sine', 'square', 'sawtooth', 'triangle']
+				choices: ['lowpass', 'highpass', 'bandpass',
+					'lowshelf', 'highshelf', 'peaking', 'notch', 'allpass']
 			}
 		},
 	},

@@ -428,21 +428,23 @@
 	})();
 	exports.Synth = Synth;
 	//-------------------- Node palette definition --------------------
+	var OCTAVE_DETUNE = {
+	    initial: 0,
+	    min: -1200,
+	    max: 1200,
+	    linear: true
+	};
+	var FREQUENCY = {
+	    initial: 220,
+	    min: 20,
+	    max: 20000
+	};
 	var palette = {
 	    Oscillator: {
 	        constructor: 'createOscillator',
 	        params: {
-	            frequency: {
-	                initial: 200,
-	                min: 20,
-	                max: 20000
-	            },
-	            detune: {
-	                initial: 0,
-	                min: -1200,
-	                max: 1200,
-	                linear: true
-	            },
+	            frequency: FREQUENCY,
+	            detune: OCTAVE_DETUNE,
 	            type: {
 	                initial: 'sawtooth',
 	                choices: ['sine', 'square', 'sawtooth', 'triangle']
@@ -463,19 +465,17 @@
 	    Filter: {
 	        constructor: 'createBiquadFilter',
 	        params: {
-	            frequency: {
-	                initial: 220,
-	                min: 20,
-	                max: 20000
-	            },
+	            frequency: FREQUENCY,
 	            Q: {
 	                initial: 0,
 	                min: 0,
 	                max: 100
 	            },
+	            detune: OCTAVE_DETUNE,
 	            type: {
 	                initial: 'lowpass',
-	                choices: ['sine', 'square', 'sawtooth', 'triangle']
+	                choices: ['lowpass', 'highpass', 'bandpass',
+	                    'lowshelf', 'highshelf', 'peaking', 'notch', 'allpass']
 	            }
 	        },
 	    },
@@ -513,6 +513,7 @@
 	        .attr('value', param2slider(aparam.value, pdef))
 	        .on('input', function (_) {
 	        var value = slider2param(parseFloat(slider.val()), pdef);
+	        //TODO linear/log ramp at frame rate
 	        aparam.setValueAtTime(value, 0);
 	    });
 	    sliderBox.append(slider);
@@ -531,6 +532,8 @@
 	        return (paramValue - pdef.min) / (pdef.max - pdef.min);
 	    }
 	    else {
+	        if (paramValue - pdef.min == 0)
+	            return 0;
 	        var logRange = logarithm(LOG_BASE, pdef.max - pdef.min);
 	        return logarithm(LOG_BASE, paramValue - pdef.min) / logRange;
 	    }

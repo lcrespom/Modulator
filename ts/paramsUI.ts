@@ -22,6 +22,7 @@ function renderAudioParam(anode: AudioNode, ndef: NodeDef, param: string, panel:
 		.attr('value', param2slider(aparam.value, pdef))
 		.on('input', _ => {
 			const value = slider2param(parseFloat(slider.val()), pdef);
+			//TODO linear/log ramp at frame rate
 			aparam.setValueAtTime(value, 0);
 		});
 	sliderBox.append(slider);
@@ -44,6 +45,7 @@ function param2slider(paramValue: number, pdef: NodeParamDef): number {
 		return (paramValue - pdef.min) / (pdef.max - pdef.min);
 	}
 	else {
+		if (paramValue - pdef.min == 0) return 0;
 		const logRange = logarithm(LOG_BASE, pdef.max - pdef.min);
 		return logarithm(LOG_BASE, paramValue - pdef.min) / logRange;
 	}
