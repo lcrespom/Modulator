@@ -185,7 +185,6 @@
 	    }
 	    Node.prototype.addInput = function (n) {
 	        this.inputs.push(n);
-	        //TODO check if connections are accepted, both at source and destination nodes
 	    };
 	    Node.prototype.removeInput = function (np) {
 	        var pos;

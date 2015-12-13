@@ -53,7 +53,6 @@ export class Node {
 
 	addInput(n: Node) {
 		this.inputs.push(n);
-		//TODO check if connections are accepted, both at source and destination nodes
 	}
 
 	removeInput(np: Node | number): Node {
