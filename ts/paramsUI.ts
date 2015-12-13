@@ -32,14 +32,20 @@ function renderOtherParam(n: Node, ndef: NodeDef, param: string, panel: JQuery) 
 	console.log(n.name, param);
 }
 
+const LOG_BASE = 2;
+
+function logarithm(base: number, x: number): number {
+	return Math.log(x) / Math.log(base);
+}
+
 function param2slider(paramValue: number, range: ParamRange): number {
-	const logRange = Math.log10(range.max - range.min);
-	return Math.log10(paramValue - range.min) / logRange;
+	const logRange = logarithm(LOG_BASE, range.max - range.min);
+	return logarithm(LOG_BASE, paramValue - range.min) / logRange;
 }
 
 function slider2param(sliderValue: number, range: ParamRange): number {
-	const logRange = Math.log10(range.max - range.min);
-	return range.min + Math.pow(10, sliderValue * logRange);
+	const logRange = logarithm(LOG_BASE, range.max - range.min);
+	return range.min + Math.pow(LOG_BASE, sliderValue * logRange);
 }
 
 interface ParamRange {
@@ -53,13 +59,4 @@ function ucfirst(str: string) {
 	return str[0].toUpperCase() + str.substring(1);
 }
 
-interface MathLog10 extends Math {
-	log10: (number) => number
-}
-
-declare var Math: MathLog10;
-
-Math.log10 = Math.log10 || function(x) {
-  return Math.log(x) / Math.LN10;
-};
 

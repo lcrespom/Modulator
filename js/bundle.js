@@ -499,21 +499,22 @@
 	function renderOtherParam(n, ndef, param, panel) {
 	    console.log(n.name, param);
 	}
+	var LOG_BASE = 2;
+	function logarithm(base, x) {
+	    return Math.log(x) / Math.log(base);
+	}
 	function param2slider(paramValue, range) {
-	    var logRange = Math.log10(range.max - range.min);
-	    return Math.log10(paramValue - range.min) / logRange;
+	    var logRange = logarithm(LOG_BASE, range.max - range.min);
+	    return logarithm(LOG_BASE, paramValue - range.min) / logRange;
 	}
 	function slider2param(sliderValue, range) {
-	    var logRange = Math.log10(range.max - range.min);
-	    return range.min + Math.pow(10, sliderValue * logRange);
+	    var logRange = logarithm(LOG_BASE, range.max - range.min);
+	    return range.min + Math.pow(LOG_BASE, sliderValue * logRange);
 	}
 	//-------------------- Misc utilities --------------------
 	function ucfirst(str) {
 	    return str[0].toUpperCase() + str.substring(1);
 	}
-	Math.log10 = Math.log10 || function (x) {
-	    return Math.log(x) / Math.LN10;
-	};
 
 
 /***/ }
