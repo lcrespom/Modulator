@@ -409,11 +409,12 @@
 	        var anode = this.ac[def.constructor]();
 	        for (var _i = 0, _a = Object.keys(def.params || {}); _i < _a.length; _i++) {
 	            var param = _a[_i];
-	            anode[param] = def.params[param];
-	        }
-	        for (var _b = 0, _c = Object.keys(def.audioParams || {}); _b < _c.length; _b++) {
-	            var param = _c[_b];
-	            anode[param].value = def.audioParams[param];
+	            if (!anode[param])
+	                console.warn("Parameter '" + param + "' not found for node " + type + "'");
+	            else if (anode[param] instanceof AudioParam)
+	                anode[param].value = def.params[param].initial;
+	            else
+	                anode[param] = def.params[param].initial;
 	        }
 	        return anode;
 	    };
@@ -426,37 +427,33 @@
 	    return Synth;
 	})();
 	exports.Synth = Synth;
+	//-------------------- Node palette definition --------------------
 	var palette = {
 	    Oscillator: {
 	        constructor: 'createOscillator',
-	        //TODO reorganize
 	        params: {
-	            type: 'sawtooth'
-	        },
-	        audioParams: {
-	            frequency: 220,
-	            detune: 0
-	        },
-	        paramTypes: {
-	            type: ['sine', 'square', 'sawtooth', 'triangle'],
 	            frequency: {
+	                initial: 200,
 	                min: 20,
 	                max: 20000
 	            },
 	            detune: {
+	                initial: 0,
 	                min: -1200,
 	                max: 1200,
 	                linear: true
+	            },
+	            type: {
+	                initial: 'sawtooth',
+	                choices: ['sine', 'square', 'sawtooth', 'triangle']
 	            }
 	        }
 	    },
 	    Gain: {
 	        constructor: 'createGain',
-	        audioParams: {
-	            gain: 1
-	        },
-	        paramTypes: {
+	        params: {
 	            gain: {
+	                initial: 1,
 	                min: 0,
 	                max: 1,
 	                linear: true
@@ -466,26 +463,25 @@
 	    Filter: {
 	        constructor: 'createBiquadFilter',
 	        params: {
-	            type: 'lowpass'
-	        },
-	        audioParams: {
-	            frequency: 220,
-	            Q: 0
-	        },
-	        paramTypes: {
-	            type: ['sine', 'square', 'sawtooth', 'triangle'],
 	            frequency: {
+	                initial: 220,
 	                min: 20,
 	                max: 20000
 	            },
 	            Q: {
+	                initial: 0,
 	                min: 0,
 	                max: 100
+	            },
+	            type: {
+	                initial: 'lowpass',
+	                choices: ['sine', 'square', 'sawtooth', 'triangle']
 	            }
-	        }
+	        },
 	    },
 	    Speaker: {
-	        constructor: null
+	        constructor: null,
+	        params: null
 	    }
 	};
 
@@ -494,59 +490,58 @@
 /* 3 */
 /***/ function(module, exports) {
 
-	//TODO refactor main so that SynthNode is available
+	//TODO refactor main so that SynthNode is available and 'n' can be typed
 	function renderParams(n, ndef, panel) {
 	    panel.empty();
-	    for (var _i = 0, _a = Object.keys(ndef.audioParams || {}); _i < _a.length; _i++) {
+	    for (var _i = 0, _a = Object.keys(ndef.params || {}); _i < _a.length; _i++) {
 	        var param = _a[_i];
-	        renderAudioParam(n.anode, ndef, param, panel);
-	    }
-	    for (var _b = 0, _c = Object.keys(ndef.params || {}); _b < _c.length; _b++) {
-	        var param = _c[_b];
-	        renderOtherParam(n.anode, ndef, param, panel);
+	        if (n.anode[param] instanceof AudioParam)
+	            renderAudioParam(n.anode, ndef, param, panel);
+	        else
+	            renderOtherParam(n.anode, ndef, param, panel);
 	    }
 	}
 	exports.renderParams = renderParams;
 	function renderAudioParam(anode, ndef, param, panel) {
-	    var range = ndef.paramTypes[param];
+	    var pdef = ndef.params[param];
 	    var aparam = anode[param];
 	    var sliderBox = $('<div class="slider-box">');
 	    var slider = $('<input type="range" orient="vertical">')
 	        .attr('min', 0)
 	        .attr('max', 1)
 	        .attr('step', 0.001)
-	        .attr('value', param2slider(aparam.value, range))
+	        .attr('value', param2slider(aparam.value, pdef))
 	        .on('input', function (_) {
-	        var value = slider2param(parseFloat(slider.val()), range);
+	        var value = slider2param(parseFloat(slider.val()), pdef);
 	        aparam.setValueAtTime(value, 0);
 	    });
 	    sliderBox.append(slider);
 	    slider.after('<br/>' + ucfirst(param));
 	    panel.append(sliderBox);
 	}
-	function renderOtherParam(n, ndef, param, panel) {
-	    console.log(n.name, param);
+	function renderOtherParam(anode, ndef, param, panel) {
+	    console.log("TODO: render non-AudioParam " + param + " = " + ndef.params[param].initial);
 	}
 	var LOG_BASE = 2;
 	function logarithm(base, x) {
 	    return Math.log(x) / Math.log(base);
 	}
-	function param2slider(paramValue, range) {
-	    if (range.linear) {
-	        return (paramValue - range.min) / (range.max - range.min);
+	function param2slider(paramValue, pdef) {
+	    if (pdef.linear) {
+	        return (paramValue - pdef.min) / (pdef.max - pdef.min);
 	    }
 	    else {
-	        var logRange = logarithm(LOG_BASE, range.max - range.min);
-	        return logarithm(LOG_BASE, paramValue - range.min) / logRange;
+	        var logRange = logarithm(LOG_BASE, pdef.max - pdef.min);
+	        return logarithm(LOG_BASE, paramValue - pdef.min) / logRange;
 	    }
 	}
-	function slider2param(sliderValue, range) {
-	    if (range.linear) {
-	        return range.min + sliderValue * (range.max - range.min);
+	function slider2param(sliderValue, pdef) {
+	    if (pdef.linear) {
+	        return pdef.min + sliderValue * (pdef.max - pdef.min);
 	    }
 	    else {
-	        var logRange = logarithm(LOG_BASE, range.max - range.min);
-	        return range.min + Math.pow(LOG_BASE, sliderValue * logRange);
+	        var logRange = logarithm(LOG_BASE, pdef.max - pdef.min);
+	        return pdef.min + Math.pow(LOG_BASE, sliderValue * logRange);
 	    }
 	}
 	//-------------------- Misc utilities --------------------

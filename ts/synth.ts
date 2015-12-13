@@ -11,13 +11,15 @@ export class Synth {
 
 	createNode(type: string): AudioNode {
 		const def: NodeDef = palette[type];
-		if (!def || !this.ac[def.constructor
-		]) return null;
+		if (!def || !this.ac[def.constructor]) return null;
 		const anode = this.ac[def.constructor]();
 		for (const param of Object.keys(def.params || {}))
-			anode[param] = def.params[param];
-		for (const param of Object.keys(def.audioParams || {}))
-			anode[param].value = def.audioParams[param];
+			if (!anode[param])
+				console.warn(`Parameter '${param}' not found for node ${type}'`)
+			else if (anode[param] instanceof AudioParam)
+				anode[param].value = def.params[param].initial;
+			else
+				anode[param] = def.params[param].initial;
 		return anode;
 	}
 
@@ -30,37 +32,51 @@ export class Synth {
 	}
 }
 
+export interface NodeDefPalette {
+	[key: string]: NodeDef
+}
+
+export interface NodeDef {
+	constructor: string,
+	params: { [key: string]: NodeParamDef }
+}
+
+export interface NodeParamDef {
+	initial: number | string,
+	min?: number,
+	max?: number,
+	linear?: boolean,
+	choices?: string[]
+}
+
+//-------------------- Node palette definition --------------------
+
 var palette: NodeDefPalette = {
 	Oscillator: {
 		constructor: 'createOscillator',
-		//TODO reorganize
 		params: {
-			type: 'sawtooth'
-		},
-		audioParams: {
-			frequency: 220,
-			detune: 0
-		},
-		paramTypes: {
-			type: ['sine', 'square', 'sawtooth', 'triangle'],
 			frequency: {
+				initial: 200,
 				min: 20,
 				max: 20000
 			},
 			detune: {
+				initial: 0,
 				min: -1200,
 				max: 1200,
 				linear: true
+			},
+			type: {
+				initial: 'sawtooth',
+				choices: ['sine', 'square', 'sawtooth', 'triangle']
 			}
 		}
 	},
 	Gain: {
 		constructor: 'createGain',
-		audioParams: {
-			gain: 1
-		},
-		paramTypes: {
+		params: {
 			gain: {
+				initial: 1,
 				min: 0,
 				max: 1,
 				linear: true
@@ -70,40 +86,30 @@ var palette: NodeDefPalette = {
 	Filter: {
 		constructor: 'createBiquadFilter',
 		params: {
-			type: 'lowpass'
-		},
-		audioParams: {
-			frequency: 220,
-			Q: 0
-		},
-		paramTypes: {
-			type: ['sine', 'square', 'sawtooth', 'triangle'],
 			frequency: {
+				initial: 220,
 				min: 20,
 				max: 20000
 			},
 			Q: {
+				initial: 0,
 				min: 0,
 				max: 100
+			},
+			type: {
+				initial: 'lowpass',
+				choices: ['sine', 'square', 'sawtooth', 'triangle']
 			}
-		}
-
+		},
 	},
 	Speaker: {
-		constructor: null
+		constructor: null,
+		params: null
 	}
 };
 
-export interface NodeDefPalette {
-	[key: string]: NodeDef
-}
 
-export interface NodeDef {
-	constructor: string,
-	params?: any,
-	audioParams?: any,
-	paramTypes?: any
-}
+//-------------------- Internal interfaces --------------------
 
 interface WindowWithAudio extends Window {
 	AudioContext: AudioContext,

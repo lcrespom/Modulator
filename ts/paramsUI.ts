@@ -1,26 +1,27 @@
 import { Node } from './graph';
-import { NodeDef } from './synth';
+import { NodeDef, NodeParamDef } from './synth';
 
-//TODO refactor main so that SynthNode is available
+//TODO refactor main so that SynthNode is available and 'n' can be typed
 export function renderParams(n: any, ndef: NodeDef, panel: JQuery) {
 	panel.empty();
-	for (const param of Object.keys(ndef.audioParams || {}))
-		renderAudioParam(n.anode, ndef, param, panel);
 	for (const param of Object.keys(ndef.params || {}))
-		renderOtherParam(n.anode, ndef, param, panel);
+		if (n.anode[param] instanceof AudioParam)
+			renderAudioParam(n.anode, ndef, param, panel);
+		else
+			renderOtherParam(n.anode, ndef, param, panel);
 }
 
 function renderAudioParam(anode: AudioNode, ndef: NodeDef, param: string, panel: JQuery) {
-	const range: ParamRange = ndef.paramTypes[param];
+	const pdef: NodeParamDef = ndef.params[param];
 	const aparam: AudioParam = anode[param];
 	const sliderBox = $('<div class="slider-box">');
 	const slider = $('<input type="range" orient="vertical">')
 		.attr('min', 0)
 		.attr('max', 1)
 		.attr('step', 0.001)
-		.attr('value', param2slider(aparam.value, range))
+		.attr('value', param2slider(aparam.value, pdef))
 		.on('input', _ => {
-			const value = slider2param(parseFloat(slider.val()), range);
+			const value = slider2param(parseFloat(slider.val()), pdef);
 			aparam.setValueAtTime(value, 0);
 		});
 	sliderBox.append(slider);
@@ -28,8 +29,8 @@ function renderAudioParam(anode: AudioNode, ndef: NodeDef, param: string, panel:
 	panel.append(sliderBox);
 }
 
-function renderOtherParam(n: Node, ndef: NodeDef, param: string, panel: JQuery) {
-	console.log(n.name, param);
+function renderOtherParam(anode: AudioNode, ndef: NodeDef, param: string, panel: JQuery) {
+	console.log(`TODO: render non-AudioParam ${param} = ${ndef.params[param].initial}`);
 }
 
 const LOG_BASE = 2;
@@ -38,31 +39,26 @@ function logarithm(base: number, x: number): number {
 	return Math.log(x) / Math.log(base);
 }
 
-function param2slider(paramValue: number, range: ParamRange): number {
-	if (range.linear) {
-		return (paramValue - range.min) / (range.max - range.min);
+function param2slider(paramValue: number, pdef: NodeParamDef): number {
+	if (pdef.linear) {
+		return (paramValue - pdef.min) / (pdef.max - pdef.min);
 	}
 	else {
-		const logRange = logarithm(LOG_BASE, range.max - range.min);
-		return logarithm(LOG_BASE, paramValue - range.min) / logRange;
+		const logRange = logarithm(LOG_BASE, pdef.max - pdef.min);
+		return logarithm(LOG_BASE, paramValue - pdef.min) / logRange;
 	}
 }
 
-function slider2param(sliderValue: number, range: ParamRange): number {
-	if (range.linear) {
-		return range.min + sliderValue * (range.max - range.min);
+function slider2param(sliderValue: number, pdef: NodeParamDef): number {
+	if (pdef.linear) {
+		return pdef.min + sliderValue * (pdef.max - pdef.min);
 	}
 	else {
-		const logRange = logarithm(LOG_BASE, range.max - range.min);
-		return range.min + Math.pow(LOG_BASE, sliderValue * logRange);
+		const logRange = logarithm(LOG_BASE, pdef.max - pdef.min);
+		return pdef.min + Math.pow(LOG_BASE, sliderValue * logRange);
 	}
 }
 
-interface ParamRange {
-	min: number,
-	max: number,
-	linear?: boolean
-}
 
 //-------------------- Misc utilities --------------------
 
