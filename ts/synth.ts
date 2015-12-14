@@ -1,6 +1,6 @@
 export class Synth {
 	ac: FullAudioContext;
-	palette: any;
+	palette: NodePalette;
 
 	constructor() {
 		const CtxClass: any = window.AudioContext || window.webkitAudioContext;
@@ -9,7 +9,7 @@ export class Synth {
 		this.palette = palette;
 	}
 
-	createNode(type: string): AudioNode {
+	createAudioNode(type: string): AudioNode {
 		const def: NodeDef = palette[type];
 		if (!def || !this.ac[def.constructor]) return null;
 		const anode = this.ac[def.constructor]();
@@ -38,6 +38,7 @@ export interface NodePalette {
 
 export interface NodeDef {
 	constructor: string,
+	control?: boolean,
 	params: { [key: string]: NodeParamDef }
 }
 
@@ -110,6 +111,7 @@ var palette: NodePalette = {
 	// Controllers
 	LFO: {
 		constructor: 'createOscillator',
+		control: true,
 		params: {
 			frequency: {
 				initial: 2,
@@ -118,7 +120,7 @@ var palette: NodePalette = {
 			},
 			detune: OCTAVE_DETUNE,
 			type: {
-				initial: 'sawtooth',
+				initial: 'sine',
 				choices: ['sine', 'square', 'sawtooth', 'triangle']
 			}
 		}

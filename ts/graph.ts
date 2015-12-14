@@ -16,11 +16,13 @@ export class Graph {
 		this.graphDraw.arrowColor = color;
 	}
 
-	addNode(n: Node) {
+	addNode(n: Node, classes?:string) {
 		n.element = $('<div>')
-		.addClass('node')
-		.text(n.name)
-		.css({ left: n.x, top: n.y, cursor: 'default' });
+			.addClass('node')
+			.text(n.name)
+			.css({ left: n.x, top: n.y, cursor: 'default' });
+		//TODO check if $.addClass admits multiple classes
+		if (classes) n.element.addClass(classes);
 		this.nodeCanvas.append(n.element);
 		this.nodes.push(n);
 		this.graphInteract.registerNode(n);
@@ -227,7 +229,6 @@ class GraphDraw {
 
 	draw() {
 		this.clearCanvas();
-		this.gc.strokeStyle = this.arrowColor;
 		this.gc.lineWidth = 2;
 		for (const ndst of this.nodes)
 			for (const nsrc of ndst.inputs)
@@ -241,6 +242,7 @@ class GraphDraw {
 	drawArrow(srcNode: Node, dstNode: Node) {
 		const srcPoint = this.getNodeCenter(srcNode);
 		const dstPoint = this.getNodeCenter(dstNode);
+		this.gc.strokeStyle = this.arrowColor;
 		this.gc.beginPath();
 		this.gc.moveTo(srcPoint.x, srcPoint.y);
 		this.gc.lineTo(dstPoint.x, dstPoint.y);

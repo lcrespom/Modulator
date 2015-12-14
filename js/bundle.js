@@ -59,17 +59,27 @@
 	    }
 	    SynthNode.prototype.addInput = function (n) {
 	        _super.prototype.addInput.call(this, n);
-	        n.anode.connect(this.anode);
+	        if (n.isControl) {
+	        }
+	        else
+	            n.anode.connect(this.anode);
 	    };
 	    SynthNode.prototype.removeInput = function (np) {
 	        var removed = _super.prototype.removeInput.call(this, np);
-	        removed.anode.disconnect(this.anode);
+	        if (removed.isControl) {
+	        }
+	        else {
+	            //TODO test fan-out
+	            removed.anode.disconnect(this.anode);
+	        }
 	        return removed;
 	    };
 	    SynthNode.prototype.canBeSource = function () {
 	        return this.anode.numberOfOutputs > 0;
 	    };
 	    SynthNode.prototype.canConnectInput = function (n) {
+	        if (n.isControl)
+	            return true;
 	        return this.anode.numberOfInputs > 0;
 	    };
 	    return SynthNode;
@@ -79,7 +89,7 @@
 	main();
 	function main() {
 	    registerNodeSelection();
-	    setArrowColor();
+	    setArrowColors();
 	    registerPaletteHandler();
 	    registerPlayHandler();
 	    addOutputNode();
@@ -120,8 +130,9 @@
 	        var elem = $(this);
 	        var n = new SynthNode(260, 180, elem.text());
 	        n.type = elem.attr('data-type');
-	        n.anode = synth.createNode(n.type);
-	        gr.addNode(n);
+	        n.anode = synth.createAudioNode(n.type);
+	        n.isControl = synth.palette[n.type].control;
+	        gr.addNode(n, n.isControl ? 'node-ctrl' : undefined);
 	        if (!n.anode) {
 	            console.warn("No AudioNode found for '" + n.type + "'");
 	            n.element.css('background-color', '#BBB');
@@ -132,11 +143,21 @@
 	        }
 	    });
 	}
-	function setArrowColor() {
-	    var tmp = $('<div>').addClass('arrow');
+	function setArrowColors() {
+	    var arrowColor = getCssFromClass('arrow', 'color');
+	    var ctrlArrowColor = getCssFromClass('arrow-ctrl', 'color');
+	    var originalDrawArrow = gr.graphDraw.drawArrow;
+	    gr.graphDraw.drawArrow = function (srcNode, dstNode) {
+	        this.arrowColor = srcNode.isControl ? ctrlArrowColor : arrowColor;
+	        originalDrawArrow.bind(this)(srcNode, dstNode);
+	    };
+	}
+	function getCssFromClass(className, propName) {
+	    var tmp = $('<div>').addClass(className);
 	    $('body').append(tmp);
-	    gr.arrowColor = tmp.css('color');
+	    var propValue = tmp.css(propName);
 	    tmp.remove();
+	    return propValue;
 	}
 
 
@@ -159,11 +180,14 @@
 	        enumerable: true,
 	        configurable: true
 	    });
-	    Graph.prototype.addNode = function (n) {
+	    Graph.prototype.addNode = function (n, classes) {
 	        n.element = $('<div>')
 	            .addClass('node')
 	            .text(n.name)
 	            .css({ left: n.x, top: n.y, cursor: 'default' });
+	        //TODO check if $.addClass admits multiple classes
+	        if (classes)
+	            n.element.addClass(classes);
 	        this.nodeCanvas.append(n.element);
 	        this.nodes.push(n);
 	        this.graphInteract.registerNode(n);
@@ -348,7 +372,6 @@
 	    }
 	    GraphDraw.prototype.draw = function () {
 	        this.clearCanvas();
-	        this.gc.strokeStyle = this.arrowColor;
 	        this.gc.lineWidth = 2;
 	        for (var _i = 0, _a = this.nodes; _i < _a.length; _i++) {
 	            var ndst = _a[_i];
@@ -364,6 +387,7 @@
 	    GraphDraw.prototype.drawArrow = function (srcNode, dstNode) {
 	        var srcPoint = this.getNodeCenter(srcNode);
 	        var dstPoint = this.getNodeCenter(dstNode);
+	        this.gc.strokeStyle = this.arrowColor;
 	        this.gc.beginPath();
 	        this.gc.moveTo(srcPoint.x, srcPoint.y);
 	        this.gc.lineTo(dstPoint.x, dstPoint.y);
@@ -401,7 +425,7 @@
 	        this.stop();
 	        this.palette = palette;
 	    }
-	    Synth.prototype.createNode = function (type) {
+	    Synth.prototype.createAudioNode = function (type) {
 	        var def = palette[type];
 	        if (!def || !this.ac[def.constructor])
 	            return null;
@@ -484,6 +508,7 @@
 	    // Controllers
 	    LFO: {
 	        constructor: 'createOscillator',
+	        control: true,
 	        params: {
 	            frequency: {
 	                initial: 2,
@@ -492,7 +517,7 @@
 	            },
 	            detune: OCTAVE_DETUNE,
 	            type: {
-	                initial: 'sawtooth',
+	                initial: 'sine',
 	                choices: ['sine', 'square', 'sawtooth', 'triangle']
 	            }
 	        }

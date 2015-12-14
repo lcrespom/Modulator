@@ -32,6 +32,10 @@ body {
 	line-height: 60px;
 }
 
+.node-ctrl {
+	background-color: #B8B8F9;
+	border-color: #5E61FB;
+}
 .node.selected {
 	border: 2px solid #004ACF;
 	box-shadow: 5px 5px 2px rgba(0,0,0,0.4);
@@ -42,11 +46,17 @@ body {
 	color: #5DA6FF;
 }
 
+.arrow-ctrl {
+	display: none;
+	color: #5E61FB;
+}
+
 .palette {
 	margin-left: 5px;
 	display: inline-block;
 	height: 507px;
 	vertical-align: top;
+	overflow-y: auto;
 }
 
 .palette > .node {

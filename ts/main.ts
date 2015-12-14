@@ -6,15 +6,25 @@ import { renderParams } from './paramsUI';
 class SynthNode extends Node {
 	anode: AudioNode;
 	type: string;
+	isControl: boolean;
 
 	addInput(n: SynthNode) {
 		super.addInput(n);
-		n.anode.connect(this.anode);
+		if (n.isControl) {
+			//TODO connect to parameter
+		}
+		else n.anode.connect(this.anode);
 	}
 
 	removeInput(np: SynthNode | number): Node {
 		const removed: SynthNode = <SynthNode>super.removeInput(np);
-		(<any>removed).anode.disconnect(this.anode);
+		if (removed.isControl) {
+			//TODO disconnect parameter (...if possible)			
+		}
+		else {
+			//TODO test fan-out
+			(<any>removed).anode.disconnect(this.anode);
+		}
 		return removed;
 	}
 
@@ -22,7 +32,8 @@ class SynthNode extends Node {
 		return this.anode.numberOfOutputs > 0;
 	}
 
-	canConnectInput(n: Node): boolean {
+	canConnectInput(n: SynthNode): boolean {
+		if (n.isControl) return true;
 		return this.anode.numberOfInputs > 0;
 	}
 }
@@ -35,7 +46,7 @@ main();
 
 function main() {
 	registerNodeSelection();
-	setArrowColor();
+	setArrowColors();
 	registerPaletteHandler();
 	registerPlayHandler();
 	addOutputNode();
@@ -83,8 +94,9 @@ function registerPaletteHandler() {
 		const elem = $(this);
 		const n = new SynthNode(260, 180, elem.text());
 		n.type = elem.attr('data-type');
-		n.anode = synth.createNode(n.type);
-		gr.addNode(n);
+		n.anode = synth.createAudioNode(n.type);
+		n.isControl = synth.palette[n.type].control;
+		gr.addNode(n, n.isControl ? 'node-ctrl' : undefined);
 		if (!n.anode) {
 			console.warn(`No AudioNode found for '${n.type}'`);
 			n.element.css('background-color', '#BBB');
@@ -95,10 +107,20 @@ function registerPaletteHandler() {
 	});
 }
 
+function setArrowColors() {
+	const arrowColor = getCssFromClass('arrow', 'color');
+	const ctrlArrowColor = getCssFromClass('arrow-ctrl', 'color');
+	const originalDrawArrow = gr.graphDraw.drawArrow;
+	gr.graphDraw.drawArrow = function(srcNode: SynthNode, dstNode: SynthNode) {
+		this.arrowColor = srcNode.isControl ? ctrlArrowColor : arrowColor;
+		originalDrawArrow.bind(this)(srcNode, dstNode);
+	}
+}
 
-function setArrowColor() {
-	const tmp = $('<div>').addClass('arrow');
+function getCssFromClass(className, propName) {	
+	const tmp = $('<div>').addClass(className);
 	$('body').append(tmp);
-	gr.arrowColor = tmp.css('color');
+	const propValue = tmp.css(propName);
 	tmp.remove();
+	return propValue;
 }
