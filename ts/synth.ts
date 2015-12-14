@@ -1,5 +1,5 @@
 export class Synth {
-	ac: FullAudioContext;
+	ac: ModernAudioContext;
 	palette: NodePalette;
 
 	constructor() {
@@ -134,13 +134,13 @@ var palette: NodePalette = {
 
 //-------------------- Internal interfaces --------------------
 
-interface WindowWithAudio extends Window {
+interface ModernWindow extends Window {
 	AudioContext: AudioContext,
 	webkitAudioContext: AudioContext
 }
-declare var window: WindowWithAudio;
+declare var window: ModernWindow;
 
-interface FullAudioContext extends AudioContext {
+interface ModernAudioContext extends AudioContext {
 	suspend: () => void,
 	resume: () => void,
 }

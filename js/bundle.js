@@ -60,6 +60,9 @@
 	    SynthNode.prototype.addInput = function (n) {
 	        _super.prototype.addInput.call(this, n);
 	        if (n.isControl) {
+	            if (!n.controlParam)
+	                n.controlParam = 'TODO'; //TODO retrieve first available control param
+	            n.anode.connect(this.anode[n.controlParam]);
 	        }
 	        else
 	            n.anode.connect(this.anode);

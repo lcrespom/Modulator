@@ -4,13 +4,17 @@ import { renderParams } from './paramsUI';
 
 
 class SynthNode extends Node {
-	anode: AudioNode;
+	anode: ModernAudioNode;
 	type: string;
 	isControl: boolean;
+	controlParam: string; 
 
 	addInput(n: SynthNode) {
 		super.addInput(n);
 		if (n.isControl) {
+			if (!n.controlParam)
+				n.controlParam = 'TODO';//TODO retrieve first available control param
+			n.anode.connect(this.anode[n.controlParam]);
 			//TODO connect to parameter
 		}
 		else n.anode.connect(this.anode);
@@ -23,7 +27,7 @@ class SynthNode extends Node {
 		}
 		else {
 			//TODO test fan-out
-			(<any>removed).anode.disconnect(this.anode);
+			removed.anode.disconnect(this.anode);
 		}
 		return removed;
 	}
@@ -38,6 +42,9 @@ class SynthNode extends Node {
 	}
 }
 
+interface ModernAudioNode extends AudioNode {
+	disconnect(output?: number | AudioNode | AudioParam): void
+}
 
 const gr = new Graph(<HTMLCanvasElement>$('#graph-canvas')[0]);
 const synth = new Synth();

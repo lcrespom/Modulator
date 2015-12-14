@@ -5,6 +5,7 @@ to be used with the
 
 ##ToDo
 - Functionality
+	- Node deletion (e.g. via a delete button in parameter box)
 	- Keyboard trigger
 	- Control nodes
 	- Support fan-out by connecting and disconnecting to/from multiple modules
@@ -16,11 +17,16 @@ to be used with the
 	- When adding a node from the palette, place it on an empty
 		spot and select it
 - UI
+	- Descriptive headers in graph, palette & parameters boxes
 	- Help button explaining how to connect etc.
 	- Remove hardcoded dimensions from canvas
+	- Right-click & drag to connect nodes
 	- Branding
 	- Naming
 	- Logo
+- Code
+	- Refactor main.ts
+	- Replace SynthNode extension with composition (how?)
 - Support
 	- Support FireFox (does not have AudioContext.suspend/resume)
 	- Test in Safari
@@ -28,3 +34,4 @@ to be used with the
 	- Document
 	- Present in meetup
 	- Invite contributors
+	- Contact web audio developers such as @chrislowis & @mohayonao
