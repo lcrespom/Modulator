@@ -59,9 +59,9 @@
 	    }
 	    SynthNode.prototype.addInput = function (n) {
 	        _super.prototype.addInput.call(this, n);
-	        if (n.isControl) {
+	        if (n.nodeDef.control) {
 	            if (!n.controlParam)
-	                n.controlParam = 'TODO'; //TODO retrieve first available control param
+	                n.controlParam = Object.keys(this.nodeDef.params)[0];
 	            n.anode.connect(this.anode[n.controlParam]);
 	        }
 	        else
@@ -69,7 +69,9 @@
 	    };
 	    SynthNode.prototype.removeInput = function (np) {
 	        var removed = _super.prototype.removeInput.call(this, np);
-	        if (removed.isControl) {
+	        if (removed.nodeDef.control) {
+	            removed.anode.disconnect(this.anode[removed.controlParam]);
+	            removed.controlParam = null;
 	        }
 	        else {
 	            //TODO test fan-out
@@ -81,7 +83,7 @@
 	        return this.anode.numberOfOutputs > 0;
 	    };
 	    SynthNode.prototype.canConnectInput = function (n) {
-	        if (n.isControl)
+	        if (n.nodeDef.control)
 	            return true;
 	        return this.anode.numberOfInputs > 0;
 	    };
@@ -134,8 +136,8 @@
 	        var n = new SynthNode(260, 180, elem.text());
 	        n.type = elem.attr('data-type');
 	        n.anode = synth.createAudioNode(n.type);
-	        n.isControl = synth.palette[n.type].control;
-	        gr.addNode(n, n.isControl ? 'node-ctrl' : undefined);
+	        n.nodeDef = synth.palette[n.type];
+	        gr.addNode(n, n.nodeDef.control ? 'node-ctrl' : undefined);
 	        if (!n.anode) {
 	            console.warn("No AudioNode found for '" + n.type + "'");
 	            n.element.css('background-color', '#BBB');
@@ -151,7 +153,7 @@
 	    var ctrlArrowColor = getCssFromClass('arrow-ctrl', 'color');
 	    var originalDrawArrow = gr.graphDraw.drawArrow;
 	    gr.graphDraw.drawArrow = function (srcNode, dstNode) {
-	        this.arrowColor = srcNode.isControl ? ctrlArrowColor : arrowColor;
+	        this.arrowColor = srcNode.nodeDef.control ? ctrlArrowColor : arrowColor;
 	        originalDrawArrow.bind(this)(srcNode, dstNode);
 	    };
 	}

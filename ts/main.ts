@@ -1,29 +1,29 @@
 import { Graph, Node } from './graph';
-import { Synth } from './synth';
+import { Synth, NodeDef } from './synth';
 import { renderParams } from './paramsUI';
 
 
 class SynthNode extends Node {
 	anode: ModernAudioNode;
 	type: string;
-	isControl: boolean;
-	controlParam: string; 
+	controlParam: string;
+	nodeDef: NodeDef;
 
 	addInput(n: SynthNode) {
 		super.addInput(n);
-		if (n.isControl) {
+		if (n.nodeDef.control) {
 			if (!n.controlParam)
-				n.controlParam = 'TODO';//TODO retrieve first available control param
+				n.controlParam = Object.keys(this.nodeDef.params)[0];
 			n.anode.connect(this.anode[n.controlParam]);
-			//TODO connect to parameter
 		}
 		else n.anode.connect(this.anode);
 	}
 
 	removeInput(np: SynthNode | number): Node {
 		const removed: SynthNode = <SynthNode>super.removeInput(np);
-		if (removed.isControl) {
-			//TODO disconnect parameter (...if possible)			
+		if (removed.nodeDef.control) {
+			removed.anode.disconnect(this.anode[removed.controlParam]);
+			removed.controlParam = null;
 		}
 		else {
 			//TODO test fan-out
@@ -37,7 +37,7 @@ class SynthNode extends Node {
 	}
 
 	canConnectInput(n: SynthNode): boolean {
-		if (n.isControl) return true;
+		if (n.nodeDef.control) return true;
 		return this.anode.numberOfInputs > 0;
 	}
 }
@@ -102,8 +102,8 @@ function registerPaletteHandler() {
 		const n = new SynthNode(260, 180, elem.text());
 		n.type = elem.attr('data-type');
 		n.anode = synth.createAudioNode(n.type);
-		n.isControl = synth.palette[n.type].control;
-		gr.addNode(n, n.isControl ? 'node-ctrl' : undefined);
+		n.nodeDef = synth.palette[n.type];
+		gr.addNode(n, n.nodeDef.control ? 'node-ctrl' : undefined);
 		if (!n.anode) {
 			console.warn(`No AudioNode found for '${n.type}'`);
 			n.element.css('background-color', '#BBB');
@@ -119,7 +119,7 @@ function setArrowColors() {
 	const ctrlArrowColor = getCssFromClass('arrow-ctrl', 'color');
 	const originalDrawArrow = gr.graphDraw.drawArrow;
 	gr.graphDraw.drawArrow = function(srcNode: SynthNode, dstNode: SynthNode) {
-		this.arrowColor = srcNode.isControl ? ctrlArrowColor : arrowColor;
+		this.arrowColor = srcNode.nodeDef.control ? ctrlArrowColor : arrowColor;
 		originalDrawArrow.bind(this)(srcNode, dstNode);
 	}
 }

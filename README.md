@@ -5,10 +5,15 @@ to be used with the
 
 ##ToDo
 - Functionality
+	- Control nodes
+		- Add control parameter selector in params box
+		- Add gain control node
+		- ADSR
+	- Split slider logscale in two with middle value in the middle of the slider,
+		then fine-tune all module definitions (e.g. gain)
 	- Node deletion (e.g. via a delete button in parameter box)
 	- Keyboard trigger
-	- Control nodes
-	- Support fan-out by connecting and disconnecting to/from multiple modules
+	- Consider supporting fan-out by connecting and disconnecting to/from multiple modules
 	- Test multiple outputs from an audio node
 	- More audio nodes (reverb, etc.)
 	- Display editable parameter values numerically under slider

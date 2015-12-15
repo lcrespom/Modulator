@@ -8,7 +8,12 @@
 		"tsc": "tsc",
 		"build": "webpack --progress --colors --display-error-details --display-reasons",
 		"watch": "webpack --progress --colors --watch",
-		"serve": "http-server -c-1"
+		"serve": "http-server -c-1",
+
+		"publish:index": "cp index.html ../lcrespom.github.io/synth",
+		"publish:css": "cp -R css ../lcrespom.github.io/synth",
+		"publish:js": "cp -R js ../lcrespom.github.io/synth",
+		"publish": "npm run publish:index && npm run publish:css && npm run publish:js"
 	},
 	"keywords": [
 		"graph"
