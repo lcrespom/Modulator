@@ -9,6 +9,8 @@ to be used with the
 		- Add control parameter selector in params box
 		- Add gain control node
 		- ADSR
+	- Add all possible AudioNodes available into the palette
+		- Especially support sampled audio
 	- Split slider logscale in two with middle value in the middle of the slider,
 		then fine-tune all module definitions (e.g. gain)
 	- Node deletion (e.g. via a delete button in parameter box)
@@ -21,8 +23,13 @@ to be used with the
 	- Load/save instruments
 	- When adding a node from the palette, place it on an empty
 		spot and select it
+	- Long term:
+		- Tracker
+		- Custom modules with WebWorker
+		- Record & save audio
+
 - UI
-	- Descriptive headers in graph, palette & parameters boxes
+	- Update parameter box header with currently selected node
 	- Help button explaining how to connect etc.
 	- Remove hardcoded dimensions from canvas
 	- Right-click & drag to connect nodes
@@ -31,7 +38,7 @@ to be used with the
 	- Logo
 - Code
 	- Refactor main.ts
-	- Replace SynthNode extension with composition (how?)
+	- Replace SynthNode class extension with composition (how?)
 - Support
 	- Support FireFox (does not have AudioContext.suspend/resume)
 	- Test in Safari
