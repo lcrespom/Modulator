@@ -117,7 +117,7 @@ var palette: NodePalette = {
 				max: 5
 			}
 		}
-	}
+	},
 	// Controllers
 	LFO: {
 		constructor: 'createOscillator',
