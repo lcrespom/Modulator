@@ -5,15 +5,16 @@ to be used with the
 
 ##ToDo
 - Functionality
+	- Keyboard trigger
 	- Control nodes
 		- ADSR (requires keyboard trigger feature)
 	- Add all possible AudioNodes available into the palette
-		- Especially support sampled audio
-		- Reverb, etc.
-	- Split slider logscale in two with middle value in the middle of the slider,
-		then fine-tune all module definitions (e.g. gain)
+		- Support sampled audio
+	- Improve slider logscale:
+		- Support parameter values < 1
+		- Split slider logscale in two with middle value in the middle of the slider,
+			then fine-tune all module definitions (e.g. gain)
 	- Node deletion (e.g. via a delete button in parameter box)
-	- Keyboard trigger
 	- Consider supporting fan-out by connecting and disconnecting to/from multiple modules
 	- Dislay osc/fft using AnalyserNode
 	- Load/save instruments
@@ -29,6 +30,7 @@ to be used with the
 	- Help button explaining how to connect etc.
 	- Remove hardcoded dimensions from canvas
 	- Right-click & drag to connect nodes
+	- Cool design
 	- Branding
 	- Naming
 	- Logo
@@ -43,6 +45,7 @@ to be used with the
 
 - Share
 	- Document
+	- Create proper website in github pages
 	- Present in meetup
 	- Invite contributors
 	- Contact web audio developers such as @chrislowis & @mohayonao

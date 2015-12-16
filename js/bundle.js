@@ -510,6 +510,16 @@
 	            }
 	        },
 	    },
+	    Delay: {
+	        constructor: 'createDelay',
+	        params: {
+	            delayTime: {
+	                initial: 1,
+	                min: 0,
+	                max: 5
+	            }
+	        }
+	    },
 	    // Controllers
 	    LFO: {
 	        constructor: 'createOscillator',

@@ -83,7 +83,7 @@ input[type=range][orient=vertical] {
 	writing-mode: bt-lr; /* IE */
 	-webkit-appearance: slider-vertical; /* WebKit */
 	width: 50px;
-	height: 130px;
+	height: 125px;
 	padding: 0 5px;
 	display: inline-block;
 }
@@ -92,7 +92,7 @@ input[type=range][orient=vertical] {
 	display: inline-block;
 	text-align: center;
 	width: 100px;
-	margin-top: 5px;
+	margin-top: 7px;
 	font-size: 90%;
 	line-height: 1.4em;
 }
