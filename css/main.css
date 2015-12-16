@@ -83,7 +83,7 @@ input[type=range][orient=vertical] {
 	writing-mode: bt-lr; /* IE */
 	-webkit-appearance: slider-vertical; /* WebKit */
 	width: 50px;
-	height: 150px;
+	height: 130px;
 	padding: 0 5px;
 	display: inline-block;
 }
@@ -92,9 +92,15 @@ input[type=range][orient=vertical] {
 	display: inline-block;
 	text-align: center;
 	width: 100px;
-	margin-top: 10px;
+	margin-top: 5px;
 	font-size: 90%;
 	line-height: 1.4em;
+}
+
+.slider-box input[type=number] {
+	width: 60px;
+	text-align: center;
+	margin-bottom: 5px;
 }
 
 .choice-box {

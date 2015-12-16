@@ -15,7 +15,6 @@ to be used with the
 	- Node deletion (e.g. via a delete button in parameter box)
 	- Keyboard trigger
 	- Consider supporting fan-out by connecting and disconnecting to/from multiple modules
-	- Display editable parameter values numerically under slider
 	- Dislay osc/fft using AnalyserNode
 	- Load/save instruments
 	- When adding a node from the palette, place it on an empty spot and select it
@@ -33,12 +32,15 @@ to be used with the
 	- Branding
 	- Naming
 	- Logo
+
 - Code
 	- Refactor main.ts
 	- Replace SynthNode class extension with composition (how?)
+
 - Support
 	- Support FireFox (does not have AudioContext.suspend/resume)
 	- Test in Safari
+
 - Share
 	- Document
 	- Present in meetup

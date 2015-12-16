@@ -13,17 +13,6 @@ export function renderParams(n: any, ndef: NodeDef, panel: JQuery) {
 			renderOtherParam(n.anode, ndef, param, panel);
 }
 
-function renderParamControl(n: any, panel: JQuery) {
-	if (!n.controlParams) return;
-	const combo = renderCombo(panel, n.controlParams, n.controlParam, 'Controlling');
-	combo.on('input', _ => {
-		if (n.controlParam)
-			n.anode.disconnect(n.controlTarget[n.controlParam]);
-		n.controlParam = combo.val();
-		n.anode.connect(n.controlTarget[n.controlParam]);
-	});
-}
-
 function renderAudioParam(anode: AudioNode, ndef: NodeDef, param: string, panel: JQuery) {
 	const pdef: NodeParamDef = ndef.params[param];
 	const aparam: AudioParam = anode[param];
@@ -33,14 +22,36 @@ function renderAudioParam(anode: AudioNode, ndef: NodeDef, param: string, panel:
 		.attr('max', 1)
 		.attr('step', 0.001)
 		.attr('value', param2slider(aparam.value, pdef))
-		.on('input', _ => {
-			const value = slider2param(parseFloat(slider.val()), pdef);
-			//TODO linear/log ramp at frame rate
-			aparam.setValueAtTime(value, 0);
-		});
+	const numInput = $('<input type="number">')
+		.attr('min', pdef.min)
+		.attr('max', pdef.max)
+		.attr('value', aparam.value);
+	sliderBox.append(numInput);
 	sliderBox.append(slider);
-	slider.after('<br/>' + ucfirst(param));
+	sliderBox.append($('<span><br/>' + ucfirst(param) + '</span>'));
 	panel.append(sliderBox);
+	slider.on('input', _ => {
+		const value = slider2param(parseFloat(slider.val()), pdef);
+		numInput.val(truncateFloat(value, 5));
+		aparam.setValueAtTime(value, 0);	//TODO linear/log ramp at frame rate
+	});
+	numInput.on('input', _ => {
+		const value = numInput.val();
+		if (value.length == 0 || isNaN(value)) return;
+		slider.val(param2slider(value, pdef));
+		aparam.setValueAtTime(value, 0);	//TODO linear/log ramp at frame rate
+	});
+}
+
+function renderParamControl(n: any, panel: JQuery) {
+	if (!n.controlParams) return;
+	const combo = renderCombo(panel, n.controlParams, n.controlParam, 'Controlling');
+	combo.on('input', _ => {
+		if (n.controlParam)
+			n.anode.disconnect(n.controlTarget[n.controlParam]);
+		n.controlParam = combo.val();
+		n.anode.connect(n.controlTarget[n.controlParam]);
+	});
 }
 
 function renderOtherParam(anode: AudioNode, ndef: NodeDef, param: string, panel: JQuery) {
@@ -96,4 +107,11 @@ function slider2param(sliderValue: number, pdef: NodeParamDef): number {
 
 function ucfirst(str: string) {
 	return str[0].toUpperCase() + str.substring(1);
+}
+
+function truncateFloat(f: number, len: number): string {
+	let s: string = '' + f;
+	s = s.substr(0, len);
+	if (s[s.length - 1] == '.') return s.substr(0, len - 1);
+	else return s;
 }

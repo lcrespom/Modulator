@@ -563,6 +563,36 @@
 	    }
 	}
 	exports.renderParams = renderParams;
+	function renderAudioParam(anode, ndef, param, panel) {
+	    var pdef = ndef.params[param];
+	    var aparam = anode[param];
+	    var sliderBox = $('<div class="slider-box">');
+	    var slider = $('<input type="range" orient="vertical">')
+	        .attr('min', 0)
+	        .attr('max', 1)
+	        .attr('step', 0.001)
+	        .attr('value', param2slider(aparam.value, pdef));
+	    var numInput = $('<input type="number">')
+	        .attr('min', pdef.min)
+	        .attr('max', pdef.max)
+	        .attr('value', aparam.value);
+	    sliderBox.append(numInput);
+	    sliderBox.append(slider);
+	    sliderBox.append($('<span><br/>' + ucfirst(param) + '</span>'));
+	    panel.append(sliderBox);
+	    slider.on('input', function (_) {
+	        var value = slider2param(parseFloat(slider.val()), pdef);
+	        numInput.val(truncateFloat(value, 5));
+	        aparam.setValueAtTime(value, 0); //TODO linear/log ramp at frame rate
+	    });
+	    numInput.on('input', function (_) {
+	        var value = numInput.val();
+	        if (value.length == 0 || isNaN(value))
+	            return;
+	        slider.val(param2slider(value, pdef));
+	        aparam.setValueAtTime(value, 0); //TODO linear/log ramp at frame rate
+	    });
+	}
 	function renderParamControl(n, panel) {
 	    if (!n.controlParams)
 	        return;
@@ -573,24 +603,6 @@
 	        n.controlParam = combo.val();
 	        n.anode.connect(n.controlTarget[n.controlParam]);
 	    });
-	}
-	function renderAudioParam(anode, ndef, param, panel) {
-	    var pdef = ndef.params[param];
-	    var aparam = anode[param];
-	    var sliderBox = $('<div class="slider-box">');
-	    var slider = $('<input type="range" orient="vertical">')
-	        .attr('min', 0)
-	        .attr('max', 1)
-	        .attr('step', 0.001)
-	        .attr('value', param2slider(aparam.value, pdef))
-	        .on('input', function (_) {
-	        var value = slider2param(parseFloat(slider.val()), pdef);
-	        //TODO linear/log ramp at frame rate
-	        aparam.setValueAtTime(value, 0);
-	    });
-	    sliderBox.append(slider);
-	    slider.after('<br/>' + ucfirst(param));
-	    panel.append(sliderBox);
 	}
 	function renderOtherParam(anode, ndef, param, panel) {
 	    var combo = renderCombo(panel, ndef.params[param].choices, anode[param], ucfirst(param));
@@ -640,6 +652,14 @@
 	//-------------------- Misc utilities --------------------
 	function ucfirst(str) {
 	    return str[0].toUpperCase() + str.substring(1);
+	}
+	function truncateFloat(f, len) {
+	    var s = '' + f;
+	    s = s.substr(0, len);
+	    if (s[s.length - 1] == '.')
+	        return s.substr(0, len - 1);
+	    else
+	        return s;
 	}
 
 
