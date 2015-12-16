@@ -60,7 +60,7 @@
 	    SynthNode.prototype.addInput = function (n) {
 	        var _this = this;
 	        _super.prototype.addInput.call(this, n);
-	        if (n.nodeDef.control) {
+	        if (n.nodeDef.control && !this.nodeDef.control) {
 	            n.controlParams = Object.keys(this.nodeDef.params)
 	                .filter(function (pname) { return _this.anode[pname] instanceof AudioParam; });
 	            n.controlParam = n.controlParams[0];
@@ -72,7 +72,7 @@
 	    };
 	    SynthNode.prototype.removeInput = function (np) {
 	        var removed = _super.prototype.removeInput.call(this, np);
-	        if (removed.nodeDef.control)
+	        if (removed.nodeDef.control && !this.nodeDef.control)
 	            removed.anode.disconnect(this.anode[removed.controlParam]);
 	        else
 	            removed.anode.disconnect(this.anode);
@@ -485,7 +485,7 @@
 	            gain: {
 	                initial: 1,
 	                min: 0,
-	                max: 1,
+	                max: 10,
 	                linear: true
 	            }
 	        }
@@ -525,6 +525,19 @@
 	            }
 	        }
 	    },
+	    GainCtrl: {
+	        constructor: 'createGain',
+	        control: true,
+	        params: {
+	            gain: {
+	                initial: 10,
+	                min: 0,
+	                max: 1000,
+	                linear: true
+	            }
+	        }
+	    },
+	    // Output
 	    Speaker: {
 	        constructor: null,
 	        params: null

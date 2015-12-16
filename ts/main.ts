@@ -14,7 +14,7 @@ class SynthNode extends Node {
 
 	addInput(n: SynthNode) {
 		super.addInput(n);
-		if (n.nodeDef.control) {
+		if (n.nodeDef.control && !this.nodeDef.control) {
 			n.controlParams = Object.keys(this.nodeDef.params)
 				.filter(pname => this.anode[pname] instanceof AudioParam); 
 			n.controlParam = n.controlParams[0];
@@ -27,7 +27,7 @@ class SynthNode extends Node {
 
 	removeInput(np: SynthNode | number): Node {
 		const removed: SynthNode = <SynthNode>super.removeInput(np);
-		if (removed.nodeDef.control)
+		if (removed.nodeDef.control && !this.nodeDef.control)
 			removed.anode.disconnect(this.anode[removed.controlParam]);
 		else //TODO test fan-out
 			removed.anode.disconnect(this.anode);

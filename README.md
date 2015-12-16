@@ -6,8 +6,7 @@ to be used with the
 ##ToDo
 - Functionality
 	- Control nodes
-		- Add gain control node
-		- ADSR
+		- ADSR (requires keyboard trigger feature)
 	- Add all possible AudioNodes available into the palette
 		- Especially support sampled audio
 		- Reverb, etc.
@@ -19,11 +18,11 @@ to be used with the
 	- Display editable parameter values numerically under slider
 	- Dislay osc/fft using AnalyserNode
 	- Load/save instruments
-	- When adding a node from the palette, place it on an empty
-		spot and select it
+	- When adding a node from the palette, place it on an empty spot and select it
 	- Long term:
 		- Tracker
 		- Custom modules with WebWorker
+		- Composite modules, e.g. LFO+Gain
 		- Record & save audio
 
 - UI

@@ -85,7 +85,7 @@ var palette: NodePalette = {
 			gain: {
 				initial: 1,
 				min: 0,
-				max: 1,
+				max: 10,
 				linear: true
 			}
 		}
@@ -124,7 +124,20 @@ var palette: NodePalette = {
 				choices: ['sine', 'square', 'sawtooth', 'triangle']
 			}
 		}
-	},	// Output
+	},
+	GainCtrl: {
+		constructor: 'createGain',
+		control: true,
+		params: {
+			gain: {
+				initial: 10,
+				min: 0,
+				max: 1000,
+				linear: true
+			}
+		}
+	},
+	// Output
 	Speaker: {
 		constructor: null,
 		params: null
