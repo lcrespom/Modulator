@@ -58,7 +58,7 @@ function main() {
 
 function registerNodeSelection() {
 	gr.nodeSelected = function(n: SynthNode) {
-		renderParams(n, synth.palette[n.type], $('.params-box'));
+		renderParams(n, synth.palette[n.type], $('#node-params'));
 	}
 }
 

@@ -27,7 +27,6 @@ body {
 	margin: 0;
 	overflow: hidden;
 	position: relative;
-	display: inline-block;
 }
 
 .node {
@@ -61,7 +60,6 @@ body {
 
 .palette {
 	margin-left: 5px;
-	display: inline-block;
 	height: 507px;
 	vertical-align: top;
 	overflow-y: auto;
@@ -74,11 +72,12 @@ body {
 }
 
 .params-box {
-	height: 190px;
-	width: 802px;
+	height: 210px;
+	width: 800px;
 	margin-top: 5px;
 	margin-bottom: 10px;
 	overflow-x: auto;
+	display: block;
 }
 
 input[type=range][orient=vertical] {
@@ -94,7 +93,7 @@ input[type=range][orient=vertical] {
 	display: inline-block;
 	text-align: center;
 	width: 100px;
-	margin-top: 15px;
+	margin-top: 10px;
 	font-size: 90%;
 	line-height: 1.4em;
 }
@@ -103,7 +102,7 @@ input[type=range][orient=vertical] {
 	display: inline-block;
 	text-align: center;
 	width: 100px;
-	margin-top: 15px;
+	margin-top: 10px;
 	font-size: 90%;
 	line-height: 1.4em;
 }

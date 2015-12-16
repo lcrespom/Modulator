@@ -97,7 +97,7 @@
 	}
 	function registerNodeSelection() {
 	    gr.nodeSelected = function (n) {
-	        paramsUI_1.renderParams(n, synth.palette[n.type], $('.params-box'));
+	        paramsUI_1.renderParams(n, synth.palette[n.type], $('#node-params'));
 	    };
 	}
 	function addOutputNode() {
