@@ -6,7 +6,6 @@ to be used with the
 ##ToDo
 - Functionality
 	- Control nodes
-		- Add control parameter selector in params box
 		- Add gain control node
 		- ADSR
 	- Add all possible AudioNodes available into the palette

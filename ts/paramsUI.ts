@@ -14,7 +14,14 @@ export function renderParams(n: any, ndef: NodeDef, panel: JQuery) {
 }
 
 function renderParamControl(n: any, panel: JQuery) {
-	//TODO implement	
+	if (!n.controlParams) return;
+	const combo = renderCombo(panel, n.controlParams, n.controlParam, 'Controlling');
+	combo.on('input', _ => {
+		if (n.controlParam)
+			n.anode.disconnect(n.controlTarget[n.controlParam]);
+		n.controlParam = combo.val();
+		n.anode.connect(n.controlTarget[n.controlParam]);
+	});
 }
 
 function renderAudioParam(anode: AudioNode, ndef: NodeDef, param: string, panel: JQuery) {
@@ -37,20 +44,24 @@ function renderAudioParam(anode: AudioNode, ndef: NodeDef, param: string, panel:
 }
 
 function renderOtherParam(anode: AudioNode, ndef: NodeDef, param: string, panel: JQuery) {
-	const pdef: NodeParamDef = ndef.params[param];
-	const choiceBox = $('<div class="choice-box">');
-	const combo = $('<select>').attr('size', pdef.choices.length);
-	for (const choice of pdef.choices) {
-		const option = $('<option>').text(choice);
-		if (choice == anode[param]) option.attr('selected', 'selected');
-		combo.append(option);
-	}
-	choiceBox.append(combo);
-	combo.after('<br/><br/>' + ucfirst(param));
-	panel.append(choiceBox);
+	const combo = renderCombo(panel, ndef.params[param].choices, anode[param], ucfirst(param));
 	combo.on('input', _ => {
 		anode[param] = combo.val();
 	});
+}
+
+function renderCombo(panel: JQuery, choices: string[], selected: string, label: string): JQuery {
+	const choiceBox = $('<div class="choice-box">');
+	const combo = $('<select>').attr('size', choices.length);
+	for (const choice of choices) {
+		const option = $('<option>').text(choice);
+		if (choice == selected) option.attr('selected', 'selected');
+		combo.append(option);
+	}
+	choiceBox.append(combo);
+	combo.after('<br/><br/>' + label);
+	panel.append(choiceBox);
+	return combo;
 }
 
 const LOG_BASE = 2;

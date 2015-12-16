@@ -58,10 +58,13 @@
 	        _super.apply(this, arguments);
 	    }
 	    SynthNode.prototype.addInput = function (n) {
+	        var _this = this;
 	        _super.prototype.addInput.call(this, n);
 	        if (n.nodeDef.control) {
-	            n.controlParams = Object.keys(this.nodeDef.params);
+	            n.controlParams = Object.keys(this.nodeDef.params)
+	                .filter(function (pname) { return _this.anode[pname] instanceof AudioParam; });
 	            n.controlParam = n.controlParams[0];
+	            n.controlTarget = this.anode;
 	            n.anode.connect(this.anode[n.controlParam]);
 	        }
 	        else
@@ -548,7 +551,15 @@
 	}
 	exports.renderParams = renderParams;
 	function renderParamControl(n, panel) {
-	    //TODO implement	
+	    if (!n.controlParams)
+	        return;
+	    var combo = renderCombo(panel, n.controlParams, n.controlParam, 'Controlling');
+	    combo.on('input', function (_) {
+	        if (n.controlParam)
+	            n.anode.disconnect(n.controlTarget[n.controlParam]);
+	        n.controlParam = combo.val();
+	        n.anode.connect(n.controlTarget[n.controlParam]);
+	    });
 	}
 	function renderAudioParam(anode, ndef, param, panel) {
 	    var pdef = ndef.params[param];
@@ -569,22 +580,25 @@
 	    panel.append(sliderBox);
 	}
 	function renderOtherParam(anode, ndef, param, panel) {
-	    var pdef = ndef.params[param];
+	    var combo = renderCombo(panel, ndef.params[param].choices, anode[param], ucfirst(param));
+	    combo.on('input', function (_) {
+	        anode[param] = combo.val();
+	    });
+	}
+	function renderCombo(panel, choices, selected, label) {
 	    var choiceBox = $('<div class="choice-box">');
-	    var combo = $('<select>').attr('size', pdef.choices.length);
-	    for (var _i = 0, _a = pdef.choices; _i < _a.length; _i++) {
-	        var choice = _a[_i];
+	    var combo = $('<select>').attr('size', choices.length);
+	    for (var _i = 0; _i < choices.length; _i++) {
+	        var choice = choices[_i];
 	        var option = $('<option>').text(choice);
-	        if (choice == anode[param])
+	        if (choice == selected)
 	            option.attr('selected', 'selected');
 	        combo.append(option);
 	    }
 	    choiceBox.append(combo);
-	    combo.after('<br/><br/>' + ucfirst(param));
+	    combo.after('<br/><br/>' + label);
 	    panel.append(choiceBox);
-	    combo.on('input', function (_) {
-	        anode[param] = combo.val();
-	    });
+	    return combo;
 	}
 	var LOG_BASE = 2;
 	function logarithm(base, x) {

@@ -5,17 +5,22 @@ import { renderParams } from './paramsUI';
 
 class SynthNode extends Node {
 	anode: ModernAudioNode;
-	type: string;
+	type: string;	//TODO with nodeDef, this is no longer required
+	nodeDef: NodeDef;
+	// Used by control nodes only
 	controlParam: string;
 	controlParams: string[];
-	nodeDef: NodeDef;
+	controlTarget: ModernAudioNode;
 
 	addInput(n: SynthNode) {
 		super.addInput(n);
 		if (n.nodeDef.control) {
-			n.controlParams = Object.keys(this.nodeDef.params); 
+			n.controlParams = Object.keys(this.nodeDef.params)
+				.filter(pname => this.anode[pname] instanceof AudioParam); 
 			n.controlParam = n.controlParams[0];
+			n.controlTarget = this.anode;
 			n.anode.connect(this.anode[n.controlParam]);
+			//TODO update params box in case selected node is n
 		}
 		else n.anode.connect(this.anode);
 	}
