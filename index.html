@@ -11,27 +11,31 @@
 </head>
 <body>
 
-	<!--------------- Graph canvas --------------->
-	<div class="graph-box">
-		<h5 class="bg-primary box-header">Audio Node Graph</h5>
-		<div class="canvas-box">
-			<canvas id="graph-canvas" class="graph" width="700" height="480"></canvas>
+	<div>
+		<!--------------- Graph canvas --------------->
+		<div class="graph-box">
+			<h5 class="bg-primary box-header">Audio Node Graph</h5>
+			<div class="canvas-box">
+				<canvas id="graph-canvas" class="graph" width="700" height="480"></canvas>
+			</div>
+		</div><!--
+	
+		--------------- Node palette ---------------
+	--><div class="palette graph-box">
+			<h5 class="bg-primary box-header">Palette</h5>
+			<div class="node" data-type="Oscillator">Osc</div>
+			<div class="node" data-type="Gain">Gain</div>
+			<div class="node" data-type="Filter">Filter</div>
+			<div class="node node-ctrl" data-type="LFO">LFO</div>
 		</div>
-	</div><!--
-
-	--------------- Node palette ---------------
- --><div class="palette graph-box">
-		<h5 class="bg-primary box-header">Palette</h5>
-		<div class="node" data-type="Oscillator">Osc</div>
-		<div class="node" data-type="Gain">Gain</div>
-		<div class="node" data-type="Filter">Filter</div>
-		<div class="node node-ctrl" data-type="LFO">LFO</div>
 	</div>
 
-	<!--------------- Current node parameters --------------->
-	<div class="params-box graph-box">
-		<h5 class="bg-primary box-header" id="node-params-hdr">Node Parameters</h5>
-		<div id="node-params"></div>
+	<div>
+		<!--------------- Current node parameters --------------->
+		<div class="params-box graph-box">
+			<h5 class="bg-primary box-header" id="node-params-hdr">Node Parameters</h5>
+			<div id="node-params"></div>
+		</div>
 	</div>
 
 	<!--------------- Misc controls --------------->

@@ -59,7 +59,7 @@ body {
 }
 
 .palette {
-	margin-left: 5px;
+	margin-left: 10px;
 	height: 507px;
 	vertical-align: top;
 	overflow-y: auto;
@@ -73,11 +73,10 @@ body {
 
 .params-box {
 	height: 210px;
-	width: 800px;
+	width: 805px;
 	margin-top: 5px;
 	margin-bottom: 10px;
 	overflow-x: auto;
-	display: block;
 }
 
 input[type=range][orient=vertical] {
