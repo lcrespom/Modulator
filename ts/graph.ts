@@ -21,7 +21,6 @@ export class Graph {
 			.addClass('node')
 			.text(n.name)
 			.css({ left: n.x, top: n.y, cursor: 'default' });
-		//TODO check if $.addClass admits multiple classes
 		if (classes) n.element.addClass(classes);
 		this.nodeCanvas.append(n.element);
 		this.nodes.push(n);

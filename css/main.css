@@ -75,10 +75,10 @@ body {
 
 .params-box {
 	height: 190px;
-	width: 805px;
+	width: 802px;
 	margin-top: 5px;
 	margin-bottom: 10px;
-	overflow: auto;
+	overflow-x: auto;
 }
 
 input[type=range][orient=vertical] {

@@ -11,13 +11,12 @@ to be used with the
 		- ADSR
 	- Add all possible AudioNodes available into the palette
 		- Especially support sampled audio
+		- Reverb, etc.
 	- Split slider logscale in two with middle value in the middle of the slider,
 		then fine-tune all module definitions (e.g. gain)
 	- Node deletion (e.g. via a delete button in parameter box)
 	- Keyboard trigger
 	- Consider supporting fan-out by connecting and disconnecting to/from multiple modules
-	- Test multiple outputs from an audio node
-	- More audio nodes (reverb, etc.)
 	- Display editable parameter values numerically under slider
 	- Dislay osc/fft using AnalyserNode
 	- Load/save instruments

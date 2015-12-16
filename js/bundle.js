@@ -60,8 +60,8 @@
 	    SynthNode.prototype.addInput = function (n) {
 	        _super.prototype.addInput.call(this, n);
 	        if (n.nodeDef.control) {
-	            if (!n.controlParam)
-	                n.controlParam = Object.keys(this.nodeDef.params)[0];
+	            n.controlParams = Object.keys(this.nodeDef.params);
+	            n.controlParam = n.controlParams[0];
 	            n.anode.connect(this.anode[n.controlParam]);
 	        }
 	        else
@@ -69,14 +69,10 @@
 	    };
 	    SynthNode.prototype.removeInput = function (np) {
 	        var removed = _super.prototype.removeInput.call(this, np);
-	        if (removed.nodeDef.control) {
+	        if (removed.nodeDef.control)
 	            removed.anode.disconnect(this.anode[removed.controlParam]);
-	            removed.controlParam = null;
-	        }
-	        else {
-	            //TODO test fan-out
+	        else
 	            removed.anode.disconnect(this.anode);
-	        }
 	        return removed;
 	    };
 	    SynthNode.prototype.canBeSource = function () {
@@ -101,7 +97,7 @@
 	}
 	function registerNodeSelection() {
 	    gr.nodeSelected = function (n) {
-	        paramsUI_1.renderParams(n.anode, synth.palette[n.type], $('.params-box'));
+	        paramsUI_1.renderParams(n, synth.palette[n.type], $('.params-box'));
 	    };
 	}
 	function addOutputNode() {
@@ -190,7 +186,6 @@
 	            .addClass('node')
 	            .text(n.name)
 	            .css({ left: n.x, top: n.y, cursor: 'default' });
-	        //TODO check if $.addClass admits multiple classes
 	        if (classes)
 	            n.element.addClass(classes);
 	        this.nodeCanvas.append(n.element);
@@ -538,17 +533,23 @@
 /* 3 */
 /***/ function(module, exports) {
 
-	function renderParams(anode, ndef, panel) {
+	//TODO refactor main so "n" can be typed to SynthNode
+	function renderParams(n, ndef, panel) {
 	    panel.empty();
+	    if (ndef.control)
+	        renderParamControl(n, panel);
 	    for (var _i = 0, _a = Object.keys(ndef.params || {}); _i < _a.length; _i++) {
 	        var param = _a[_i];
-	        if (anode[param] instanceof AudioParam)
-	            renderAudioParam(anode, ndef, param, panel);
+	        if (n.anode[param] instanceof AudioParam)
+	            renderAudioParam(n.anode, ndef, param, panel);
 	        else
-	            renderOtherParam(anode, ndef, param, panel);
+	            renderOtherParam(n.anode, ndef, param, panel);
 	    }
 	}
 	exports.renderParams = renderParams;
+	function renderParamControl(n, panel) {
+	    //TODO implement	
+	}
 	function renderAudioParam(anode, ndef, param, panel) {
 	    var pdef = ndef.params[param];
 	    var aparam = anode[param];

@@ -7,13 +7,14 @@ class SynthNode extends Node {
 	anode: ModernAudioNode;
 	type: string;
 	controlParam: string;
+	controlParams: string[];
 	nodeDef: NodeDef;
 
 	addInput(n: SynthNode) {
 		super.addInput(n);
 		if (n.nodeDef.control) {
-			if (!n.controlParam)
-				n.controlParam = Object.keys(this.nodeDef.params)[0];
+			n.controlParams = Object.keys(this.nodeDef.params); 
+			n.controlParam = n.controlParams[0];
 			n.anode.connect(this.anode[n.controlParam]);
 		}
 		else n.anode.connect(this.anode);
@@ -21,14 +22,10 @@ class SynthNode extends Node {
 
 	removeInput(np: SynthNode | number): Node {
 		const removed: SynthNode = <SynthNode>super.removeInput(np);
-		if (removed.nodeDef.control) {
+		if (removed.nodeDef.control)
 			removed.anode.disconnect(this.anode[removed.controlParam]);
-			removed.controlParam = null;
-		}
-		else {
-			//TODO test fan-out
+		else //TODO test fan-out
 			removed.anode.disconnect(this.anode);
-		}
 		return removed;
 	}
 
@@ -61,7 +58,7 @@ function main() {
 
 function registerNodeSelection() {
 	gr.nodeSelected = function(n: SynthNode) {
-		renderParams(n.anode, synth.palette[n.type], $('.params-box'));
+		renderParams(n, synth.palette[n.type], $('.params-box'));
 	}
 }
 
