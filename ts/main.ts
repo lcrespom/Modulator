@@ -27,8 +27,10 @@ class SynthNode extends Node {
 
 	removeInput(np: SynthNode | number): Node {
 		const removed: SynthNode = <SynthNode>super.removeInput(np);
-		if (removed.nodeDef.control && !this.nodeDef.control)
+		if (removed.nodeDef.control && !this.nodeDef.control) {
+			removed.controlParams = null;
 			removed.anode.disconnect(this.anode[removed.controlParam]);
+		}
 		else //TODO test fan-out
 			removed.anode.disconnect(this.anode);
 		return removed;

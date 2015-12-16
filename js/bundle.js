@@ -72,8 +72,10 @@
 	    };
 	    SynthNode.prototype.removeInput = function (np) {
 	        var removed = _super.prototype.removeInput.call(this, np);
-	        if (removed.nodeDef.control && !this.nodeDef.control)
+	        if (removed.nodeDef.control && !this.nodeDef.control) {
+	            removed.controlParams = null;
 	            removed.anode.disconnect(this.anode[removed.controlParam]);
+	        }
 	        else
 	            removed.anode.disconnect(this.anode);
 	        return removed;
