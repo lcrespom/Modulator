@@ -49,3 +49,21 @@ to be used with the
 	- Present in meetup
 	- Invite contributors
 	- Contact web audio developers such as @chrislowis & @mohayonao
+
+##References
+- Chris Lowis (@chrislowis)
+	- His [blog](http://blog.chrislowis.co.uk/) and web audio weekly newsletter.
+	- His talk about [synth history and web audio](http://blog.chrislowis.co.uk/2015/06/26/a-brief-history-of-synthesis.html)
+	- His github [repo](https://github.com/chrislo)
+-  Chris Wilson (@cwilso) from Google
+	- His talk about [web audio](https://www.youtube.com/watch?v=wZrNI-86zYI&list=FLztHRYsgsJ4s2_qfg91iW1Q&index=1)
+	- His github [repo](https://github.com/cwilso)
+	- [Midi synth](https://webaudiodemos.appspot.com/midi-synth/index.html)
+	- Web audio [playground](http://webaudioplayground.appspot.com/)
+- Stuart memo (@stuartmemo)
+	- His web audio [talk](https://www.youtube.com/watch?v=PN8Eg1K9xjE)
+	- His fancy [website](http://stuartmemo.com/) with lots of small webaudio tools
+- Steve Kinney
+	- His [talk](https://www.youtube.com/watch?v=56spBAgOYfg) about web audio
+	- Great idea on emulating restartable oscillator by setting gain to 0 to stop and 1 to
+		play again
