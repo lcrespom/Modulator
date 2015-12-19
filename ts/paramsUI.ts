@@ -1,7 +1,7 @@
 import { Node } from './graph';
 import { NodeDef, NodeParamDef } from './synth';
 
-//TODO refactor main so "n" can be typed to SynthNode
+//TODO refactor main so "n" can be typed to NodeData and ndef parameter can be removed
 export function renderParams(n: any, ndef: NodeDef, panel: JQuery) {
 	panel.empty();
 	if (ndef.control)

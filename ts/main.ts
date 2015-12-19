@@ -1,55 +1,66 @@
-import { Graph, Node } from './graph';
+import { Graph, Node, GraphHandler } from './graph';
 import { Synth, NodeDef } from './synth';
 import { renderParams } from './paramsUI';
 
-
-class SynthNode extends Node {
+class NodeData {
 	anode: ModernAudioNode;
 	nodeDef: NodeDef;
 	// Used by control nodes only
 	controlParam: string;
 	controlParams: string[];
 	controlTarget: ModernAudioNode;
+}
 
-	addInput(n: SynthNode) {
-		super.addInput(n);
-		if (n.nodeDef.control && !this.nodeDef.control) {
-			n.controlParams = Object.keys(this.nodeDef.params)
-				.filter(pname => this.anode[pname] instanceof AudioParam); 
-			n.controlParam = n.controlParams[0];
-			n.controlTarget = this.anode;
-			n.anode.connect(this.anode[n.controlParam]);
-			//TODO update params box in case selected node is n
-		}
-		else n.anode.connect(this.anode);
+class SynthGraphHandler implements GraphHandler {
+
+	canBeSource(n: Node): boolean {
+		const data: NodeData = n.data;
+		return data.anode.numberOfOutputs > 0;
 	}
 
-	removeInput(np: SynthNode | number): Node {
-		const removed: SynthNode = <SynthNode>super.removeInput(np);
-		if (removed.nodeDef.control && !this.nodeDef.control) {
-			removed.controlParams = null;
-			removed.anode.disconnect(this.anode[removed.controlParam]);
+	canConnect(src: Node, dst: Node): boolean {
+		const srcData: NodeData = src.data;
+		const dstData: NodeData = dst.data;
+		//TODO even if src node is control, should not connect to Speaker output
+		if (srcData.nodeDef.control) return true;
+		return dstData.anode.numberOfInputs > 0;
+	}
+
+	connected(src: Node, dst: Node) {
+		const srcData: NodeData = src.data;
+		const dstData: NodeData = dst.data;
+		if (srcData.nodeDef.control && !dstData.nodeDef.control) {
+			srcData.controlParams = Object.keys(dstData.nodeDef.params)
+				.filter(pname => dstData.anode[pname] instanceof AudioParam);
+			srcData.controlParam = srcData.controlParams[0];
+			srcData.controlTarget = dstData.anode;
+			srcData.anode.connect(dstData.anode[srcData.controlParam]);
+			//TODO update params box in case selected node is src
+		}
+		else srcData.anode.connect(dstData.anode);
+	}
+
+	disconnected(src: Node, dst: Node) {
+		const srcData: NodeData = src.data;
+		const dstData: NodeData = dst.data;
+		if (srcData.nodeDef.control && !dstData.nodeDef.control) {
+			srcData.controlParams = null;
+			srcData.anode.disconnect(dstData.anode[srcData.controlParam]);
 		}
 		else //TODO test fan-out
-			removed.anode.disconnect(this.anode);
-		return removed;
+			srcData.anode.disconnect(dstData.anode);
+		return srcData;
 	}
 
-	canBeSource(): boolean {
-		return this.anode.numberOfOutputs > 0;
-	}
-
-	canConnectInput(n: SynthNode): boolean {
-		if (n.nodeDef.control) return true;
-		return this.anode.numberOfInputs > 0;
-	}
 }
+
 
 interface ModernAudioNode extends AudioNode {
 	disconnect(output?: number | AudioNode | AudioParam): void
 }
 
 const gr = new Graph(<HTMLCanvasElement>$('#graph-canvas')[0]);
+gr.handler = new SynthGraphHandler();
 const synth = new Synth();
 
 main();
@@ -63,15 +74,19 @@ function main() {
 }
 
 function registerNodeSelection() {
-	gr.nodeSelected = function(n: SynthNode) {
-		renderParams(n, n.nodeDef, $('#node-params'));
+	gr.nodeSelected = function(n: Node) {
+		const data: NodeData = n.data;
+		renderParams(data, data.nodeDef, $('#node-params'));
 	}
 }
 
 function addOutputNode() {
-	const out = new SynthNode(500, 180, 'Out');
-	out.anode = synth.ac.destination;
-	out.nodeDef = synth.palette['Speaker'];
+	//TODO avoid using hardcoded position
+	const out = new Node(500, 180, 'Out');
+	const data = new NodeData();
+	out.data = data;
+	data.anode = synth.ac.destination;
+	data.nodeDef = synth.palette['Speaker'];
 	gr.addNode(out);
 }
 
@@ -102,17 +117,19 @@ function registerPlayHandler() {
 function registerPaletteHandler() {
 	$('.palette > .node').click(function(evt) {
 		const elem = $(this);
-		const n = new SynthNode(260, 180, elem.text());
+		const n = new Node(260, 180, elem.text());
+		const data = new NodeData();
+		n.data = data;
 		const type = elem.attr('data-type');
-		n.anode = synth.createAudioNode(type);
-		n.nodeDef = synth.palette[type];
-		gr.addNode(n, n.nodeDef.control ? 'node-ctrl' : undefined);
-		if (!n.anode) {
+		data.anode = synth.createAudioNode(type);
+		data.nodeDef = synth.palette[type];
+		gr.addNode(n, data.nodeDef.control ? 'node-ctrl' : undefined);
+		if (!data.anode) {
 			console.warn(`No AudioNode found for '${type}'`);
 			n.element.css('background-color', '#BBB');
 		}
 		else {
-			if (n.anode['start']) n.anode['start']();
+			if (data.anode['start']) data.anode['start']();
 		}
 	});
 }
@@ -121,13 +138,14 @@ function setArrowColors() {
 	const arrowColor = getCssFromClass('arrow', 'color');
 	const ctrlArrowColor = getCssFromClass('arrow-ctrl', 'color');
 	const originalDrawArrow = gr.graphDraw.drawArrow;
-	gr.graphDraw.drawArrow = function(srcNode: SynthNode, dstNode: SynthNode) {
-		this.arrowColor = srcNode.nodeDef.control ? ctrlArrowColor : arrowColor;
+	gr.graphDraw.drawArrow = function(srcNode: Node, dstNode: Node) {
+		const srcData: NodeData = srcNode.data;
+		this.arrowColor = srcData.nodeDef.control ? ctrlArrowColor : arrowColor;
 		originalDrawArrow.bind(this)(srcNode, dstNode);
 	}
 }
 
-function getCssFromClass(className, propName) {	
+function getCssFromClass(className, propName) {
 	const tmp = $('<div>').addClass(className);
 	$('body').append(tmp);
 	const propValue = tmp.css(propName);

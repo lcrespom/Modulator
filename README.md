@@ -4,6 +4,9 @@ to be used with the
 [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API).
 
 ##ToDo
+- Bugs
+	- Arrows are drawn in wrong position when window is vertically scrolled
+
 - Functionality
 	- Keyboard trigger
 	- Control nodes
@@ -26,7 +29,6 @@ to be used with the
 		- Record & save audio
 
 - UI
-	- Update parameter box header with currently selected node
 	- Help button explaining how to connect etc.
 	- Remove hardcoded dimensions from canvas
 	- Right-click & drag to connect nodes
@@ -34,10 +36,10 @@ to be used with the
 	- Branding
 	- Naming
 	- Logo
+	- Update parameter box header with currently selected node
 
 - Code
 	- Refactor main.ts
-	- Replace SynthNode class extension with composition (how?)
 
 - Support
 	- Support FireFox (does not have AudioContext.suspend/resume)

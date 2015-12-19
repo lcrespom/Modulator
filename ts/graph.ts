@@ -11,6 +11,7 @@ export class Graph {
 		const gc = canvas.getContext('2d');
 		this.graphDraw = new GraphDraw(gc, canvas, this.nodes);
 		this.graphInteract = new GraphInteraction(this, gc);
+		this.handler = new DefaultGraphHandler();
 	}
 
 	set arrowColor(color: string) {
@@ -46,6 +47,7 @@ export class Node {
 	element: JQuery;
 	w: number;
 	h: number;
+	data: any;
 
 	constructor(x: number, y: number, name: string) {
 		this.x = x;
@@ -57,27 +59,10 @@ export class Node {
 		this.inputs.push(n);
 	}
 
-	removeInput(np: Node | number): Node {
-		let pos: number;
-		let result: Node;
-		if (np instanceof Node) {
-			pos = this.inputs.indexOf(<Node>np);
-			result = np;
-		}
-		else {
-			pos = <number>np;
-			result = this.inputs[pos];
-		}
-		if (np >= 0)
-			this.inputs.splice(<number>np, 1);
-		return result;
-	}
-
-	canBeSource(): boolean {
-		return true;
-	}
-
-	canConnectInput(n: Node): boolean {
+	removeInput(n: Node): boolean {
+		const pos: number = this.inputs.indexOf(n);
+		if (pos < 0) return false;
+		this.inputs.splice(pos, 1);
 		return true;
 	}
 
@@ -85,9 +70,9 @@ export class Node {
 
 export interface GraphHandler {
 	canBeSource(n: Node): boolean;
-	canConnectInput(n: Node): boolean;
-	connect(src: Node, dst: Node);
-	disconnect(src: Node, dst: Node);
+	canConnect(src: Node, dst: Node): boolean;
+	connected(src: Node, dst: Node);
+	disconnected(src: Node, dst: Node);
 }
 
 
@@ -95,10 +80,11 @@ export interface GraphHandler {
 
 class DefaultGraphHandler implements GraphHandler {
 	canBeSource(n: Node): boolean { return true; }
-	canConnectInput(n: Node): boolean { return true; }
-	connect(src: Node, dst: Node) {}
-	disconnect(src: Node, dst: Node) {}
+	canConnect(src: Node, dst: Node): boolean { return true; }
+	connected(src: Node, dst: Node) {}
+	disconnected(src: Node, dst: Node) {}
 }
+
 
 class GraphInteraction {
 
@@ -150,20 +136,16 @@ class GraphInteraction {
 			if (evt.keyCode != 16  || this.connecting) return;
 			srcn = this.getNodeFromDOM(this.getElementUnderMouse());
 			if (!srcn) return;
-			if (!srcn.canBeSource()) {
+			if (!this.graph.handler.canBeSource(srcn)) {
 				srcn.element.css('cursor', 'not-allowed');
 				return;
 			}
-			this.graph.nodeCanvas.css('cursor', 'crosshair');
-			this.graph.nodeCanvas.find('.node').css('cursor', 'crosshair');
 			this.connecting = true;
 			this.registerRubberBanding(srcn);
 		})
 		.keyup(evt => {
 			if (evt.keyCode != 16) return;
 			this.connecting = false;
-			this.graph.nodeCanvas.css('cursor', '');
-			this.graph.nodeCanvas.find('.node').css('cursor', 'default');
 			this.deregisterRubberBanding();
 			const dstn = this.getNodeFromDOM(this.getElementUnderMouse());
 			if (!dstn) return;
@@ -174,10 +156,14 @@ class GraphInteraction {
 
 	connectOrDisconnect(srcn: Node, dstn: Node) {
 		if (srcn == dstn) return;	// duh!
-		const pos = dstn.inputs.indexOf(srcn);
-		if (pos >= 0) dstn.removeInput(pos);
-		else if (srcn.canBeSource() && dstn.canConnectInput(srcn))
+		if (dstn.removeInput(srcn)) {
+			this.graph.handler.disconnected(srcn, dstn);
+		}
+		else if (this.graph.handler.canBeSource(srcn) &&
+			this.graph.handler.canConnect(srcn, dstn)) {
 			dstn.addInput(srcn);
+			this.graph.handler.connected(srcn, dstn);
+		}
 	}
 
 	getElementUnderMouse(): JQuery {
@@ -202,12 +188,17 @@ class GraphInteraction {
 			this.graph.graphDraw.drawArrow(srcn, dstn);
 			this.gc.restore();
 		});
+		// Setup cursors
+		this.graph.nodeCanvas.css('cursor', 'crosshair');
+		this.graph.nodeCanvas.find('.node').css('cursor', 'crosshair');
 		for (const n of this.graph.nodes)
-			if (n != srcn && !n.canConnectInput(srcn))
+			if (n != srcn && !this.graph.handler.canConnect(srcn, n))
 				n.element.css('cursor', 'not-allowed');
 	}
 
 	deregisterRubberBanding() {
+		this.graph.nodeCanvas.css('cursor', '');
+		this.graph.nodeCanvas.find('.node').css('cursor', 'default');
 		this.graph.nodeCanvas.off('mousemove');
 		this.graph.graphDraw.draw();
 	}

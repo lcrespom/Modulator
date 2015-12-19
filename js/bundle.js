@@ -44,53 +44,57 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var __extends = (this && this.__extends) || function (d, b) {
-	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-	    function __() { this.constructor = d; }
-	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	};
 	var graph_1 = __webpack_require__(1);
 	var synth_1 = __webpack_require__(2);
 	var paramsUI_1 = __webpack_require__(3);
-	var SynthNode = (function (_super) {
-	    __extends(SynthNode, _super);
-	    function SynthNode() {
-	        _super.apply(this, arguments);
+	var NodeData = (function () {
+	    function NodeData() {
 	    }
-	    SynthNode.prototype.addInput = function (n) {
-	        var _this = this;
-	        _super.prototype.addInput.call(this, n);
-	        if (n.nodeDef.control && !this.nodeDef.control) {
-	            n.controlParams = Object.keys(this.nodeDef.params)
-	                .filter(function (pname) { return _this.anode[pname] instanceof AudioParam; });
-	            n.controlParam = n.controlParams[0];
-	            n.controlTarget = this.anode;
-	            n.anode.connect(this.anode[n.controlParam]);
-	        }
-	        else
-	            n.anode.connect(this.anode);
+	    return NodeData;
+	})();
+	var SynthGraphHandler = (function () {
+	    function SynthGraphHandler() {
+	    }
+	    SynthGraphHandler.prototype.canBeSource = function (n) {
+	        var data = n.data;
+	        return data.anode.numberOfOutputs > 0;
 	    };
-	    SynthNode.prototype.removeInput = function (np) {
-	        var removed = _super.prototype.removeInput.call(this, np);
-	        if (removed.nodeDef.control && !this.nodeDef.control) {
-	            removed.controlParams = null;
-	            removed.anode.disconnect(this.anode[removed.controlParam]);
-	        }
-	        else
-	            removed.anode.disconnect(this.anode);
-	        return removed;
-	    };
-	    SynthNode.prototype.canBeSource = function () {
-	        return this.anode.numberOfOutputs > 0;
-	    };
-	    SynthNode.prototype.canConnectInput = function (n) {
-	        if (n.nodeDef.control)
+	    SynthGraphHandler.prototype.canConnect = function (src, dst) {
+	        var srcData = src.data;
+	        var dstData = dst.data;
+	        //TODO even if src node is control, should not connect to Speaker output
+	        if (srcData.nodeDef.control)
 	            return true;
-	        return this.anode.numberOfInputs > 0;
+	        return dstData.anode.numberOfInputs > 0;
 	    };
-	    return SynthNode;
-	})(graph_1.Node);
+	    SynthGraphHandler.prototype.connected = function (src, dst) {
+	        var srcData = src.data;
+	        var dstData = dst.data;
+	        if (srcData.nodeDef.control && !dstData.nodeDef.control) {
+	            srcData.controlParams = Object.keys(dstData.nodeDef.params)
+	                .filter(function (pname) { return dstData.anode[pname] instanceof AudioParam; });
+	            srcData.controlParam = srcData.controlParams[0];
+	            srcData.controlTarget = dstData.anode;
+	            srcData.anode.connect(dstData.anode[srcData.controlParam]);
+	        }
+	        else
+	            srcData.anode.connect(dstData.anode);
+	    };
+	    SynthGraphHandler.prototype.disconnected = function (src, dst) {
+	        var srcData = src.data;
+	        var dstData = dst.data;
+	        if (srcData.nodeDef.control && !dstData.nodeDef.control) {
+	            srcData.controlParams = null;
+	            srcData.anode.disconnect(dstData.anode[srcData.controlParam]);
+	        }
+	        else
+	            srcData.anode.disconnect(dstData.anode);
+	        return srcData;
+	    };
+	    return SynthGraphHandler;
+	})();
 	var gr = new graph_1.Graph($('#graph-canvas')[0]);
+	gr.handler = new SynthGraphHandler();
 	var synth = new synth_1.Synth();
 	main();
 	function main() {
@@ -102,13 +106,17 @@
 	}
 	function registerNodeSelection() {
 	    gr.nodeSelected = function (n) {
-	        paramsUI_1.renderParams(n, n.nodeDef, $('#node-params'));
+	        var data = n.data;
+	        paramsUI_1.renderParams(data, data.nodeDef, $('#node-params'));
 	    };
 	}
 	function addOutputNode() {
-	    var out = new SynthNode(500, 180, 'Out');
-	    out.anode = synth.ac.destination;
-	    out.nodeDef = synth.palette['Speaker'];
+	    //TODO avoid using hardcoded position
+	    var out = new graph_1.Node(500, 180, 'Out');
+	    var data = new NodeData();
+	    out.data = data;
+	    data.anode = synth.ac.destination;
+	    data.nodeDef = synth.palette['Speaker'];
 	    gr.addNode(out);
 	}
 	function registerPlayHandler() {
@@ -134,18 +142,20 @@
 	function registerPaletteHandler() {
 	    $('.palette > .node').click(function (evt) {
 	        var elem = $(this);
-	        var n = new SynthNode(260, 180, elem.text());
+	        var n = new graph_1.Node(260, 180, elem.text());
+	        var data = new NodeData();
+	        n.data = data;
 	        var type = elem.attr('data-type');
-	        n.anode = synth.createAudioNode(type);
-	        n.nodeDef = synth.palette[type];
-	        gr.addNode(n, n.nodeDef.control ? 'node-ctrl' : undefined);
-	        if (!n.anode) {
+	        data.anode = synth.createAudioNode(type);
+	        data.nodeDef = synth.palette[type];
+	        gr.addNode(n, data.nodeDef.control ? 'node-ctrl' : undefined);
+	        if (!data.anode) {
 	            console.warn("No AudioNode found for '" + type + "'");
 	            n.element.css('background-color', '#BBB');
 	        }
 	        else {
-	            if (n.anode['start'])
-	                n.anode['start']();
+	            if (data.anode['start'])
+	                data.anode['start']();
 	        }
 	    });
 	}
@@ -154,7 +164,8 @@
 	    var ctrlArrowColor = getCssFromClass('arrow-ctrl', 'color');
 	    var originalDrawArrow = gr.graphDraw.drawArrow;
 	    gr.graphDraw.drawArrow = function (srcNode, dstNode) {
-	        this.arrowColor = srcNode.nodeDef.control ? ctrlArrowColor : arrowColor;
+	        var srcData = srcNode.data;
+	        this.arrowColor = srcData.nodeDef.control ? ctrlArrowColor : arrowColor;
 	        originalDrawArrow.bind(this)(srcNode, dstNode);
 	    };
 	}
@@ -178,6 +189,7 @@
 	        var gc = canvas.getContext('2d');
 	        this.graphDraw = new GraphDraw(gc, canvas, this.nodes);
 	        this.graphInteract = new GraphInteraction(this, gc);
+	        this.handler = new DefaultGraphHandler();
 	    }
 	    Object.defineProperty(Graph.prototype, "arrowColor", {
 	        set: function (color) {
@@ -215,25 +227,11 @@
 	    Node.prototype.addInput = function (n) {
 	        this.inputs.push(n);
 	    };
-	    Node.prototype.removeInput = function (np) {
-	        var pos;
-	        var result;
-	        if (np instanceof Node) {
-	            pos = this.inputs.indexOf(np);
-	            result = np;
-	        }
-	        else {
-	            pos = np;
-	            result = this.inputs[pos];
-	        }
-	        if (np >= 0)
-	            this.inputs.splice(np, 1);
-	        return result;
-	    };
-	    Node.prototype.canBeSource = function () {
-	        return true;
-	    };
-	    Node.prototype.canConnectInput = function (n) {
+	    Node.prototype.removeInput = function (n) {
+	        var pos = this.inputs.indexOf(n);
+	        if (pos < 0)
+	            return false;
+	        this.inputs.splice(pos, 1);
 	        return true;
 	    };
 	    return Node;
@@ -244,9 +242,9 @@
 	    function DefaultGraphHandler() {
 	    }
 	    DefaultGraphHandler.prototype.canBeSource = function (n) { return true; };
-	    DefaultGraphHandler.prototype.canConnectInput = function (n) { return true; };
-	    DefaultGraphHandler.prototype.connect = function (src, dst) { };
-	    DefaultGraphHandler.prototype.disconnect = function (src, dst) { };
+	    DefaultGraphHandler.prototype.canConnect = function (src, dst) { return true; };
+	    DefaultGraphHandler.prototype.connected = function (src, dst) { };
+	    DefaultGraphHandler.prototype.disconnected = function (src, dst) { };
 	    return DefaultGraphHandler;
 	})();
 	var GraphInteraction = (function () {
@@ -298,12 +296,10 @@
 	            srcn = _this.getNodeFromDOM(_this.getElementUnderMouse());
 	            if (!srcn)
 	                return;
-	            if (!srcn.canBeSource()) {
+	            if (!_this.graph.handler.canBeSource(srcn)) {
 	                srcn.element.css('cursor', 'not-allowed');
 	                return;
 	            }
-	            _this.graph.nodeCanvas.css('cursor', 'crosshair');
-	            _this.graph.nodeCanvas.find('.node').css('cursor', 'crosshair');
 	            _this.connecting = true;
 	            _this.registerRubberBanding(srcn);
 	        })
@@ -311,8 +307,6 @@
 	            if (evt.keyCode != 16)
 	                return;
 	            _this.connecting = false;
-	            _this.graph.nodeCanvas.css('cursor', '');
-	            _this.graph.nodeCanvas.find('.node').css('cursor', 'default');
 	            _this.deregisterRubberBanding();
 	            var dstn = _this.getNodeFromDOM(_this.getElementUnderMouse());
 	            if (!dstn)
@@ -324,11 +318,14 @@
 	    GraphInteraction.prototype.connectOrDisconnect = function (srcn, dstn) {
 	        if (srcn == dstn)
 	            return; // duh!
-	        var pos = dstn.inputs.indexOf(srcn);
-	        if (pos >= 0)
-	            dstn.removeInput(pos);
-	        else if (srcn.canBeSource() && dstn.canConnectInput(srcn))
+	        if (dstn.removeInput(srcn)) {
+	            this.graph.handler.disconnected(srcn, dstn);
+	        }
+	        else if (this.graph.handler.canBeSource(srcn) &&
+	            this.graph.handler.canConnect(srcn, dstn)) {
 	            dstn.addInput(srcn);
+	            this.graph.handler.connected(srcn, dstn);
+	        }
 	    };
 	    GraphInteraction.prototype.getElementUnderMouse = function () {
 	        var hovered = $(':hover');
@@ -354,13 +351,18 @@
 	            _this.graph.graphDraw.drawArrow(srcn, dstn);
 	            _this.gc.restore();
 	        });
+	        // Setup cursors
+	        this.graph.nodeCanvas.css('cursor', 'crosshair');
+	        this.graph.nodeCanvas.find('.node').css('cursor', 'crosshair');
 	        for (var _i = 0, _a = this.graph.nodes; _i < _a.length; _i++) {
 	            var n = _a[_i];
-	            if (n != srcn && !n.canConnectInput(srcn))
+	            if (n != srcn && !this.graph.handler.canConnect(srcn, n))
 	                n.element.css('cursor', 'not-allowed');
 	        }
 	    };
 	    GraphInteraction.prototype.deregisterRubberBanding = function () {
+	        this.graph.nodeCanvas.css('cursor', '');
+	        this.graph.nodeCanvas.find('.node').css('cursor', 'default');
 	        this.graph.nodeCanvas.off('mousemove');
 	        this.graph.graphDraw.draw();
 	    };
@@ -570,7 +572,7 @@
 /* 3 */
 /***/ function(module, exports) {
 
-	//TODO refactor main so "n" can be typed to SynthNode
+	//TODO refactor main so "n" can be typed to NodeData and ndef parameter can be removed
 	function renderParams(n, ndef, panel) {
 	    panel.empty();
 	    if (ndef.control)
