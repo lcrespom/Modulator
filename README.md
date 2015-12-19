@@ -18,8 +18,8 @@ to be used with the
 		- Support parameter values < 1
 		- Split slider logscale in two with middle value in the middle of the slider,
 			then fine-tune all module definitions (e.g. gain)
-	- Node deletion (e.g. via a delete button in parameter box)
-	- Consider supporting fan-out by connecting and disconnecting to/from multiple modules
+	- Node removal (e.g. via a delete button in parameter box)
+	- Test fan-out by connecting and disconnecting to/from multiple modules
 	- Dislay osc/fft using AnalyserNode
 	- Load/save instruments
 	- When adding a node from the palette, place it on an empty spot and select it

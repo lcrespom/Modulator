@@ -14,7 +14,7 @@ export class Graph {
 		this.handler = new DefaultGraphHandler();
 	}
 
-	addNode(n: Node, classes?:string) {
+	addNode(n: Node, classes?: string) {
 		n.element = $('<div>')
 			.addClass('node')
 			.text(n.name)
