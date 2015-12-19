@@ -102,13 +102,13 @@
 	}
 	function registerNodeSelection() {
 	    gr.nodeSelected = function (n) {
-	        paramsUI_1.renderParams(n, synth.palette[n.type], $('#node-params'));
+	        paramsUI_1.renderParams(n, n.nodeDef, $('#node-params'));
 	    };
 	}
 	function addOutputNode() {
 	    var out = new SynthNode(500, 180, 'Out');
 	    out.anode = synth.ac.destination;
-	    out.type = 'Speaker';
+	    out.nodeDef = synth.palette['Speaker'];
 	    gr.addNode(out);
 	}
 	function registerPlayHandler() {
@@ -135,12 +135,12 @@
 	    $('.palette > .node').click(function (evt) {
 	        var elem = $(this);
 	        var n = new SynthNode(260, 180, elem.text());
-	        n.type = elem.attr('data-type');
-	        n.anode = synth.createAudioNode(n.type);
-	        n.nodeDef = synth.palette[n.type];
+	        var type = elem.attr('data-type');
+	        n.anode = synth.createAudioNode(type);
+	        n.nodeDef = synth.palette[type];
 	        gr.addNode(n, n.nodeDef.control ? 'node-ctrl' : undefined);
 	        if (!n.anode) {
-	            console.warn("No AudioNode found for '" + n.type + "'");
+	            console.warn("No AudioNode found for '" + type + "'");
 	            n.element.css('background-color', '#BBB');
 	        }
 	        else {

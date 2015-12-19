@@ -5,7 +5,6 @@ import { renderParams } from './paramsUI';
 
 class SynthNode extends Node {
 	anode: ModernAudioNode;
-	type: string;	//TODO with nodeDef, this is no longer required
 	nodeDef: NodeDef;
 	// Used by control nodes only
 	controlParam: string;
@@ -65,14 +64,14 @@ function main() {
 
 function registerNodeSelection() {
 	gr.nodeSelected = function(n: SynthNode) {
-		renderParams(n, synth.palette[n.type], $('#node-params'));
+		renderParams(n, n.nodeDef, $('#node-params'));
 	}
 }
 
 function addOutputNode() {
 	const out = new SynthNode(500, 180, 'Out');
 	out.anode = synth.ac.destination;
-	out.type = 'Speaker';
+	out.nodeDef = synth.palette['Speaker'];
 	gr.addNode(out);
 }
 
@@ -104,12 +103,12 @@ function registerPaletteHandler() {
 	$('.palette > .node').click(function(evt) {
 		const elem = $(this);
 		const n = new SynthNode(260, 180, elem.text());
-		n.type = elem.attr('data-type');
-		n.anode = synth.createAudioNode(n.type);
-		n.nodeDef = synth.palette[n.type];
+		const type = elem.attr('data-type');
+		n.anode = synth.createAudioNode(type);
+		n.nodeDef = synth.palette[type];
 		gr.addNode(n, n.nodeDef.control ? 'node-ctrl' : undefined);
 		if (!n.anode) {
-			console.warn(`No AudioNode found for '${n.type}'`);
+			console.warn(`No AudioNode found for '${type}'`);
 			n.element.css('background-color', '#BBB');
 		}
 		else {
