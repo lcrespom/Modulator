@@ -30,9 +30,10 @@ body {
 }
 
 .node {
+	color: white;
+	text-shadow: 0 -1px 0 rgba(0,0,0,.2);
 	position: absolute;
-	background: #BFF2FF;
-	border: 2px solid #5DA6FF;
+	background: green;
 	border-radius: 4px;
 	width: 80px; height: 60px;
 	text-align: center;
@@ -40,22 +41,20 @@ body {
 }
 
 .node-ctrl {
-	background-color: #B8B8F9;
-	border-color: #5E61FB;
+	background-color: royalblue;
 }
 .node.selected {
-	border: 2px solid #004ACF;
-	box-shadow: 5px 5px 2px rgba(0,0,0,0.4);
+	box-shadow: 5px 5px 2px rgba(0,0,0,0.5);
 }
 
 .arrow {
 	display: none;
-	color: #5DA6FF;
+	color: green;
 }
 
 .arrow-ctrl {
 	display: none;
-	color: #5E61FB;
+	color: royalblue;
 }
 
 .palette {
