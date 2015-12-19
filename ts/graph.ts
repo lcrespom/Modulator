@@ -4,6 +4,7 @@ export class Graph {
 	nodes: Node[] = [];
 	graphDraw: GraphDraw;
 	graphInteract: GraphInteraction;
+	handler: GraphHandler;
 
 	constructor(canvas: HTMLCanvasElement) {
 		this.nodeCanvas = $(canvas.parentElement);
@@ -82,8 +83,22 @@ export class Node {
 
 }
 
+export interface GraphHandler {
+	canBeSource(n: Node): boolean;
+	canConnectInput(n: Node): boolean;
+	connect(src: Node, dst: Node);
+	disconnect(src: Node, dst: Node);
+}
+
 
 //------------------------- Privates -------------------------
+
+class DefaultGraphHandler implements GraphHandler {
+	canBeSource(n: Node): boolean { return true; }
+	canConnectInput(n: Node): boolean { return true; }
+	connect(src: Node, dst: Node) {}
+	disconnect(src: Node, dst: Node) {}
+}
 
 class GraphInteraction {
 

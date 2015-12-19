@@ -240,6 +240,15 @@
 	})();
 	exports.Node = Node;
 	//------------------------- Privates -------------------------
+	var DefaultGraphHandler = (function () {
+	    function DefaultGraphHandler() {
+	    }
+	    DefaultGraphHandler.prototype.canBeSource = function (n) { return true; };
+	    DefaultGraphHandler.prototype.canConnectInput = function (n) { return true; };
+	    DefaultGraphHandler.prototype.connect = function (src, dst) { };
+	    DefaultGraphHandler.prototype.disconnect = function (src, dst) { };
+	    return DefaultGraphHandler;
+	})();
 	var GraphInteraction = (function () {
 	    function GraphInteraction(graph, gc) {
 	        this.connecting = false;
