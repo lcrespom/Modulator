@@ -44,9 +44,106 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var graph_1 = __webpack_require__(1);
-	var synth_1 = __webpack_require__(2);
-	var paramsUI_1 = __webpack_require__(3);
+	var synthUI_1 = __webpack_require__(1);
+	var graphCanvas = $('#graph-canvas')[0];
+	var synthUI = new synthUI_1.SynthUI(graphCanvas, $('#node-params'));
+	registerPlayHandler();
+	function registerPlayHandler() {
+	    var playing = false;
+	    var $playBut = $('#play-stop');
+	    $playBut.click(togglePlayStop);
+	    $('body').keypress(function (evt) {
+	        if (evt.keyCode == 32)
+	            togglePlayStop();
+	    });
+	    function togglePlayStop() {
+	        if (playing) {
+	            synthUI.synth.stop();
+	            $playBut.text('Play');
+	        }
+	        else {
+	            synthUI.synth.play();
+	            $playBut.text('Stop');
+	        }
+	        playing = !playing;
+	    }
+	}
+
+
+/***/ },
+/* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var SynthUI = (function () {
+	    function SynthUI(graphCanvas, jqParams) {
+	        this.gr = new graph_1.Graph(graphCanvas);
+	        this.gr.handler = new SynthGraphHandler();
+	        this.synth = new synth_1.Synth();
+	        this.registerNodeSelection(jqParams);
+	        this.setArrowColors();
+	        this.registerPaletteHandler();
+	        this.addOutputNode();
+	    }
+	    SynthUI.prototype.registerNodeSelection = function (jqParams) {
+	        this.gr.nodeSelected = function (n) {
+	            var data = n.data;
+	            paramsUI_1.renderParams(data, data.nodeDef, jqParams);
+	        };
+	    };
+	    SynthUI.prototype.addOutputNode = function () {
+	        //TODO avoid using hardcoded position
+	        var out = new graph_1.Node(500, 180, 'Out');
+	        var data = new NodeData();
+	        out.data = data;
+	        data.anode = this.synth.ac.destination;
+	        data.nodeDef = this.synth.palette['Speaker'];
+	        this.gr.addNode(out);
+	    };
+	    SynthUI.prototype.registerPaletteHandler = function () {
+	        var self = this; // JQuery sets this in event handlers
+	        $('.palette > .node').click(function (evt) {
+	            var elem = $(this);
+	            var n = new graph_1.Node(260, 180, elem.text());
+	            var data = new NodeData();
+	            n.data = data;
+	            var type = elem.attr('data-type');
+	            data.anode = self.synth.createAudioNode(type);
+	            data.nodeDef = self.synth.palette[type];
+	            self.gr.addNode(n, data.nodeDef.control ? 'node-ctrl' : undefined);
+	            if (!data.anode) {
+	                console.warn("No AudioNode found for '" + type + "'");
+	                n.element.css('background-color', '#BBB');
+	            }
+	            else {
+	                if (data.anode['start'])
+	                    data.anode['start']();
+	            }
+	        });
+	    };
+	    SynthUI.prototype.setArrowColors = function () {
+	        var arrowColor = this.getCssFromClass('arrow', 'color');
+	        var ctrlArrowColor = this.getCssFromClass('arrow-ctrl', 'color');
+	        var originalDrawArrow = this.gr.graphDraw.drawArrow;
+	        this.gr.graphDraw.drawArrow = function (srcNode, dstNode) {
+	            var srcData = srcNode.data;
+	            this.arrowColor = srcData.nodeDef.control ? ctrlArrowColor : arrowColor;
+	            originalDrawArrow.bind(this)(srcNode, dstNode);
+	        };
+	    };
+	    SynthUI.prototype.getCssFromClass = function (className, propName) {
+	        var tmp = $('<div>').addClass(className);
+	        $('body').append(tmp);
+	        var propValue = tmp.css(propName);
+	        tmp.remove();
+	        return propValue;
+	    };
+	    return SynthUI;
+	})();
+	exports.SynthUI = SynthUI;
+	//-------------------- Privates --------------------
+	var graph_1 = __webpack_require__(2);
+	var synth_1 = __webpack_require__(3);
+	var paramsUI_1 = __webpack_require__(4);
 	var NodeData = (function () {
 	    function NodeData() {
 	    }
@@ -93,93 +190,10 @@
 	    };
 	    return SynthGraphHandler;
 	})();
-	var gr = new graph_1.Graph($('#graph-canvas')[0]);
-	gr.handler = new SynthGraphHandler();
-	var synth = new synth_1.Synth();
-	main();
-	function main() {
-	    registerNodeSelection();
-	    setArrowColors();
-	    registerPaletteHandler();
-	    registerPlayHandler();
-	    addOutputNode();
-	}
-	function registerNodeSelection() {
-	    gr.nodeSelected = function (n) {
-	        var data = n.data;
-	        paramsUI_1.renderParams(data, data.nodeDef, $('#node-params'));
-	    };
-	}
-	function addOutputNode() {
-	    //TODO avoid using hardcoded position
-	    var out = new graph_1.Node(500, 180, 'Out');
-	    var data = new NodeData();
-	    out.data = data;
-	    data.anode = synth.ac.destination;
-	    data.nodeDef = synth.palette['Speaker'];
-	    gr.addNode(out);
-	}
-	function registerPlayHandler() {
-	    var playing = false;
-	    var $playBut = $('#play-stop');
-	    $playBut.click(togglePlayStop);
-	    $('body').keypress(function (evt) {
-	        if (evt.keyCode == 32)
-	            togglePlayStop();
-	    });
-	    function togglePlayStop() {
-	        if (playing) {
-	            synth.stop();
-	            $playBut.text('Play');
-	        }
-	        else {
-	            synth.play();
-	            $playBut.text('Stop');
-	        }
-	        playing = !playing;
-	    }
-	}
-	function registerPaletteHandler() {
-	    $('.palette > .node').click(function (evt) {
-	        var elem = $(this);
-	        var n = new graph_1.Node(260, 180, elem.text());
-	        var data = new NodeData();
-	        n.data = data;
-	        var type = elem.attr('data-type');
-	        data.anode = synth.createAudioNode(type);
-	        data.nodeDef = synth.palette[type];
-	        gr.addNode(n, data.nodeDef.control ? 'node-ctrl' : undefined);
-	        if (!data.anode) {
-	            console.warn("No AudioNode found for '" + type + "'");
-	            n.element.css('background-color', '#BBB');
-	        }
-	        else {
-	            if (data.anode['start'])
-	                data.anode['start']();
-	        }
-	    });
-	}
-	function setArrowColors() {
-	    var arrowColor = getCssFromClass('arrow', 'color');
-	    var ctrlArrowColor = getCssFromClass('arrow-ctrl', 'color');
-	    var originalDrawArrow = gr.graphDraw.drawArrow;
-	    gr.graphDraw.drawArrow = function (srcNode, dstNode) {
-	        var srcData = srcNode.data;
-	        this.arrowColor = srcData.nodeDef.control ? ctrlArrowColor : arrowColor;
-	        originalDrawArrow.bind(this)(srcNode, dstNode);
-	    };
-	}
-	function getCssFromClass(className, propName) {
-	    var tmp = $('<div>').addClass(className);
-	    $('body').append(tmp);
-	    var propValue = tmp.css(propName);
-	    tmp.remove();
-	    return propValue;
-	}
 
 
 /***/ },
-/* 1 */
+/* 2 */
 /***/ function(module, exports) {
 
 	var Graph = (function () {
@@ -431,7 +445,7 @@
 
 
 /***/ },
-/* 2 */
+/* 3 */
 /***/ function(module, exports) {
 
 	var Synth = (function () {
@@ -569,7 +583,7 @@
 
 
 /***/ },
-/* 3 */
+/* 4 */
 /***/ function(module, exports) {
 
 	//TODO refactor main so "n" can be typed to NodeData and ndef parameter can be removed

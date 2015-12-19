@@ -5,7 +5,7 @@ to be used with the
 
 ##ToDo
 - Bugs
-	- Arrows are drawn in wrong position when window is vertically scrolled
+	- Arrows are drawn in wrong position when window is vertically scrolled (low)
 
 - Functionality
 	- Keyboard trigger
@@ -37,9 +37,6 @@ to be used with the
 	- Naming
 	- Logo
 	- Update parameter box header with currently selected node
-
-- Code
-	- Refactor main.ts
 
 - Support
 	- Support FireFox (does not have AudioContext.suspend/resume)
