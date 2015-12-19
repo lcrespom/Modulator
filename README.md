@@ -17,16 +17,19 @@ to be used with the
 	- Improve slider logscale:
 		- Support parameter values < 1
 		- Split slider logscale in two with middle value in the middle of the slider,
-			then fine-tune all module definitions (e.g. gain)
+			then fine-tune all node definitions (e.g. gain)
 	- Node removal (e.g. via a delete button in parameter box)
-	- Test fan-out by connecting and disconnecting to/from multiple modules
+	- Test fan-out by connecting and disconnecting to/from multiple nodes
 	- Dislay osc/fft using AnalyserNode
 	- Load/save instruments
 	- When adding a node from the palette, place it on an empty spot and select it
+	- Limitation: a control node can only control a single node
+		- Prevent from connecting a control node to more than one destination
+		- Or else, modify the UI to support multiple destination nodes
 	- Long term:
 		- Tracker
-		- Custom modules with WebWorker
-		- Composite modules, e.g. LFO+Gain
+		- Custom nodes with WebWorker
+		- Composite nodes, e.g. LFO+Gain
 		- Record & save audio
 
 - UI
