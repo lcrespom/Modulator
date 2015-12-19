@@ -79,7 +79,6 @@
 	        this.gr = new graph_1.Graph(graphCanvas);
 	        this.gr.handler = new SynthGraphHandler(jqParams);
 	        this.synth = new synth_1.Synth();
-	        this.setArrowColors();
 	        this.registerPaletteHandler();
 	        this.addOutputNode();
 	    }
@@ -113,23 +112,6 @@
 	            }
 	        });
 	    };
-	    SynthUI.prototype.setArrowColors = function () {
-	        var arrowColor = this.getCssFromClass('arrow', 'color');
-	        var ctrlArrowColor = this.getCssFromClass('arrow-ctrl', 'color');
-	        var originalDrawArrow = this.gr.graphDraw.drawArrow;
-	        this.gr.graphDraw.drawArrow = function (srcNode, dstNode) {
-	            var srcData = srcNode.data;
-	            this.arrowColor = srcData.nodeDef.control ? ctrlArrowColor : arrowColor;
-	            originalDrawArrow.bind(this)(srcNode, dstNode);
-	        };
-	    };
-	    SynthUI.prototype.getCssFromClass = function (className, propName) {
-	        var tmp = $('<div>').addClass(className);
-	        $('body').append(tmp);
-	        var propValue = tmp.css(propName);
-	        tmp.remove();
-	        return propValue;
-	    };
 	    return SynthUI;
 	})();
 	exports.SynthUI = SynthUI;
@@ -146,6 +128,8 @@
 	var SynthGraphHandler = (function () {
 	    function SynthGraphHandler(jqParams) {
 	        this.jqParams = jqParams;
+	        this.arrowColor = getCssFromClass('arrow', 'color');
+	        this.ctrlArrowColor = getCssFromClass('arrow-ctrl', 'color');
 	    }
 	    SynthGraphHandler.prototype.canBeSource = function (n) {
 	        var data = n.data;
@@ -186,8 +170,19 @@
 	        var data = n.data;
 	        paramsUI_1.renderParams(data, this.jqParams);
 	    };
+	    SynthGraphHandler.prototype.getArrowColor = function (src, dst) {
+	        var srcData = src.data;
+	        return srcData.nodeDef.control ? this.ctrlArrowColor : this.arrowColor;
+	    };
 	    return SynthGraphHandler;
 	})();
+	function getCssFromClass(className, propName) {
+	    var tmp = $('<div>').addClass(className);
+	    $('body').append(tmp);
+	    var propValue = tmp.css(propName);
+	    tmp.remove();
+	    return propValue;
+	}
 
 
 /***/ },
@@ -199,17 +194,10 @@
 	        this.nodes = [];
 	        this.nodeCanvas = $(canvas.parentElement);
 	        var gc = canvas.getContext('2d');
-	        this.graphDraw = new GraphDraw(gc, canvas, this.nodes);
+	        this.graphDraw = new GraphDraw(this, gc, canvas);
 	        this.graphInteract = new GraphInteraction(this, gc);
 	        this.handler = new DefaultGraphHandler();
 	    }
-	    Object.defineProperty(Graph.prototype, "arrowColor", {
-	        set: function (color) {
-	            this.graphDraw.arrowColor = color;
-	        },
-	        enumerable: true,
-	        configurable: true
-	    });
 	    Graph.prototype.addNode = function (n, classes) {
 	        n.element = $('<div>')
 	            .addClass('node')
@@ -273,6 +261,7 @@
 	    DefaultGraphHandler.prototype.connected = function (src, dst) { };
 	    DefaultGraphHandler.prototype.disconnected = function (src, dst) { };
 	    DefaultGraphHandler.prototype.nodeSelected = function (n) { };
+	    DefaultGraphHandler.prototype.getArrowColor = function (src, dst) { return "black"; };
 	    return DefaultGraphHandler;
 	})();
 	var GraphInteraction = (function () {
@@ -401,12 +390,12 @@
 	    return GraphInteraction;
 	})();
 	var GraphDraw = (function () {
-	    function GraphDraw(gc, canvas, nodes) {
-	        this.arrowColor = "black";
+	    function GraphDraw(graph, gc, canvas) {
 	        this.arrowHeadLen = 10;
+	        this.graph = graph;
 	        this.gc = gc;
 	        this.canvas = canvas;
-	        this.nodes = nodes;
+	        this.nodes = graph.nodes;
 	    }
 	    GraphDraw.prototype.draw = function () {
 	        this.clearCanvas();
@@ -425,7 +414,7 @@
 	    GraphDraw.prototype.drawArrow = function (srcNode, dstNode) {
 	        var srcPoint = this.getNodeCenter(srcNode);
 	        var dstPoint = this.getNodeCenter(dstNode);
-	        this.gc.strokeStyle = this.arrowColor;
+	        this.gc.strokeStyle = this.graph.handler.getArrowColor(srcNode, dstNode);
 	        this.gc.beginPath();
 	        this.gc.moveTo(srcPoint.x, srcPoint.y);
 	        this.gc.lineTo(dstPoint.x, dstPoint.y);

@@ -6,7 +6,6 @@ export class SynthUI {
 		this.gr = new Graph(graphCanvas);
 		this.gr.handler = new SynthGraphHandler(jqParams);
 		this.synth = new Synth();
-		this.setArrowColors();
 		this.registerPaletteHandler();
 		this.addOutputNode();
 	}
@@ -42,24 +41,6 @@ export class SynthUI {
 		});
 	}
 
-	setArrowColors() {
-		const arrowColor = this.getCssFromClass('arrow', 'color');
-		const ctrlArrowColor = this.getCssFromClass('arrow-ctrl', 'color');
-		const originalDrawArrow = this.gr.graphDraw.drawArrow;
-		this.gr.graphDraw.drawArrow = function(srcNode: Node, dstNode: Node) {
-			const srcData: NodeData = srcNode.data;
-			this.arrowColor = srcData.nodeDef.control ? ctrlArrowColor : arrowColor;
-			originalDrawArrow.bind(this)(srcNode, dstNode);
-		}
-	}
-
-	getCssFromClass(className, propName) {
-		const tmp = $('<div>').addClass(className);
-		$('body').append(tmp);
-		const propValue = tmp.css(propName);
-		tmp.remove();
-		return propValue;
-	}
 }
 
 
@@ -82,9 +63,13 @@ import { renderParams } from './paramsUI';
 class SynthGraphHandler implements GraphHandler {
 
 	jqParams: JQuery;
+	arrowColor: string;
+	ctrlArrowColor: string;
 
 	constructor(jqParams) {
 		this.jqParams = jqParams;
+		this.arrowColor = getCssFromClass('arrow', 'color');
+		this.ctrlArrowColor = getCssFromClass('arrow-ctrl', 'color');
 	}
 
 	canBeSource(n: Node): boolean {
@@ -129,9 +114,22 @@ class SynthGraphHandler implements GraphHandler {
 		const data: NodeData = n.data;
 		renderParams(data, this.jqParams);
 	}
+
+	getArrowColor(src: Node, dst: Node): string {
+		const srcData: NodeData = src.data;
+		return srcData.nodeDef.control ? this.ctrlArrowColor : this.arrowColor;
+	}
 }
 
 
 interface ModernAudioNode extends AudioNode {
 	disconnect(output?: number | AudioNode | AudioParam): void
+}
+
+function getCssFromClass(className, propName) {
+	const tmp = $('<div>').addClass(className);
+	$('body').append(tmp);
+	const propValue = tmp.css(propName);
+	tmp.remove();
+	return propValue;
 }

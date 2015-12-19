@@ -9,13 +9,9 @@ export class Graph {
 	constructor(canvas: HTMLCanvasElement) {
 		this.nodeCanvas = $(canvas.parentElement);
 		const gc = canvas.getContext('2d');
-		this.graphDraw = new GraphDraw(gc, canvas, this.nodes);
+		this.graphDraw = new GraphDraw(this, gc, canvas);
 		this.graphInteract = new GraphInteraction(this, gc);
 		this.handler = new DefaultGraphHandler();
-	}
-
-	set arrowColor(color: string) {
-		this.graphDraw.arrowColor = color;
 	}
 
 	addNode(n: Node, classes?:string) {
@@ -90,6 +86,7 @@ export interface GraphHandler {
 	connected(src: Node, dst: Node): void;
 	disconnected(src: Node, dst: Node): void;
 	nodeSelected(n: Node): void;
+	getArrowColor(src: Node, dst: Node): string;
 }
 
 
@@ -101,6 +98,7 @@ class DefaultGraphHandler implements GraphHandler {
 	connected(src: Node, dst: Node): void {}
 	disconnected(src: Node, dst: Node):void {}
 	nodeSelected(n: Node): void {}
+	getArrowColor(src: Node, dst: Node): string { return "black"; }
 }
 
 
@@ -231,16 +229,17 @@ interface Point {
 
 class GraphDraw {
 
+	graph: Graph;
 	gc: CanvasRenderingContext2D;
 	canvas: HTMLCanvasElement;
-	arrowColor: string = "black";
 	arrowHeadLen = 10;
 	nodes: Node[];
 
-	constructor(gc: CanvasRenderingContext2D, canvas: HTMLCanvasElement, nodes: Node[]) {
+	constructor(graph: Graph, gc: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
+		this.graph = graph;
 		this.gc = gc;
 		this.canvas = canvas;
-		this.nodes = nodes;
+		this.nodes = graph.nodes;
 	}
 
 	draw() {
@@ -258,7 +257,7 @@ class GraphDraw {
 	drawArrow(srcNode: Node, dstNode: Node) {
 		const srcPoint = this.getNodeCenter(srcNode);
 		const dstPoint = this.getNodeCenter(dstNode);
-		this.gc.strokeStyle = this.arrowColor;
+		this.gc.strokeStyle = this.graph.handler.getArrowColor(srcNode, dstNode);
 		this.gc.beginPath();
 		this.gc.moveTo(srcPoint.x, srcPoint.y);
 		this.gc.lineTo(dstPoint.x, dstPoint.y);
