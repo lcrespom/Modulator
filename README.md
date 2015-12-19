@@ -5,6 +5,7 @@ to be used with the
 
 ##ToDo
 - Bugs
+	- Refine rules to determine whether nodes can connect
 	- Arrows are drawn in wrong position when window is vertically scrolled (low)
 
 - Functionality

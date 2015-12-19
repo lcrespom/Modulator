@@ -4,19 +4,11 @@ export class SynthUI {
 
 	constructor(graphCanvas: HTMLCanvasElement, jqParams: JQuery) {
 		this.gr = new Graph(graphCanvas);
-		this.gr.handler = new SynthGraphHandler();
+		this.gr.handler = new SynthGraphHandler(jqParams);
 		this.synth = new Synth();
-		this.registerNodeSelection(jqParams);
 		this.setArrowColors();
 		this.registerPaletteHandler();
 		this.addOutputNode();
-	}
-
-	registerNodeSelection(jqParams: JQuery) {
-		this.gr.nodeSelected = function(n: Node) {
-			const data: NodeData = n.data;
-			renderParams(data, data.nodeDef, jqParams);
-		}
 	}
 
 	addOutputNode() {
@@ -30,7 +22,7 @@ export class SynthUI {
 	}
 
 	registerPaletteHandler() {
-		var self = this;	// JQuery sets this in event handlers
+		var self = this;	// JQuery sets 'this' in event handlers
 		$('.palette > .node').click(function(evt) {
 			const elem = $(this);
 			const n = new Node(260, 180, elem.text());
@@ -71,13 +63,7 @@ export class SynthUI {
 }
 
 
-//-------------------- Privates --------------------
-
-import { Graph, Node, GraphHandler } from './graph';
-import { Synth, NodeDef } from './synth';
-import { renderParams } from './paramsUI';
-
-class NodeData {
+export class NodeData {
 	anode: ModernAudioNode;
 	nodeDef: NodeDef;
 	// Used by control nodes only
@@ -86,7 +72,20 @@ class NodeData {
 	controlTarget: ModernAudioNode;
 }
 
+
+//-------------------- Privates --------------------
+
+import { Graph, Node, GraphHandler } from './graph';
+import { Synth, NodeDef } from './synth';
+import { renderParams } from './paramsUI';
+
 class SynthGraphHandler implements GraphHandler {
+
+	jqParams: JQuery;
+
+	constructor(jqParams) {
+		this.jqParams = jqParams;
+	}
 
 	canBeSource(n: Node): boolean {
 		const data: NodeData = n.data;
@@ -101,7 +100,7 @@ class SynthGraphHandler implements GraphHandler {
 		return dstData.anode.numberOfInputs > 0;
 	}
 
-	connected(src: Node, dst: Node) {
+	connected(src: Node, dst: Node): void {
 		const srcData: NodeData = src.data;
 		const dstData: NodeData = dst.data;
 		if (srcData.nodeDef.control && !dstData.nodeDef.control) {
@@ -115,7 +114,7 @@ class SynthGraphHandler implements GraphHandler {
 		else srcData.anode.connect(dstData.anode);
 	}
 
-	disconnected(src: Node, dst: Node) {
+	disconnected(src: Node, dst: Node): void {
 		const srcData: NodeData = src.data;
 		const dstData: NodeData = dst.data;
 		if (srcData.nodeDef.control && !dstData.nodeDef.control) {
@@ -124,9 +123,12 @@ class SynthGraphHandler implements GraphHandler {
 		}
 		else //TODO test fan-out
 			srcData.anode.disconnect(dstData.anode);
-		return srcData;
 	}
 
+	nodeSelected(n: Node): void {
+		const data: NodeData = n.data;
+		renderParams(data, this.jqParams);
+	}
 }
 
 

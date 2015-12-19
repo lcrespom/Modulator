@@ -1,16 +1,17 @@
 import { Node } from './graph';
 import { NodeDef, NodeParamDef } from './synth';
+import { NodeData } from './synthUI';
 
 //TODO refactor main so "n" can be typed to NodeData and ndef parameter can be removed
-export function renderParams(n: any, ndef: NodeDef, panel: JQuery) {
+export function renderParams(ndata: NodeData, panel: JQuery) {
 	panel.empty();
-	if (ndef.control)
-		renderParamControl(n, panel);
-	for (const param of Object.keys(ndef.params || {}))
-		if (n.anode[param] instanceof AudioParam)
-			renderAudioParam(n.anode, ndef, param, panel);
+	if (ndata.nodeDef.control)
+		renderParamControl(ndata, panel);
+	for (const param of Object.keys(ndata.nodeDef.params || {}))
+		if (ndata.anode[param] instanceof AudioParam)
+			renderAudioParam(ndata.anode, ndata.nodeDef, param, panel);
 		else
-			renderOtherParam(n.anode, ndef, param, panel);
+			renderOtherParam(ndata.anode, ndata.nodeDef, param, panel);
 }
 
 function renderAudioParam(anode: AudioNode, ndef: NodeDef, param: string, panel: JQuery) {
@@ -43,14 +44,14 @@ function renderAudioParam(anode: AudioNode, ndef: NodeDef, param: string, panel:
 	});
 }
 
-function renderParamControl(n: any, panel: JQuery) {
-	if (!n.controlParams) return;
-	const combo = renderCombo(panel, n.controlParams, n.controlParam, 'Controlling');
+function renderParamControl(ndata: NodeData, panel: JQuery) {
+	if (!ndata.controlParams) return;
+	const combo = renderCombo(panel, ndata.controlParams, ndata.controlParam, 'Controlling');
 	combo.on('input', _ => {
-		if (n.controlParam)
-			n.anode.disconnect(n.controlTarget[n.controlParam]);
-		n.controlParam = combo.val();
-		n.anode.connect(n.controlTarget[n.controlParam]);
+		if (ndata.controlParam)
+			ndata.anode.disconnect(ndata.controlTarget[ndata.controlParam]);
+		ndata.controlParam = combo.val();
+		ndata.anode.connect(ndata.controlTarget[ndata.controlParam]);
 	});
 }
 
