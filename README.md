@@ -66,3 +66,5 @@ to be used with the
 	- His [talk](https://www.youtube.com/watch?v=56spBAgOYfg) about web audio
 	- Great idea on emulating restartable oscillator by setting gain to 0 to stop and 1 to
 		play again
+- Soledad Penades
+	- [Hands On Web Audio](http://soledadpenades.com/files/t/2015_howa/#0) presentation
