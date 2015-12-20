@@ -1,8 +1,10 @@
 import { SynthUI } from './synthUI';
+import { Keyboard } from './keyboard';
 
 const graphCanvas = <HTMLCanvasElement>$('#graph-canvas')[0];
 const synthUI = new SynthUI(graphCanvas, $('#node-params'));
 registerPlayHandler();
+setupKeyboard();
 
 
 function registerPlayHandler() {
@@ -26,5 +28,10 @@ function registerPlayHandler() {
 		}
 		playing = !playing;
 	}
+}
 
+function setupKeyboard() {
+	var kb = new Keyboard();
+	kb.noteOn = (midi, ratio) => console.log('Note on:', midi, ratio);
+	kb.noteOff = (midi) => console.log('Note off:', midi);
 }

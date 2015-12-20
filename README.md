@@ -4,18 +4,20 @@ to be used with the
 [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API).
 
 ##ToDo
+High priority items are in **bold**
 - Bugs
+	- **Fix logscale to accept parameter values between 0 and 1, both included**
 	- Refine rules to determine whether nodes can connect
 	- Arrows are drawn in wrong position when window is vertically scrolled (low)
 
 - Functionality
-	- Keyboard trigger
+	- **Keyboard trigger**
 	- Control nodes
-		- ADSR (requires keyboard trigger feature)
+		- **ADSR (requires keyboard trigger feature)**
 	- Add all possible AudioNodes available into the palette
 		- Support sampled audio
 	- Improve slider logscale:
-		- Support parameter values < 1
+		- Support parameter values < 1 (this is a bug)
 		- Split slider logscale in two with middle value in the middle of the slider,
 			then fine-tune all node definitions (e.g. gain)
 	- Node removal (e.g. via a delete button in parameter box)
@@ -42,6 +44,10 @@ to be used with the
 	- Logo
 	- Update parameter box header with currently selected node
 
+- Code
+	- Separate graph.ts into an independent npm module
+	- Provide some in-code documentation describing each module & class
+
 - Support
 	- Support FireFox (does not have AudioContext.suspend/resume)
 	- Test in Safari
@@ -51,13 +57,13 @@ to be used with the
 	- Create proper website in github pages
 	- Present in meetup
 	- Invite contributors
-	- Contact web audio developers such as @chrislowis & @mohayonao
 
 ##References
 - Chris Lowis (@chrislowis)
 	- His [blog](http://blog.chrislowis.co.uk/) and web audio weekly newsletter.
 	- His talk about [synth history and web audio](http://blog.chrislowis.co.uk/2015/06/26/a-brief-history-of-synthesis.html)
 	- His github [repo](https://github.com/chrislo)
+	- [Synthesising Drum Sounds with the Web Audio API](https://dev.opera.com/articles/drum-sounds-webaudio/)
 -  Chris Wilson (@cwilso) from Google
 	- His talk about [web audio](https://www.youtube.com/watch?v=wZrNI-86zYI&list=FLztHRYsgsJ4s2_qfg91iW1Q&index=1)
 	- His github [repo](https://github.com/cwilso)

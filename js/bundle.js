@@ -45,9 +45,11 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var synthUI_1 = __webpack_require__(1);
+	var keyboard_1 = __webpack_require__(5);
 	var graphCanvas = $('#graph-canvas')[0];
 	var synthUI = new synthUI_1.SynthUI(graphCanvas, $('#node-params'));
 	registerPlayHandler();
+	setupKeyboard();
 	function registerPlayHandler() {
 	    var playing = false;
 	    var $playBut = $('#play-stop');
@@ -67,6 +69,11 @@
 	        }
 	        playing = !playing;
 	    }
+	}
+	function setupKeyboard() {
+	    var kb = new keyboard_1.Keyboard();
+	    kb.noteOn = function (midi, ratio) { return console.log('Note on:', midi, ratio); };
+	    kb.noteOff = function (midi) { return console.log('Note off:', midi); };
 	}
 
 
@@ -695,6 +702,55 @@
 	    else
 	        return s;
 	}
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
+	var Keyboard = (function () {
+	    function Keyboard() {
+	        this.setupHandler();
+	    }
+	    Keyboard.prototype.setupHandler = function () {
+	        var _this = this;
+	        var pressedKeys = {};
+	        $('body')
+	            .on('keydown', function (evt) {
+	            if (pressedKeys[evt.keyCode])
+	                return; // Skip repetitions
+	            pressedKeys[evt.keyCode] = true;
+	            var midi = _this.key2midi(evt.keyCode);
+	            if (midi < 0)
+	                return;
+	            _this.noteOn(midi, _this.midi2freqRatio(midi));
+	        })
+	            .on('keyup', function (evt) {
+	            pressedKeys[evt.keyCode] = false;
+	            var midi = _this.key2midi(evt.keyCode);
+	            if (midi < 0)
+	                return;
+	            _this.noteOff(midi);
+	        });
+	    };
+	    Keyboard.prototype.key2midi = function (keyCode) {
+	        var pos = KB_NOTES.indexOf(String.fromCharCode(keyCode));
+	        if (pos < 0)
+	            return -1;
+	        return BASE_NOTE + pos;
+	    };
+	    Keyboard.prototype.midi2freqRatio = function (midi) {
+	        return Math.pow(SEMITONE, midi - A4);
+	    };
+	    Keyboard.prototype.noteOn = function (midi, ratio) { };
+	    Keyboard.prototype.noteOff = function (midi) { };
+	    return Keyboard;
+	})();
+	exports.Keyboard = Keyboard;
+	var KB_NOTES = 'ZSXDCVGBHNJMQ2W3ER5T6Y7UI9O0P';
+	var BASE_NOTE = 36;
+	var SEMITONE = Math.pow(2, 1 / 12);
+	var A4 = 57;
 
 
 /***/ }
