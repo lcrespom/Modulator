@@ -32,6 +32,10 @@ function registerPlayHandler() {
 
 function setupKeyboard() {
 	var kb = new Keyboard();
-	kb.noteOn = (midi, ratio) => console.log('Note on:', midi, ratio);
-	kb.noteOff = (midi) => console.log('Note off:', midi);
+	kb.noteOn = (midi, ratio) => {
+		synthUI.synth.noteOn(midi, 1, ratio);
+	};
+	kb.noteOff = (midi) => {
+		synthUI.synth.noteOff(midi, 1);
+	};
 }

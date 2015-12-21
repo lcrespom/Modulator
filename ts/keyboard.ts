@@ -1,3 +1,9 @@
+const KB_NOTES = 'ZSXDCVGBHNJMQ2W3ER5T6Y7UI9O0P';
+const BASE_NOTE = 36;
+const SEMITONE = Math.pow(2, 1/12);
+const A4 = 57;
+
+
 export class Keyboard {
 
 	constructor() {
@@ -32,11 +38,6 @@ export class Keyboard {
 		return Math.pow(SEMITONE, midi - A4);
 	}
 
-	noteOn(midi: number, ratio: number) {}
-	noteOff(midi: number) {}
+	noteOn(midi: number, ratio: number):void {}
+	noteOff(midi: number): void {}
 }
-
-const KB_NOTES = 'ZSXDCVGBHNJMQ2W3ER5T6Y7UI9O0P';
-const BASE_NOTE = 36;
-const SEMITONE = Math.pow(2, 1/12);
-const A4 = 57;

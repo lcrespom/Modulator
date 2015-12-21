@@ -1,3 +1,5 @@
+import { NoteHandler, NoteHandlers } from './notes';
+
 export class SynthUI {
 	gr: Graph;
 	synth: Synth;
@@ -24,33 +26,45 @@ export class SynthUI {
 		var self = this;	// JQuery sets 'this' in event handlers
 		$('.palette > .node').click(function(evt) {
 			const elem = $(this);
-			const n = new Node(260, 180, elem.text());
-			const data = new NodeData();
-			n.data = data;
-			const type = elem.attr('data-type');
-			data.anode = self.synth.createAudioNode(type);
-			data.nodeDef = self.synth.palette[type];
-			self.gr.addNode(n, data.nodeDef.control ? 'node-ctrl' : undefined);
-			if (!data.anode) {
-				console.warn(`No AudioNode found for '${type}'`);
-				n.element.css('background-color', '#BBB');
-			}
-			else {
-				if (data.anode['start']) data.anode['start']();
-			}
+			self.addNode(elem.attr('data-type'), elem.text());
 		});
+	}
+
+	addNode(type: string, text: string): void {
+		const n = new Node(260, 180, text);
+		const data = new NodeData();
+		n.data = data;
+		data.anode = this.synth.createAudioNode(type);
+		data.nodeDef = this.synth.palette[type];
+		this.gr.addNode(n, data.nodeDef.control ? 'node-ctrl' : undefined);
+		if (!data.anode) {
+			console.warn(`No AudioNode found for '${type}'`);
+			n.element.css('background-color', '#BBB');
+		}
+		else {
+			const nh = data.nodeDef.noteHandler; 
+			if (nh) {
+				data.noteHandler = new NoteHandlers[nh](data.anode);
+				this.synth.addNoteHandler(data.noteHandler);
+			}
+			//TODO remove
+			if (data.anode['start']) data.anode['start']();
+		}
 	}
 
 }
 
 
 export class NodeData {
+	// Used by all nodes
 	anode: ModernAudioNode;
 	nodeDef: NodeDef;
-	// Used by control nodes only
+	// Used by control nodes
 	controlParam: string;
 	controlParams: string[];
 	controlTarget: ModernAudioNode;
+	// Used by source audio nodes
+	noteHandler: NoteHandler;
 }
 
 

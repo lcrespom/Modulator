@@ -16,6 +16,7 @@ High priority items are in **bold**
 		- **ADSR (requires keyboard trigger feature)**
 	- Add all possible AudioNodes available into the palette
 		- Support sampled audio
+		- StereoPanner
 	- Improve slider logscale:
 		- Support parameter values < 1 (this is a bug)
 		- Split slider logscale in two with middle value in the middle of the slider,

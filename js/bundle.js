@@ -72,8 +72,12 @@
 	}
 	function setupKeyboard() {
 	    var kb = new keyboard_1.Keyboard();
-	    kb.noteOn = function (midi, ratio) { return console.log('Note on:', midi, ratio); };
-	    kb.noteOff = function (midi) { return console.log('Note off:', midi); };
+	    kb.noteOn = function (midi, ratio) {
+	        synthUI.synth.noteOn(midi, 1, ratio);
+	    };
+	    kb.noteOff = function (midi) {
+	        synthUI.synth.noteOff(midi, 1);
+	    };
 	}
 
 
@@ -81,6 +85,7 @@
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var notes_1 = __webpack_require__(6);
 	var SynthUI = (function () {
 	    function SynthUI(graphCanvas, jqParams) {
 	        this.gr = new graph_1.Graph(graphCanvas);
@@ -102,22 +107,30 @@
 	        var self = this; // JQuery sets 'this' in event handlers
 	        $('.palette > .node').click(function (evt) {
 	            var elem = $(this);
-	            var n = new graph_1.Node(260, 180, elem.text());
-	            var data = new NodeData();
-	            n.data = data;
-	            var type = elem.attr('data-type');
-	            data.anode = self.synth.createAudioNode(type);
-	            data.nodeDef = self.synth.palette[type];
-	            self.gr.addNode(n, data.nodeDef.control ? 'node-ctrl' : undefined);
-	            if (!data.anode) {
-	                console.warn("No AudioNode found for '" + type + "'");
-	                n.element.css('background-color', '#BBB');
-	            }
-	            else {
-	                if (data.anode['start'])
-	                    data.anode['start']();
-	            }
+	            self.addNode(elem.attr('data-type'), elem.text());
 	        });
+	    };
+	    SynthUI.prototype.addNode = function (type, text) {
+	        var n = new graph_1.Node(260, 180, text);
+	        var data = new NodeData();
+	        n.data = data;
+	        data.anode = this.synth.createAudioNode(type);
+	        data.nodeDef = this.synth.palette[type];
+	        this.gr.addNode(n, data.nodeDef.control ? 'node-ctrl' : undefined);
+	        if (!data.anode) {
+	            console.warn("No AudioNode found for '" + type + "'");
+	            n.element.css('background-color', '#BBB');
+	        }
+	        else {
+	            var nh = data.nodeDef.noteHandler;
+	            if (nh) {
+	                data.noteHandler = new notes_1.NoteHandlers[nh](data.anode);
+	                this.synth.addNoteHandler(data.noteHandler);
+	            }
+	            //TODO remove
+	            if (data.anode['start'])
+	                data.anode['start']();
+	        }
 	    };
 	    return SynthUI;
 	})();
@@ -450,10 +463,12 @@
 
 /***/ },
 /* 3 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
+	var notes_1 = __webpack_require__(6);
 	var Synth = (function () {
 	    function Synth() {
+	        this.noteHandlers = [];
 	        var CtxClass = window.AudioContext || window.webkitAudioContext;
 	        this.ac = new CtxClass();
 	        this.stop();
@@ -464,6 +479,34 @@
 	        if (!def || !this.ac[def.constructor])
 	            return null;
 	        var anode = this.ac[def.constructor]();
+	        this.initNodeParams(anode, def, type);
+	        return anode;
+	    };
+	    Synth.prototype.play = function () {
+	        this.ac.resume();
+	    };
+	    Synth.prototype.stop = function () {
+	        this.ac.suspend();
+	    };
+	    Synth.prototype.noteOn = function (midi, gain, ratio) {
+	        for (var _i = 0, _a = this.noteHandlers; _i < _a.length; _i++) {
+	            var nh = _a[_i];
+	            nh.noteOn(midi, gain, ratio);
+	        }
+	    };
+	    Synth.prototype.noteOff = function (midi, gain) {
+	        for (var _i = 0, _a = this.noteHandlers; _i < _a.length; _i++) {
+	            var nh = _a[_i];
+	            nh.noteOff(midi, gain);
+	        }
+	    };
+	    Synth.prototype.addNoteHandler = function (nh) {
+	        this.noteHandlers.push(nh);
+	    };
+	    Synth.prototype.removeNoteHandler = function (nh) {
+	        notes_1.removeArrayElement(this.noteHandlers, nh);
+	    };
+	    Synth.prototype.initNodeParams = function (anode, def, type) {
 	        for (var _i = 0, _a = Object.keys(def.params || {}); _i < _a.length; _i++) {
 	            var param = _a[_i];
 	            if (!anode[param])
@@ -473,13 +516,6 @@
 	            else
 	                anode[param] = def.params[param].initial;
 	        }
-	        return anode;
-	    };
-	    Synth.prototype.play = function () {
-	        this.ac.resume();
-	    };
-	    Synth.prototype.stop = function () {
-	        this.ac.suspend();
 	    };
 	    return Synth;
 	})();
@@ -500,6 +536,7 @@
 	    // Sources
 	    Oscillator: {
 	        constructor: 'createOscillator',
+	        noteHandler: 'osc',
 	        params: {
 	            frequency: FREQUENCY,
 	            detune: OCTAVE_DETUNE,
@@ -708,6 +745,10 @@
 /* 5 */
 /***/ function(module, exports) {
 
+	var KB_NOTES = 'ZSXDCVGBHNJMQ2W3ER5T6Y7UI9O0P';
+	var BASE_NOTE = 36;
+	var SEMITONE = Math.pow(2, 1 / 12);
+	var A4 = 57;
 	var Keyboard = (function () {
 	    function Keyboard() {
 	        this.setupHandler();
@@ -747,10 +788,67 @@
 	    return Keyboard;
 	})();
 	exports.Keyboard = Keyboard;
-	var KB_NOTES = 'ZSXDCVGBHNJMQ2W3ER5T6Y7UI9O0P';
-	var BASE_NOTE = 36;
-	var SEMITONE = Math.pow(2, 1 / 12);
-	var A4 = 57;
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+	var OscNoteHandler = (function () {
+	    function OscNoteHandler(osc) {
+	        this.osc = osc;
+	        this.outTracker = new OutputTracker(osc);
+	    }
+	    OscNoteHandler.prototype.noteOn = function (midi, gain, ratio) {
+	        //TODO clone, connect and start
+	        console.log(">>> note on:", midi);
+	    };
+	    OscNoteHandler.prototype.noteOff = function (midi, gain) {
+	        //TODO temporarily call noteEnd
+	        console.log("<<< note off:", midi);
+	    };
+	    OscNoteHandler.prototype.noteEnd = function (midi) {
+	        //TODO stop and disconnect
+	    };
+	    return OscNoteHandler;
+	})();
+	exports.NoteHandlers = {
+	    'osc': OscNoteHandler
+	};
+	var OutputTracker = (function () {
+	    function OutputTracker(anode) {
+	        this.outputs = [];
+	        this.onBefore(anode, 'connect', this.connect);
+	        this.onBefore(anode, 'disconnect', this.disconnect);
+	    }
+	    OutputTracker.prototype.connect = function (anode) {
+	        if (!(anode instanceof AudioNode))
+	            return;
+	        this.outputs.push(anode);
+	    };
+	    OutputTracker.prototype.disconnect = function (anode) {
+	        if (!(anode instanceof AudioNode))
+	            return;
+	        removeArrayElement(this.outputs, anode);
+	    };
+	    OutputTracker.prototype.onBefore = function (obj, fname, funcToCall) {
+	        var oldf = obj[fname];
+	        var self = this;
+	        obj[fname] = function () {
+	            funcToCall.apply(self, arguments);
+	            oldf.apply(obj, arguments);
+	        };
+	    };
+	    return OutputTracker;
+	})();
+	function removeArrayElement(a, e) {
+	    var pos = a.indexOf(e);
+	    if (pos < 0)
+	        return false; // not found
+	    a.splice(pos, 1);
+	    return true;
+	}
+	exports.removeArrayElement = removeArrayElement;
 
 
 /***/ }

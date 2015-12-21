@@ -1,6 +1,9 @@
+import { NoteHandler, removeArrayElement } from './notes';
+
 export class Synth {
 	ac: ModernAudioContext;
 	palette: NodePalette;
+	noteHandlers: NoteHandler[] = [];
 
 	constructor() {
 		const CtxClass: any = window.AudioContext || window.webkitAudioContext;
@@ -13,13 +16,7 @@ export class Synth {
 		const def: NodeDef = palette[type];
 		if (!def || !this.ac[def.constructor]) return null;
 		const anode = this.ac[def.constructor]();
-		for (const param of Object.keys(def.params || {}))
-			if (!anode[param])
-				console.warn(`Parameter '${param}' not found for node ${type}'`)
-			else if (anode[param] instanceof AudioParam)
-				anode[param].value = def.params[param].initial;
-			else
-				anode[param] = def.params[param].initial;
+		this.initNodeParams(anode, def, type);
 		return anode;
 	}
 
@@ -30,24 +27,54 @@ export class Synth {
 	stop() {
 		this.ac.suspend();
 	}
+
+	noteOn(midi: number, gain: number, ratio: number): void {
+		for (const nh of this.noteHandlers)
+			nh.noteOn(midi, gain, ratio);
+	}
+
+	noteOff(midi: number, gain: number): void {
+		for (const nh of this.noteHandlers)
+			nh.noteOff(midi, gain);
+	}
+
+	addNoteHandler(nh: NoteHandler): void {
+		this.noteHandlers.push(nh);
+	}
+
+	removeNoteHandler(nh: NoteHandler): void {
+		removeArrayElement(this.noteHandlers, nh)
+	}
+
+	initNodeParams(anode: AudioNode, def: NodeDef, type: string): void {
+		for (const param of Object.keys(def.params || {}))
+			if (!anode[param])
+				console.warn(`Parameter '${param}' not found for node ${type}'`)
+			else if (anode[param] instanceof AudioParam)
+				anode[param].value = def.params[param].initial;
+			else
+				anode[param] = def.params[param].initial;
+	}
+
 }
 
 export interface NodePalette {
-	[key: string]: NodeDef
+	[key: string]: NodeDef;
 }
 
 export interface NodeDef {
-	constructor: string,
-	control?: boolean,
-	params: { [key: string]: NodeParamDef }
+	constructor: string;
+	noteHandler?: string;
+	control?: boolean;
+	params: { [key: string]: NodeParamDef };
 }
 
 export interface NodeParamDef {
-	initial: number | string,
-	min?: number,
-	max?: number,
-	linear?: boolean,
-	choices?: string[]
+	initial: number | string;
+	min?: number;
+	max?: number;
+	linear?: boolean;
+	choices?: string[];
 }
 
 //-------------------- Node palette definition --------------------
@@ -69,6 +96,7 @@ var palette: NodePalette = {
 	// Sources
 	Oscillator: {
 		constructor: 'createOscillator',
+		noteHandler: 'osc',
 		params: {
 			frequency: FREQUENCY,
 			detune: OCTAVE_DETUNE,
