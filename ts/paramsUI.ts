@@ -34,13 +34,19 @@ function renderAudioParam(anode: AudioNode, ndef: NodeDef, param: string, panel:
 	slider.on('input', _ => {
 		const value = slider2param(parseFloat(slider.val()), pdef);
 		numInput.val(truncateFloat(value, 5));
-		aparam.setValueAtTime(value, 0);	//TODO linear/log ramp at frame rate
+		aparam.value = value;
+		//TODO linear/log ramp at frame rate
+		//	...but beware of non-playing source nodes
+		//aparam.setValueAtTime(value, 0);
 	});
 	numInput.on('input', _ => {
 		const value = numInput.val();
 		if (value.length == 0 || isNaN(value)) return;
 		slider.val(param2slider(value, pdef));
-		aparam.setValueAtTime(value, 0);	//TODO linear/log ramp at frame rate
+		aparam.value = value;
+		//TODO linear/log ramp at frame rate
+		//	...but beware of non-playing source nodes
+		//aparam.setValueAtTime(value, 0);
 	});
 }
 
