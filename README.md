@@ -30,6 +30,8 @@ High priority items are in **bold**
 		- Prevent from connecting a control node to more than one destination
 		- Or else, modify the UI to support multiple destination nodes
 	- Long term:
+		- Portamento
+		- Polyphonic synth via a graph clone per voice
 		- Tracker
 		- Custom nodes with WebWorker
 		- Composite nodes, e.g. LFO+Gain

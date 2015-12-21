@@ -11,7 +11,8 @@ export interface NoteHandler {
 class OscNoteHandler implements NoteHandler {
 	node: Node;
 	outTracker: OutputTracker;
-	clones: OscillatorNode[] = [];
+	oscClone: OscillatorNode;
+	lastNote: number;
 
 	constructor(n: Node) {
 		this.node = n;
@@ -19,12 +20,12 @@ class OscNoteHandler implements NoteHandler {
 	}
 
 	noteOn(midi: number, gain: number, ratio: number):void {
-		// Clone, connect and start
-		const osc: OscillatorNode = <OscillatorNode>this.clone();
-		//TODO should also listen to value changes on original osc and apply them to clones
-		this.clones[midi] = osc;
-		osc.frequency.value = osc.frequency.value * ratio;
-		osc.start();
+		if (this.oscClone) this.oscClone.stop();
+		this.oscClone = <OscillatorNode>this.clone();
+		//TODO should also listen to value changes on original osc and apply them to clone
+		this.oscClone.frequency.value = this.oscClone.frequency.value * ratio;
+		this.oscClone.start();
+		this.lastNote = midi;
 	}
 
 	noteOff(midi: number, gain: number): void {
@@ -34,11 +35,10 @@ class OscNoteHandler implements NoteHandler {
 
 	noteEnd(midi: number): void {
 		// Stop and disconnect
-		const osc = this.clones[midi];
-		if (!osc) return;
-		osc.stop();
-		this.disconnect(osc);
-		this.clones[midi] = null;
+		if (!this.oscClone || this.lastNote != midi) return;
+		this.oscClone.stop();
+		this.disconnect(this.oscClone);
+		this.oscClone = null;
 	}
 
 	clone(): AudioNode {
