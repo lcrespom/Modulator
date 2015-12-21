@@ -2,7 +2,6 @@ import { Node } from './graph';
 import { NodeDef, NodeParamDef } from './synth';
 import { NodeData } from './synthUI';
 
-//TODO refactor main so "n" can be typed to NodeData and ndef parameter can be removed
 export function renderParams(ndata: NodeData, panel: JQuery) {
 	panel.empty();
 	if (ndata.nodeDef.control)
@@ -35,18 +34,12 @@ function renderAudioParam(anode: AudioNode, ndef: NodeDef, param: string, panel:
 		const value = slider2param(parseFloat(slider.val()), pdef);
 		numInput.val(truncateFloat(value, 5));
 		aparam.value = value;
-		//TODO linear/log ramp at frame rate
-		//	...but beware of non-playing source nodes
-		//aparam.setValueAtTime(value, 0);
 	});
 	numInput.on('input', _ => {
 		const value = numInput.val();
 		if (value.length == 0 || isNaN(value)) return;
 		slider.val(param2slider(value, pdef));
 		aparam.value = value;
-		//TODO linear/log ramp at frame rate
-		//	...but beware of non-playing source nodes
-		//aparam.setValueAtTime(value, 0);
 	});
 }
 

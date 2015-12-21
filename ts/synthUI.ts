@@ -120,7 +120,7 @@ class SynthGraphHandler implements GraphHandler {
 			srcData.controlParams = null;
 			srcData.anode.disconnect(dstData.anode[srcData.controlParam]);
 		}
-		else //TODO test fan-out
+		else
 			srcData.anode.disconnect(dstData.anode);
 	}
 

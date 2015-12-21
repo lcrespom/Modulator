@@ -717,7 +717,6 @@
 /* 5 */
 /***/ function(module, exports) {
 
-	//TODO refactor main so "n" can be typed to NodeData and ndef parameter can be removed
 	function renderParams(ndata, panel) {
 	    panel.empty();
 	    if (ndata.nodeDef.control)
@@ -752,9 +751,6 @@
 	        var value = slider2param(parseFloat(slider.val()), pdef);
 	        numInput.val(truncateFloat(value, 5));
 	        aparam.value = value;
-	        //TODO linear/log ramp at frame rate
-	        //	...but beware of non-playing source nodes
-	        //aparam.setValueAtTime(value, 0);
 	    });
 	    numInput.on('input', function (_) {
 	        var value = numInput.val();
@@ -762,9 +758,6 @@
 	            return;
 	        slider.val(param2slider(value, pdef));
 	        aparam.value = value;
-	        //TODO linear/log ramp at frame rate
-	        //	...but beware of non-playing source nodes
-	        //aparam.setValueAtTime(value, 0);
 	    });
 	}
 	function renderParamControl(ndata, panel) {
