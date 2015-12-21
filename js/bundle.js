@@ -103,7 +103,7 @@
 	        else {
 	            var nh = data.nodeDef.noteHandler;
 	            if (nh) {
-	                data.noteHandler = new notes_1.NoteHandlers[nh](data.anode);
+	                data.noteHandler = new notes_1.NoteHandlers[nh](n);
 	                this.synth.addNoteHandler(data.noteHandler);
 	            }
 	            else if (data.anode['start'])
@@ -188,20 +188,14 @@
 /***/ function(module, exports) {
 
 	var OscNoteHandler = (function () {
-	    function OscNoteHandler(osc) {
+	    function OscNoteHandler(n) {
 	        this.clones = [];
-	        this.osc = osc;
-	        this.outTracker = new OutputTracker(osc);
+	        this.node = n;
+	        this.outTracker = new OutputTracker(n.data.anode);
 	    }
 	    OscNoteHandler.prototype.noteOn = function (midi, gain, ratio) {
 	        // Clone, connect and start
 	        var osc = this.clone();
-	        for (var _i = 0, _a = this.outTracker.outputs; _i < _a.length; _i++) {
-	            var out = _a[_i];
-	            osc.connect(out);
-	        }
-	        //TODO should store current list of outputs
-	        //...in case user connects or disconnects during playback
 	        //TODO should also listen to value changes on original osc and apply them to clones
 	        this.clones[midi] = osc;
 	        osc.frequency.value = osc.frequency.value * ratio;
@@ -217,18 +211,49 @@
 	        if (!osc)
 	            return;
 	        osc.stop();
-	        for (var _i = 0, _a = this.outTracker.outputs; _i < _a.length; _i++) {
-	            var out = _a[_i];
-	            osc.disconnect(out);
-	        }
+	        this.disconnect(osc);
 	        this.clones[midi] = null;
 	    };
 	    OscNoteHandler.prototype.clone = function () {
-	        var osc = this.osc.context.createOscillator();
-	        osc.frequency.value = this.osc.frequency.value;
-	        osc.detune.value = this.osc.detune.value;
-	        osc.type = this.osc.type;
-	        return osc;
+	        var data = this.node.data;
+	        // Create clone
+	        var anode = data.anode.context[data.nodeDef.constructor]();
+	        // Copy parameters
+	        for (var _i = 0, _a = Object.keys(data.nodeDef.params); _i < _a.length; _i++) {
+	            var pname = _a[_i];
+	            var param = data.anode[pname];
+	            if (param instanceof AudioParam)
+	                anode[pname].value = data.anode[pname].value;
+	            else
+	                anode[pname] = data.anode[pname];
+	        }
+	        // Copy output connections
+	        for (var _b = 0, _c = this.outTracker.outputs; _b < _c.length; _b++) {
+	            var out = _c[_b];
+	            anode.connect(out);
+	        }
+	        // Copy control input connections
+	        for (var _d = 0, _e = this.node.inputs; _d < _e.length; _d++) {
+	            var inNode = _e[_d];
+	            var inData = inNode.data;
+	            inNode.data.anode.connect(anode[inData.controlParam]);
+	        }
+	        //TODO should copy snapshot of list of inputs and outputs
+	        //...in case user connects or disconnects during playback
+	        return anode;
+	    };
+	    OscNoteHandler.prototype.disconnect = function (anode) {
+	        // Disconnect outputs
+	        for (var _i = 0, _a = this.outTracker.outputs; _i < _a.length; _i++) {
+	            var out = _a[_i];
+	            anode.disconnect(out);
+	        }
+	        // Disconnect control inputs
+	        for (var _b = 0, _c = this.node.inputs; _b < _c.length; _b++) {
+	            var inNode = _c[_b];
+	            var inData = inNode.data;
+	            inNode.data.anode.disconnect(anode[inData.controlParam]);
+	        }
 	    };
 	    return OscNoteHandler;
 	})();

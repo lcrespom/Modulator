@@ -1,26 +1,26 @@
+import { Node } from './graph';
+import { NodeData } from './synthUI';
+
 export interface NoteHandler {
 	noteOn(midi: number, gain: number, ratio: number):void;
 	noteOff(midi: number, gain: number): void;
 	noteEnd(midi: number): void;
 }
 
+
 class OscNoteHandler implements NoteHandler {
-	osc: OscillatorNode;
+	node: Node;
 	outTracker: OutputTracker;
 	clones: OscillatorNode[] = [];
 
-	constructor(osc: OscillatorNode) {
-		this.osc = osc;
-		this.outTracker = new OutputTracker(osc);
+	constructor(n: Node) {
+		this.node = n;
+		this.outTracker = new OutputTracker(n.data.anode);
 	}
 
 	noteOn(midi: number, gain: number, ratio: number):void {
 		// Clone, connect and start
-		const osc = this.clone();
-		for (const out of this.outTracker.outputs)
-			osc.connect(out);
-		//TODO should store current list of outputs
-		//...in case user connects or disconnects during playback
+		const osc: OscillatorNode = <OscillatorNode>this.clone();
 		//TODO should also listen to value changes on original osc and apply them to clones
 		this.clones[midi] = osc;
 		osc.frequency.value = osc.frequency.value * ratio;
@@ -34,20 +34,47 @@ class OscNoteHandler implements NoteHandler {
 
 	noteEnd(midi: number): void {
 		// Stop and disconnect
-		const osc:any = this.clones[midi];
+		const osc = this.clones[midi];
 		if (!osc) return;
 		osc.stop();
-		for (const out of this.outTracker.outputs)
-			osc.disconnect(out);
+		this.disconnect(osc);
 		this.clones[midi] = null;
 	}
 
-	clone(): OscillatorNode {
-		const osc = this.osc.context.createOscillator();
-		osc.frequency.value = this.osc.frequency.value;
-		osc.detune.value = this.osc.detune.value;
-		osc.type = this.osc.type;
-		return osc;
+	clone(): AudioNode {
+		const data: NodeData = this.node.data;
+		// Create clone
+		const anode = data.anode.context[data.nodeDef.constructor]();
+		// Copy parameters
+		for (const pname of Object.keys(data.nodeDef.params)) {
+			const param = data.anode[pname];
+			if (param instanceof AudioParam)
+				anode[pname].value = data.anode[pname].value;
+			else
+				anode[pname] = data.anode[pname];
+		}
+		// Copy output connections
+		for (const out of this.outTracker.outputs)
+			anode.connect(out);
+		// Copy control input connections
+		for (const inNode of this.node.inputs) {
+			const inData: NodeData = inNode.data;
+			inNode.data.anode.connect(anode[inData.controlParam]);
+		}
+		//TODO should copy snapshot of list of inputs and outputs
+		//...in case user connects or disconnects during playback
+		return anode;
+	}
+
+	disconnect(anode: AudioNode): void {
+		// Disconnect outputs
+		for (const out of this.outTracker.outputs)
+			anode.disconnect(<any>out);
+		// Disconnect control inputs
+		for (const inNode of this.node.inputs) {
+			const inData: NodeData = inNode.data;
+			inNode.data.anode.disconnect(anode[inData.controlParam]);
+		}
 	}
 
 }
