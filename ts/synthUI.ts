@@ -47,6 +47,8 @@ export class SynthUI {
 				data.noteHandler = new NoteHandlers[nh](data.anode);
 				this.synth.addNoteHandler(data.noteHandler);
 			}
+			// LFO does not have a note handler yet needs to be started
+			else if (data.anode['start']) data.anode['start']();
 		}
 	}
 

@@ -106,6 +106,8 @@
 	                data.noteHandler = new notes_1.NoteHandlers[nh](data.anode);
 	                this.synth.addNoteHandler(data.noteHandler);
 	            }
+	            else if (data.anode['start'])
+	                data.anode['start']();
 	        }
 	    };
 	    return SynthUI;

@@ -7,13 +7,14 @@ to be used with the
 High priority items are in **bold**
 - Bugs
 	- **Fix logscale to accept parameter values between 0 and 1, both included**
+	- Review TODO items inside code
+	- Fix slider numeric value rendering: rounding fails and displays too many digits
 	- Refine rules to determine whether nodes can connect
 	- Arrows are drawn in wrong position when window is vertically scrolled (low)
 
 - Functionality
-	- **Keyboard trigger**
 	- Control nodes
-		- **ADSR (requires keyboard trigger feature)**
+		- **ADSR**
 	- Add all possible AudioNodes available into the palette
 		- Support sampled audio
 		- StereoPanner
@@ -22,7 +23,6 @@ High priority items are in **bold**
 		- Split slider logscale in two with middle value in the middle of the slider,
 			then fine-tune all node definitions (e.g. gain)
 	- Node removal (e.g. via a delete button in parameter box)
-	- Test fan-out by connecting and disconnecting to/from multiple nodes
 	- Dislay osc/fft using AnalyserNode
 	- Load/save instruments
 	- When adding a node from the palette, place it on an empty spot and select it
