@@ -8,7 +8,6 @@ export class Synth {
 	constructor() {
 		const CtxClass: any = window.AudioContext || window.webkitAudioContext;
 		this.ac = new CtxClass();
-		this.stop();
 		this.palette = palette;
 	}
 

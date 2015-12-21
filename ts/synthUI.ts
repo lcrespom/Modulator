@@ -47,8 +47,6 @@ export class SynthUI {
 				data.noteHandler = new NoteHandlers[nh](data.anode);
 				this.synth.addNoteHandler(data.noteHandler);
 			}
-			//TODO remove
-			if (data.anode['start']) data.anode['start']();
 		}
 	}
 
