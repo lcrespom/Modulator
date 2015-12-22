@@ -2,6 +2,7 @@ import { NoteHandler, removeArrayElement } from './notes';
 
 export class Synth {
 	ac: ModernAudioContext;
+	customNodes: { [key: string]: AudioNode };
 	palette: NodePalette;
 	noteHandlers: NoteHandler[] = [];
 
@@ -13,8 +14,10 @@ export class Synth {
 
 	createAudioNode(type: string): AudioNode {
 		const def: NodeDef = palette[type];
-		if (!def || !this.ac[def.constructor]) return null;
-		const anode = this.ac[def.constructor]();
+		if (!def) return null;
+		const factory = def.custom ? this.customNodes : this.ac;
+		if (!factory[def.constructor]) return null;
+		const anode = factory[def.constructor]();
 		this.initNodeParams(anode, def, type);
 		return anode;
 	}
@@ -55,6 +58,10 @@ export class Synth {
 				anode[param] = def.params[param].initial;
 	}
 
+	registerCustomNode(constructorName: string, nodeClass: AudioNode) {
+		this.customNodes[constructorName] = nodeClass;
+	}
+
 }
 
 export interface NodePalette {
@@ -63,6 +70,7 @@ export interface NodePalette {
 
 export interface NodeDef {
 	constructor: string;
+	custom?: boolean;
 	noteHandler?: string;
 	control?: boolean;
 	params: { [key: string]: NodeParamDef };

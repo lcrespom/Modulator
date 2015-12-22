@@ -18,6 +18,11 @@ High priority items are in **bold**
 	- Add all possible AudioNodes available into the palette
 		- Support sampled audio
 		- StereoPanner
+	- Custom nodes
+		- Restartable Oscillator with gain
+		- Restartable sample buffer with gain
+		- ADSR
+		- Full synth as a reusable module (long term)
 	- Improve slider logscale:
 		- Support parameter values < 1 (this is a bug)
 		- Split slider logscale in two with middle value in the middle of the slider,
@@ -29,13 +34,16 @@ High priority items are in **bold**
 	- Limitation: a control node can only control a single node
 		- Prevent from connecting a control node to more than one destination
 		- Or else, modify the UI to support multiple destination nodes
+	- Portamento
+	- Polyphonic synth via a graph clone per voice
 	- Long term:
-		- Portamento
-		- Polyphonic synth via a graph clone per voice
 		- Tracker
 		- Custom nodes with WebWorker
 		- Composite nodes, e.g. LFO+Gain
 		- Record & save audio
+		- Server-side part, supporting:
+			- Loading & saving of resources: synth modules, songs, samples, etc.
+			- User area storing user's synths, current work, etc.
 
 - UI
 	- Help button explaining how to connect etc.

@@ -565,9 +565,12 @@
 	    }
 	    Synth.prototype.createAudioNode = function (type) {
 	        var def = palette[type];
-	        if (!def || !this.ac[def.constructor])
+	        if (!def)
 	            return null;
-	        var anode = this.ac[def.constructor]();
+	        var factory = def.custom ? this.customNodes : this.ac;
+	        if (!factory[def.constructor])
+	            return null;
+	        var anode = factory[def.constructor]();
 	        this.initNodeParams(anode, def, type);
 	        return anode;
 	    };
@@ -605,6 +608,9 @@
 	            else
 	                anode[param] = def.params[param].initial;
 	        }
+	    };
+	    Synth.prototype.registerCustomNode = function (constructorName, nodeClass) {
+	        this.customNodes[constructorName] = nodeClass;
 	    };
 	    return Synth;
 	})();
