@@ -42,7 +42,7 @@ export class SynthUI {
 			n.element.css('background-color', '#BBB');
 		}
 		else {
-			const nh = data.nodeDef.noteHandler; 
+			const nh = data.nodeDef.noteHandler;
 			if (nh) {
 				data.noteHandler = new NoteHandlers[nh](n);
 				this.synth.addNoteHandler(data.noteHandler);
@@ -71,7 +71,8 @@ export class NodeData {
 //-------------------- Privates --------------------
 
 import { Graph, Node, GraphHandler } from './graph';
-import { Synth, NodeDef } from './synth';
+import { Synth } from './synth';
+import { NodeDef } from './palette';
 import { renderParams } from './paramsUI';
 
 class SynthGraphHandler implements GraphHandler {

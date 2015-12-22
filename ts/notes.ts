@@ -76,11 +76,25 @@ class OscNoteHandler implements NoteHandler {
 			inNode.data.anode.disconnect(anode[inData.controlParam]);
 		}
 	}
-
 }
 
+
+class ADSRNoteHandler implements NoteHandler {
+	noteOn(midi: number, gain: number, ratio: number):void {
+		console.log('ADSR: noteOn');
+	}
+	noteOff(midi: number, gain: number): void {
+		console.log('ADSR: noteOff');
+	}
+	noteEnd(midi: number): void {
+
+	}
+}
+
+
 export const NoteHandlers = {
-	'osc': OscNoteHandler	
+	'osc': OscNoteHandler,
+	'ADSR': ADSRNoteHandler
 };
 
 

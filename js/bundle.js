@@ -45,7 +45,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var synthUI_1 = __webpack_require__(1);
-	var keyboard_1 = __webpack_require__(6);
+	var keyboard_1 = __webpack_require__(7);
 	var graphCanvas = $('#graph-canvas')[0];
 	var synthUI = new synthUI_1.SynthUI(graphCanvas, $('#node-params'));
 	setupKeyboard();
@@ -122,7 +122,7 @@
 	//-------------------- Privates --------------------
 	var graph_1 = __webpack_require__(3);
 	var synth_1 = __webpack_require__(4);
-	var paramsUI_1 = __webpack_require__(5);
+	var paramsUI_1 = __webpack_require__(6);
 	var SynthGraphHandler = (function () {
 	    function SynthGraphHandler(jqParams) {
 	        this.jqParams = jqParams;
@@ -256,8 +256,22 @@
 	    };
 	    return OscNoteHandler;
 	})();
+	var ADSRNoteHandler = (function () {
+	    function ADSRNoteHandler() {
+	    }
+	    ADSRNoteHandler.prototype.noteOn = function (midi, gain, ratio) {
+	        console.log('ADSR: noteOn');
+	    };
+	    ADSRNoteHandler.prototype.noteOff = function (midi, gain) {
+	        console.log('ADSR: noteOff');
+	    };
+	    ADSRNoteHandler.prototype.noteEnd = function (midi) {
+	    };
+	    return ADSRNoteHandler;
+	})();
 	exports.NoteHandlers = {
-	    'osc': OscNoteHandler
+	    'osc': OscNoteHandler,
+	    'ADSR': ADSRNoteHandler
 	};
 	var OutputTracker = (function () {
 	    function OutputTracker(anode) {
@@ -555,16 +569,24 @@
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
 	var notes_1 = __webpack_require__(2);
+	var palette_1 = __webpack_require__(5);
 	var Synth = (function () {
 	    function Synth() {
+	        this.customNodes = {};
 	        this.noteHandlers = [];
 	        var CtxClass = window.AudioContext || window.webkitAudioContext;
 	        this.ac = new CtxClass();
-	        this.palette = palette;
+	        this.palette = palette_1.palette;
+	        this.registerCustomNode('createADSR', ADSR);
 	    }
 	    Synth.prototype.createAudioNode = function (type) {
-	        var def = palette[type];
+	        var def = palette_1.palette[type];
 	        if (!def)
 	            return null;
 	        var factory = def.custom ? this.customNodes : this.ac;
@@ -610,11 +632,51 @@
 	        }
 	    };
 	    Synth.prototype.registerCustomNode = function (constructorName, nodeClass) {
-	        this.customNodes[constructorName] = nodeClass;
+	        this.customNodes[constructorName] = function () { return new nodeClass(); };
 	    };
 	    return Synth;
 	})();
 	exports.Synth = Synth;
+	//-------------------- Custom nodes --------------------
+	var CustomNodeBase = (function () {
+	    function CustomNodeBase() {
+	        this.channelCount = 2;
+	        this.channelCountMode = 'max';
+	        this.channelInterpretation = 'speakers';
+	        this.numberOfInputs = 0;
+	        this.numberOfOutputs = 1;
+	    }
+	    CustomNodeBase.prototype.connect = function (param) { };
+	    CustomNodeBase.prototype.disconnect = function () { };
+	    // Required for extending EventTarget
+	    CustomNodeBase.prototype.addEventListener = function () { };
+	    CustomNodeBase.prototype.dispatchEvent = function (evt) { return false; };
+	    CustomNodeBase.prototype.removeEventListener = function () { };
+	    return CustomNodeBase;
+	})();
+	var ADSR = (function (_super) {
+	    __extends(ADSR, _super);
+	    function ADSR() {
+	        _super.apply(this, arguments);
+	        this.attack = 0.2;
+	        this.decay = 0.5;
+	        this.sustain = 0.5;
+	        this.release = 1;
+	    }
+	    ADSR.prototype.connect = function (param) {
+	        //TODO implement
+	    };
+	    ADSR.prototype.disconnect = function () {
+	        //TODO implement
+	    };
+	    return ADSR;
+	})(CustomNodeBase);
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
 	//-------------------- Node palette definition --------------------
 	var OCTAVE_DETUNE = {
 	    initial: 0,
@@ -627,7 +689,7 @@
 	    min: 20,
 	    max: 20000
 	};
-	var palette = {
+	exports.palette = {
 	    // Sources
 	    Oscillator: {
 	        constructor: 'createOscillator',
@@ -714,12 +776,25 @@
 	    Speaker: {
 	        constructor: null,
 	        params: null
+	    },
+	    // Custom
+	    ADSR: {
+	        constructor: 'createADSR',
+	        noteHandler: 'ADSR',
+	        control: true,
+	        custom: true,
+	        params: {
+	            attack: { initial: 0.2, min: 0, max: 10 },
+	            decay: { initial: 0.5, min: 0, max: 10 },
+	            sustain: { initial: 0.5, min: 0, max: 1, linear: true },
+	            release: { initial: 1.0, min: 0, max: 10 },
+	        }
 	    }
 	};
 
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports) {
 
 	function renderParams(ndata, panel) {
@@ -738,32 +813,7 @@
 	function renderAudioParam(anode, ndef, param, panel) {
 	    var pdef = ndef.params[param];
 	    var aparam = anode[param];
-	    var sliderBox = $('<div class="slider-box">');
-	    var slider = $('<input type="range" orient="vertical">')
-	        .attr('min', 0)
-	        .attr('max', 1)
-	        .attr('step', 0.001)
-	        .attr('value', param2slider(aparam.value, pdef));
-	    var numInput = $('<input type="number">')
-	        .attr('min', pdef.min)
-	        .attr('max', pdef.max)
-	        .attr('value', aparam.value);
-	    sliderBox.append(numInput);
-	    sliderBox.append(slider);
-	    sliderBox.append($('<span><br/>' + ucfirst(param) + '</span>'));
-	    panel.append(sliderBox);
-	    slider.on('input', function (_) {
-	        var value = slider2param(parseFloat(slider.val()), pdef);
-	        numInput.val(truncateFloat(value, 5));
-	        aparam.value = value;
-	    });
-	    numInput.on('input', function (_) {
-	        var value = numInput.val();
-	        if (value.length == 0 || isNaN(value))
-	            return;
-	        slider.val(param2slider(value, pdef));
-	        aparam.value = value;
-	    });
+	    renderSlider(panel, pdef, param, aparam.value, function (value) { return aparam.value = value; });
 	}
 	function renderParamControl(ndata, panel) {
 	    if (!ndata.controlParams)
@@ -777,9 +827,43 @@
 	    });
 	}
 	function renderOtherParam(anode, ndef, param, panel) {
-	    var combo = renderCombo(panel, ndef.params[param].choices, anode[param], ucfirst(param));
-	    combo.on('input', function (_) {
-	        anode[param] = combo.val();
+	    var pdef = ndef.params[param];
+	    if (pdef.choices) {
+	        var combo = renderCombo(panel, pdef.choices, anode[param], ucfirst(param));
+	        combo.on('input', function (_) {
+	            anode[param] = combo.val();
+	        });
+	    }
+	    else if (pdef.min != undefined) {
+	        renderSlider(panel, pdef, param, anode[param], function (value) { return anode[param] = value; });
+	    }
+	}
+	function renderSlider(panel, pdef, param, value, setValue) {
+	    var sliderBox = $('<div class="slider-box">');
+	    var slider = $('<input type="range" orient="vertical">')
+	        .attr('min', 0)
+	        .attr('max', 1)
+	        .attr('step', 0.001)
+	        .attr('value', param2slider(value, pdef));
+	    var numInput = $('<input type="number">')
+	        .attr('min', pdef.min)
+	        .attr('max', pdef.max)
+	        .attr('value', truncateFloat(value, 5));
+	    sliderBox.append(numInput);
+	    sliderBox.append(slider);
+	    sliderBox.append($('<span><br/>' + ucfirst(param) + '</span>'));
+	    panel.append(sliderBox);
+	    slider.on('input', function (_) {
+	        var value = slider2param(parseFloat(slider.val()), pdef);
+	        numInput.val(truncateFloat(value, 5));
+	        setValue(value);
+	    });
+	    numInput.on('input', function (_) {
+	        var value = numInput.val();
+	        if (value.length == 0 || isNaN(value))
+	            return;
+	        slider.val(param2slider(value, pdef));
+	        setValue(value);
 	    });
 	}
 	function renderCombo(panel, choices, selected, label) {
@@ -836,7 +920,7 @@
 
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports) {
 
 	var KB_NOTES = 'ZSXDCVGBHNJMQ2W3ER5T6Y7UI9O0P';

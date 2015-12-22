@@ -1,8 +1,10 @@
 import { NoteHandler, removeArrayElement } from './notes';
+import { NodeDef, NodePalette, palette } from './palette';
+
 
 export class Synth {
 	ac: ModernAudioContext;
-	customNodes: { [key: string]: AudioNode };
+	customNodes: { [key: string]: Function } = {};
 	palette: NodePalette;
 	noteHandlers: NoteHandler[] = [];
 
@@ -10,6 +12,7 @@ export class Synth {
 		const CtxClass: any = window.AudioContext || window.webkitAudioContext;
 		this.ac = new CtxClass();
 		this.palette = palette;
+		this.registerCustomNode('createADSR', ADSR);
 	}
 
 	createAudioNode(type: string): AudioNode {
@@ -58,137 +61,43 @@ export class Synth {
 				anode[param] = def.params[param].initial;
 	}
 
-	registerCustomNode(constructorName: string, nodeClass: AudioNode) {
-		this.customNodes[constructorName] = nodeClass;
+	registerCustomNode(constructorName: string, nodeClass: any) {
+		this.customNodes[constructorName] = () => new nodeClass();
 	}
 
 }
 
-export interface NodePalette {
-	[key: string]: NodeDef;
+
+//-------------------- Custom nodes --------------------
+
+class CustomNodeBase implements AudioNode {
+	channelCount = 2;
+	channelCountMode = 'max';
+	channelInterpretation = 'speakers';
+	context: AudioContext;
+	numberOfInputs = 0;
+	numberOfOutputs = 1;
+	connect(param: AudioParam | AudioNode) {}
+	disconnect() {}
+	// Required for extending EventTarget
+	addEventListener(){}
+	dispatchEvent(evt: Event): boolean { return false; }
+	removeEventListener(){}
 }
 
-export interface NodeDef {
-	constructor: string;
-	custom?: boolean;
-	noteHandler?: string;
-	control?: boolean;
-	params: { [key: string]: NodeParamDef };
-}
+class ADSR extends CustomNodeBase {
+	attack: number = 0.2;
+	decay: number = 0.5;
+	sustain: number = 0.5;
+	release: number = 1;
 
-export interface NodeParamDef {
-	initial: number | string;
-	min?: number;
-	max?: number;
-	linear?: boolean;
-	choices?: string[];
-}
-
-//-------------------- Node palette definition --------------------
-
-const OCTAVE_DETUNE: NodeParamDef = {
-	initial: 0,
-	min: -1200,
-	max: 1200,
-	linear: true
-};
-
-const FREQUENCY: NodeParamDef = {
-	initial: 220,
-	min: 20,
-	max: 20000
-};
-
-var palette: NodePalette = {
-	// Sources
-	Oscillator: {
-		constructor: 'createOscillator',
-		noteHandler: 'osc',
-		params: {
-			frequency: FREQUENCY,
-			detune: OCTAVE_DETUNE,
-			type: {
-				initial: 'sawtooth',
-				choices: ['sine', 'square', 'sawtooth', 'triangle']
-			}
-		}
-	},
-	// Effects
-	Gain: {
-		constructor: 'createGain',
-		params: {
-			gain: {
-				initial: 1,
-				min: 0,
-				max: 10,
-				linear: true
-			}
-		}
-	},
-	Filter: {
-		constructor: 'createBiquadFilter',
-		params: {
-			frequency: FREQUENCY,
-			Q: {
-				initial: 0,
-				min: 0,
-				max: 100
-			},
-			//TODO gain
-			detune: OCTAVE_DETUNE,
-			type: {
-				initial: 'lowpass',
-				choices: ['lowpass', 'highpass', 'bandpass',
-					'lowshelf', 'highshelf', 'peaking', 'notch', 'allpass']
-			}
-		},
-	},
-	Delay: {
-		constructor: 'createDelay',
-		params: {
-			delayTime: {
-				initial: 1,
-				min: 0,
-				max: 5
-			}
-		}
-	},
-	// Controllers
-	LFO: {
-		constructor: 'createOscillator',
-		control: true,
-		params: {
-			frequency: {
-				initial: 2,
-				min: 0.01,
-				max: 200
-			},
-			detune: OCTAVE_DETUNE,
-			type: {
-				initial: 'sine',
-				choices: ['sine', 'square', 'sawtooth', 'triangle']
-			}
-		}
-	},
-	GainCtrl: {
-		constructor: 'createGain',
-		control: true,
-		params: {
-			gain: {
-				initial: 10,
-				min: 0,
-				max: 1000,
-				linear: true
-			}
-		}
-	},
-	// Output
-	Speaker: {
-		constructor: null,
-		params: null
+	connect(param: AudioParam | AudioNode) {
+		//TODO implement
 	}
-};
-
+	disconnect() {
+		//TODO implement
+	}
+}
 
 //-------------------- Internal interfaces --------------------
 

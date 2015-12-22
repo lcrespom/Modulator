@@ -1,6 +1,7 @@
 import { Node } from './graph';
-import { NodeDef, NodeParamDef } from './synth';
+import { NodeDef, NodeParamDef } from './palette';
 import { NodeData } from './synthUI';
+
 
 export function renderParams(ndata: NodeData, panel: JQuery) {
 	panel.empty();
@@ -13,34 +14,11 @@ export function renderParams(ndata: NodeData, panel: JQuery) {
 			renderOtherParam(ndata.anode, ndata.nodeDef, param, panel);
 }
 
+
 function renderAudioParam(anode: AudioNode, ndef: NodeDef, param: string, panel: JQuery) {
 	const pdef: NodeParamDef = ndef.params[param];
 	const aparam: AudioParam = anode[param];
-	const sliderBox = $('<div class="slider-box">');
-	const slider = $('<input type="range" orient="vertical">')
-		.attr('min', 0)
-		.attr('max', 1)
-		.attr('step', 0.001)
-		.attr('value', param2slider(aparam.value, pdef))
-	const numInput = $('<input type="number">')
-		.attr('min', pdef.min)
-		.attr('max', pdef.max)
-		.attr('value', aparam.value);
-	sliderBox.append(numInput);
-	sliderBox.append(slider);
-	sliderBox.append($('<span><br/>' + ucfirst(param) + '</span>'));
-	panel.append(sliderBox);
-	slider.on('input', _ => {
-		const value = slider2param(parseFloat(slider.val()), pdef);
-		numInput.val(truncateFloat(value, 5));
-		aparam.value = value;
-	});
-	numInput.on('input', _ => {
-		const value = numInput.val();
-		if (value.length == 0 || isNaN(value)) return;
-		slider.val(param2slider(value, pdef));
-		aparam.value = value;
-	});
+	renderSlider(panel, pdef, param, aparam.value, value => aparam.value = value);
 }
 
 function renderParamControl(ndata: NodeData, panel: JQuery) {
@@ -55,9 +33,45 @@ function renderParamControl(ndata: NodeData, panel: JQuery) {
 }
 
 function renderOtherParam(anode: AudioNode, ndef: NodeDef, param: string, panel: JQuery) {
-	const combo = renderCombo(panel, ndef.params[param].choices, anode[param], ucfirst(param));
-	combo.on('input', _ => {
-		anode[param] = combo.val();
+	const pdef: NodeParamDef = ndef.params[param];
+	if (pdef.choices) {
+		const combo = renderCombo(panel, pdef.choices, anode[param], ucfirst(param));
+		combo.on('input', _ => {
+			anode[param] = combo.val();
+		});
+	}
+	else if (pdef.min != undefined) {
+		renderSlider(panel, pdef, param, anode[param], value => anode[param] = value);
+	}
+}
+
+
+function renderSlider(panel: JQuery, pdef: NodeParamDef,
+	param: string, value: number, setValue: (value: number) => void) {
+	const sliderBox = $('<div class="slider-box">');
+	const slider = $('<input type="range" orient="vertical">')
+		.attr('min', 0)
+		.attr('max', 1)
+		.attr('step', 0.001)
+		.attr('value', param2slider(value, pdef))
+	const numInput = $('<input type="number">')
+		.attr('min', pdef.min)
+		.attr('max', pdef.max)
+		.attr('value', truncateFloat(value, 5));
+	sliderBox.append(numInput);
+	sliderBox.append(slider);
+	sliderBox.append($('<span><br/>' + ucfirst(param) + '</span>'));
+	panel.append(sliderBox);
+	slider.on('input', _ => {
+		const value = slider2param(parseFloat(slider.val()), pdef);
+		numInput.val(truncateFloat(value, 5));
+		setValue(value);
+	});
+	numInput.on('input', _ => {
+		const value = numInput.val();
+		if (value.length == 0 || isNaN(value)) return;
+		slider.val(param2slider(value, pdef));
+		setValue(value);
 	});
 }
 
