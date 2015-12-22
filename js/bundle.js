@@ -707,23 +707,14 @@
 	    Gain: {
 	        constructor: 'createGain',
 	        params: {
-	            gain: {
-	                initial: 1,
-	                min: 0,
-	                max: 10,
-	                linear: true
-	            }
+	            gain: { initial: 1, min: 0, max: 10, linear: true }
 	        }
 	    },
 	    Filter: {
 	        constructor: 'createBiquadFilter',
 	        params: {
 	            frequency: FREQUENCY,
-	            Q: {
-	                initial: 0,
-	                min: 0,
-	                max: 100
-	            },
+	            Q: { initial: 0, min: 0, max: 100 },
 	            //TODO gain
 	            detune: OCTAVE_DETUNE,
 	            type: {
@@ -736,11 +727,7 @@
 	    Delay: {
 	        constructor: 'createDelay',
 	        params: {
-	            delayTime: {
-	                initial: 1,
-	                min: 0,
-	                max: 5
-	            }
+	            delayTime: { initial: 1, min: 0, max: 5 }
 	        }
 	    },
 	    // Controllers
@@ -748,11 +735,7 @@
 	        constructor: 'createOscillator',
 	        control: true,
 	        params: {
-	            frequency: {
-	                initial: 2,
-	                min: 0.01,
-	                max: 200
-	            },
+	            frequency: { initial: 2, min: 0.01, max: 200 },
 	            detune: OCTAVE_DETUNE,
 	            type: {
 	                initial: 'sine',
@@ -764,12 +747,7 @@
 	        constructor: 'createGain',
 	        control: true,
 	        params: {
-	            gain: {
-	                initial: 10,
-	                min: 0,
-	                max: 1000,
-	                linear: true
-	            }
+	            gain: { initial: 10, min: 0, max: 1000, linear: true }
 	        }
 	    },
 	    // Output
