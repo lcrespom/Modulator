@@ -21,6 +21,7 @@ export class Synth {
 		const factory = def.custom ? this.customNodes : this.ac;
 		if (!factory[def.constructor]) return null;
 		const anode = factory[def.constructor]();
+		if (!anode.context) anode.context = this.ac;
 		this.initNodeParams(anode, def, type);
 		return anode;
 	}
@@ -71,6 +72,7 @@ export class Synth {
 //-------------------- Custom nodes --------------------
 
 class CustomNodeBase implements AudioNode {
+	custom = true;
 	channelCount = 2;
 	channelCountMode = 'max';
 	channelInterpretation = 'speakers';
@@ -85,7 +87,7 @@ class CustomNodeBase implements AudioNode {
 	removeEventListener(){}
 }
 
-class ADSR extends CustomNodeBase {
+export class ADSR extends CustomNodeBase {
 	attack: number = 0.2;
 	decay: number = 0.5;
 	sustain: number = 0.5;
@@ -102,12 +104,12 @@ class ADSR extends CustomNodeBase {
 //-------------------- Internal interfaces --------------------
 
 interface ModernWindow extends Window {
-	AudioContext: AudioContext,
-	webkitAudioContext: AudioContext
+	AudioContext: AudioContext;
+	webkitAudioContext: AudioContext;
 }
 declare var window: ModernWindow;
 
 interface ModernAudioContext extends AudioContext {
-	suspend: () => void,
-	resume: () => void,
+	suspend: () => void;
+	resume: () => void;
 }

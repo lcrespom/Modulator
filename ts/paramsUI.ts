@@ -18,7 +18,11 @@ export function renderParams(ndata: NodeData, panel: JQuery) {
 function renderAudioParam(anode: AudioNode, ndef: NodeDef, param: string, panel: JQuery) {
 	const pdef: NodeParamDef = ndef.params[param];
 	const aparam: AudioParam = anode[param];
-	renderSlider(panel, pdef, param, aparam.value, value => aparam.value = value);
+	if (aparam['_value']) aparam.value = aparam['_value'];
+	renderSlider(panel, pdef, param, aparam.value, value => {
+		aparam.value = value;
+		aparam['_value'] = value;
+	});
 }
 
 function renderParamControl(ndata: NodeData, panel: JQuery) {
@@ -68,8 +72,8 @@ function renderSlider(panel: JQuery, pdef: NodeParamDef,
 		setValue(value);
 	});
 	numInput.on('input', _ => {
-		const value = numInput.val();
-		if (value.length == 0 || isNaN(value)) return;
+		const value = parseFloat(numInput.val());
+		if (isNaN(value)) return;
 		slider.val(param2slider(value, pdef));
 		setValue(value);
 	});
