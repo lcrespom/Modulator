@@ -6,7 +6,7 @@ to be used with the
 ##ToDo
 High priority items are in **bold**
 - Bugs
-	- **ADSR needs much more testing (e.g. it fails to control filter cutoff frequency)**
+	- **ADSR needs more testing & refining**
 	- **Fix logscale to accept parameter values between 0 and 1, both included**
 	- ADSR is full of keyboard-tracking bugs and inconsistencies
 	- Fix slider numeric value rendering: rounding fails and displays too many digits

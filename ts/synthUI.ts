@@ -1,4 +1,5 @@
 import { NoteHandler, NoteHandlers } from './notes';
+import { ModernAudioNode } from './modern';
 
 export class SynthUI {
 	gr: Graph;
@@ -179,10 +180,6 @@ class SynthGraphHandler implements GraphHandler {
 	}
 }
 
-
-interface ModernAudioNode extends AudioNode {
-	disconnect(output?: number | AudioNode | AudioParam): void
-}
 
 function getCssFromClass(className, propName) {
 	const tmp = $('<div>').addClass(className);

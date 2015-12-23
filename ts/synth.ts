@@ -1,5 +1,6 @@
 import { NoteHandler, removeArrayElement } from './notes';
 import { NodeDef, NodePalette, palette } from './palette';
+import { ModernWindow, ModernAudioContext } from './modern';
 
 
 export class Synth {
@@ -99,15 +100,5 @@ export class ADSR extends CustomNodeBase {
 	//TODO kb trigger (boolean)
 }
 
-//-------------------- Internal interfaces --------------------
 
-interface ModernWindow extends Window {
-	AudioContext: AudioContext;
-	webkitAudioContext: AudioContext;
-}
 declare var window: ModernWindow;
-
-interface ModernAudioContext extends AudioContext {
-	suspend: () => void;
-	resume: () => void;
-}

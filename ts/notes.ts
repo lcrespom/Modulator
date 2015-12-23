@@ -1,6 +1,7 @@
 import { Node } from './graph';
 import { NodeData } from './synthUI';
 import { ADSR } from './synth';
+import { ModernAudioNode } from './modern';
 
 export interface NoteHandler {
 	noteOn(midi: number, gain: number, ratio: number):void;
@@ -53,10 +54,10 @@ class BaseNoteHandler implements NoteHandler {
 		return anode;
 	}
 
-	disconnect(anode: AudioNode): void {
+	disconnect(anode: ModernAudioNode): void {
 		// Disconnect outputs
 		for (const out of this.outTracker.outputs)
-			anode.disconnect(<any>out);
+			anode.disconnect(out);
 		// Disconnect control inputs
 		for (const inNode of this.node.inputs) {
 			const inData: NodeData = inNode.data;
