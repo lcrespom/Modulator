@@ -9,7 +9,7 @@ export class SynthUI {
 
 	constructor(graphCanvas: HTMLCanvasElement, jqParams: JQuery) {
 		this.gr = new Graph(graphCanvas);
-		this.gr.handler = new SynthGraphHandler(jqParams);
+		this.gr.handler = new SynthGraphHandler(this.gr, jqParams);
 		this.synth = new Synth();
 		this.registerPaletteHandler();
 		this.addOutputNode();
@@ -117,15 +117,17 @@ export class NodeData {
 import { Graph, Node, GraphHandler } from './graph';
 import { Synth } from './synth';
 import { NodeDef } from './palette';
-import { renderParams } from './paramsUI';
+import { renderParams, addDeleteButton } from './paramsUI';
 
 class SynthGraphHandler implements GraphHandler {
 
+	gr: Graph;
 	jqParams: JQuery;
 	arrowColor: string;
 	ctrlArrowColor: string;
 
-	constructor(jqParams) {
+	constructor(gr: Graph, jqParams: JQuery) {
+		this.gr = gr;
 		this.jqParams = jqParams;
 		this.arrowColor = getCssFromClass('arrow', 'color');
 		this.ctrlArrowColor = getCssFromClass('arrow-ctrl', 'color');
@@ -172,6 +174,10 @@ class SynthGraphHandler implements GraphHandler {
 	nodeSelected(n: Node): void {
 		const data: NodeData = n.data;
 		renderParams(data, this.jqParams);
+		if (n.data.anode instanceof AudioDestinationNode) return;
+		addDeleteButton(this.jqParams, () => {
+			this.gr.removeNode(n);
+		});
 	}
 
 	getArrowColor(src: Node, dst: Node): string {

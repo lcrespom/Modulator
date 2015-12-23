@@ -68,7 +68,7 @@
 	var SynthUI = (function () {
 	    function SynthUI(graphCanvas, jqParams) {
 	        this.gr = new graph_1.Graph(graphCanvas);
-	        this.gr.handler = new SynthGraphHandler(jqParams);
+	        this.gr.handler = new SynthGraphHandler(this.gr, jqParams);
 	        this.synth = new synth_1.Synth();
 	        this.registerPaletteHandler();
 	        this.addOutputNode();
@@ -162,7 +162,8 @@
 	var synth_1 = __webpack_require__(4);
 	var paramsUI_1 = __webpack_require__(6);
 	var SynthGraphHandler = (function () {
-	    function SynthGraphHandler(jqParams) {
+	    function SynthGraphHandler(gr, jqParams) {
+	        this.gr = gr;
 	        this.jqParams = jqParams;
 	        this.arrowColor = getCssFromClass('arrow', 'color');
 	        this.ctrlArrowColor = getCssFromClass('arrow-ctrl', 'color');
@@ -203,8 +204,14 @@
 	            srcData.anode.disconnect(dstData.anode);
 	    };
 	    SynthGraphHandler.prototype.nodeSelected = function (n) {
+	        var _this = this;
 	        var data = n.data;
 	        paramsUI_1.renderParams(data, this.jqParams);
+	        if (n.data.anode instanceof AudioDestinationNode)
+	            return;
+	        paramsUI_1.addDeleteButton(this.jqParams, function () {
+	            _this.gr.removeNode(n);
+	        });
 	    };
 	    SynthGraphHandler.prototype.getArrowColor = function (src, dst) {
 	        var srcData = src.data;
@@ -441,7 +448,19 @@
 	        this.draw();
 	    };
 	    Graph.prototype.removeNode = function (n) {
-	        alert('Sorry, not available yet');
+	        var pos = this.nodes.indexOf(n);
+	        if (pos < 0)
+	            return console.warn("Node '" + n.name + "' is not a member of graph");
+	        for (var _i = 0, _a = this.nodes; _i < _a.length; _i++) {
+	            var nn = _a[_i];
+	            if (n == nn)
+	                continue;
+	            this.disconnect(n, nn);
+	            this.disconnect(nn, n);
+	        }
+	        this.nodes.splice(pos, 1);
+	        n.element.remove();
+	        this.draw();
 	    };
 	    Graph.prototype.selectNode = function (n) {
 	        this.graphInteract.selectNode(n);
@@ -900,6 +919,15 @@
 	    }
 	}
 	exports.renderParams = renderParams;
+	function addDeleteButton(panel, handler) {
+	    var button = $("\n\t\t<button class=\"btn btn-danger btn-sm del-node-but\" type=\"button\">\n\t\t\t<span class=\"glyphicon glyphicon-trash\" aria-hidden=\"true\"></span>\n\t\t</button>\n\t");
+	    panel.append(button);
+	    button.click(function (_) {
+	        if (confirm('Delete node?'))
+	            handler();
+	    });
+	}
+	exports.addDeleteButton = addDeleteButton;
 	function renderAudioParam(anode, ndef, param, panel) {
 	    var pdef = ndef.params[param];
 	    var aparam = anode[param];

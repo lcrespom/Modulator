@@ -15,7 +15,6 @@ High priority items are in **bold**
 	- Review TODO items inside code
 
 - Functionality
-	- Node removal (e.g. via a delete button in parameter box)
 	- Add all possible AudioNodes available into the palette
 		- Support sampled audio
 		- StereoPanner
@@ -45,6 +44,7 @@ High priority items are in **bold**
 			- User area storing user's synths, current work, etc.
 
 - UI
+	- Proper Bootstrap popup for confirmation of node deletion
 	- Help
 		- General help button explaining how to connect etc.
 		- Description of each node

@@ -114,3 +114,9 @@ input[type=range][orient=vertical] {
 .choice-box select {
 	border-radius: 3px;
 }
+
+.del-node-but {
+	float: right;
+	margin-top: 145px;
+	margin-right: 15px;
+}

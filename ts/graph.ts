@@ -28,8 +28,18 @@ export class Graph {
 		this.draw();
 	}
 
-	removeNode(n: Node) {
-		alert('Sorry, not available yet');
+	removeNode(n: Node): void {
+		const pos = this.nodes.indexOf(n);
+		if (pos < 0)
+			return console.warn(`Node '${n.name}' is not a member of graph`);
+		for (const nn of this.nodes) {
+			if (n == nn) continue;
+			this.disconnect(n, nn);
+			this.disconnect(nn, n);
+		}
+		this.nodes.splice(pos, 1);
+		n.element.remove();
+		this.draw();
 	}
 
 	selectNode(n: Node) {

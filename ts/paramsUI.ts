@@ -3,7 +3,7 @@ import { NodeDef, NodeParamDef } from './palette';
 import { NodeData } from './synthUI';
 
 
-export function renderParams(ndata: NodeData, panel: JQuery) {
+export function renderParams(ndata: NodeData, panel: JQuery): void {
 	panel.empty();
 	if (ndata.nodeDef.control)
 		renderParamControl(ndata, panel);
@@ -12,6 +12,18 @@ export function renderParams(ndata: NodeData, panel: JQuery) {
 			renderAudioParam(ndata.anode, ndata.nodeDef, param, panel);
 		else
 			renderOtherParam(ndata.anode, ndata.nodeDef, param, panel);
+}
+
+export function addDeleteButton(panel: JQuery, handler: () => void): void {
+	const button = $(`
+		<button class="btn btn-danger btn-sm del-node-but" type="button">
+			<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+		</button>
+	`);
+	panel.append(button);
+	button.click(_ => {
+		if (confirm('Delete node?')) handler();
+	});
 }
 
 
