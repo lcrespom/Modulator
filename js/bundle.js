@@ -251,7 +251,7 @@
 	    }
 	    OscNoteHandler.prototype.noteOn = function (midi, gain, ratio) {
 	        if (this.playing)
-	            this.noteEnd(midi);
+	            this.noteEnd(midi); // Because this is monophonic
 	        this.playing = true;
 	        this.oscClone = this.clone();
 	        //TODO should also listen to value changes on original osc and apply them to clone
@@ -709,12 +709,6 @@
 	        this.sustain = 0.5;
 	        this.release = 1;
 	    }
-	    ADSR.prototype.connect = function (param) {
-	        //TODO implement
-	    };
-	    ADSR.prototype.disconnect = function () {
-	        //TODO implement
-	    };
 	    return ADSR;
 	})(CustomNodeBase);
 	exports.ADSR = ADSR;

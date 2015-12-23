@@ -92,13 +92,9 @@ export class ADSR extends CustomNodeBase {
 	decay: number = 0.5;
 	sustain: number = 0.5;
 	release: number = 1;
-
-	connect(param: AudioParam | AudioNode) {
-		//TODO implement
-	}
-	disconnect() {
-		//TODO implement
-	}
+	//TODO 0 <= depth <= 1
+	//TODO linear / exponential
+	//TODO kb trigger (boolean)
 }
 
 //-------------------- Internal interfaces --------------------

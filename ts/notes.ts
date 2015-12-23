@@ -65,7 +65,7 @@ class OscNoteHandler extends BaseNoteHandler {
 	playing = false;
 
 	noteOn(midi: number, gain: number, ratio: number):void {
-		if (this.playing) this.noteEnd(midi);
+		if (this.playing) this.noteEnd(midi);	// Because this is monophonic
 		this.playing = true;
 		this.oscClone = <OscillatorNode>this.clone();
 		//TODO should also listen to value changes on original osc and apply them to clone
