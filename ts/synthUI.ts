@@ -69,7 +69,7 @@ export class SynthUI {
 		for (let xx = 10; xx < canvasW - this.nw; xx += 10) {
 			for (let yy = 10; yy < canvasH - this.nh; yy += 10) {
 				const dist = this.dist2nearestNode(xx, yy);
-				if (dist > maxDist) {
+				if (dist > maxDist && dist < this.nw * 3) {
 					x = xx;
 					y = yy;
 					maxDist = dist;

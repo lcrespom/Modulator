@@ -123,7 +123,7 @@
 	        for (var xx = 10; xx < canvasW - this.nw; xx += 10) {
 	            for (var yy = 10; yy < canvasH - this.nh; yy += 10) {
 	                var dist = this.dist2nearestNode(xx, yy);
-	                if (dist > maxDist) {
+	                if (dist > maxDist && dist < this.nw * 3) {
 	                    x = xx;
 	                    y = yy;
 	                    maxDist = dist;
