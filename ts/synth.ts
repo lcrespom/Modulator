@@ -35,8 +35,10 @@ export class Synth {
 	}
 
 	noteOn(midi: number, gain: number, ratio: number): void {
-		for (const nh of this.noteHandlers)
+		for (const nh of this.noteHandlers) {
+			if (nh.kbTrigger) nh.handlers = this.noteHandlers;
 			nh.noteOn(midi, gain, ratio);
+		}
 	}
 
 	noteOff(midi: number, gain: number): void {

@@ -6,31 +6,30 @@ to be used with the
 ##ToDo
 High priority items are in **bold**
 - Bugs
+	- **ADSR needs much more testing (e.g. it fails to control filter cutoff frequency)**
 	- **Fix logscale to accept parameter values between 0 and 1, both included**
-	- Review TODO items inside code
+	- ADSR is full of keyboard-tracking bugs and inconsistencies
 	- Fix slider numeric value rendering: rounding fails and displays too many digits
 	- Refine rules to determine whether nodes can connect
 	- Arrows are drawn in wrong position when window is vertically scrolled (low)
+	- Review TODO items inside code
 
 - Functionality
-	- Control nodes
-		- **ADSR**
+	- Node removal (e.g. via a delete button in parameter box)
 	- Add all possible AudioNodes available into the palette
 		- Support sampled audio
 		- StereoPanner
 	- Custom nodes
-		- Restartable Oscillator with gain
-		- Restartable sample buffer with gain
-		- ADSR
+		- Oscillator with gain
+		- Sample buffer with gain
 		- Full synth as a reusable module (long term)
 	- Improve slider logscale:
 		- Support parameter values < 1 (this is a bug)
 		- Split slider logscale in two with middle value in the middle of the slider,
 			then fine-tune all node definitions (e.g. gain)
-	- Node removal (e.g. via a delete button in parameter box)
 	- Dislay osc/fft using AnalyserNode
-	- Load/save instruments
-	- When adding a node from the palette, place it on an empty spot and select it
+	- Load/save instruments (using JSON)
+	- Preset instruments & save to preset
 	- Limitation: a control node can only control a single node
 		- Prevent from connecting a control node to more than one destination
 		- Or else, modify the UI to support multiple destination nodes
@@ -46,7 +45,11 @@ High priority items are in **bold**
 			- User area storing user's synths, current work, etc.
 
 - UI
-	- Help button explaining how to connect etc.
+	- Help
+		- General help button explaining how to connect etc.
+		- Description of each node
+		- Description of each node parameters
+	- Find a better way to add nodes from the palette into the canvas
 	- Remove hardcoded dimensions from canvas
 	- Right-click & drag to connect nodes
 	- Cool design

@@ -1,6 +1,7 @@
 export class Graph {
 
 	nodeCanvas: JQuery;
+	canvas: HTMLCanvasElement;
 	nodes: Node[] = [];
 	graphDraw: GraphDraw;
 	graphInteract: GraphInteraction;
@@ -8,6 +9,7 @@ export class Graph {
 
 	constructor(canvas: HTMLCanvasElement) {
 		this.nodeCanvas = $(canvas.parentElement);
+		this.canvas = canvas;
 		const gc = canvas.getContext('2d');
 		this.graphDraw = new GraphDraw(this, gc, canvas);
 		this.graphInteract = new GraphInteraction(this, gc);
@@ -28,6 +30,10 @@ export class Graph {
 
 	removeNode(n: Node) {
 		alert('Sorry, not available yet');
+	}
+
+	selectNode(n: Node) {
+		this.graphInteract.selectNode(n);
 	}
 
 	connect(srcn: Node, dstn: Node): boolean {
@@ -137,12 +143,16 @@ class GraphInteraction {
 		n.element.click(_ => {
 			if (this.dragging) return;
 			if (this.selectedNode == n) return;
-			if (this.selectedNode)
-				this.selectedNode.element.removeClass('selected');
-			n.element.addClass('selected');
-			this.selectedNode = n;
-			this.graph.handler.nodeSelected(n);
+			this.selectNode(n);
 		});
+	}
+
+	selectNode(n: Node): void {
+		if (this.selectedNode)
+			this.selectedNode.element.removeClass('selected');
+		n.element.addClass('selected');
+		this.selectedNode = n;
+		this.graph.handler.nodeSelected(n);
 	}
 
 	setupConnectHandler() {

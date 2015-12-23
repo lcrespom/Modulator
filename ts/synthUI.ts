@@ -3,6 +3,8 @@ import { NoteHandler, NoteHandlers } from './notes';
 export class SynthUI {
 	gr: Graph;
 	synth: Synth;
+	nw: number;
+	nh: number;
 
 	constructor(graphCanvas: HTMLCanvasElement, jqParams: JQuery) {
 		this.gr = new Graph(graphCanvas);
@@ -14,12 +16,13 @@ export class SynthUI {
 
 	addOutputNode() {
 		//TODO avoid using hardcoded position
-		const out = new Node(500, 180, 'Out');
+		const out = new Node(500, 210, 'Out');
 		const data = new NodeData();
 		out.data = data;
 		data.anode = this.synth.ac.destination;
 		data.nodeDef = this.synth.palette['Speaker'];
 		this.gr.addNode(out);
+		this.initNodeDimensions(out);
 	}
 
 	registerPaletteHandler() {
@@ -31,12 +34,14 @@ export class SynthUI {
 	}
 
 	addNode(type: string, text: string): void {
-		const n = new Node(260, 180, text);
+		let { x, y } = this.findFreeSpot();
+		const n = new Node(x, y, text);
 		const data = new NodeData();
 		n.data = data;
 		data.anode = this.synth.createAudioNode(type);
 		data.nodeDef = this.synth.palette[type];
 		this.gr.addNode(n, data.nodeDef.control ? 'node-ctrl' : undefined);
+		this.gr.selectNode(n);
 		if (!data.anode) {
 			console.warn(`No AudioNode found for '${type}'`);
 			n.element.css('background-color', '#BBB');
@@ -50,6 +55,44 @@ export class SynthUI {
 			// LFO does not have a note handler yet needs to be started
 			else if (data.anode['start']) data.anode['start']();
 		}
+	}
+
+
+	//----- Rest of methods are used to find a free spot in the canvas -----
+
+	findFreeSpot() {
+		let maxDist = 0;
+		const canvasW = this.gr.canvas.width;
+		const canvasH = this.gr.canvas.height;
+		let x = canvasW / 2;
+		let y = canvasH / 2;
+		for (let xx = 10; xx < canvasW - this.nw; xx += 10) {
+			for (let yy = 10; yy < canvasH - this.nh; yy += 10) {
+				const dist = this.dist2nearestNode(xx, yy);
+				if (dist > maxDist) {
+					x = xx;
+					y = yy;
+					maxDist = dist;
+				}
+			}
+		}
+		return { x, y };
+	}
+
+	dist2nearestNode(x: number, y: number) {
+		let minDist = Number.MAX_VALUE;
+		for (const n of this.gr.nodes) {
+			const dx = x - n.x;
+			const dy = y - n.y;
+			const dist = Math.sqrt(dx*dx + dy*dy);
+			if (dist < minDist) minDist = dist;
+		}
+		return minDist;
+	}
+
+	initNodeDimensions(n) {
+		this.nw = n.element.outerWidth();
+		this.nh = n.element.outerHeight();
 	}
 
 }
