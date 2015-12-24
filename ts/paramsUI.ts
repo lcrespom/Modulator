@@ -121,9 +121,8 @@ function param2slider(paramValue: number, pdef: NodeParamDef): number {
 		return (paramValue - pdef.min) / (pdef.max - pdef.min);
 	}
 	else {
-		if (paramValue - pdef.min == 0) return 0;
-		const logRange = logarithm(LOG_BASE, pdef.max - pdef.min);
-		return logarithm(LOG_BASE, paramValue - pdef.min) / logRange;
+		const logRange = logarithm(LOG_BASE, pdef.max + 1 - pdef.min);
+		return logarithm(LOG_BASE, paramValue + 1 - pdef.min) / logRange;
 	}
 }
 
@@ -132,8 +131,8 @@ function slider2param(sliderValue: number, pdef: NodeParamDef): number {
 		return pdef.min + sliderValue * (pdef.max - pdef.min);
 	}
 	else {
-		const logRange = logarithm(LOG_BASE, pdef.max - pdef.min);
-		return pdef.min + Math.pow(LOG_BASE, sliderValue * logRange);
+		const logRange = logarithm(LOG_BASE, pdef.max + 1 - pdef.min);
+		return pdef.min + Math.pow(LOG_BASE, sliderValue * logRange) - 1;
 	}
 }
 

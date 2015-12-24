@@ -22,7 +22,6 @@ Contributions are welcome. Preferred language is TypeScript, but it is not manda
 
 ##ToDo
 - Bugs
-	- **Fix logscale to accept parameter values between 0 and 1, both included**
 	- ADSR needs more testing & refining
 		- Release works only sometimes
 	- Popping sound at note on (probably needs custom oscillator with gain)
@@ -39,10 +38,6 @@ Contributions are welcome. Preferred language is TypeScript, but it is not manda
 		- Sample buffer with gain
 		- Full synth as a reusable module (long term)
 		- Ring modulation using a gain node where the gain is controlled by an oscillator
-	- Improve slider logscale:
-		- Support parameter values < 1 (this is a bug)
-		- Split slider logscale in two with middle value in the middle of the slider,
-			then fine-tune all node definitions (e.g. gain)
 	- Improve ADSR
 		- Linear/exponential switch
 		- Depth parameter to control how much the envelope controls the target parameter

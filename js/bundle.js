@@ -1103,10 +1103,8 @@
 	        return (paramValue - pdef.min) / (pdef.max - pdef.min);
 	    }
 	    else {
-	        if (paramValue - pdef.min == 0)
-	            return 0;
-	        var logRange = logarithm(LOG_BASE, pdef.max - pdef.min);
-	        return logarithm(LOG_BASE, paramValue - pdef.min) / logRange;
+	        var logRange = logarithm(LOG_BASE, pdef.max + 1 - pdef.min);
+	        return logarithm(LOG_BASE, paramValue + 1 - pdef.min) / logRange;
 	    }
 	}
 	function slider2param(sliderValue, pdef) {
@@ -1114,8 +1112,8 @@
 	        return pdef.min + sliderValue * (pdef.max - pdef.min);
 	    }
 	    else {
-	        var logRange = logarithm(LOG_BASE, pdef.max - pdef.min);
-	        return pdef.min + Math.pow(LOG_BASE, sliderValue * logRange);
+	        var logRange = logarithm(LOG_BASE, pdef.max + 1 - pdef.min);
+	        return pdef.min + Math.pow(LOG_BASE, sliderValue * logRange) - 1;
 	    }
 	}
 	//-------------------- Misc utilities --------------------
