@@ -18,7 +18,7 @@ A graphical modular synthesizer, using the
 You can directly try it out [here](//lcrespom.github.io/synth).
 
 ##Contributing
-Contribution is welcome. Preferred language is TypeScript, but it is not mandatory.
+Contributions are welcome. Preferred language is TypeScript, but it is not mandatory.
 
 ##ToDo
 - Bugs
