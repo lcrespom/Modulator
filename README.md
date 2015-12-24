@@ -1,9 +1,9 @@
-#Graph
+#Modulator
 A graphical modular synthesizer, using the
 [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API).
 
-##Usage:
-- Click any synth node from the palette at the right to add it to the canvas.
+##Usage
+- Click any synth node from the palette at the right to add it to the canvas
 - Use regular drag & drop to move audio nodes around in the canvas
 - To connect two nodes:
 	- Place the mouse pointer over the source node
