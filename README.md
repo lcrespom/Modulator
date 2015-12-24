@@ -8,6 +8,7 @@ High priority items are in **bold**
 - Bugs
 	- **ADSR needs more testing & refining**
 	- **Fix logscale to accept parameter values between 0 and 1, both included**
+	- Popping sound at note on (probably needs custom oscillator with gain)
 	- ADSR is full of keyboard-tracking bugs and inconsistencies
 	- Fix slider numeric value rendering: rounding fails and displays too many digits
 	- Refine rules to determine whether nodes can connect
@@ -44,6 +45,7 @@ High priority items are in **bold**
 			- User area storing user's synths, current work, etc.
 
 - UI
+	- Use 10x10 grid for placing nodes after drop (but not during drag: it is not smooth)
 	- Proper Bootstrap popup for confirmation of node deletion
 	- Help
 		- General help button explaining how to connect etc.

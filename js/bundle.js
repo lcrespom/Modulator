@@ -46,6 +46,7 @@
 
 	var synthUI_1 = __webpack_require__(1);
 	var keyboard_1 = __webpack_require__(7);
+	setupTheme();
 	var graphCanvas = $('#graph-canvas')[0];
 	var synthUI = new synthUI_1.SynthUI(graphCanvas, $('#node-params'));
 	setupKeyboard();
@@ -57,6 +58,25 @@
 	    kb.noteOff = function (midi) {
 	        synthUI.synth.noteOff(midi, 1);
 	    };
+	}
+	function setupTheme() {
+	    var search = getSearch();
+	    if (search.theme)
+	        $('body').addClass(search.theme);
+	}
+	function getSearch() {
+	    var search = {};
+	    var sstr = document.location.search;
+	    if (!sstr)
+	        return search;
+	    if (sstr[0] == '?')
+	        sstr = sstr.substr(1);
+	    for (var _i = 0, _a = sstr.split('&'); _i < _a.length; _i++) {
+	        var part = _a[_i];
+	        var kv = part.split('=');
+	        search[kv[0]] = kv[1];
+	    }
+	    return search;
 	}
 
 
@@ -866,7 +886,7 @@
 	        constructor: 'createOscillator',
 	        control: true,
 	        params: {
-	            frequency: { initial: 2, min: 0.01, max: 200 },
+	            frequency: { initial: 5, min: 0.01, max: 200 },
 	            detune: OCTAVE_DETUNE,
 	            type: {
 	                initial: 'sine',

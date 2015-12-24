@@ -79,7 +79,7 @@ export var palette: NodePalette = {
 		constructor: 'createOscillator',
 		control: true,
 		params: {
-			frequency: { initial: 2, min: 0.01, max: 200 },
+			frequency: { initial: 5, min: 0.01, max: 200 },
 			detune: OCTAVE_DETUNE,
 			type: {
 				initial: 'sine',
