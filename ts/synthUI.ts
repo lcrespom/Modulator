@@ -183,6 +183,7 @@ class SynthGraphHandler implements GraphHandler {
 		if (n.data.anode instanceof AudioDestinationNode) return;
 		addDeleteButton(this.jqParams, () => {
 			this.gr.removeNode(n);
+			this.jqParams.empty();
 		});
 	}
 

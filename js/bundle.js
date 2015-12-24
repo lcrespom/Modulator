@@ -241,6 +241,7 @@
 	            return;
 	        paramsUI_1.addDeleteButton(this.jqParams, function () {
 	            _this.gr.removeNode(n);
+	            _this.jqParams.empty();
 	        });
 	    };
 	    SynthGraphHandler.prototype.getArrowColor = function (src, dst) {
@@ -899,11 +900,6 @@
 	    max: 1200,
 	    linear: true
 	};
-	var FREQUENCY = {
-	    initial: 220,
-	    min: 20,
-	    max: 20000
-	};
 	/**
 	 * The set of AudioNodes available to the application, along with
 	 * their configuration.
@@ -914,7 +910,7 @@
 	        constructor: 'createOscillator',
 	        noteHandler: 'osc',
 	        params: {
-	            frequency: FREQUENCY,
+	            frequency: { initial: 220, min: 20, max: 20000 },
 	            detune: OCTAVE_DETUNE,
 	            type: {
 	                initial: 'sawtooth',
@@ -932,7 +928,7 @@
 	    Filter: {
 	        constructor: 'createBiquadFilter',
 	        params: {
-	            frequency: FREQUENCY,
+	            frequency: { initial: 440, min: 20, max: 20000 },
 	            Q: { initial: 0, min: 0, max: 100 },
 	            //TODO gain
 	            detune: OCTAVE_DETUNE,

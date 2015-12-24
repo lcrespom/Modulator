@@ -30,12 +30,6 @@ const OCTAVE_DETUNE: NodeParamDef = {
 	linear: true
 };
 
-const FREQUENCY: NodeParamDef = {
-	initial: 220,
-	min: 20,
-	max: 20000
-};
-
 /**
  * The set of AudioNodes available to the application, along with
  * their configuration.
@@ -46,7 +40,7 @@ export var palette: NodePalette = {
 		constructor: 'createOscillator',
 		noteHandler: 'osc',
 		params: {
-			frequency: FREQUENCY,
+			frequency: { initial: 220, min: 20, max: 20000 },
 			detune: OCTAVE_DETUNE,
 			type: {
 				initial: 'sawtooth',
@@ -64,7 +58,7 @@ export var palette: NodePalette = {
 	Filter: {
 		constructor: 'createBiquadFilter',
 		params: {
-			frequency: FREQUENCY,
+			frequency: { initial: 440, min: 20, max: 20000 },
 			Q: { initial: 0, min: 0, max: 100 },
 			//TODO gain
 			detune: OCTAVE_DETUNE,

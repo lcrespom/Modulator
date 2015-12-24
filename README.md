@@ -24,6 +24,7 @@ Contribution is welcome. Preferred language is TypeScript, but it is not mandato
 - Bugs
 	- **Fix logscale to accept parameter values between 0 and 1, both included**
 	- ADSR needs more testing & refining
+		- Release works only sometimes
 	- Popping sound at note on (probably needs custom oscillator with gain)
 	- Refine rules to determine whether nodes can connect
 	- Arrows are drawn in wrong position when window is vertically scrolled (low)
@@ -31,12 +32,13 @@ Contribution is welcome. Preferred language is TypeScript, but it is not mandato
 
 - Functionality
 	- Add all possible AudioNodes available into the palette
-		- Support sampled audio
+		- Support sampled audio (default sample URL to amen break from Wikipedia)
 		- StereoPanner
 	- Custom nodes
 		- Oscillator with gain
 		- Sample buffer with gain
 		- Full synth as a reusable module (long term)
+		- Ring modulation using a gain node where the gain is controlled by an oscillator
 	- Improve slider logscale:
 		- Support parameter values < 1 (this is a bug)
 		- Split slider logscale in two with middle value in the middle of the slider,
