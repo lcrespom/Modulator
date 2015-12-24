@@ -1,10 +1,26 @@
 #Graph
-A graphical editor, to be used for creating audio routing graphs,
-to be used with the
+A graphical modular synthesizer, using the
 [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API).
 
+##Usage:
+- Click any synth node from the palette at the right to add it to the canvas.
+- Use regular drag & drop to move audio nodes around in the canvas
+- To connect two nodes:
+	- Place the mouse pointer over the source node
+	- Press the shift key
+	- Move the mouse pointer to the destination node
+		(but don't press the mouse button or you will start dragging the node)
+	- Release the shift key to make the connection
+- To disconnect two nodes, simply make the same connection again,
+	and this time it will be removed
+- Use the keyboard to play notes: note C2 is in 'z', note C3 is in 'a'.
+
+You can directly try it out [here](lcrespom.github.io/synth).
+
+##Contributing
+Contribution is welcome. Preferred language is TypeScript, but it is not mandatory.
+
 ##ToDo
-High priority items are in **bold**
 - Bugs
 	- **Fix logscale to accept parameter values between 0 and 1, both included**
 	- ADSR needs more testing & refining
@@ -31,6 +47,7 @@ High priority items are in **bold**
 	- Dislay osc/fft using AnalyserNode
 	- Load/save instruments (using JSON)
 	- Preset instruments & save to preset
+	- Export to dependency-free JavaScript
 	- Limitation: a control node can only control a single node
 		- Prevent from connecting a control node to more than one destination
 		- Or else, modify the UI to support multiple destination nodes
