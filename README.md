@@ -6,11 +6,9 @@ to be used with the
 ##ToDo
 High priority items are in **bold**
 - Bugs
-	- **ADSR needs more testing & refining**
 	- **Fix logscale to accept parameter values between 0 and 1, both included**
+	- ADSR needs more testing & refining
 	- Popping sound at note on (probably needs custom oscillator with gain)
-	- ADSR is full of keyboard-tracking bugs and inconsistencies
-	- Fix slider numeric value rendering: rounding fails and displays too many digits
 	- Refine rules to determine whether nodes can connect
 	- Arrows are drawn in wrong position when window is vertically scrolled (low)
 	- Review TODO items inside code
