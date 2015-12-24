@@ -15,7 +15,7 @@ A graphical modular synthesizer, using the
 	and this time it will be removed
 - Use the keyboard to play notes: note C2 is in 'z', note C3 is in 'a'.
 
-You can directly try it out [here](lcrespom.github.io/synth).
+You can directly try it out [here](//lcrespom.github.io/synth).
 
 ##Contributing
 Contribution is welcome. Preferred language is TypeScript, but it is not mandatory.
