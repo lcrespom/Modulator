@@ -9,6 +9,7 @@ setupTheme();
 const graphCanvas = <HTMLCanvasElement>$('#graph-canvas')[0];
 const synthUI = new SynthUI(graphCanvas, $('#node-params'));
 setupKeyboard();
+setupButtons();
 
 
 function setupKeyboard() {
@@ -19,6 +20,12 @@ function setupKeyboard() {
 	kb.noteOff = (midi) => {
 		synthUI.synth.noteOff(midi, 1);
 	};
+}
+
+function setupButtons() {
+	$('#save-but').click(_ =>
+		console.log(synthUI.gr.toJSON())
+	);
 }
 
 function setupTheme() {

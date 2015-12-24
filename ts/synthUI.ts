@@ -43,6 +43,7 @@ export class SynthUI {
 		const n = new Node(x, y, text);
 		const data = new NodeData();
 		n.data = data;
+		data.type = type;
 		data.anode = this.synth.createAudioNode(type);
 		data.nodeDef = this.synth.palette[type];
 		this.gr.addNode(n, data.nodeDef.control ? 'node-ctrl' : undefined);
@@ -112,6 +113,7 @@ export class SynthUI {
  */
 export class NodeData {
 	// Used by all nodes
+	type: string;
 	anode: ModernAudioNode;
 	nodeDef: NodeDef;
 	// Used by control nodes
@@ -195,6 +197,28 @@ class SynthGraphHandler implements GraphHandler {
 	getArrowColor(src: Node, dst: Node): string {
 		const srcData: NodeData = src.data;
 		return srcData.nodeDef.control ? this.ctrlArrowColor : this.arrowColor;
+	}
+
+	data2json(n: Node): any {
+		const data: NodeData = n.data;
+		if (!data.type) return {};	// This is the dummy output node
+		const params = {};
+		for (const pname of Object.keys(data.nodeDef.params)) {
+			const pvalue = data.anode[pname];
+			params[pname] = pvalue instanceof AudioParam ? pvalue.value : pvalue;
+		}
+		return {
+			type: data.type,
+			params,
+			controlParam: data.controlParam,
+			controlParams: data.controlParams//,
+			//controlTarget: will need to search for it in list of nodes
+			//TODO complete
+		}
+	}
+
+	json2data(n: Node, json: any): void {
+		//TODO: implement
 	}
 }
 

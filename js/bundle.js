@@ -53,6 +53,7 @@
 	var graphCanvas = $('#graph-canvas')[0];
 	var synthUI = new synthUI_1.SynthUI(graphCanvas, $('#node-params'));
 	setupKeyboard();
+	setupButtons();
 	function setupKeyboard() {
 	    var kb = new keyboard_1.Keyboard();
 	    kb.noteOn = function (midi, ratio) {
@@ -61,6 +62,11 @@
 	    kb.noteOff = function (midi) {
 	        synthUI.synth.noteOff(midi, 1);
 	    };
+	}
+	function setupButtons() {
+	    $('#save-but').click(function (_) {
+	        return console.log(synthUI.gr.toJSON());
+	    });
 	}
 	function setupTheme() {
 	    var search = getSearch();
@@ -122,6 +128,7 @@
 	        var n = new graph_1.Node(x, y, text);
 	        var data = new NodeData();
 	        n.data = data;
+	        data.type = type;
 	        data.anode = this.synth.createAudioNode(type);
 	        data.nodeDef = this.synth.palette[type];
 	        this.gr.addNode(n, data.nodeDef.control ? 'node-ctrl' : undefined);
@@ -252,6 +259,26 @@
 	    SynthGraphHandler.prototype.getArrowColor = function (src, dst) {
 	        var srcData = src.data;
 	        return srcData.nodeDef.control ? this.ctrlArrowColor : this.arrowColor;
+	    };
+	    SynthGraphHandler.prototype.data2json = function (n) {
+	        var data = n.data;
+	        if (!data.type)
+	            return {}; // This is the dummy output node
+	        var params = {};
+	        for (var _i = 0, _a = Object.keys(data.nodeDef.params); _i < _a.length; _i++) {
+	            var pname = _a[_i];
+	            var pvalue = data.anode[pname];
+	            params[pname] = pvalue instanceof AudioParam ? pvalue.value : pvalue;
+	        }
+	        return {
+	            type: data.type,
+	            params: params,
+	            controlParam: data.controlParam,
+	            controlParams: data.controlParams //,
+	        };
+	    };
+	    SynthGraphHandler.prototype.json2data = function (n, json) {
+	        //TODO: implement
 	    };
 	    return SynthGraphHandler;
 	})();
@@ -498,6 +525,7 @@
 	var Graph = (function () {
 	    function Graph(canvas) {
 	        this.nodes = [];
+	        this.lastId = 0;
 	        this.nodeCanvas = $(canvas.parentElement);
 	        this.canvas = canvas;
 	        var gc = canvas.getContext('2d');
@@ -506,6 +534,7 @@
 	        this.handler = new DefaultGraphHandler();
 	    }
 	    Graph.prototype.addNode = function (n, classes) {
+	        n.id = this.lastId++;
 	        n.element = $('<div>')
 	            .addClass('node')
 	            .text(n.name)
@@ -551,6 +580,34 @@
 	    Graph.prototype.draw = function () {
 	        this.graphDraw.draw();
 	    };
+	    Graph.prototype.toJSON = function () {
+	        var jsonNodes = [];
+	        var jsonNodeData = [];
+	        for (var _i = 0, _a = this.nodes; _i < _a.length; _i++) {
+	            var node = _a[_i];
+	            var nodeInputs = [];
+	            for (var _b = 0, _c = node.inputs; _b < _c.length; _b++) {
+	                var nin = _c[_b];
+	                nodeInputs.push(nin.id);
+	            }
+	            jsonNodes.push({
+	                id: node.id,
+	                x: node.x,
+	                y: node.y,
+	                name: node.name,
+	                inputs: nodeInputs
+	            });
+	            jsonNodeData.push(this.handler.data2json(node));
+	        }
+	        var jsonGraph = {
+	            nodes: jsonNodes,
+	            nodeData: jsonNodeData
+	        };
+	        return JSON.stringify(jsonGraph);
+	    };
+	    Graph.prototype.fromJSON = function (json) {
+	        //TODO implement
+	    };
 	    return Graph;
 	})();
 	exports.Graph = Graph;
@@ -589,6 +646,8 @@
 	    DefaultGraphHandler.prototype.disconnected = function (src, dst) { };
 	    DefaultGraphHandler.prototype.nodeSelected = function (n) { };
 	    DefaultGraphHandler.prototype.getArrowColor = function (src, dst) { return "black"; };
+	    DefaultGraphHandler.prototype.data2json = function (n) { return {}; };
+	    DefaultGraphHandler.prototype.json2data = function (n, json) { };
 	    return DefaultGraphHandler;
 	})();
 	/**

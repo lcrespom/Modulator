@@ -9,6 +9,7 @@ export class Graph {
 	graphDraw: GraphDraw;
 	graphInteract: GraphInteraction;
 	handler: GraphHandler;
+	lastId: number = 0;
 
 	constructor(canvas: HTMLCanvasElement) {
 		this.nodeCanvas = $(canvas.parentElement);
@@ -20,6 +21,7 @@ export class Graph {
 	}
 
 	addNode(n: Node, classes?: string) {
+		n.id = this.lastId++;
 		n.element = $('<div>')
 			.addClass('node')
 			.text(n.name)
@@ -67,6 +69,32 @@ export class Graph {
 		this.graphDraw.draw();
 	}
 
+	toJSON(): string {
+		const jsonNodes = [];
+		const jsonNodeData = [];
+		for (const node of this.nodes) {
+			const nodeInputs = [];
+			for (const nin of node.inputs)
+				nodeInputs.push(nin.id);
+			jsonNodes.push({
+				id: node.id,
+				x: node.x,
+				y: node.y,
+				name: node.name,
+				inputs: nodeInputs
+			});
+			jsonNodeData.push(this.handler.data2json(node));
+		}
+		const jsonGraph = {
+			nodes: jsonNodes,
+			nodeData: jsonNodeData
+		}
+		return JSON.stringify(jsonGraph);
+	}
+
+	fromJSON(json: any) {
+		//TODO implement
+	}
 }
 
 /**
@@ -74,6 +102,7 @@ export class Graph {
  * to its data property.
  */
 export class Node {
+	id: number;
 	x: number;
 	y: number;
 	name: string;
@@ -113,6 +142,8 @@ export interface GraphHandler {
 	disconnected(src: Node, dst: Node): void;
 	nodeSelected(n: Node): void;
 	getArrowColor(src: Node, dst: Node): string;
+	data2json(n: Node): any;
+	json2data(n: Node, json: any): void;
 }
 
 
@@ -126,6 +157,8 @@ class DefaultGraphHandler implements GraphHandler {
 	disconnected(src: Node, dst: Node):void {}
 	nodeSelected(n: Node): void {}
 	getArrowColor(src: Node, dst: Node): string { return "black"; }
+	data2json(n: Node): any { return {}; }
+	json2data(n: Node, json: any): void {}
 }
 
 /**
