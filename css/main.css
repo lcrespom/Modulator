@@ -72,10 +72,21 @@ body {
 
 .params-box {
 	height: 210px;
-	width: 805px;
+	width: 595px;
 	margin-top: 5px;
 	margin-bottom: 10px;
 	overflow-x: auto;
+	display: inline-block;
+}
+
+.presets-box {
+	height: 210px;
+	width: 200px;
+	margin-top: 5px;
+	margin-bottom: 10px;
+	margin-left: 10px;
+	vertical-align: top;
+	display: inline-block;
 }
 
 input[type=range][orient=vertical] {

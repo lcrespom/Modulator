@@ -62,6 +62,7 @@ Contributions are welcome. Preferred language is TypeScript, but it is not manda
 - UI
 	- Use 10x10 grid for placing nodes after drop (but not during drag: it is not smooth)
 	- Proper Bootstrap popup for confirmation of node deletion
+	- Center parameters horizontally in parameters panel
 	- Help
 		- General help button explaining how to connect etc.
 		- Description of each node
