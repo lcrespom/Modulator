@@ -13,7 +13,7 @@ export class SynthUI {
 
 	constructor(graphCanvas: HTMLCanvasElement, jqParams: JQuery) {
 		this.gr = new Graph(graphCanvas);
-		this.gr.handler = new SynthGraphHandler(this.gr, jqParams);
+		this.gr.handler = new SynthGraphHandler(this, jqParams);
 		this.synth = new Synth();
 		this.registerPaletteHandler();
 		this.addOutputNode();
@@ -50,18 +50,23 @@ export class SynthUI {
 		if (!data.anode) {
 			console.warn(`No AudioNode found for '${type}'`);
 			n.element.css('background-color', '#BBB');
+			return;
 		}
-		else {
-			const nh = data.nodeDef.noteHandler;
-			if (nh) {
-				data.noteHandler = new NoteHandlers[nh](n);
-				this.synth.addNoteHandler(data.noteHandler);
-			}
-			// LFO does not have a note handler yet needs to be started
-			else if (data.anode['start']) data.anode['start']();
+		const nh = data.nodeDef.noteHandler;
+		if (nh) {
+			data.noteHandler = new NoteHandlers[nh](n);
+			this.synth.addNoteHandler(data.noteHandler);
 		}
+		// LFO does not have a note handler yet needs to be started
+		else if (data.anode['start']) data.anode['start']();
 	}
 
+	removeNode(n: Node) {
+		this.gr.removeNode(n);
+		const data: NodeData = n.data;
+		if (data.noteHandler)
+			this.synth.removeNoteHandler(data.noteHandler);
+	}
 
 	//----- Rest of methods are used to find a free spot in the canvas -----
 
@@ -127,13 +132,13 @@ import { renderParams, addDeleteButton } from './paramsUI';
 
 class SynthGraphHandler implements GraphHandler {
 
-	gr: Graph;
+	synthUI: SynthUI;
 	jqParams: JQuery;
 	arrowColor: string;
 	ctrlArrowColor: string;
 
-	constructor(gr: Graph, jqParams: JQuery) {
-		this.gr = gr;
+	constructor(synthUI: SynthUI, jqParams: JQuery) {
+		this.synthUI = synthUI;
 		this.jqParams = jqParams;
 		this.arrowColor = getCssFromClass('arrow', 'color');
 		this.ctrlArrowColor = getCssFromClass('arrow-ctrl', 'color');
@@ -182,7 +187,7 @@ class SynthGraphHandler implements GraphHandler {
 		renderParams(data, this.jqParams);
 		if (n.data.anode instanceof AudioDestinationNode) return;
 		addDeleteButton(this.jqParams, () => {
-			this.gr.removeNode(n);
+			this.synthUI.removeNode(n);
 			this.jqParams.empty();
 		});
 	}

@@ -95,7 +95,7 @@
 	var SynthUI = (function () {
 	    function SynthUI(graphCanvas, jqParams) {
 	        this.gr = new graph_1.Graph(graphCanvas);
-	        this.gr.handler = new SynthGraphHandler(this.gr, jqParams);
+	        this.gr.handler = new SynthGraphHandler(this, jqParams);
 	        this.synth = new synth_1.Synth();
 	        this.registerPaletteHandler();
 	        this.addOutputNode();
@@ -129,16 +129,21 @@
 	        if (!data.anode) {
 	            console.warn("No AudioNode found for '" + type + "'");
 	            n.element.css('background-color', '#BBB');
+	            return;
 	        }
-	        else {
-	            var nh = data.nodeDef.noteHandler;
-	            if (nh) {
-	                data.noteHandler = new notes_1.NoteHandlers[nh](n);
-	                this.synth.addNoteHandler(data.noteHandler);
-	            }
-	            else if (data.anode['start'])
-	                data.anode['start']();
+	        var nh = data.nodeDef.noteHandler;
+	        if (nh) {
+	            data.noteHandler = new notes_1.NoteHandlers[nh](n);
+	            this.synth.addNoteHandler(data.noteHandler);
 	        }
+	        else if (data.anode['start'])
+	            data.anode['start']();
+	    };
+	    SynthUI.prototype.removeNode = function (n) {
+	        this.gr.removeNode(n);
+	        var data = n.data;
+	        if (data.noteHandler)
+	            this.synth.removeNoteHandler(data.noteHandler);
 	    };
 	    //----- Rest of methods are used to find a free spot in the canvas -----
 	    SynthUI.prototype.findFreeSpot = function () {
@@ -192,8 +197,8 @@
 	var synth_1 = __webpack_require__(5);
 	var paramsUI_1 = __webpack_require__(7);
 	var SynthGraphHandler = (function () {
-	    function SynthGraphHandler(gr, jqParams) {
-	        this.gr = gr;
+	    function SynthGraphHandler(synthUI, jqParams) {
+	        this.synthUI = synthUI;
 	        this.jqParams = jqParams;
 	        this.arrowColor = getCssFromClass('arrow', 'color');
 	        this.ctrlArrowColor = getCssFromClass('arrow-ctrl', 'color');
@@ -240,7 +245,7 @@
 	        if (n.data.anode instanceof AudioDestinationNode)
 	            return;
 	        paramsUI_1.addDeleteButton(this.jqParams, function () {
-	            _this.gr.removeNode(n);
+	            _this.synthUI.removeNode(n);
 	            _this.jqParams.empty();
 	        });
 	    };
