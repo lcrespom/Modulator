@@ -3,7 +3,10 @@ const BASE_NOTE = 36;
 const SEMITONE = Math.pow(2, 1/12);
 const A4 = 57;
 
-
+/**
+ * Provides a piano keyboard using the PC keyboard.
+ * Listens to keyboard events and generates MIDI-style noteOn/noteOff events.
+ */
 export class Keyboard {
 
 	constructor() {

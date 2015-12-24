@@ -1,8 +1,12 @@
 import { Node } from './graph';
 import { NodeData } from './synthUI';
 import { ADSR } from './synth';
-import { ModernAudioNode } from './modern';
+import { ModernAudioNode, removeArrayElement } from './modern';
 
+/**
+ * A note handler handles MIDI keyboard events on behalf of a synth node,
+ * updating the node status accordingly.
+ */
 export interface NoteHandler {
 	noteOn(midi: number, gain: number, ratio: number):void;
 	noteOff(midi: number, gain: number): void;
@@ -12,7 +16,9 @@ export interface NoteHandler {
 	handlers: NoteHandler[];
 }
 
-
+/**
+ * Handles common AudioNode cloning, used by oscillator and buffered data nodes.
+ */
 class BaseNoteHandler implements NoteHandler {
 	node: Node;
 	outTracker: OutputTracker;
@@ -66,6 +72,9 @@ class BaseNoteHandler implements NoteHandler {
 	}
 }
 
+/**
+ * Handles note events for an OscillatorNode
+ */
 class OscNoteHandler extends BaseNoteHandler {
 	oscClone: OscillatorNode;
 	lastNote: number;
@@ -98,6 +107,9 @@ class OscNoteHandler extends BaseNoteHandler {
 
 }
 
+/**
+ * Handles note events for a custom ADSR node
+ */
 
 class ADSRNoteHandler extends BaseNoteHandler {
 	lastNote: number;
@@ -152,14 +164,20 @@ class ADSRNoteHandler extends BaseNoteHandler {
 	}
 }
 
-
+/**
+ * Exports available note handlers so they are used by their respective
+ * nodes from the palette.
+ */
 export const NoteHandlers = {
 	'osc': OscNoteHandler,
 	'ADSR': ADSRNoteHandler
 };
 
 
-
+/**
+ * Tracks a node output connections and disconnections, to be used
+ * when cloning, removing or controlling nodes.
+ */
 class OutputTracker {
 	outputs: (AudioNode | AudioParam) [] = [];
 
@@ -184,12 +202,4 @@ class OutputTracker {
 			oldf.apply(obj, arguments);
 		}
 	}
-}
-
-
-export function removeArrayElement(a: any[], e: any): boolean {
-	const pos = a.indexOf(e);
-	if (pos < 0) return false;	// not found
-	a.splice(pos, 1);
-	return true;
 }

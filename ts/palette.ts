@@ -1,7 +1,13 @@
-export interface NodePalette {
-	[key: string]: NodeDef;
+/** Configuration data for an AudioNode parameter */
+export interface NodeParamDef {
+	initial: number | string;
+	min?: number;
+	max?: number;
+	linear?: boolean;
+	choices?: string[];
 }
 
+/** Configuration data for an AudioNode */
 export interface NodeDef {
 	constructor: string;
 	custom?: boolean;
@@ -10,12 +16,9 @@ export interface NodeDef {
 	params: { [key: string]: NodeParamDef };
 }
 
-export interface NodeParamDef {
-	initial: number | string;
-	min?: number;
-	max?: number;
-	linear?: boolean;
-	choices?: string[];
+/** A set of AudioNode configuration elements */
+export interface NodePalette {
+	[key: string]: NodeDef;
 }
 
 //-------------------- Node palette definition --------------------
@@ -33,6 +36,10 @@ const FREQUENCY: NodeParamDef = {
 	max: 20000
 };
 
+/**
+ * The set of AudioNodes available to the application, along with
+ * their configuration.
+ */
 export var palette: NodePalette = {
 	// Sources
 	Oscillator: {

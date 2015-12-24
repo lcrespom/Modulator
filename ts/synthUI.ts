@@ -1,6 +1,10 @@
 import { NoteHandler, NoteHandlers } from './notes';
 import { ModernAudioNode } from './modern';
 
+/**
+ * Customizes the generic graph editor in order to manipulate and control a graph of
+ * AudioNodes
+ */
 export class SynthUI {
 	gr: Graph;
 	synth: Synth;
@@ -98,7 +102,9 @@ export class SynthUI {
 
 }
 
-
+/**
+ * Holds all data associated with an AudioNode in the graph
+ */
 export class NodeData {
 	// Used by all nodes
 	anode: ModernAudioNode;

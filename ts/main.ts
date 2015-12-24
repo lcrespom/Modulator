@@ -1,3 +1,7 @@
+/**
+ * Main entry point: setup synth editor and keyboard listener.
+ */
+
 import { SynthUI } from './synthUI';
 import { Keyboard } from './keyboard';
 

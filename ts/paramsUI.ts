@@ -2,7 +2,9 @@ import { Node } from './graph';
 import { NodeDef, NodeParamDef } from './palette';
 import { NodeData } from './synthUI';
 
-
+/**
+ * Renders the UI controls associated with the parameters of a given node
+ */
 export function renderParams(ndata: NodeData, panel: JQuery): void {
 	panel.empty();
 	if (ndata.nodeDef.control)
@@ -14,6 +16,9 @@ export function renderParams(ndata: NodeData, panel: JQuery): void {
 			renderOtherParam(ndata.anode, ndata.nodeDef, param, panel);
 }
 
+/**
+ * Renders a "delete node" button inside the parameters panel
+ */
 export function addDeleteButton(panel: JQuery, handler: () => void): void {
 	const button = $(`
 		<button class="btn btn-danger btn-sm del-node-but" type="button">

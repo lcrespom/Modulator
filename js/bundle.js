@@ -44,8 +44,11 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
+	/**
+	 * Main entry point: setup synth editor and keyboard listener.
+	 */
 	var synthUI_1 = __webpack_require__(1);
-	var keyboard_1 = __webpack_require__(7);
+	var keyboard_1 = __webpack_require__(8);
 	setupTheme();
 	var graphCanvas = $('#graph-canvas')[0];
 	var synthUI = new synthUI_1.SynthUI(graphCanvas, $('#node-params'));
@@ -85,6 +88,10 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var notes_1 = __webpack_require__(2);
+	/**
+	 * Customizes the generic graph editor in order to manipulate and control a graph of
+	 * AudioNodes
+	 */
 	var SynthUI = (function () {
 	    function SynthUI(graphCanvas, jqParams) {
 	        this.gr = new graph_1.Graph(graphCanvas);
@@ -171,6 +178,9 @@
 	    return SynthUI;
 	})();
 	exports.SynthUI = SynthUI;
+	/**
+	 * Holds all data associated with an AudioNode in the graph
+	 */
 	var NodeData = (function () {
 	    function NodeData() {
 	    }
@@ -178,9 +188,9 @@
 	})();
 	exports.NodeData = NodeData;
 	//-------------------- Privates --------------------
-	var graph_1 = __webpack_require__(3);
-	var synth_1 = __webpack_require__(4);
-	var paramsUI_1 = __webpack_require__(6);
+	var graph_1 = __webpack_require__(4);
+	var synth_1 = __webpack_require__(5);
+	var paramsUI_1 = __webpack_require__(7);
 	var SynthGraphHandler = (function () {
 	    function SynthGraphHandler(gr, jqParams) {
 	        this.gr = gr;
@@ -250,13 +260,17 @@
 
 /***/ },
 /* 2 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	var __extends = (this && this.__extends) || function (d, b) {
 	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
+	var modern_1 = __webpack_require__(3);
+	/**
+	 * Handles common AudioNode cloning, used by oscillator and buffered data nodes.
+	 */
 	var BaseNoteHandler = (function () {
 	    function BaseNoteHandler(n) {
 	        this.kbTrigger = false;
@@ -311,6 +325,9 @@
 	    };
 	    return BaseNoteHandler;
 	})();
+	/**
+	 * Handles note events for an OscillatorNode
+	 */
 	var OscNoteHandler = (function (_super) {
 	    __extends(OscNoteHandler, _super);
 	    function OscNoteHandler() {
@@ -345,6 +362,9 @@
 	    };
 	    return OscNoteHandler;
 	})(BaseNoteHandler);
+	/**
+	 * Handles note events for a custom ADSR node
+	 */
 	var ADSRNoteHandler = (function (_super) {
 	    __extends(ADSRNoteHandler, _super);
 	    function ADSRNoteHandler() {
@@ -405,10 +425,18 @@
 	    };
 	    return ADSRNoteHandler;
 	})(BaseNoteHandler);
+	/**
+	 * Exports available note handlers so they are used by their respective
+	 * nodes from the palette.
+	 */
 	exports.NoteHandlers = {
 	    'osc': OscNoteHandler,
 	    'ADSR': ADSRNoteHandler
 	};
+	/**
+	 * Tracks a node output connections and disconnections, to be used
+	 * when cloning, removing or controlling nodes.
+	 */
 	var OutputTracker = (function () {
 	    function OutputTracker(anode) {
 	        this.outputs = [];
@@ -419,7 +447,7 @@
 	        this.outputs.push(np);
 	    };
 	    OutputTracker.prototype.disconnect = function (np) {
-	        removeArrayElement(this.outputs, np);
+	        modern_1.removeArrayElement(this.outputs, np);
 	    };
 	    OutputTracker.prototype.onBefore = function (obj, fname, funcToCall) {
 	        var oldf = obj[fname];
@@ -431,6 +459,19 @@
 	    };
 	    return OutputTracker;
 	})();
+
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	/**
+	 * Modernize browser interfaces so that TypeScript does not complain
+	 * when calling new features.
+	 *
+	 * Also provides some basic utility funcitons which should be part of
+	 * the standard JavaScript library.
+	 */
 	function removeArrayElement(a, e) {
 	    var pos = a.indexOf(e);
 	    if (pos < 0)
@@ -442,9 +483,12 @@
 
 
 /***/ },
-/* 3 */
+/* 4 */
 /***/ function(module, exports) {
 
+	/**
+	 * A generic directed graph editor.
+	 */
 	var Graph = (function () {
 	    function Graph(canvas) {
 	        this.nodes = [];
@@ -504,6 +548,10 @@
 	    return Graph;
 	})();
 	exports.Graph = Graph;
+	/**
+	 * A node in the graph. Application-specific data can be attached
+	 * to its data property.
+	 */
 	var Node = (function () {
 	    function Node(x, y, name) {
 	        this.inputs = [];
@@ -525,6 +573,7 @@
 	})();
 	exports.Node = Node;
 	//------------------------- Privates -------------------------
+	/** Default, do-nothing GraphHandler implementation */
 	var DefaultGraphHandler = (function () {
 	    function DefaultGraphHandler() {
 	    }
@@ -536,6 +585,10 @@
 	    DefaultGraphHandler.prototype.getArrowColor = function (src, dst) { return "black"; };
 	    return DefaultGraphHandler;
 	})();
+	/**
+	 * Handles all UI interaction with graph in order to move, select, connect
+	 * and disconnect nodes.
+	 */
 	var GraphInteraction = (function () {
 	    function GraphInteraction(graph, gc) {
 	        this.dragging = false;
@@ -664,6 +717,9 @@
 	    };
 	    return GraphInteraction;
 	})();
+	/**
+	 * Handles graph drawing by rendering arrows in a canvas.
+	 */
 	var GraphDraw = (function () {
 	    function GraphDraw(graph, gc, canvas) {
 	        this.arrowHeadLen = 10;
@@ -717,7 +773,7 @@
 
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __extends = (this && this.__extends) || function (d, b) {
@@ -725,8 +781,13 @@
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var notes_1 = __webpack_require__(2);
-	var palette_1 = __webpack_require__(5);
+	var palette_1 = __webpack_require__(6);
+	var modern_1 = __webpack_require__(3);
+	/**
+	 * Performs global operations on all AudioNodes:
+	 * - Manages AudioNode creation and initialization from the palette
+	 * - Distributes MIDI keyboard events to NoteHandlers
+	 */
 	var Synth = (function () {
 	    function Synth() {
 	        this.customNodes = {};
@@ -773,7 +834,7 @@
 	        this.noteHandlers.push(nh);
 	    };
 	    Synth.prototype.removeNoteHandler = function (nh) {
-	        notes_1.removeArrayElement(this.noteHandlers, nh);
+	        modern_1.removeArrayElement(this.noteHandlers, nh);
 	    };
 	    Synth.prototype.initNodeParams = function (anode, def, type) {
 	        for (var _i = 0, _a = Object.keys(def.params || {}); _i < _a.length; _i++) {
@@ -810,6 +871,9 @@
 	    CustomNodeBase.prototype.removeEventListener = function () { };
 	    return CustomNodeBase;
 	})();
+	/**
+	 * A custom AudioNode providing ADSR envelope control
+	 */
 	var ADSR = (function (_super) {
 	    __extends(ADSR, _super);
 	    function ADSR() {
@@ -825,7 +889,7 @@
 
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports) {
 
 	//-------------------- Node palette definition --------------------
@@ -840,6 +904,10 @@
 	    min: 20,
 	    max: 20000
 	};
+	/**
+	 * The set of AudioNodes available to the application, along with
+	 * their configuration.
+	 */
 	exports.palette = {
 	    // Sources
 	    Oscillator: {
@@ -923,9 +991,12 @@
 
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports) {
 
+	/**
+	 * Renders the UI controls associated with the parameters of a given node
+	 */
 	function renderParams(ndata, panel) {
 	    panel.empty();
 	    if (ndata.nodeDef.control)
@@ -939,6 +1010,9 @@
 	    }
 	}
 	exports.renderParams = renderParams;
+	/**
+	 * Renders a "delete node" button inside the parameters panel
+	 */
 	function addDeleteButton(panel, handler) {
 	    var button = $("\n\t\t<button class=\"btn btn-danger btn-sm del-node-but\" type=\"button\">\n\t\t\t<span class=\"glyphicon glyphicon-trash\" aria-hidden=\"true\"></span>\n\t\t</button>\n\t");
 	    panel.append(button);
@@ -1063,13 +1137,17 @@
 
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports) {
 
 	var KB_NOTES = 'ZSXDCVGBHNJMQ2W3ER5T6Y7UI9O0P';
 	var BASE_NOTE = 36;
 	var SEMITONE = Math.pow(2, 1 / 12);
 	var A4 = 57;
+	/**
+	 * Provides a piano keyboard using the PC keyboard.
+	 * Listens to keyboard events and generates MIDI-style noteOn/noteOff events.
+	 */
 	var Keyboard = (function () {
 	    function Keyboard() {
 	        this.setupHandler();

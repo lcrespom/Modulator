@@ -1,8 +1,12 @@
-import { NoteHandler, removeArrayElement } from './notes';
+import { NoteHandler } from './notes';
 import { NodeDef, NodePalette, palette } from './palette';
-import { ModernWindow, ModernAudioContext } from './modern';
+import { ModernWindow, ModernAudioContext, removeArrayElement } from './modern';
 
-
+/**
+ * Performs global operations on all AudioNodes:
+ * - Manages AudioNode creation and initialization from the palette
+ * - Distributes MIDI keyboard events to NoteHandlers
+ */
 export class Synth {
 	ac: ModernAudioContext;
 	customNodes: { [key: string]: Function } = {};
@@ -90,6 +94,9 @@ class CustomNodeBase implements AudioNode {
 	removeEventListener(){}
 }
 
+/**
+ * A custom AudioNode providing ADSR envelope control
+ */
 export class ADSR extends CustomNodeBase {
 	attack: number = 0.2;
 	decay: number = 0.5;

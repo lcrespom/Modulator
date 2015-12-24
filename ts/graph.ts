@@ -1,3 +1,6 @@
+/**
+ * A generic directed graph editor.
+ */
 export class Graph {
 
 	nodeCanvas: JQuery;
@@ -66,7 +69,10 @@ export class Graph {
 
 }
 
-
+/**
+ * A node in the graph. Application-specific data can be attached
+ * to its data property.
+ */
 export class Node {
 	x: number;
 	y: number;
@@ -96,6 +102,10 @@ export class Node {
 
 }
 
+/**
+ * A set of callbacks to be implemented by the application in order
+ * to customize the graph editor and add application-specific behavior.
+ */
 export interface GraphHandler {
 	canBeSource(n: Node): boolean;
 	canConnect(src: Node, dst: Node): boolean;
@@ -108,6 +118,7 @@ export interface GraphHandler {
 
 //------------------------- Privates -------------------------
 
+/** Default, do-nothing GraphHandler implementation */
 class DefaultGraphHandler implements GraphHandler {
 	canBeSource(n: Node): boolean { return true; }
 	canConnect(src: Node, dst: Node): boolean { return true; }
@@ -117,7 +128,10 @@ class DefaultGraphHandler implements GraphHandler {
 	getArrowColor(src: Node, dst: Node): string { return "black"; }
 }
 
-
+/**
+ * Handles all UI interaction with graph in order to move, select, connect
+ * and disconnect nodes.
+ */
 class GraphInteraction {
 
 	graph: Graph;
@@ -247,6 +261,9 @@ interface Point {
 }
 
 
+/**
+ * Handles graph drawing by rendering arrows in a canvas.
+ */
 class GraphDraw {
 
 	graph: Graph;

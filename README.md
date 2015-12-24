@@ -25,6 +25,9 @@ High priority items are in **bold**
 		- Support parameter values < 1 (this is a bug)
 		- Split slider logscale in two with middle value in the middle of the slider,
 			then fine-tune all node definitions (e.g. gain)
+	- Improve ADSR
+		- Linear/exponential switch
+		- Depth parameter to control how much the envelope controls the target parameter
 	- Dislay osc/fft using AnalyserNode
 	- Load/save instruments (using JSON)
 	- Preset instruments & save to preset
@@ -60,7 +63,6 @@ High priority items are in **bold**
 
 - Code
 	- Separate graph.ts into an independent npm module
-	- Provide some in-code documentation describing each module & class
 
 - Support
 	- Support FireFox (does not have AudioContext.suspend/resume)
