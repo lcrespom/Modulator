@@ -24,8 +24,15 @@ function setupKeyboard() {
 
 function setupButtons() {
 	$('#save-but').click(_ =>
-		console.log(synthUI.gr.toJSON())
+		prompt(
+			'Copy the text below to the clipboard and save it to a local text file',
+			synthUI.gr.toJSON()
+		)
 	);
+	$('#load-but').click(_ => {
+		const json = prompt('Paste below the contents of a previously saved synth');
+		if (json) synthUI.gr.fromJSON(json);
+	});
 }
 
 function setupTheme() {

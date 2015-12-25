@@ -42,26 +42,18 @@ Contributions are welcome. Preferred language is TypeScript, but it is not manda
 		- Linear/exponential switch
 		- Depth parameter to control how much the envelope controls the target parameter
 	- Dislay osc/fft using AnalyserNode
-	- Load/save instruments (using JSON)
-	- Preset instruments & save to preset
+	- Preset section with library of default instruments
 	- Export to dependency-free JavaScript
 	- Limitation: a control node can only control a single node
 		- Prevent from connecting a control node to more than one destination
 		- Or else, modify the UI to support multiple destination nodes
 	- Portamento
 	- Polyphonic synth via a graph clone per voice
-	- Long term:
-		- Tracker
-		- Custom nodes with WebWorker
-		- Composite nodes, e.g. LFO+Gain
-		- Record & save audio
-		- Server-side part, supporting:
-			- Loading & saving of resources: synth modules, songs, samples, etc.
-			- User area storing user's synths, current work, etc.
+	- More testing on instrument load/save
 
 - UI
 	- Use 10x10 grid for placing nodes after drop (but not during drag: it is not smooth)
-	- Proper Bootstrap popup for confirmation of node deletion
+	- Proper Bootstrap popups instead of crappy browser popups (alert/cofirm/prompt)
 	- Center parameters horizontally in parameters panel
 	- Help
 		- General help button explaining how to connect etc.
@@ -76,12 +68,20 @@ Contributions are welcome. Preferred language is TypeScript, but it is not manda
 	- Logo
 	- Update parameter box header with currently selected node
 
+- Long term:
+	- Tracker
+	- Custom nodes with WebWorker
+	- Composite nodes, e.g. LFO+Gain
+	- Record & save audio
+	- Server-side part, supporting:
+		- Loading & saving of resources: synth modules, songs, samples, etc.
+		- User area storing user's synths, current work, etc.
+
 - Code
 	- Separate graph.ts into an independent npm module
 
 - Support
-	- Support FireFox (does not have AudioContext.suspend/resume)
-	- Test in Safari
+	- Test support in FireFox & Safari
 
 - Share
 	- Document

@@ -65,7 +65,12 @@
 	}
 	function setupButtons() {
 	    $('#save-but').click(function (_) {
-	        return console.log(synthUI.gr.toJSON());
+	        return prompt('Copy the text below to the clipboard and save it to a local text file', synthUI.gr.toJSON());
+	    });
+	    $('#load-but').click(function (_) {
+	        var json = prompt('Paste below the contents of a previously saved synth');
+	        if (json)
+	            synthUI.gr.fromJSON(json);
 	    });
 	}
 	function setupTheme() {
