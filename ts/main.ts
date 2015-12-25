@@ -4,12 +4,13 @@
 
 import { SynthUI } from './synthUI';
 import { Keyboard } from './keyboard';
+import { Presets } from './presets';
 
 setupTheme();
 const graphCanvas = <HTMLCanvasElement>$('#graph-canvas')[0];
 const synthUI = new SynthUI(graphCanvas, $('#node-params'));
 setupKeyboard();
-setupButtons();
+new Presets(synthUI);
 
 
 function setupKeyboard() {
@@ -20,19 +21,6 @@ function setupKeyboard() {
 	kb.noteOff = (midi) => {
 		synthUI.synth.noteOff(midi, 1);
 	};
-}
-
-function setupButtons() {
-	$('#save-but').click(_ =>
-		prompt(
-			'Copy the text below to the clipboard and save it to a local text file',
-			synthUI.gr.toJSON()
-		)
-	);
-	$('#load-but').click(_ => {
-		const json = prompt('Paste below the contents of a previously saved synth');
-		if (json) synthUI.gr.fromJSON(json);
-	});
 }
 
 function setupTheme() {

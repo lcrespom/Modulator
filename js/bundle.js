@@ -49,11 +49,12 @@
 	 */
 	var synthUI_1 = __webpack_require__(1);
 	var keyboard_1 = __webpack_require__(8);
+	var presets_1 = __webpack_require__(9);
 	setupTheme();
 	var graphCanvas = $('#graph-canvas')[0];
 	var synthUI = new synthUI_1.SynthUI(graphCanvas, $('#node-params'));
 	setupKeyboard();
-	setupButtons();
+	new presets_1.Presets(synthUI);
 	function setupKeyboard() {
 	    var kb = new keyboard_1.Keyboard();
 	    kb.noteOn = function (midi, ratio) {
@@ -62,16 +63,6 @@
 	    kb.noteOff = function (midi) {
 	        synthUI.synth.noteOff(midi, 1);
 	    };
-	}
-	function setupButtons() {
-	    $('#save-but').click(function (_) {
-	        return prompt('Copy the text below to the clipboard and save it to a local text file', synthUI.gr.toJSON());
-	    });
-	    $('#load-but').click(function (_) {
-	        var json = prompt('Paste below the contents of a previously saved synth');
-	        if (json)
-	            synthUI.gr.fromJSON(json);
-	    });
 	}
 	function setupTheme() {
 	    var search = getSearch();
@@ -1156,7 +1147,7 @@
 	 * Renders a "delete node" button inside the parameters panel
 	 */
 	function addDeleteButton(panel, handler) {
-	    var button = $("\n\t\t<button class=\"btn btn-danger btn-sm del-node-but\" type=\"button\">\n\t\t\t<span class=\"glyphicon glyphicon-trash\" aria-hidden=\"true\"></span>\n\t\t</button>\n\t");
+	    var button = $("\n\t\t<button class=\"btn btn-danger del-node-but\" type=\"button\">\n\t\t\t<span class=\"glyphicon glyphicon-trash\" aria-hidden=\"true\"></span>\n\t\t</button>\n\t");
 	    panel.append(button);
 	    button.click(function (_) {
 	        if (confirm('Delete node?'))
@@ -1327,6 +1318,31 @@
 	    return Keyboard;
 	})();
 	exports.Keyboard = Keyboard;
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports) {
+
+	var Presets = (function () {
+	    function Presets(synthUI) {
+	        this.synthUI = synthUI;
+	        this.setupButtons();
+	    }
+	    Presets.prototype.setupButtons = function () {
+	        var _this = this;
+	        $('#save-but').click(function (_) {
+	            return prompt('Copy the text below to the clipboard and save it to a local text file', _this.synthUI.gr.toJSON());
+	        });
+	        $('#load-but').click(function (_) {
+	            var json = prompt('Paste below the contents of a previously saved synth');
+	            if (json)
+	                _this.synthUI.gr.fromJSON(json);
+	        });
+	    };
+	    return Presets;
+	})();
+	exports.Presets = Presets;
 
 
 /***/ }

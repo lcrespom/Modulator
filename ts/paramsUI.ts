@@ -21,7 +21,7 @@ export function renderParams(ndata: NodeData, panel: JQuery): void {
  */
 export function addDeleteButton(panel: JQuery, handler: () => void): void {
 	const button = $(`
-		<button class="btn btn-danger btn-sm del-node-but" type="button">
+		<button class="btn btn-danger del-node-but" type="button">
 			<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
 		</button>
 	`);
