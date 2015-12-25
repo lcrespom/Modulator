@@ -109,12 +109,15 @@
 	    SynthUI.prototype.addOutputNode = function () {
 	        //TODO avoid using hardcoded position
 	        var out = new graph_1.Node(500, 210, 'Out');
-	        var data = new NodeData();
-	        out.data = data;
-	        data.anode = this.synth.ac.destination;
-	        data.nodeDef = this.synth.palette['Speaker'];
+	        out.data = new NodeData();
+	        this.initOutputNodeData(out.data);
 	        this.gr.addNode(out);
 	        this.initNodeDimensions(out);
+	    };
+	    SynthUI.prototype.initOutputNodeData = function (data) {
+	        data.type = 'out';
+	        data.anode = this.synth.ac.destination;
+	        data.nodeDef = this.synth.palette['Speaker'];
 	    };
 	    SynthUI.prototype.registerPaletteHandler = function () {
 	        var self = this; // JQuery sets 'this' in event handlers
@@ -126,18 +129,27 @@
 	    SynthUI.prototype.addNode = function (type, text) {
 	        var _a = this.findFreeSpot(), x = _a.x, y = _a.y;
 	        var n = new graph_1.Node(x, y, text);
+	        this.createNodeData(n, type);
+	        this.gr.addNode(n, n.data.nodeDef.control ? 'node-ctrl' : undefined);
+	        this.gr.selectNode(n);
+	    };
+	    SynthUI.prototype.removeNode = function (n) {
+	        this.gr.removeNode(n);
+	    };
+	    SynthUI.prototype.removeNodeData = function (data) {
+	        if (data.noteHandler)
+	            this.synth.removeNoteHandler(data.noteHandler);
+	    };
+	    SynthUI.prototype.createNodeData = function (n, type) {
 	        var data = new NodeData();
 	        n.data = data;
+	        if (type == 'out')
+	            return this.initOutputNodeData(n.data);
 	        data.type = type;
 	        data.anode = this.synth.createAudioNode(type);
+	        if (!data.anode)
+	            return console.error("No AudioNode found for '" + type + "'");
 	        data.nodeDef = this.synth.palette[type];
-	        this.gr.addNode(n, data.nodeDef.control ? 'node-ctrl' : undefined);
-	        this.gr.selectNode(n);
-	        if (!data.anode) {
-	            console.warn("No AudioNode found for '" + type + "'");
-	            n.element.css('background-color', '#BBB');
-	            return;
-	        }
 	        var nh = data.nodeDef.noteHandler;
 	        if (nh) {
 	            data.noteHandler = new notes_1.NoteHandlers[nh](n);
@@ -145,12 +157,6 @@
 	        }
 	        else if (data.anode['start'])
 	            data.anode['start']();
-	    };
-	    SynthUI.prototype.removeNode = function (n) {
-	        this.gr.removeNode(n);
-	        var data = n.data;
-	        if (data.noteHandler)
-	            this.synth.removeNoteHandler(data.noteHandler);
 	    };
 	    //----- Rest of methods are used to find a free spot in the canvas -----
 	    SynthUI.prototype.findFreeSpot = function () {
@@ -256,19 +262,26 @@
 	            _this.jqParams.empty();
 	        });
 	    };
+	    SynthGraphHandler.prototype.nodeRemoved = function (n) {
+	        this.synthUI.removeNodeData(n.data);
+	    };
 	    SynthGraphHandler.prototype.getArrowColor = function (src, dst) {
 	        var srcData = src.data;
 	        return srcData.nodeDef.control ? this.ctrlArrowColor : this.arrowColor;
 	    };
 	    SynthGraphHandler.prototype.data2json = function (n) {
 	        var data = n.data;
-	        if (!data.type)
-	            return {}; // This is the dummy output node
 	        var params = {};
 	        for (var _i = 0, _a = Object.keys(data.nodeDef.params); _i < _a.length; _i++) {
 	            var pname = _a[_i];
 	            var pvalue = data.anode[pname];
-	            params[pname] = pvalue instanceof AudioParam ? pvalue.value : pvalue;
+	            if (pvalue instanceof AudioParam)
+	                if (pvalue['_value'] === undefined)
+	                    params[pname] = pvalue.value;
+	                else
+	                    params[pname] = pvalue['_value'];
+	            else
+	                params[pname] = pvalue;
 	        }
 	        return {
 	            type: data.type,
@@ -278,7 +291,20 @@
 	        };
 	    };
 	    SynthGraphHandler.prototype.json2data = function (n, json) {
-	        //TODO: implement
+	        this.synthUI.createNodeData(n, json.type);
+	        var data = n.data;
+	        for (var _i = 0, _a = Object.keys(json.params); _i < _a.length; _i++) {
+	            var pname = _a[_i];
+	            var pvalue = data.anode[pname];
+	            var jv = json.params[pname];
+	            if (pvalue instanceof AudioParam) {
+	                pvalue.value = jv;
+	                pvalue['_value'] = jv;
+	            }
+	            else
+	                data.anode[pname] = jv;
+	        }
+	        //TODO: complete
 	    };
 	    return SynthGraphHandler;
 	})();
@@ -559,6 +585,7 @@
 	        }
 	        this.nodes.splice(pos, 1);
 	        n.element.remove();
+	        this.handler.nodeRemoved(n);
 	        this.draw();
 	    };
 	    Graph.prototype.selectNode = function (n) {
@@ -595,7 +622,9 @@
 	                x: node.x,
 	                y: node.y,
 	                name: node.name,
-	                inputs: nodeInputs
+	                inputs: nodeInputs,
+	                classes: node.element.attr('class')
+	                    .split(' ').filter(function (v) { return v.substr(0, 3) != 'ui-'; }).join(' ')
 	            });
 	            jsonNodeData.push(this.handler.data2json(node));
 	        }
@@ -605,8 +634,55 @@
 	        };
 	        return JSON.stringify(jsonGraph);
 	    };
-	    Graph.prototype.fromJSON = function (json) {
-	        //TODO implement
+	    Graph.prototype.fromJSON = function (sjson) {
+	        var json = JSON.parse(sjson);
+	        // First, remove existing nodes
+	        for (var _i = 0, _a = this.nodes; _i < _a.length; _i++) {
+	            var n = _a[_i];
+	            this.removeNode(n);
+	        }
+	        this.lastId = 0;
+	        // Then add nodes
+	        for (var _b = 0, _c = json.nodes; _b < _c.length; _b++) {
+	            var jn = _c[_b];
+	            var node = new Node(jn.x, jn.y, jn.name);
+	            this.addNode(node);
+	            node.id = jn.id; // Override id after being initialized inside addNode
+	            node.element.attr('class', jn.classes);
+	        }
+	        // Then connect them
+	        var gh = this.handler;
+	        this.handler = new DefaultGraphHandler(); // Disable graph handler
+	        for (var i = 0; i < json.nodes.length; i++) {
+	            for (var _d = 0, _e = json.nodes[i].inputs; _d < _e.length; _d++) {
+	                var inum = _e[_d];
+	                var src = this.nodeById(inum);
+	                this.connect(src, this.nodes[i]);
+	            }
+	        }
+	        this.handler = gh; // Restore graph handler
+	        // Then set their data
+	        for (var i = 0; i < json.nodes.length; i++) {
+	            this.handler.json2data(this.nodes[i], json.nodeData[i]);
+	        }
+	        // Then notify connections to handler
+	        for (var _f = 0, _g = this.nodes; _f < _g.length; _f++) {
+	            var dst = _g[_f];
+	            for (var _h = 0, _j = dst.inputs; _h < _j.length; _h++) {
+	                var src = _j[_h];
+	                this.handler.connected(src, dst);
+	            }
+	        }
+	        // And finally, draw the new graph
+	        this.draw();
+	    };
+	    Graph.prototype.nodeById = function (id) {
+	        for (var _i = 0, _a = this.nodes; _i < _a.length; _i++) {
+	            var node = _a[_i];
+	            if (node.id === id)
+	                return node;
+	        }
+	        return null;
 	    };
 	    return Graph;
 	})();
@@ -645,6 +721,7 @@
 	    DefaultGraphHandler.prototype.connected = function (src, dst) { };
 	    DefaultGraphHandler.prototype.disconnected = function (src, dst) { };
 	    DefaultGraphHandler.prototype.nodeSelected = function (n) { };
+	    DefaultGraphHandler.prototype.nodeRemoved = function (n) { };
 	    DefaultGraphHandler.prototype.getArrowColor = function (src, dst) { return "black"; };
 	    DefaultGraphHandler.prototype.data2json = function (n) { return {}; };
 	    DefaultGraphHandler.prototype.json2data = function (n, json) { };
@@ -1032,7 +1109,7 @@
 	    // Output
 	    Speaker: {
 	        constructor: null,
-	        params: null
+	        params: {}
 	    },
 	    // Custom
 	    ADSR: {

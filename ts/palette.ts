@@ -98,7 +98,7 @@ export var palette: NodePalette = {
 	// Output
 	Speaker: {
 		constructor: null,
-		params: null
+		params: {}
 	},
 	// Custom
 	ADSR: {

@@ -44,6 +44,7 @@ export class Graph {
 		}
 		this.nodes.splice(pos, 1);
 		n.element.remove();
+		this.handler.nodeRemoved(n);
 		this.draw();
 	}
 
@@ -81,7 +82,9 @@ export class Graph {
 				x: node.x,
 				y: node.y,
 				name: node.name,
-				inputs: nodeInputs
+				inputs: nodeInputs,
+				classes: node.element.attr('class')
+					.split(' ').filter(v => v.substr(0, 3) != 'ui-').join(' ')
 			});
 			jsonNodeData.push(this.handler.data2json(node));
 		}
@@ -92,8 +95,44 @@ export class Graph {
 		return JSON.stringify(jsonGraph);
 	}
 
-	fromJSON(json: any) {
-		//TODO implement
+	fromJSON(sjson: string) {
+		const json = JSON.parse(sjson);
+		// First, remove existing nodes
+		for (const n of this.nodes) this.removeNode(n);
+		this.lastId = 0;
+		// Then add nodes
+		for (const jn of json.nodes) {
+			const node = new Node(jn.x, jn.y, jn.name);
+			this.addNode(node);
+			node.id = jn.id;	// Override id after being initialized inside addNode
+			node.element.attr('class', jn.classes);
+		}
+		// Then connect them
+		const gh = this.handler;
+		this.handler = new DefaultGraphHandler();	// Disable graph handler
+		for (let i = 0; i < json.nodes.length; i++) {
+			for (const inum of json.nodes[i].inputs) {
+				const src = this.nodeById(inum);
+				this.connect(src, this.nodes[i]);
+			}
+		}
+		this.handler = gh;	// Restore graph handler
+		// Then set their data
+		for (let i = 0; i < json.nodes.length; i++) {
+			this.handler.json2data(this.nodes[i], json.nodeData[i]);
+		}
+		// Then notify connections to handler
+		for (const dst of this.nodes)
+			for (const src of dst.inputs)
+				this.handler.connected(src, dst);
+		// And finally, draw the new graph
+		this.draw();
+	}
+
+	nodeById(id: number): Node {
+		for (const node of this.nodes)
+			if (node.id === id) return node;
+		return null;
 	}
 }
 
@@ -141,6 +180,7 @@ export interface GraphHandler {
 	connected(src: Node, dst: Node): void;
 	disconnected(src: Node, dst: Node): void;
 	nodeSelected(n: Node): void;
+	nodeRemoved(n: Node): void;
 	getArrowColor(src: Node, dst: Node): string;
 	data2json(n: Node): any;
 	json2data(n: Node, json: any): void;
@@ -156,6 +196,7 @@ class DefaultGraphHandler implements GraphHandler {
 	connected(src: Node, dst: Node): void {}
 	disconnected(src: Node, dst: Node):void {}
 	nodeSelected(n: Node): void {}
+	nodeRemoved(n: Node): void {}
 	getArrowColor(src: Node, dst: Node): string { return "black"; }
 	data2json(n: Node): any { return {}; }
 	json2data(n: Node, json: any): void {}

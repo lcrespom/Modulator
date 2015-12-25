@@ -22,12 +22,16 @@ export class SynthUI {
 	addOutputNode() {
 		//TODO avoid using hardcoded position
 		const out = new Node(500, 210, 'Out');
-		const data = new NodeData();
-		out.data = data;
-		data.anode = this.synth.ac.destination;
-		data.nodeDef = this.synth.palette['Speaker'];
+		out.data = new NodeData();
+		this.initOutputNodeData(out.data);
 		this.gr.addNode(out);
 		this.initNodeDimensions(out);
+	}
+
+	initOutputNodeData(data: NodeData): void {
+		data.type = 'out';
+		data.anode = this.synth.ac.destination;
+		data.nodeDef = this.synth.palette['Speaker'];
 	}
 
 	registerPaletteHandler() {
@@ -41,18 +45,30 @@ export class SynthUI {
 	addNode(type: string, text: string): void {
 		let { x, y } = this.findFreeSpot();
 		const n = new Node(x, y, text);
+		this.createNodeData(n, type);
+		this.gr.addNode(n, n.data.nodeDef.control ? 'node-ctrl' : undefined);
+		this.gr.selectNode(n);
+	}
+
+	removeNode(n: Node): void {
+		this.gr.removeNode(n);
+	}
+
+	removeNodeData(data: NodeData): void {
+		if (data.noteHandler)
+			this.synth.removeNoteHandler(data.noteHandler);
+	}
+
+	createNodeData(n: Node, type: string): void {
 		const data = new NodeData();
 		n.data = data;
+		if (type == 'out')
+			return this.initOutputNodeData(n.data);
 		data.type = type;
 		data.anode = this.synth.createAudioNode(type);
+		if (!data.anode)
+			return console.error(`No AudioNode found for '${type}'`);
 		data.nodeDef = this.synth.palette[type];
-		this.gr.addNode(n, data.nodeDef.control ? 'node-ctrl' : undefined);
-		this.gr.selectNode(n);
-		if (!data.anode) {
-			console.warn(`No AudioNode found for '${type}'`);
-			n.element.css('background-color', '#BBB');
-			return;
-		}
 		const nh = data.nodeDef.noteHandler;
 		if (nh) {
 			data.noteHandler = new NoteHandlers[nh](n);
@@ -60,13 +76,6 @@ export class SynthUI {
 		}
 		// LFO does not have a note handler yet needs to be started
 		else if (data.anode['start']) data.anode['start']();
-	}
-
-	removeNode(n: Node) {
-		this.gr.removeNode(n);
-		const data: NodeData = n.data;
-		if (data.noteHandler)
-			this.synth.removeNoteHandler(data.noteHandler);
 	}
 
 	//----- Rest of methods are used to find a free spot in the canvas -----
@@ -194,6 +203,10 @@ class SynthGraphHandler implements GraphHandler {
 		});
 	}
 
+	nodeRemoved(n: Node) {
+		this.synthUI.removeNodeData(n.data);
+	}
+
 	getArrowColor(src: Node, dst: Node): string {
 		const srcData: NodeData = src.data;
 		return srcData.nodeDef.control ? this.ctrlArrowColor : this.arrowColor;
@@ -201,11 +214,13 @@ class SynthGraphHandler implements GraphHandler {
 
 	data2json(n: Node): any {
 		const data: NodeData = n.data;
-		if (!data.type) return {};	// This is the dummy output node
 		const params = {};
 		for (const pname of Object.keys(data.nodeDef.params)) {
 			const pvalue = data.anode[pname];
-			params[pname] = pvalue instanceof AudioParam ? pvalue.value : pvalue;
+			if (pvalue instanceof AudioParam)
+				if (pvalue['_value'] === undefined) params[pname] = pvalue.value;
+				else params[pname] = pvalue['_value'];
+			else params[pname] = pvalue;
 		}
 		return {
 			type: data.type,
@@ -218,7 +233,18 @@ class SynthGraphHandler implements GraphHandler {
 	}
 
 	json2data(n: Node, json: any): void {
-		//TODO: implement
+		this.synthUI.createNodeData(n, json.type);
+		const data: NodeData = n.data;
+		for (const pname of Object.keys(json.params)) {
+			const pvalue = data.anode[pname];
+			const jv = json.params[pname];
+			if (pvalue instanceof AudioParam) {
+				pvalue.value = jv;
+				pvalue['_value'] = jv;
+			}
+			else data.anode[pname] = jv;
+		}
+		//TODO: complete
 	}
 }
 
