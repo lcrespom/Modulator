@@ -42,7 +42,8 @@ Contributions are welcome. Preferred language is TypeScript, but it is not manda
 		- Linear/exponential switch
 		- Depth parameter to control how much the envelope controls the target parameter
 	- Dislay osc/fft using AnalyserNode
-	- Preset section with library of default instruments
+	- Display piano keyboard / display PC keys on piano keys / gather mouse input
+	- Provide 10 preset instruments
 	- Export to dependency-free JavaScript
 	- Limitation: a control node can only control a single node
 		- Prevent from connecting a control node to more than one destination
@@ -60,13 +61,17 @@ Contributions are welcome. Preferred language is TypeScript, but it is not manda
 		- Description of each node
 		- Description of each node parameters
 	- Find a better way to add nodes from the palette into the canvas
-	- Remove hardcoded dimensions from canvas
+	- Improve layout
+		- Center horizontally
+		- Remove hardcoded dimensions from canvas
+		- More flexible layout
 	- Right-click & drag to connect nodes
 	- Cool design
 	- Branding
 	- Naming
-	- Logo
+	- Logo / display logo/name in top-center header
 	- Update parameter box header with currently selected node
+	- Use cooler fonts, e.g. Electrolize: @import url(https://fonts.googleapis.com/css?family=Electrolize);
 
 - Long term:
 	- Tracker
@@ -79,6 +84,7 @@ Contributions are welcome. Preferred language is TypeScript, but it is not manda
 
 - Code
 	- Separate graph.ts into an independent npm module
+	- Better, cleaner implementation of HTML/CSS in index.html and main.css
 
 - Support
 	- Test support in FireFox & Safari

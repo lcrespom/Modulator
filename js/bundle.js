@@ -628,19 +628,16 @@
 	            nodes: jsonNodes,
 	            nodeData: jsonNodeData
 	        };
-	        return JSON.stringify(jsonGraph);
+	        return jsonGraph;
 	    };
-	    Graph.prototype.fromJSON = function (sjson) {
-	        var json = JSON.parse(sjson);
+	    Graph.prototype.fromJSON = function (json) {
 	        // First, remove existing nodes
-	        for (var _i = 0, _a = this.nodes; _i < _a.length; _i++) {
-	            var n = _a[_i];
-	            this.removeNode(n);
-	        }
+	        while (this.nodes.length > 0)
+	            this.removeNode(this.nodes[0]);
 	        this.lastId = 0;
 	        // Then add nodes
-	        for (var _b = 0, _c = json.nodes; _b < _c.length; _b++) {
-	            var jn = _c[_b];
+	        for (var _i = 0, _a = json.nodes; _i < _a.length; _i++) {
+	            var jn = _a[_i];
 	            var node = new Node(jn.x, jn.y, jn.name);
 	            this.addNode(node);
 	            node.id = jn.id; // Override id after being initialized inside addNode
@@ -650,8 +647,8 @@
 	        var gh = this.handler;
 	        this.handler = new DefaultGraphHandler(); // Disable graph handler
 	        for (var i = 0; i < json.nodes.length; i++) {
-	            for (var _d = 0, _e = json.nodes[i].inputs; _d < _e.length; _d++) {
-	                var inum = _e[_d];
+	            for (var _b = 0, _c = json.nodes[i].inputs; _b < _c.length; _b++) {
+	                var inum = _c[_b];
 	                var src = this.nodeById(inum);
 	                this.connect(src, this.nodes[i]);
 	            }
@@ -662,10 +659,10 @@
 	            this.handler.json2data(this.nodes[i], json.nodeData[i]);
 	        }
 	        // Then notify connections to handler
-	        for (var _f = 0, _g = this.nodes; _f < _g.length; _f++) {
-	            var dst = _g[_f];
-	            for (var _h = 0, _j = dst.inputs; _h < _j.length; _h++) {
-	                var src = _j[_h];
+	        for (var _d = 0, _e = this.nodes; _d < _e.length; _d++) {
+	            var dst = _e[_d];
+	            for (var _f = 0, _g = dst.inputs; _f < _g.length; _f++) {
+	                var src = _g[_f];
 	                this.handler.connected(src, dst);
 	            }
 	        }
@@ -1324,21 +1321,79 @@
 /* 9 */
 /***/ function(module, exports) {
 
+	var MAX_PRESETS = 20;
 	var Presets = (function () {
 	    function Presets(synthUI) {
+	        this.presetNum = 0;
 	        this.synthUI = synthUI;
-	        this.setupButtons();
+	        this.registerListeners();
+	        this.loadPresets();
 	    }
-	    Presets.prototype.setupButtons = function () {
+	    Presets.prototype.loadPresets = function () {
+	        var _this = this;
+	        this.presets = new Array(MAX_PRESETS);
+	        for (var i = 0; i < MAX_PRESETS; i++)
+	            this.presets[i] = this.getEmptyPreset();
+	        $.get('js/presets.json', function (data) {
+	            if (!(data instanceof Array))
+	                return;
+	            for (var i = 0; i < MAX_PRESETS; i++)
+	                if (data[i])
+	                    _this.presets[i] = data[i];
+	            _this.preset2synth();
+	        });
+	    };
+	    Presets.prototype.getEmptyPreset = function () {
+	        return {
+	            name: '',
+	            nodes: [
+	                { id: 0, x: 500, y: 210, name: 'Out', inputs: [], classes: 'node' }
+	            ],
+	            nodeData: [
+	                { type: 'out', params: {} }
+	            ]
+	        };
+	    };
+	    Presets.prototype.checkButtons = function () {
+	        $('#prev-preset-but').prop('disabled', this.presetNum <= 0);
+	        $('#next-preset-but').prop('disabled', this.presetNum >= MAX_PRESETS - 1);
+	    };
+	    Presets.prototype.registerListeners = function () {
 	        var _this = this;
 	        $('#save-but').click(function (_) {
-	            return prompt('Copy the text below to the clipboard and save it to a local text file', _this.synthUI.gr.toJSON());
+	            var json = _this.synthUI.gr.toJSON();
+	            json.name = $('#preset-name').val();
+	            prompt('Copy the text below to the clipboard and save it to a local text file', JSON.stringify(json));
 	        });
 	        $('#load-but').click(function (_) {
 	            var json = prompt('Paste below the contents of a previously saved synth');
-	            if (json)
-	                _this.synthUI.gr.fromJSON(json);
+	            if (json) {
+	                _this.presets[_this.presetNum] = JSON.parse(json);
+	                _this.preset2synth();
+	            }
 	        });
+	        $('#prev-preset-but').click(function (_) {
+	            _this.synth2preset();
+	            _this.presetNum--;
+	            _this.preset2synth();
+	        });
+	        $('#next-preset-but').click(function (_) {
+	            _this.synth2preset();
+	            _this.presetNum++;
+	            _this.preset2synth();
+	        });
+	    };
+	    Presets.prototype.synth2preset = function () {
+	        this.presets[this.presetNum] = this.synthUI.gr.toJSON();
+	        this.presets[this.presetNum].name = $('#preset-name').val();
+	    };
+	    Presets.prototype.preset2synth = function () {
+	        var preset = this.presets[this.presetNum];
+	        $('#preset-num').text(this.presetNum + 1);
+	        $('#preset-name').val(preset.name);
+	        $('#node-params').empty();
+	        this.checkButtons();
+	        this.synthUI.gr.fromJSON(preset);
 	    };
 	    return Presets;
 	})();

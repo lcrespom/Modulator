@@ -70,7 +70,7 @@ export class Graph {
 		this.graphDraw.draw();
 	}
 
-	toJSON(): string {
+	toJSON(): any {
 		const jsonNodes = [];
 		const jsonNodeData = [];
 		for (const node of this.nodes) {
@@ -92,13 +92,13 @@ export class Graph {
 			nodes: jsonNodes,
 			nodeData: jsonNodeData
 		}
-		return JSON.stringify(jsonGraph);
+		return jsonGraph;
 	}
 
-	fromJSON(sjson: string) {
-		const json = JSON.parse(sjson);
+	fromJSON(json: any) {
 		// First, remove existing nodes
-		for (const n of this.nodes) this.removeNode(n);
+		while (this.nodes.length > 0)
+			this.removeNode(this.nodes[0]);
 		this.lastId = 0;
 		// Then add nodes
 		for (const jn of json.nodes) {
