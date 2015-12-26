@@ -1346,6 +1346,11 @@
 /***/ function(module, exports) {
 
 	var MAX_PRESETS = 20;
+	/**
+	 * Manages the presets box:
+	 * - Handles navigation through presets
+	 * - Handles preset loading & saving
+	 */
 	var Presets = (function () {
 	    function Presets(synthUI) {
 	        this.presetNum = 0;

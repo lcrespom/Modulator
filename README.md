@@ -46,7 +46,6 @@ Contributions are welcome. Preferred language is TypeScript, but it is not manda
 	- Dislay osc/fft using AnalyserNode
 	- Display piano keyboard / display PC keys on piano keys / gather mouse input
 	- Provide 10 preset instruments
-	- Export to dependency-free JavaScript
 	- Limitation: a control node can only control a single node
 		- Prevent from connecting a control node to more than one destination
 		- Or else, modify the UI to support multiple destination nodes
@@ -86,6 +85,7 @@ Contributions are welcome. Preferred language is TypeScript, but it is not manda
 - Code
 	- Separate graph.ts into an independent npm module
 	- Better, cleaner implementation of HTML/CSS in index.html and main.css
+	- API to load & play presets without displaying the node graph
 
 - Support
 	- Test support in FireFox & Safari

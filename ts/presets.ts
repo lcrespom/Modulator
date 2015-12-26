@@ -2,6 +2,11 @@ import { SynthUI } from './synthUI';
 
 const MAX_PRESETS = 20;
 
+/**
+ * Manages the presets box:
+ * - Handles navigation through presets
+ * - Handles preset loading & saving
+ */
 export class Presets {
 
 	synthUI: SynthUI;
@@ -50,7 +55,7 @@ export class Presets {
 			prompt(
 				'Copy the text below to the clipboard and save it to a local text file',
 				JSON.stringify(json)
-			)
+			);
 		});
 		$('#load-but').click(_ => {
 			const json = prompt('Paste below the contents of a previously saved synth');
