@@ -60,8 +60,8 @@ export var palette: NodePalette = {
 		params: {
 			frequency: { initial: 440, min: 20, max: 20000 },
 			Q: { initial: 0, min: 0, max: 100 },
-			//TODO gain
 			detune: OCTAVE_DETUNE,
+			gain: { initial: 0, min: -40, max: 40, linear: true },
 			type: {
 				initial: 'lowpass',
 				choices: ['lowpass', 'highpass', 'bandpass',
@@ -84,6 +84,17 @@ export var palette: NodePalette = {
 				max: 1,
 				linear: true
 			}
+		}
+	},
+	Compressor: {
+		constructor: 'createDynamicsCompressor',
+		params: {
+			threshold: { initial: -24, min: -100, max: 0, linear: true },
+			knee: { initial: 30, min: 0, max: 40, linear: true },
+			ratio: { initial: 12, min: 1, max: 20, linear: true },
+			reduction: { initial: 0, min: -20, max: 0, linear: true },
+			attack: { initial: 0.003, min: 0, max: 1 }//,
+			//release: { initial: 0.25, min: 0, max: 1 }
 		}
 	},
 	// Controllers

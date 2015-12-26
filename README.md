@@ -34,15 +34,11 @@ Contributions are welcome. Preferred language is TypeScript, but it is not manda
 - Functionality
 	- Add all possible AudioNodes available into the palette
 		- Support sampled audio (default sample URL to amen break from Wikipedia)
-		- StereoPanner
 		- All pending nodes
 			- AudioBufferSourceNode
 			- ChannelMergerNode / ChannelSplitterNode (maybe not)
 			- ConvolverNode
-			- DynamicsCompressorNode
-			- StereoPannerNode
 			- WaveShaperNode
-		- Also, add pending parameters to existing modules (Filter)
 	- Custom nodes
 		- Oscillator with gain
 		- LFO with gain
@@ -64,8 +60,11 @@ Contributions are welcome. Preferred language is TypeScript, but it is not manda
 
 - UI
 	- Proper Bootstrap popups instead of crappy browser popups (alert/cofirm/prompt)
-	- Center parameters horizontally in parameters panel
-	- Use cool knobs for parameters instead of default browser sliders
+	- Parameters panel
+		- Center parameters horizontally
+		- Adapt space between parameters according to number of parameters.
+			Then Compressor will be able to use its 6th parameter.
+		- Use cool knobs for parameters instead of default browser sliders
 	- Help
 		- General help button explaining how to connect etc.
 		- Description of each node

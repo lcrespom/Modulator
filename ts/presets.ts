@@ -64,16 +64,21 @@ export class Presets {
 				this.preset2synth();
 			}
 		});
-		$('#prev-preset-but').click(_ => {
-			this.synth2preset();
-			this.presetNum--;
-			this.preset2synth();
+		$('#prev-preset-but').click(_ => this.changePreset(-1));
+		$('#next-preset-but').click(_ => this.changePreset(+1));
+		$('body').keydown(evt => {
+			if (evt.target.nodeName == 'INPUT') return;
+			if (evt.keyCode == 37) this.changePreset(-1);
+			if (evt.keyCode == 39) this.changePreset(+1);
 		});
-		$('#next-preset-but').click(_ => {
-			this.synth2preset();
-			this.presetNum++;
-			this.preset2synth();
-		});
+	}
+
+	changePreset(increment: number) {
+		const newNum = this.presetNum + increment;
+		if (newNum < 0 || newNum >= MAX_PRESETS) return;
+		this.synth2preset();
+		this.presetNum = newNum;
+		this.preset2synth();
 	}
 
 	synth2preset() {
