@@ -69,7 +69,9 @@ Contributions are welcome. Preferred language is TypeScript, but it is not manda
 		- General help button explaining how to connect etc.
 		- Description of each node
 		- Description of each node parameters
-	- Find a better way to add nodes from the palette into the canvas
+	- Use a different CSS class for source, effect and destination nodes
+	- Consider a better way to add nodes from the palette into the canvas
+	- Consider a more user-friendly way to connect and disconnect nodes
 	- Improve layout
 		- Remove hardcoded dimensions from canvas
 		- More flexible layout
@@ -77,9 +79,7 @@ Contributions are welcome. Preferred language is TypeScript, but it is not manda
 	- Cool design
 	- Branding
 	- Naming
-	- Logo / display logo/name in top-center header
-	- Update parameter box header with currently selected node
-	- Use cooler fonts, e.g. Electrolize: @import url(https://fonts.googleapis.com/css?family=Electrolize);
+	- Logo: display logo/name in top-center header
 
 - Long term:
 	- Tracker

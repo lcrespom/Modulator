@@ -108,6 +108,31 @@ class OscNoteHandler extends BaseNoteHandler {
 }
 
 /**
+ * Handles note events for an AudioBufferSourceNode
+ */
+class BufferNoteHandler extends BaseNoteHandler {
+	oscClone: OscillatorNode;
+	lastNote: number;
+	playing = false;
+
+	noteOn(midi: number, gain: number, ratio: number):void {
+		const data: NodeData = this.node.data;
+		const absn: AudioBufferSourceNode = <AudioBufferSourceNode>data.anode;
+		absn.start();
+		//TODO
+	}
+
+	noteOff(midi: number, gain: number): void {
+		//TODO
+	}
+
+	noteEnd(midi: number): void {
+		//TODO
+	}
+
+}
+
+/**
  * Handles note events for a custom ADSR node
  */
 
@@ -170,6 +195,7 @@ class ADSRNoteHandler extends BaseNoteHandler {
  */
 export const NoteHandlers = {
 	'osc': OscNoteHandler,
+	'buffer': BufferNoteHandler,
 	'ADSR': ADSRNoteHandler
 };
 

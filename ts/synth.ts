@@ -2,6 +2,11 @@ import { NoteHandler } from './notes';
 import { NodeDef, NodePalette, palette } from './palette';
 import { ModernWindow, ModernAudioContext, removeArrayElement } from './modern';
 
+interface ParamHandler {
+	initialize(anode: AudioNode, def: NodeDef): void;
+	edit(anode: AudioNode, def: NodeDef): void;
+}
+
 /**
  * Performs global operations on all AudioNodes:
  * - Manages AudioNode creation and initialization from the palette
@@ -10,6 +15,7 @@ import { ModernWindow, ModernAudioContext, removeArrayElement } from './modern';
 export class Synth {
 	ac: ModernAudioContext;
 	customNodes: { [key: string]: Function } = {};
+	paramHandlers: { [key: string]: ParamHandler } = {};
 	palette: NodePalette;
 	noteHandlers: NoteHandler[] = [];
 
@@ -18,6 +24,7 @@ export class Synth {
 		this.ac = new CtxClass();
 		this.palette = palette;
 		this.registerCustomNode('createADSR', ADSR);
+		this.registerParamHandler('BufferURL', new BufferURL());
 	}
 
 	createAudioNode(type: string): AudioNode {
@@ -65,12 +72,18 @@ export class Synth {
 				console.warn(`Parameter '${param}' not found for node ${type}'`)
 			else if (anode[param] instanceof AudioParam)
 				anode[param].value = def.params[param].initial;
+			else if (def.params[param].handler)
+				this.paramHandlers[def.params[param].handler].initialize(anode, def);
 			else
 				anode[param] = def.params[param].initial;
 	}
 
-	registerCustomNode(constructorName: string, nodeClass: any) {
+	registerCustomNode(constructorName: string, nodeClass: any): void {
 		this.customNodes[constructorName] = () => new nodeClass();
+	}
+
+	registerParamHandler(hname: string, handler: ParamHandler): void {
+		this.paramHandlers[hname] = handler;
 	}
 
 }
@@ -105,6 +118,22 @@ export class ADSR extends CustomNodeBase {
 	//TODO 0 <= depth <= 1
 	//TODO linear / exponential
 	//TODO kb trigger (boolean)
+}
+
+//-------------------- Parameter handlers --------------------
+
+class BufferURL implements ParamHandler {
+	initialize(anode: AudioNode, def: NodeDef): void {
+		//TODO
+		console.log('Initialize buffer:', def.params['buffer'].initial);
+	}
+	edit(anode: AudioNode, def: NodeDef): void {
+		//TODO
+		console.log('Edit buffer');
+	}
+	loadBuffer(absn: AudioBufferSourceNode, url: string): void {
+		//TODO
+	}
 }
 
 

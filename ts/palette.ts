@@ -5,6 +5,7 @@ export interface NodeParamDef {
 	max?: number;
 	linear?: boolean;
 	choices?: string[];
+	handler?: string;
 }
 
 /** Configuration data for an AudioNode */
@@ -48,6 +49,18 @@ export var palette: NodePalette = {
 			}
 		}
 	},
+	Buffer: {
+		constructor: 'createBufferSource',
+		noteHandler: 'buffer',
+		params: {
+			playbackRate: { initial: 1, min: 0, max: 8 },
+			detune: OCTAVE_DETUNE,
+			buffer: {
+				initial: 'https://upload.wikimedia.org/wikipedia/en/8/80/The_Amen_Break%2C_in_context.ogg',
+				handler: 'BufferURL'
+			}
+		}
+	},
 	// Effects
 	Gain: {
 		constructor: 'createGain',
@@ -78,12 +91,7 @@ export var palette: NodePalette = {
 	StereoPan: {
 		constructor: 'createStereoPanner',
 		params: {
-			pan: {
-				initial: 0,
-				min: -1,
-				max: 1,
-				linear: true
-			}
+			pan: { initial: 0, min: -1, max: 1, linear: true }
 		}
 	},
 	Compressor: {
@@ -93,7 +101,7 @@ export var palette: NodePalette = {
 			knee: { initial: 30, min: 0, max: 40, linear: true },
 			ratio: { initial: 12, min: 1, max: 20, linear: true },
 			reduction: { initial: 0, min: -20, max: 0, linear: true },
-			attack: { initial: 0.003, min: 0, max: 1 }//,
+			attack: { initial: 0.003, min: 0, max: 1 }//TODO make it fit,
 			//release: { initial: 0.25, min: 0, max: 1 }
 		}
 	},

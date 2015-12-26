@@ -427,6 +427,29 @@
 	    return OscNoteHandler;
 	})(BaseNoteHandler);
 	/**
+	 * Handles note events for an AudioBufferSourceNode
+	 */
+	var BufferNoteHandler = (function (_super) {
+	    __extends(BufferNoteHandler, _super);
+	    function BufferNoteHandler() {
+	        _super.apply(this, arguments);
+	        this.playing = false;
+	    }
+	    BufferNoteHandler.prototype.noteOn = function (midi, gain, ratio) {
+	        var data = this.node.data;
+	        var absn = data.anode;
+	        absn.start();
+	        //TODO
+	    };
+	    BufferNoteHandler.prototype.noteOff = function (midi, gain) {
+	        //TODO
+	    };
+	    BufferNoteHandler.prototype.noteEnd = function (midi) {
+	        //TODO
+	    };
+	    return BufferNoteHandler;
+	})(BaseNoteHandler);
+	/**
 	 * Handles note events for a custom ADSR node
 	 */
 	var ADSRNoteHandler = (function (_super) {
@@ -495,6 +518,7 @@
 	 */
 	exports.NoteHandlers = {
 	    'osc': OscNoteHandler,
+	    'buffer': BufferNoteHandler,
 	    'ADSR': ADSRNoteHandler
 	};
 	/**
@@ -956,11 +980,13 @@
 	var Synth = (function () {
 	    function Synth() {
 	        this.customNodes = {};
+	        this.paramHandlers = {};
 	        this.noteHandlers = [];
 	        var CtxClass = window.AudioContext || window.webkitAudioContext;
 	        this.ac = new CtxClass();
 	        this.palette = palette_1.palette;
 	        this.registerCustomNode('createADSR', ADSR);
+	        this.registerParamHandler('BufferURL', new BufferURL());
 	    }
 	    Synth.prototype.createAudioNode = function (type) {
 	        var def = palette_1.palette[type];
@@ -1008,12 +1034,17 @@
 	                console.warn("Parameter '" + param + "' not found for node " + type + "'");
 	            else if (anode[param] instanceof AudioParam)
 	                anode[param].value = def.params[param].initial;
+	            else if (def.params[param].handler)
+	                this.paramHandlers[def.params[param].handler].initialize(anode, def);
 	            else
 	                anode[param] = def.params[param].initial;
 	        }
 	    };
 	    Synth.prototype.registerCustomNode = function (constructorName, nodeClass) {
 	        this.customNodes[constructorName] = function () { return new nodeClass(); };
+	    };
+	    Synth.prototype.registerParamHandler = function (hname, handler) {
+	        this.paramHandlers[hname] = handler;
 	    };
 	    return Synth;
 	})();
@@ -1051,6 +1082,23 @@
 	    return ADSR;
 	})(CustomNodeBase);
 	exports.ADSR = ADSR;
+	//-------------------- Parameter handlers --------------------
+	var BufferURL = (function () {
+	    function BufferURL() {
+	    }
+	    BufferURL.prototype.initialize = function (anode, def) {
+	        //TODO
+	        console.log('Initialize buffer:', def.params['buffer'].initial);
+	    };
+	    BufferURL.prototype.edit = function (anode, def) {
+	        //TODO
+	        console.log('Edit buffer');
+	    };
+	    BufferURL.prototype.loadBuffer = function (absn, url) {
+	        //TODO
+	    };
+	    return BufferURL;
+	})();
 
 
 /***/ },
@@ -1079,6 +1127,18 @@
 	            type: {
 	                initial: 'sawtooth',
 	                choices: ['sine', 'square', 'sawtooth', 'triangle']
+	            }
+	        }
+	    },
+	    Buffer: {
+	        constructor: 'createBufferSource',
+	        noteHandler: 'buffer',
+	        params: {
+	            playbackRate: { initial: 1, min: 0, max: 8 },
+	            detune: OCTAVE_DETUNE,
+	            buffer: {
+	                initial: 'https://upload.wikimedia.org/wikipedia/en/8/80/The_Amen_Break%2C_in_context.ogg',
+	                handler: 'BufferURL'
 	            }
 	        }
 	    },
@@ -1112,12 +1172,7 @@
 	    StereoPan: {
 	        constructor: 'createStereoPanner',
 	        params: {
-	            pan: {
-	                initial: 0,
-	                min: -1,
-	                max: 1,
-	                linear: true
-	            }
+	            pan: { initial: 0, min: -1, max: 1, linear: true }
 	        }
 	    },
 	    Compressor: {
@@ -1127,7 +1182,7 @@
 	            knee: { initial: 30, min: 0, max: 40, linear: true },
 	            ratio: { initial: 12, min: 1, max: 20, linear: true },
 	            reduction: { initial: 0, min: -20, max: 0, linear: true },
-	            attack: { initial: 0.003, min: 0, max: 1 } //,
+	            attack: { initial: 0.003, min: 0, max: 1 } //TODO make it fit,
 	        }
 	    },
 	    // Controllers
