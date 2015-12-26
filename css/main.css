@@ -78,10 +78,11 @@ body {
 	margin-left: 10px;
 	height: 507px;
 	vertical-align: top;
-	overflow-y: auto;
+	width: 92px;
+	overflow: hidden;
 }
 
-.palette > .node {
+.palette .node {
 	position: static;
 	margin: 5px 5px 0px 5px;
 	cursor: copy;

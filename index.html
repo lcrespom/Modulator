@@ -7,6 +7,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="css/bootstrap/bootstrap.min.css">
 	<link rel="stylesheet" href="css/bootstrap/bootstrap-theme.min.css">
+	<link rel="stylesheet" href="css/nanoscroller.css">
 	<link rel="stylesheet" type="text/css" href="css/main.css">
 </head>
 
@@ -26,13 +27,19 @@
 		--------------- Node palette ---------------
 	--><div class="palette graph-box">
 			<h5 class="bg-primary box-header">Palette</h5>
-			<div class="node" data-type="Oscillator">Osc</div>
-			<div class="node" data-type="Gain">Gain</div>
-			<div class="node" data-type="Filter">Filter</div>
-			<div class="node" data-type="Delay">Delay</div>
-			<div class="node node-ctrl" data-type="LFO">LFO</div>
-			<div class="node node-ctrl" data-type="GainCtrl">Gain Ctrl</div>
-			<div class="node node-ctrl" data-type="ADSR">ADSR</div>
+			<div class="nano">
+				<div class="nano-content">
+					<div class="node" data-type="Oscillator">Osc</div>
+					<div class="node" data-type="Gain">Gain</div>
+					<div class="node" data-type="Filter">Filter</div>
+					<div class="node" data-type="Delay">Delay</div>
+					<div class="node" data-type="Delay">StereoPan</div>
+					<div class="node node-ctrl" data-type="LFO">LFO</div>
+					<div class="node node-ctrl" data-type="GainCtrl">Gain Ctrl</div>
+					<div class="node node-ctrl" data-type="ADSR">ADSR</div>
+					<div style="height: 30px"></div>
+				</div>
+			</div>
 		</div>
 	</div>
 
@@ -80,6 +87,7 @@
 <script src="js/vendor/jquery-1.11.2.min.js"></script>
 <script src="js/vendor/jquery-ui.min.js"></script>
 <script src="js/vendor/bootstrap.min.js"></script>
+<script src="js/vendor/jquery.nanoscroller.min.js"></script>
 <script src="js/bundle.js"></script>
 
 </body>

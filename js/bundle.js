@@ -51,6 +51,7 @@
 	var keyboard_1 = __webpack_require__(8);
 	var presets_1 = __webpack_require__(9);
 	setupTheme();
+	setupPalette();
 	var graphCanvas = $('#graph-canvas')[0];
 	var synthUI = new synthUI_1.SynthUI(graphCanvas, $('#node-params'));
 	setupKeyboard();
@@ -85,6 +86,11 @@
 	        search[kv[0]] = kv[1];
 	    }
 	    return search;
+	}
+	function setupPalette() {
+	    $(function () {
+	        $('.nano')['nanoScroller']();
+	    });
 	}
 
 

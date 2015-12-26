@@ -7,6 +7,7 @@ import { Keyboard } from './keyboard';
 import { Presets } from './presets';
 
 setupTheme();
+setupPalette();
 const graphCanvas = <HTMLCanvasElement>$('#graph-canvas')[0];
 const synthUI = new SynthUI(graphCanvas, $('#node-params'));
 setupKeyboard();
@@ -41,4 +42,10 @@ function getSearch() {
 		search[kv[0]] = kv[1];
 	}
 	return search;
+}
+
+function setupPalette() {
+	$(function() {
+		$('.nano')['nanoScroller']();
+	});
 }
