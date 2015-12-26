@@ -1,3 +1,6 @@
+const SHIFT_KEY = 16;
+const CAPS_LOCK = 20;
+
 /**
  * A generic directed graph editor.
  */
@@ -257,7 +260,8 @@ class GraphInteraction {
 		let srcn: Node;
 		let connecting = false;
 		$('body').keydown(evt => {
-			if (evt.keyCode != 16  || connecting) return;
+			if (evt.keyCode == CAPS_LOCK) return this.setGrid([20, 20]);
+			if (evt.keyCode != SHIFT_KEY || connecting) return;
 			srcn = this.getNodeFromDOM(this.getElementUnderMouse());
 			if (!srcn) return;
 			if (!this.graph.handler.canBeSource(srcn)) {
@@ -268,7 +272,8 @@ class GraphInteraction {
 			this.registerRubberBanding(srcn);
 		})
 		.keyup(evt => {
-			if (evt.keyCode != 16) return;
+			if (evt.keyCode == CAPS_LOCK) return this.setGrid(null);
+			if (evt.keyCode != SHIFT_KEY) return;
 			connecting = false;
 			this.deregisterRubberBanding();
 			const dstn = this.getNodeFromDOM(this.getElementUnderMouse());
@@ -276,6 +281,10 @@ class GraphInteraction {
 			this.connectOrDisconnect(srcn, dstn);
 			this.graph.draw();
 		});
+	}
+
+	setGrid(grid: any): void {
+		$(this.graph.nodeCanvas).find('.node').draggable( "option", "grid", grid);
 	}
 
 	connectOrDisconnect(srcn: Node, dstn: Node) {

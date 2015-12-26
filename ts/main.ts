@@ -16,6 +16,8 @@ new Presets(synthUI);
 function setupKeyboard() {
 	var kb = new Keyboard();
 	kb.noteOn = (midi, ratio) => {
+		if (document.activeElement.nodeName == 'INPUT' &&
+			document.activeElement.getAttribute('type') != 'range') return;
 		synthUI.synth.noteOn(midi, 1, ratio);
 	};
 	kb.noteOff = (midi) => {

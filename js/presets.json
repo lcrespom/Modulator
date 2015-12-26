@@ -1,113 +1,422 @@
-[{
-	"name": "Fanfare",
-	"nodes": [
-		{
-			"id": 0,
-			"x": 500,
-			"y": 210,
-			"name": "Out",
-			"inputs": [
-				4
-			],
-			"classes": "node"
-		},
-		{
-			"id": 1,
-			"x": 332,
-			"y": 171,
-			"name": "Filter",
-			"inputs": [
-				2,
-				3,
-				5
-			],
-			"classes": "node"
-		},
-		{
-			"id": 2,
-			"x": 153,
-			"y": 151,
-			"name": "Osc",
-			"inputs": [],
-			"classes": "node"
-		},
-		{
-			"id": 3,
-			"x": 225,
-			"y": 283,
-			"name": "Osc",
-			"inputs": [],
-			"classes": "node"
-		},
-		{
-			"id": 4,
-			"x": 450,
-			"y": 108,
-			"name": "Gain",
-			"inputs": [
-				1
-			],
-			"classes": "node"
-		},
-		{
-			"id": 5,
-			"x": 351,
-			"y": 336,
-			"name": "ADSR",
-			"inputs": [],
-			"classes": "node node-ctrl"
-		}
-	],
-	"nodeData": [
-		{
-			"type": "out",
-			"params": {}
-		},
-		{
-			"type": "Filter",
-			"params": {
-				"frequency": 8500,
-				"Q": 5.757546424865723,
-				"detune": 0,
-				"type": "lowpass"
-			}
-		},
-		{
-			"type": "Oscillator",
-			"params": {
-				"frequency": 220,
-				"detune": 0,
-				"type": "sawtooth"
-			}
-		},
-		{
-			"type": "Oscillator",
-			"params": {
-				"frequency": 293.6600036621094,
-				"detune": 0,
-				"type": "sawtooth"
-			}
-		},
-		{
-			"type": "Gain",
-			"params": {
-				"gain": 0.6800000071525574
-			}
-		},
-		{
-			"type": "ADSR",
-			"params": {
-				"attack": 0.40228525869896803,
-				"decay": 0.5,
-				"sustain": 0.5,
-				"release": 1
+[
+	{
+		"nodes": [
+			{
+				"id": 0,
+				"x": 527,
+				"y": 174,
+				"name": "Out",
+				"inputs": [
+					4
+				],
+				"classes": "node"
 			},
-			"controlParam": "frequency",
-			"controlParams": [
-				"frequency",
-				"Q",
-				"detune"
-			]
-		}
-	]
-}]
+			{
+				"id": 1,
+				"x": 332,
+				"y": 171,
+				"name": "Filter",
+				"inputs": [
+					2,
+					3,
+					5
+				],
+				"classes": "node"
+			},
+			{
+				"id": 2,
+				"x": 158,
+				"y": 100,
+				"name": "Osc",
+				"inputs": [],
+				"classes": "node"
+			},
+			{
+				"id": 3,
+				"x": 159,
+				"y": 207,
+				"name": "Osc",
+				"inputs": [],
+				"classes": "node selected"
+			},
+			{
+				"id": 4,
+				"x": 434,
+				"y": 67,
+				"name": "Gain",
+				"inputs": [
+					1
+				],
+				"classes": "node"
+			},
+			{
+				"id": 5,
+				"x": 333,
+				"y": 313,
+				"name": "ADSR",
+				"inputs": [],
+				"classes": "node node-ctrl"
+			}
+		],
+		"nodeData": [
+			{
+				"type": "out",
+				"params": {}
+			},
+			{
+				"type": "Filter",
+				"params": {
+					"frequency": 8500,
+					"Q": 5.757546424865723,
+					"detune": 0,
+					"type": "lowpass"
+				}
+			},
+			{
+				"type": "Oscillator",
+				"params": {
+					"frequency": 220,
+					"detune": 0,
+					"type": "sawtooth"
+				}
+			},
+			{
+				"type": "Oscillator",
+				"params": {
+					"frequency": 220,
+					"detune": 500,
+					"type": "sawtooth"
+				}
+			},
+			{
+				"type": "Gain",
+				"params": {
+					"gain": 0.6800000071525574
+				}
+			},
+			{
+				"type": "ADSR",
+				"params": {
+					"attack": 0.40228525869896803,
+					"decay": 0.5,
+					"sustain": 0.5,
+					"release": 1
+				},
+				"controlParam": "frequency",
+				"controlParams": [
+					"frequency",
+					"Q",
+					"detune"
+				]
+			}
+		],
+		"name": "Fanfare"
+	},
+	{
+		"nodes": [
+			{
+				"id": 0,
+				"x": 558,
+				"y": 206,
+				"name": "Out",
+				"inputs": [
+					2
+				],
+				"classes": "node"
+			},
+			{
+				"id": 1,
+				"x": 223,
+				"y": 201,
+				"name": "Osc",
+				"inputs": [
+					4
+				],
+				"classes": "node"
+			},
+			{
+				"id": 2,
+				"x": 372,
+				"y": 63,
+				"name": "Filter",
+				"inputs": [
+					6
+				],
+				"classes": "node"
+			},
+			{
+				"id": 3,
+				"x": 51,
+				"y": 318,
+				"name": "LFO",
+				"inputs": [],
+				"classes": "node node-ctrl"
+			},
+			{
+				"id": 4,
+				"x": 202,
+				"y": 320,
+				"name": "Gain Ctrl",
+				"inputs": [
+					3
+				],
+				"classes": "node node-ctrl selected"
+			},
+			{
+				"id": 5,
+				"x": 367,
+				"y": 317,
+				"name": "ADSR",
+				"inputs": [],
+				"classes": "node node-ctrl"
+			},
+			{
+				"id": 6,
+				"x": 368,
+				"y": 198,
+				"name": "Gain",
+				"inputs": [
+					1,
+					5
+				],
+				"classes": "node"
+			}
+		],
+		"nodeData": [
+			{
+				"type": "out",
+				"params": {}
+			},
+			{
+				"type": "Oscillator",
+				"params": {
+					"frequency": 993.8301836325433,
+					"detune": 0,
+					"type": "sawtooth"
+				}
+			},
+			{
+				"type": "Filter",
+				"params": {
+					"frequency": 3804.415245453969,
+					"Q": 3.2594832166974843,
+					"detune": 0,
+					"type": "lowpass"
+				}
+			},
+			{
+				"type": "LFO",
+				"params": {
+					"frequency": 6.394086367108338,
+					"detune": 0,
+					"type": "sine"
+				}
+			},
+			{
+				"type": "GainCtrl",
+				"params": {
+					"gain": 14
+				},
+				"controlParam": "frequency",
+				"controlParams": [
+					"frequency",
+					"detune"
+				]
+			},
+			{
+				"type": "ADSR",
+				"params": {
+					"attack": 0.2,
+					"decay": 0.5,
+					"sustain": 0.5,
+					"release": 0.17710363973300636
+				},
+				"controlParam": "gain",
+				"controlParams": [
+					"gain"
+				]
+			},
+			{
+				"type": "Gain",
+				"params": {
+					"gain": 1
+				}
+			}
+		],
+		"name": "Violin"
+	},
+	{
+		"nodes": [
+			{
+				"id": 0,
+				"x": 511,
+				"y": 149,
+				"name": "Out",
+				"inputs": [
+					1
+				],
+				"classes": "node"
+			},
+			{
+				"id": 1,
+				"x": 260,
+				"y": 149,
+				"name": "Osc",
+				"inputs": [
+					2
+				],
+				"classes": "node selected"
+			},
+			{
+				"id": 2,
+				"x": 260,
+				"y": 306,
+				"name": "ADSR",
+				"inputs": [],
+				"classes": "node node-ctrl selected"
+			}
+		],
+		"nodeData": [
+			{
+				"type": "out",
+				"params": {}
+			},
+			{
+				"type": "Oscillator",
+				"params": {
+					"frequency": 1195.6321071267505,
+					"detune": 0,
+					"type": "square"
+				}
+			},
+			{
+				"type": "ADSR",
+				"params": {
+					"attack": 0,
+					"decay": 0.5,
+					"sustain": 0,
+					"release": 0
+				},
+				"controlParam": "frequency",
+				"controlParams": [
+					"frequency",
+					"detune"
+				]
+			}
+		],
+		"name": "Pew!"
+	},
+	{
+		"nodes": [
+			{
+				"id": 0,
+				"x": 527,
+				"y": 174,
+				"name": "Out",
+				"inputs": [
+					4
+				],
+				"classes": "node"
+			},
+			{
+				"id": 1,
+				"x": 332,
+				"y": 171,
+				"name": "Filter",
+				"inputs": [
+					2,
+					3,
+					5
+				],
+				"classes": "node"
+			},
+			{
+				"id": 2,
+				"x": 158,
+				"y": 100,
+				"name": "Osc",
+				"inputs": [],
+				"classes": "node"
+			},
+			{
+				"id": 3,
+				"x": 159,
+				"y": 207,
+				"name": "Osc",
+				"inputs": [],
+				"classes": "node selected"
+			},
+			{
+				"id": 4,
+				"x": 434,
+				"y": 67,
+				"name": "Gain",
+				"inputs": [
+					1
+				],
+				"classes": "node"
+			},
+			{
+				"id": 5,
+				"x": 333,
+				"y": 313,
+				"name": "ADSR",
+				"inputs": [],
+				"classes": "node node-ctrl"
+			}
+		],
+		"nodeData": [
+			{
+				"type": "out",
+				"params": {}
+			},
+			{
+				"type": "Filter",
+				"params": {
+					"frequency": 3804.415245453969,
+					"Q": 9.284478953499399,
+					"detune": 0,
+					"type": "lowpass"
+				}
+			},
+			{
+				"type": "Oscillator",
+				"params": {
+					"frequency": 140,
+					"detune": 0,
+					"type": "sawtooth"
+				}
+			},
+			{
+				"type": "Oscillator",
+				"params": {
+					"frequency": 140,
+					"detune": 10,
+					"type": "sawtooth"
+				}
+			},
+			{
+				"type": "Gain",
+				"params": {
+					"gain": 0.6800000071525574
+				}
+			},
+			{
+				"type": "ADSR",
+				"params": {
+					"attack": 0.40228525869896803,
+					"decay": 0.5,
+					"sustain": 0.5,
+					"release": 1
+				},
+				"controlParam": "frequency",
+				"controlParams": [
+					"frequency",
+					"Q",
+					"detune"
+				]
+			}
+		],
+		"name": "Tesla"
+	}
+]

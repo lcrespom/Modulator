@@ -58,6 +58,9 @@
 	function setupKeyboard() {
 	    var kb = new keyboard_1.Keyboard();
 	    kb.noteOn = function (midi, ratio) {
+	        if (document.activeElement.nodeName == 'INPUT' &&
+	            document.activeElement.getAttribute('type') != 'range')
+	            return;
 	        synthUI.synth.noteOn(midi, 1, ratio);
 	    };
 	    kb.noteOff = function (midi) {
@@ -541,6 +544,8 @@
 /* 4 */
 /***/ function(module, exports) {
 
+	var SHIFT_KEY = 16;
+	var CAPS_LOCK = 20;
 	/**
 	 * A generic directed graph editor.
 	 */
@@ -771,7 +776,9 @@
 	        var srcn;
 	        var connecting = false;
 	        $('body').keydown(function (evt) {
-	            if (evt.keyCode != 16 || connecting)
+	            if (evt.keyCode == CAPS_LOCK)
+	                return _this.setGrid([20, 20]);
+	            if (evt.keyCode != SHIFT_KEY || connecting)
 	                return;
 	            srcn = _this.getNodeFromDOM(_this.getElementUnderMouse());
 	            if (!srcn)
@@ -784,7 +791,9 @@
 	            _this.registerRubberBanding(srcn);
 	        })
 	            .keyup(function (evt) {
-	            if (evt.keyCode != 16)
+	            if (evt.keyCode == CAPS_LOCK)
+	                return _this.setGrid(null);
+	            if (evt.keyCode != SHIFT_KEY)
 	                return;
 	            connecting = false;
 	            _this.deregisterRubberBanding();
@@ -794,6 +803,9 @@
 	            _this.connectOrDisconnect(srcn, dstn);
 	            _this.graph.draw();
 	        });
+	    };
+	    GraphInteraction.prototype.setGrid = function (grid) {
+	        $(this.graph.nodeCanvas).find('.node').draggable("option", "grid", grid);
 	    };
 	    GraphInteraction.prototype.connectOrDisconnect = function (srcn, dstn) {
 	        if (this.graph.disconnect(srcn, dstn))
