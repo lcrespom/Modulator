@@ -2,6 +2,8 @@
 A graphical modular synthesizer, using the
 [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API).
 
+Requires a modern browser such as Chrome, FireFox or Safari.
+
 ##Usage
 - Click any synth node from the palette at the right to add it to the canvas
 - Use regular drag & drop to move audio nodes around in the canvas
@@ -63,7 +65,6 @@ Contributions are welcome. Preferred language is TypeScript, but it is not manda
 		- Description of each node parameters
 	- Find a better way to add nodes from the palette into the canvas
 	- Improve layout
-		- Center horizontally
 		- Remove hardcoded dimensions from canvas
 		- More flexible layout
 	- Right-click & drag to connect nodes
@@ -86,9 +87,6 @@ Contributions are welcome. Preferred language is TypeScript, but it is not manda
 	- Separate graph.ts into an independent npm module
 	- Better, cleaner implementation of HTML/CSS in index.html and main.css
 	- API to load & play presets without displaying the node graph
-
-- Support
-	- Test support in FireFox & Safari
 
 - Share
 	- Document

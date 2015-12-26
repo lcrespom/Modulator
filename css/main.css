@@ -5,6 +5,11 @@ body {
 	font-family: Electrolize, "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
+.main {
+	max-width: 810px;
+	margin: auto;
+}
+
 /*----- General -----*/
 
 .graph {
