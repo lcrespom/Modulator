@@ -55,6 +55,7 @@ Contributions are welcome. Preferred language is TypeScript, but it is not manda
 - UI
 	- Proper Bootstrap popups instead of crappy browser popups (alert/cofirm/prompt)
 	- Center parameters horizontally in parameters panel
+	- Use cool knobs for parameters instead of default browser sliders
 	- Help
 		- General help button explaining how to connect etc.
 		- Description of each node
