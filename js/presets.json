@@ -3,8 +3,8 @@
 		"nodes": [
 			{
 				"id": 0,
-				"x": 527,
-				"y": 174,
+				"x": 520,
+				"y": 180,
 				"name": "Out",
 				"inputs": [
 					4
@@ -13,8 +13,8 @@
 			},
 			{
 				"id": 1,
-				"x": 332,
-				"y": 171,
+				"x": 320,
+				"y": 180,
 				"name": "Filter",
 				"inputs": [
 					2,
@@ -25,24 +25,24 @@
 			},
 			{
 				"id": 2,
-				"x": 158,
-				"y": 100,
+				"x": 100,
+				"y": 120,
 				"name": "Osc",
 				"inputs": [],
 				"classes": "node"
 			},
 			{
 				"id": 3,
-				"x": 159,
-				"y": 207,
+				"x": 100,
+				"y": 240,
 				"name": "Osc",
 				"inputs": [],
-				"classes": "node selected"
+				"classes": "node"
 			},
 			{
 				"id": 4,
-				"x": 434,
-				"y": 67,
+				"x": 420,
+				"y": 60,
 				"name": "Gain",
 				"inputs": [
 					1
@@ -51,8 +51,8 @@
 			},
 			{
 				"id": 5,
-				"x": 333,
-				"y": 313,
+				"x": 320,
+				"y": 320,
 				"name": "ADSR",
 				"inputs": [],
 				"classes": "node node-ctrl"
@@ -116,8 +116,8 @@
 		"nodes": [
 			{
 				"id": 0,
-				"x": 558,
-				"y": 206,
+				"x": 580,
+				"y": 180,
 				"name": "Out",
 				"inputs": [
 					2
@@ -126,8 +126,8 @@
 			},
 			{
 				"id": 1,
-				"x": 223,
-				"y": 201,
+				"x": 180,
+				"y": 180,
 				"name": "Osc",
 				"inputs": [
 					4
@@ -136,8 +136,8 @@
 			},
 			{
 				"id": 2,
-				"x": 372,
-				"y": 63,
+				"x": 480,
+				"y": 60,
 				"name": "Filter",
 				"inputs": [
 					6
@@ -146,34 +146,34 @@
 			},
 			{
 				"id": 3,
-				"x": 51,
-				"y": 318,
+				"x": 40,
+				"y": 300,
 				"name": "LFO",
 				"inputs": [],
 				"classes": "node node-ctrl"
 			},
 			{
 				"id": 4,
-				"x": 202,
-				"y": 320,
+				"x": 180,
+				"y": 300,
 				"name": "Gain Ctrl",
 				"inputs": [
 					3
 				],
-				"classes": "node node-ctrl selected"
+				"classes": "node node-ctrl"
 			},
 			{
 				"id": 5,
-				"x": 367,
-				"y": 317,
+				"x": 360,
+				"y": 300,
 				"name": "ADSR",
 				"inputs": [],
 				"classes": "node node-ctrl"
 			},
 			{
 				"id": 6,
-				"x": 368,
-				"y": 198,
+				"x": 360,
+				"y": 180,
 				"name": "Gain",
 				"inputs": [
 					1,
@@ -249,8 +249,8 @@
 		"nodes": [
 			{
 				"id": 0,
-				"x": 511,
-				"y": 149,
+				"x": 460,
+				"y": 120,
 				"name": "Out",
 				"inputs": [
 					1
@@ -259,21 +259,21 @@
 			},
 			{
 				"id": 1,
-				"x": 260,
-				"y": 149,
+				"x": 240,
+				"y": 120,
 				"name": "Osc",
 				"inputs": [
 					2
 				],
-				"classes": "node selected"
+				"classes": "node"
 			},
 			{
 				"id": 2,
-				"x": 260,
-				"y": 306,
+				"x": 240,
+				"y": 260,
 				"name": "ADSR",
 				"inputs": [],
-				"classes": "node node-ctrl selected"
+				"classes": "node node-ctrl"
 			}
 		],
 		"nodeData": [
@@ -310,8 +310,8 @@
 		"nodes": [
 			{
 				"id": 0,
-				"x": 527,
-				"y": 174,
+				"x": 520,
+				"y": 160,
 				"name": "Out",
 				"inputs": [
 					4
@@ -320,8 +320,8 @@
 			},
 			{
 				"id": 1,
-				"x": 332,
-				"y": 171,
+				"x": 320,
+				"y": 160,
 				"name": "Filter",
 				"inputs": [
 					2,
@@ -332,7 +332,7 @@
 			},
 			{
 				"id": 2,
-				"x": 158,
+				"x": 140,
 				"y": 100,
 				"name": "Osc",
 				"inputs": [],
@@ -340,16 +340,16 @@
 			},
 			{
 				"id": 3,
-				"x": 159,
-				"y": 207,
+				"x": 140,
+				"y": 220,
 				"name": "Osc",
 				"inputs": [],
-				"classes": "node selected"
+				"classes": "node"
 			},
 			{
 				"id": 4,
-				"x": 434,
-				"y": 67,
+				"x": 420,
+				"y": 60,
 				"name": "Gain",
 				"inputs": [
 					1
@@ -358,8 +358,8 @@
 			},
 			{
 				"id": 5,
-				"x": 333,
-				"y": 313,
+				"x": 320,
+				"y": 300,
 				"name": "ADSR",
 				"inputs": [],
 				"classes": "node node-ctrl"

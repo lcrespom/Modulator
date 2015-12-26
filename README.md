@@ -53,7 +53,6 @@ Contributions are welcome. Preferred language is TypeScript, but it is not manda
 	- More testing on instrument load/save
 
 - UI
-	- Use 10x10 grid for placing nodes after drop (but not during drag: it is not smooth)
 	- Proper Bootstrap popups instead of crappy browser popups (alert/cofirm/prompt)
 	- Center parameters horizontally in parameters panel
 	- Help

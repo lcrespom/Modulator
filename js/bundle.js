@@ -624,8 +624,7 @@
 	                y: node.y,
 	                name: node.name,
 	                inputs: nodeInputs,
-	                classes: node.element.attr('class')
-	                    .split(' ').filter(function (v) { return v.substr(0, 3) != 'ui-'; }).join(' ')
+	                classes: this.getAppClasses(node)
 	            });
 	            jsonNodeData.push(this.handler.data2json(node));
 	        }
@@ -681,6 +680,19 @@
 	                return node;
 	        }
 	        return null;
+	    };
+	    Graph.prototype.getAppClasses = function (n) {
+	        var classes = n.element[0].className.split(/\s+/);
+	        var result = [];
+	        for (var _i = 0; _i < classes.length; _i++) {
+	            var cname = classes[_i];
+	            if (cname == 'selected')
+	                continue;
+	            if (cname.substr(0, 3) == 'ui-')
+	                continue;
+	            result.push(cname);
+	        }
+	        return result.join(' ');
 	    };
 	    return Graph;
 	})();

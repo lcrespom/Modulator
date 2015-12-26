@@ -86,8 +86,7 @@ export class Graph {
 				y: node.y,
 				name: node.name,
 				inputs: nodeInputs,
-				classes: node.element.attr('class')
-					.split(' ').filter(v => v.substr(0, 3) != 'ui-').join(' ')
+				classes: this.getAppClasses(node)
 			});
 			jsonNodeData.push(this.handler.data2json(node));
 		}
@@ -136,6 +135,17 @@ export class Graph {
 		for (const node of this.nodes)
 			if (node.id === id) return node;
 		return null;
+	}
+
+	getAppClasses(n: Node): string {
+		const classes = n.element[0].className.split(/\s+/);
+		const result = [];
+		for (const cname of classes) {
+			if (cname == 'selected') continue;
+			if (cname.substr(0, 3) == 'ui-') continue;
+			result.push(cname);
+		}
+		return result.join(' ');
 	}
 }
 
