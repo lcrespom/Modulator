@@ -33,8 +33,10 @@ Contributions are welcome. Preferred language is TypeScript, but it is not manda
 	- Add all possible AudioNodes available into the palette
 		- Support sampled audio (default sample URL to amen break from Wikipedia)
 		- StereoPanner
+		- etc!
 	- Custom nodes
 		- Oscillator with gain
+		- LFO with gain
 		- Sample buffer with gain
 		- Full synth as a reusable module (long term)
 		- Ring modulation using a gain node where the gain is controlled by an oscillator
@@ -76,7 +78,6 @@ Contributions are welcome. Preferred language is TypeScript, but it is not manda
 - Long term:
 	- Tracker
 	- Custom nodes with WebWorker
-	- Composite nodes, e.g. LFO+Gain
 	- Record & save audio
 	- Server-side part, supporting:
 		- Loading & saving of resources: synth modules, songs, samples, etc.
