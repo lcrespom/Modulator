@@ -75,6 +75,17 @@ export var palette: NodePalette = {
 			delayTime: { initial: 1, min: 0, max: 5 }
 		}
 	},
+	StereoPan: {
+		constructor: 'createStereoPanner',
+		params: {
+			pan: {
+				initial: 0,
+				min: -1,
+				max: 1,
+				linear: true
+			}
+		}
+	},
 	// Controllers
 	LFO: {
 		constructor: 'createOscillator',

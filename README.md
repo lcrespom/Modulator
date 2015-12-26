@@ -35,7 +35,14 @@ Contributions are welcome. Preferred language is TypeScript, but it is not manda
 	- Add all possible AudioNodes available into the palette
 		- Support sampled audio (default sample URL to amen break from Wikipedia)
 		- StereoPanner
-		- etc!
+		- All pending nodes
+			- AudioBufferSourceNode
+			- ChannelMergerNode / ChannelSplitterNode (maybe not)
+			- ConvolverNode
+			- DynamicsCompressorNode
+			- StereoPannerNode
+			- WaveShaperNode
+		- Also, add pending parameters to existing modules (Filter)
 	- Custom nodes
 		- Oscillator with gain
 		- LFO with gain

@@ -126,7 +126,7 @@
 	    };
 	    SynthUI.prototype.registerPaletteHandler = function () {
 	        var self = this; // JQuery sets 'this' in event handlers
-	        $('.palette > .node').click(function (evt) {
+	        $('.palette .node').click(function (evt) {
 	            var elem = $(this);
 	            self.addNode(elem.attr('data-type'), elem.text());
 	        });
@@ -1107,6 +1107,17 @@
 	        constructor: 'createDelay',
 	        params: {
 	            delayTime: { initial: 1, min: 0, max: 5 }
+	        }
+	    },
+	    StereoPan: {
+	        constructor: 'createStereoPanner',
+	        params: {
+	            pan: {
+	                initial: 0,
+	                min: -1,
+	                max: 1,
+	                linear: true
+	            }
 	        }
 	    },
 	    // Controllers

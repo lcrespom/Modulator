@@ -36,7 +36,7 @@ export class SynthUI {
 
 	registerPaletteHandler() {
 		var self = this;	// JQuery sets 'this' in event handlers
-		$('.palette > .node').click(function(evt) {
+		$('.palette .node').click(function(evt) {
 			const elem = $(this);
 			self.addNode(elem.attr('data-type'), elem.text());
 		});
