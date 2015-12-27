@@ -116,6 +116,7 @@ body {
 	margin-bottom: 10px;
 	overflow-x: auto;
 	display: inline-block;
+	position: static;
 }
 
 input[type=range][orient=vertical] {

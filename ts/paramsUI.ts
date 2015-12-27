@@ -7,13 +7,16 @@ import { NodeData } from './synthUI';
  */
 export function renderParams(ndata: NodeData, panel: JQuery): void {
 	panel.empty();
+	const boxes: JQuery[] = [];
 	if (ndata.nodeDef.control)
-		renderParamControl(ndata, panel);
-	for (const param of Object.keys(ndata.nodeDef.params || {}))
+		boxes.push(renderParamControl(ndata, panel));
+	const params = Object.keys(ndata.nodeDef.params || {});
+	if (params.length <= 0) return;
+	for (const param of params)
 		if (ndata.anode[param] instanceof AudioParam)
-			renderAudioParam(ndata.anode, ndata.nodeDef, param, panel);
+			boxes.push(renderAudioParam(ndata.anode, ndata.nodeDef, param, panel));
 		else
-			renderOtherParam(ndata.anode, ndata.nodeDef, param, panel);
+			boxes.push(renderOtherParam(ndata.anode, ndata.nodeDef, param, panel));
 }
 
 /**
@@ -32,17 +35,17 @@ export function addDeleteButton(panel: JQuery, handler: () => void): void {
 }
 
 
-function renderAudioParam(anode: AudioNode, ndef: NodeDef, param: string, panel: JQuery) {
+function renderAudioParam(anode: AudioNode, ndef: NodeDef, param: string, panel: JQuery): JQuery {
 	const pdef: NodeParamDef = ndef.params[param];
 	const aparam: AudioParam = anode[param];
 	if (aparam['_value']) aparam.value = aparam['_value'];
-	renderSlider(panel, pdef, param, aparam.value, value => {
+	return renderSlider(panel, pdef, param, aparam.value, value => {
 		aparam.value = value;
 		aparam['_value'] = value;
 	});
 }
 
-function renderParamControl(ndata: NodeData, panel: JQuery) {
+function renderParamControl(ndata: NodeData, panel: JQuery): JQuery {
 	if (!ndata.controlParams) return;
 	const combo = renderCombo(panel, ndata.controlParams, ndata.controlParam, 'Controlling');
 	combo.on('input', _ => {
@@ -51,30 +54,29 @@ function renderParamControl(ndata: NodeData, panel: JQuery) {
 		ndata.controlParam = combo.val();
 		ndata.anode.connect(ndata.controlTarget[ndata.controlParam]);
 	});
+	return combo;
 }
 
-function renderOtherParam(anode: AudioNode, ndef: NodeDef, param: string, panel: JQuery) {
+function renderOtherParam(anode: AudioNode, ndef: NodeDef, param: string, panel: JQuery): JQuery {
 	const pdef: NodeParamDef = ndef.params[param];
 	if (pdef.choices) {
 		const combo = renderCombo(panel, pdef.choices, anode[param], ucfirst(param));
 		combo.on('input', _ => {
 			anode[param] = combo.val();
 		});
+		return combo;
 	}
-	else if (pdef.min != undefined) {
-		renderSlider(panel, pdef, param, anode[param], value => anode[param] = value);
-	}
-	else if (typeof pdef.initial == 'boolean') {
-		renderBoolean(panel, pdef, param, anode, ucfirst(param));
-	}
-	else if (pdef.phandler) {
-		pdef.phandler.renderParam(panel, pdef, anode, param, ucfirst(param));
-	}
+	else if (pdef.min != undefined)
+		return renderSlider(panel, pdef, param, anode[param], value => anode[param] = value);
+	else if (typeof pdef.initial == 'boolean')
+		return renderBoolean(panel, pdef, param, anode, ucfirst(param));
+	else if (pdef.phandler)
+		return pdef.phandler.renderParam(panel, pdef, anode, param, ucfirst(param));
 }
 
 
 function renderSlider(panel: JQuery, pdef: NodeParamDef,
-	param: string, value: number, setValue: (value: number) => void) {
+	param: string, value: number, setValue: (value: number) => void): JQuery {
 	const sliderBox = $('<div class="slider-box">');
 	const slider = $('<input type="range" orient="vertical">')
 		.attr('min', 0)
@@ -100,6 +102,7 @@ function renderSlider(panel: JQuery, pdef: NodeParamDef,
 		slider.val(param2slider(value, pdef));
 		setValue(value);
 	});
+	return sliderBox;
 }
 
 function renderCombo(panel: JQuery, choices: string[], selected: string, label: string): JQuery {
@@ -116,7 +119,7 @@ function renderCombo(panel: JQuery, choices: string[], selected: string, label: 
 	return combo;
 }
 
-function renderBoolean(panel: JQuery, pdef: NodeParamDef, param: string, anode: AudioNode, label: string) {
+function renderBoolean(panel: JQuery, pdef: NodeParamDef, param: string, anode: AudioNode, label: string): JQuery {
 	const box = $('<div class="choice-box">');
 	const button = $('<button class="btn btn-info" data-toggle="button" aria-pressed="false">');
 	box.append(button);
@@ -136,6 +139,7 @@ function renderBoolean(panel: JQuery, pdef: NodeParamDef, param: string, anode: 
 		anode[param] = !anode[param];
 		button.text(anode[param] ? 'Enabled' : 'Disabled');
 	});
+	return box;
 }
 
 

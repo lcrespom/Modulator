@@ -115,10 +115,12 @@ class BufferNoteHandler extends BaseNoteHandler {
 	playing = false;
 
 	noteOn(midi: number, gain: number, ratio: number):void {
-		if (this.playing) this.noteEnd(midi);	// Because this is monophonic
+		if (this.playing) this.noteEnd(midi);
+		const buf = this.node.data.anode._buffer;
+		if (!buf) return;	// Buffer still loading or failed
 		this.playing = true;
 		this.absn = <AudioBufferSourceNode>this.clone();
-		this.absn.buffer = this.node.data.anode._buffer;
+		this.absn.buffer = buf;
 		this.absn.playbackRate.value = this.absn.playbackRate.value * ratio;
 		this.absn.start();
 		this.lastNote = midi;

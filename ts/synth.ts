@@ -5,7 +5,7 @@ import { ModernWindow, ModernAudioContext, removeArrayElement } from './modern';
 interface ParamHandler {
 	initialize(anode: AudioNode, def: NodeDef): void;
 	renderParam(panel: JQuery, pdef: NodeParamDef,
-		anode: AudioNode, param: string, label: string): void;
+		anode: AudioNode, param: string, label: string): JQuery;
 }
 
 /**
@@ -134,7 +134,7 @@ class BufferURL implements ParamHandler {
 	}
 
 	renderParam(panel: JQuery, pdef: NodeParamDef,
-		anode: AudioNode, param: string, label: string): void {
+		anode: AudioNode, param: string, label: string): JQuery {
 		const box = $('<div class="choice-box">');
 		const button = $('<button class="btn btn-primary">URL</button>');
 		box.append(button);
@@ -148,6 +148,7 @@ class BufferURL implements ParamHandler {
 			// solution: save buffer to different property, set it just before play
 			this.loadBuffer(absn.context, url, buffer => absn['_buffer'] = buffer);
 		});
+		return box;
 	}
 
 	loadBuffer(ac: AudioContext, url: string, cb: (buffer: AudioBuffer) => void): void {

@@ -437,10 +437,13 @@
 	    }
 	    BufferNoteHandler.prototype.noteOn = function (midi, gain, ratio) {
 	        if (this.playing)
-	            this.noteEnd(midi); // Because this is monophonic
+	            this.noteEnd(midi);
+	        var buf = this.node.data.anode._buffer;
+	        if (!buf)
+	            return; // Buffer still loading or failed
 	        this.playing = true;
 	        this.absn = this.clone();
-	        this.absn.buffer = this.node.data.anode._buffer;
+	        this.absn.buffer = buf;
 	        this.absn.playbackRate.value = this.absn.playbackRate.value * ratio;
 	        this.absn.start();
 	        this.lastNote = midi;
@@ -1123,6 +1126,7 @@
 	            // solution: save buffer to different property, set it just before play
 	            _this.loadBuffer(absn.context, url, function (buffer) { return absn['_buffer'] = buffer; });
 	        });
+	        return box;
 	    };
 	    BufferURL.prototype.loadBuffer = function (ac, url, cb) {
 	        var w = window;
@@ -1282,14 +1286,18 @@
 	 */
 	function renderParams(ndata, panel) {
 	    panel.empty();
+	    var boxes = [];
 	    if (ndata.nodeDef.control)
-	        renderParamControl(ndata, panel);
-	    for (var _i = 0, _a = Object.keys(ndata.nodeDef.params || {}); _i < _a.length; _i++) {
-	        var param = _a[_i];
+	        boxes.push(renderParamControl(ndata, panel));
+	    var params = Object.keys(ndata.nodeDef.params || {});
+	    if (params.length <= 0)
+	        return;
+	    for (var _i = 0; _i < params.length; _i++) {
+	        var param = params[_i];
 	        if (ndata.anode[param] instanceof AudioParam)
-	            renderAudioParam(ndata.anode, ndata.nodeDef, param, panel);
+	            boxes.push(renderAudioParam(ndata.anode, ndata.nodeDef, param, panel));
 	        else
-	            renderOtherParam(ndata.anode, ndata.nodeDef, param, panel);
+	            boxes.push(renderOtherParam(ndata.anode, ndata.nodeDef, param, panel));
 	    }
 	}
 	exports.renderParams = renderParams;
@@ -1310,7 +1318,7 @@
 	    var aparam = anode[param];
 	    if (aparam['_value'])
 	        aparam.value = aparam['_value'];
-	    renderSlider(panel, pdef, param, aparam.value, function (value) {
+	    return renderSlider(panel, pdef, param, aparam.value, function (value) {
 	        aparam.value = value;
 	        aparam['_value'] = value;
 	    });
@@ -1325,6 +1333,7 @@
 	        ndata.controlParam = combo.val();
 	        ndata.anode.connect(ndata.controlTarget[ndata.controlParam]);
 	    });
+	    return combo;
 	}
 	function renderOtherParam(anode, ndef, param, panel) {
 	    var pdef = ndef.params[param];
@@ -1333,16 +1342,14 @@
 	        combo.on('input', function (_) {
 	            anode[param] = combo.val();
 	        });
+	        return combo;
 	    }
-	    else if (pdef.min != undefined) {
-	        renderSlider(panel, pdef, param, anode[param], function (value) { return anode[param] = value; });
-	    }
-	    else if (typeof pdef.initial == 'boolean') {
-	        renderBoolean(panel, pdef, param, anode, ucfirst(param));
-	    }
-	    else if (pdef.phandler) {
-	        pdef.phandler.renderParam(panel, pdef, anode, param, ucfirst(param));
-	    }
+	    else if (pdef.min != undefined)
+	        return renderSlider(panel, pdef, param, anode[param], function (value) { return anode[param] = value; });
+	    else if (typeof pdef.initial == 'boolean')
+	        return renderBoolean(panel, pdef, param, anode, ucfirst(param));
+	    else if (pdef.phandler)
+	        return pdef.phandler.renderParam(panel, pdef, anode, param, ucfirst(param));
 	}
 	function renderSlider(panel, pdef, param, value, setValue) {
 	    var sliderBox = $('<div class="slider-box">');
@@ -1371,6 +1378,7 @@
 	        slider.val(param2slider(value, pdef));
 	        setValue(value);
 	    });
+	    return sliderBox;
 	}
 	function renderCombo(panel, choices, selected, label) {
 	    var choiceBox = $('<div class="choice-box">');
@@ -1407,6 +1415,7 @@
 	        anode[param] = !anode[param];
 	        button.text(anode[param] ? 'Enabled' : 'Disabled');
 	    });
+	    return box;
 	}
 	var LOG_BASE = 2;
 	function logarithm(base, x) {
