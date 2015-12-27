@@ -69,6 +69,8 @@ Contributions are welcome. Preferred language is TypeScript, but it is not manda
 		- General help button explaining how to connect etc.
 		- Description of each node
 		- Description of each node parameters
+	- Palette
+		- Provide a small header label for different types of nodes (source, effect, ctrl)
 	- Use a different CSS class for source, effect and destination nodes
 	- Consider a better way to add nodes from the palette into the canvas
 	- Consider a more user-friendly way to connect and disconnect nodes

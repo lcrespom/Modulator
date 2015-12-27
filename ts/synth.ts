@@ -135,8 +135,18 @@ class BufferURL implements ParamHandler {
 
 	renderParam(panel: JQuery, pdef: NodeParamDef,
 		anode: AudioNode, param: string, label: string): void {
-		//TODO
-		console.log('TODO: Edit buffer');
+		const box = $('<div class="choice-box">');
+		const button = $('<button class="btn btn-primary">URL</button>');
+		box.append(button);
+		button.after('<br/><br/>' + label);
+		panel.append(box);
+		button.click(_ => {
+			const url = prompt('Audio buffer URL:');
+			if (!url) return;
+			const absn: AudioBufferSourceNode = <AudioBufferSourceNode>anode;
+			//TODO problem: buffer can only be set once
+			this.loadBuffer(absn.context, url, buffer => absn.buffer = buffer);
+		});
 	}
 
 	loadBuffer(ac: AudioContext, url: string, cb: (buffer: AudioBuffer) => void): void {

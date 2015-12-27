@@ -1106,8 +1106,20 @@
 	        this.loadBuffer(absn.context, url, function (buffer) { return absn.buffer = buffer; });
 	    };
 	    BufferURL.prototype.renderParam = function (panel, pdef, anode, param, label) {
-	        //TODO
-	        console.log('TODO: Edit buffer');
+	        var _this = this;
+	        var box = $('<div class="choice-box">');
+	        var button = $('<button class="btn btn-primary">URL</button>');
+	        box.append(button);
+	        button.after('<br/><br/>' + label);
+	        panel.append(box);
+	        button.click(function (_) {
+	            var url = prompt('Audio buffer URL:');
+	            if (!url)
+	                return;
+	            var absn = anode;
+	            //TODO problem: buffer can only be set once
+	            _this.loadBuffer(absn.context, url, function (buffer) { return absn.buffer = buffer; });
+	        });
 	    };
 	    BufferURL.prototype.loadBuffer = function (ac, url, cb) {
 	        var w = window;
