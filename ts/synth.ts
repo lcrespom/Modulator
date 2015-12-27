@@ -130,7 +130,7 @@ class BufferURL implements ParamHandler {
 	initialize(anode: AudioNode, def: NodeDef): void {
 		const absn: AudioBufferSourceNode = <AudioBufferSourceNode>anode;
 		const url: string = <string>def.params['buffer'].initial;
-		this.loadBuffer(absn.context, url, buffer => absn.buffer = buffer);
+		this.loadBuffer(absn.context, url, buffer => absn['_buffer'] = buffer);
 	}
 
 	renderParam(panel: JQuery, pdef: NodeParamDef,
@@ -145,7 +145,8 @@ class BufferURL implements ParamHandler {
 			if (!url) return;
 			const absn: AudioBufferSourceNode = <AudioBufferSourceNode>anode;
 			//TODO problem: buffer can only be set once
-			this.loadBuffer(absn.context, url, buffer => absn.buffer = buffer);
+			// solution: save buffer to different property, set it just before play
+			this.loadBuffer(absn.context, url, buffer => absn['_buffer'] = buffer);
 		});
 	}
 

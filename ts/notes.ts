@@ -43,9 +43,9 @@ class BaseNoteHandler implements NoteHandler {
 		for (const pname of Object.keys(data.nodeDef.params)) {
 			const param = data.anode[pname];
 			if (param instanceof AudioParam)
-				anode[pname].value = data.anode[pname].value;
-			else
-				anode[pname] = data.anode[pname];
+				anode[pname].value = param.value;
+			else if (param !== null && param !== undefined)
+				anode[pname] = param;
 		}
 		// Copy output connections
 		for (const out of this.outTracker.outputs)
@@ -118,6 +118,7 @@ class BufferNoteHandler extends BaseNoteHandler {
 		if (this.playing) this.noteEnd(midi);	// Because this is monophonic
 		this.playing = true;
 		this.absn = <AudioBufferSourceNode>this.clone();
+		this.absn.buffer = this.node.data.anode._buffer;
 		this.absn.playbackRate.value = this.absn.playbackRate.value * ratio;
 		this.absn.start();
 		this.lastNote = midi;

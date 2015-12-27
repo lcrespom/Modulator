@@ -355,9 +355,9 @@
 	            var pname = _a[_i];
 	            var param = data.anode[pname];
 	            if (param instanceof AudioParam)
-	                anode[pname].value = data.anode[pname].value;
-	            else
-	                anode[pname] = data.anode[pname];
+	                anode[pname].value = param.value;
+	            else if (param !== null && param !== undefined)
+	                anode[pname] = param;
 	        }
 	        // Copy output connections
 	        for (var _b = 0, _c = this.outTracker.outputs; _b < _c.length; _b++) {
@@ -439,6 +439,7 @@
 	            this.noteEnd(midi); // Because this is monophonic
 	        this.playing = true;
 	        this.absn = this.clone();
+	        this.absn.buffer = this.node.data.anode._buffer;
 	        this.absn.playbackRate.value = this.absn.playbackRate.value * ratio;
 	        this.absn.start();
 	        this.lastNote = midi;
@@ -1103,7 +1104,7 @@
 	    BufferURL.prototype.initialize = function (anode, def) {
 	        var absn = anode;
 	        var url = def.params['buffer'].initial;
-	        this.loadBuffer(absn.context, url, function (buffer) { return absn.buffer = buffer; });
+	        this.loadBuffer(absn.context, url, function (buffer) { return absn['_buffer'] = buffer; });
 	    };
 	    BufferURL.prototype.renderParam = function (panel, pdef, anode, param, label) {
 	        var _this = this;
@@ -1118,7 +1119,8 @@
 	                return;
 	            var absn = anode;
 	            //TODO problem: buffer can only be set once
-	            _this.loadBuffer(absn.context, url, function (buffer) { return absn.buffer = buffer; });
+	            // solution: save buffer to different property, set it just before play
+	            _this.loadBuffer(absn.context, url, function (buffer) { return absn['_buffer'] = buffer; });
 	        });
 	    };
 	    BufferURL.prototype.loadBuffer = function (ac, url, cb) {
