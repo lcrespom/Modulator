@@ -116,7 +116,7 @@
 	        var out = new graph_1.Node(500, 210, 'Out');
 	        out.data = new NodeData();
 	        this.initOutputNodeData(out.data);
-	        this.gr.addNode(out);
+	        this.gr.addNode(out, 'node-out');
 	        this.initNodeDimensions(out);
 	    };
 	    SynthUI.prototype.initOutputNodeData = function (data) {
@@ -1181,7 +1181,10 @@
 	            buffer: {
 	                initial: 'https://upload.wikimedia.org/wikipedia/en/8/80/The_Amen_Break%2C_in_context.ogg',
 	                handler: 'BufferURL'
-	            }
+	            },
+	            loop: { initial: false },
+	            loopStart: { initial: 0, min: 0, max: 10 },
+	            loopEnd: { initial: 3, min: 0, max: 10 }
 	        }
 	    },
 	    // Effects
@@ -1224,7 +1227,8 @@
 	            knee: { initial: 30, min: 0, max: 40, linear: true },
 	            ratio: { initial: 12, min: 1, max: 20, linear: true },
 	            reduction: { initial: 0, min: -20, max: 0, linear: true },
-	            attack: { initial: 0.003, min: 0, max: 1 } //TODO make it fit,
+	            attack: { initial: 0.003, min: 0, max: 1 },
+	            release: { initial: 0.25, min: 0, max: 1 }
 	        }
 	    },
 	    // Controllers
@@ -1332,6 +1336,9 @@
 	    else if (pdef.min != undefined) {
 	        renderSlider(panel, pdef, param, anode[param], function (value) { return anode[param] = value; });
 	    }
+	    else if (typeof pdef.initial == 'boolean') {
+	        renderBoolean(panel, pdef, param, anode, ucfirst(param));
+	    }
 	    else if (pdef.phandler) {
 	        pdef.phandler.renderParam(panel, pdef, anode, param, ucfirst(param));
 	    }
@@ -1378,6 +1385,27 @@
 	    combo.after('<br/><br/>' + label);
 	    panel.append(choiceBox);
 	    return combo;
+	}
+	function renderBoolean(panel, pdef, param, anode, label) {
+	    var box = $('<div class="choice-box">');
+	    var button = $('<button class="btn btn-info" data-toggle="button" aria-pressed="false">');
+	    box.append(button);
+	    button.after('<br/><br/>' + label);
+	    panel.append(box);
+	    if (anode[param]) {
+	        button.text('Enabled');
+	        button.addClass('active');
+	        button.attr('aria-pressed', 'true');
+	    }
+	    else {
+	        button.text('Disabled');
+	        button.removeClass('active');
+	        button.attr('aria-pressed', 'false');
+	    }
+	    button.click(function (_) {
+	        anode[param] = !anode[param];
+	        button.text(anode[param] ? 'Enabled' : 'Disabled');
+	    });
 	}
 	var LOG_BASE = 2;
 	function logarithm(base, x) {

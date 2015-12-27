@@ -64,6 +64,9 @@ function renderOtherParam(anode: AudioNode, ndef: NodeDef, param: string, panel:
 	else if (pdef.min != undefined) {
 		renderSlider(panel, pdef, param, anode[param], value => anode[param] = value);
 	}
+	else if (typeof pdef.initial == 'boolean') {
+		renderBoolean(panel, pdef, param, anode, ucfirst(param));
+	}
 	else if (pdef.phandler) {
 		pdef.phandler.renderParam(panel, pdef, anode, param, ucfirst(param));
 	}
@@ -112,6 +115,29 @@ function renderCombo(panel: JQuery, choices: string[], selected: string, label: 
 	panel.append(choiceBox);
 	return combo;
 }
+
+function renderBoolean(panel: JQuery, pdef: NodeParamDef, param: string, anode: AudioNode, label: string) {
+	const box = $('<div class="choice-box">');
+	const button = $('<button class="btn btn-info" data-toggle="button" aria-pressed="false">');
+	box.append(button);
+	button.after('<br/><br/>' + label);
+	panel.append(box);
+	if (anode[param]) {
+		button.text('Enabled');
+		button.addClass('active');
+		button.attr('aria-pressed', 'true');
+	}
+	else {
+		button.text('Disabled');
+		button.removeClass('active');
+		button.attr('aria-pressed', 'false');
+	}
+	button.click(_ => {
+		anode[param] = !anode[param];
+		button.text(anode[param] ? 'Enabled' : 'Disabled');
+	});
+}
+
 
 const LOG_BASE = 2;
 

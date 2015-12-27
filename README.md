@@ -25,20 +25,12 @@ Contributions are welcome. Preferred language is TypeScript, but it is not manda
 ##ToDo
 - Bugs
 	- ADSR needs more testing & refining
-		- Release works only sometimes
-	- Popping sound at note on (probably needs custom oscillator with gain)
+	- Popping sound at note on/off (probably needs custom oscillator with gain)
 	- Refine rules to determine whether nodes can connect
 	- Arrows are drawn in wrong position when window is vertically scrolled (low)
 	- Review TODO items inside code
 
 - Functionality
-	- Add all possible AudioNodes available into the palette
-		- Support sampled audio (default sample URL to amen break from Wikipedia)
-		- All pending nodes
-			- AudioBufferSourceNode
-			- ChannelMergerNode / ChannelSplitterNode (maybe not)
-			- ConvolverNode
-			- WaveShaperNode
 	- Custom nodes
 		- Oscillator with gain
 		- LFO with gain
@@ -48,6 +40,10 @@ Contributions are welcome. Preferred language is TypeScript, but it is not manda
 	- Improve ADSR
 		- Linear/exponential switch
 		- Depth parameter to control how much the envelope controls the target parameter
+	- Review list of pending audio nodes
+		- Line in live input
+		- WaveShaper
+		- Etc?
 	- Dislay osc/fft using AnalyserNode
 	- Display piano keyboard / display PC keys on piano keys / gather mouse input
 	- Provide 10 preset instruments
@@ -69,8 +65,6 @@ Contributions are welcome. Preferred language is TypeScript, but it is not manda
 		- General help button explaining how to connect etc.
 		- Description of each node
 		- Description of each node parameters
-	- Palette
-		- Provide a small header label for different types of nodes (source, effect, ctrl)
 	- Use a different CSS class for source, effect and destination nodes
 	- Consider a better way to add nodes from the palette into the canvas
 	- Consider a more user-friendly way to connect and disconnect nodes

@@ -88,11 +88,17 @@ body {
 	cursor: copy;
 }
 
+.palette-section {
+	margin: 3px 4px -4px 4px;
+	text-align: center;
+	font-size: 90%;
+}
+
 /*----- Params box -----*/
 
 .params-box {
 	height: 210px;
-	width: 595px;
+	width: 605px;
 	margin-top: 5px;
 	margin-bottom: 10px;
 	overflow-x: auto;
@@ -147,7 +153,7 @@ input[type=range][orient=vertical] {
 
 .presets-box {
 	height: 210px;
-	width: 200px;
+	width: 190px;
 	margin-top: 5px;
 	margin-bottom: 10px;
 	margin-left: 10px;
@@ -157,7 +163,7 @@ input[type=range][orient=vertical] {
 
 #preset-num {
 	display: inline-block;
-	width: 50px;
+	width: 40px;
 	font-size: 130%;
 	text-align: center
 }

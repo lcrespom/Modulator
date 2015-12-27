@@ -1,6 +1,6 @@
 /** Configuration data for an AudioNode parameter */
 export interface NodeParamDef {
-	initial: number | string;
+	initial: any;
 	min?: number;
 	max?: number;
 	linear?: boolean;
@@ -59,8 +59,10 @@ export var palette: NodePalette = {
 			buffer: {
 				initial: 'https://upload.wikimedia.org/wikipedia/en/8/80/The_Amen_Break%2C_in_context.ogg',
 				handler: 'BufferURL'
-			}
-			//TODO loop / loopStart / loopEnd
+			},
+			loop: { initial: false },
+			loopStart: { initial: 0, min: 0, max: 10 },
+			loopEnd: { initial: 3, min: 0, max: 10 }
 		}
 	},
 	// Effects
@@ -103,8 +105,8 @@ export var palette: NodePalette = {
 			knee: { initial: 30, min: 0, max: 40, linear: true },
 			ratio: { initial: 12, min: 1, max: 20, linear: true },
 			reduction: { initial: 0, min: -20, max: 0, linear: true },
-			attack: { initial: 0.003, min: 0, max: 1 }//TODO make it fit,
-			//release: { initial: 0.25, min: 0, max: 1 }
+			attack: { initial: 0.003, min: 0, max: 1 },
+			release: { initial: 0.25, min: 0, max: 1 }
 		}
 	},
 	// Controllers

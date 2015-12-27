@@ -24,7 +24,7 @@ export class SynthUI {
 		const out = new Node(500, 210, 'Out');
 		out.data = new NodeData();
 		this.initOutputNodeData(out.data);
-		this.gr.addNode(out);
+		this.gr.addNode(out, 'node-out');
 		this.initNodeDimensions(out);
 	}
 
