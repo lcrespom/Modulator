@@ -8,7 +8,7 @@ import { NodeData } from './synthUI';
 export function renderParams(ndata: NodeData, panel: JQuery): void {
 	panel.empty();
 	const boxes: JQuery[] = [];
-	if (ndata.nodeDef.control)
+	if (ndata.nodeDef.control && ndata.controlParams)
 		boxes.push(renderParamControl(ndata, panel));
 	const params = Object.keys(ndata.nodeDef.params || {});
 	if (params.length <= 0) return;
@@ -17,6 +17,7 @@ export function renderParams(ndata: NodeData, panel: JQuery): void {
 			boxes.push(renderAudioParam(ndata.anode, ndata.nodeDef, param, panel));
 		else
 			boxes.push(renderOtherParam(ndata.anode, ndata.nodeDef, param, panel));
+	positionBoxes(panel, boxes);
 }
 
 /**
@@ -34,6 +35,19 @@ export function addDeleteButton(panel: JQuery, handler: () => void): void {
 	});
 }
 
+function positionBoxes(panel: JQuery, boxes: JQuery[]) {
+	const pw = panel.width();
+	const bw = boxes[0].width();
+	const sep = (pw - boxes.length * bw) / (boxes.length + 1);
+	let x = sep;
+	for (const box of boxes) {
+		box.css({
+			position: 'relative',
+			left: x
+		});
+		x += sep;
+	}
+}
 
 function renderAudioParam(anode: AudioNode, ndef: NodeDef, param: string, panel: JQuery): JQuery {
 	const pdef: NodeParamDef = ndef.params[param];
@@ -54,7 +68,7 @@ function renderParamControl(ndata: NodeData, panel: JQuery): JQuery {
 		ndata.controlParam = combo.val();
 		ndata.anode.connect(ndata.controlTarget[ndata.controlParam]);
 	});
-	return combo;
+	return combo.parent();
 }
 
 function renderOtherParam(anode: AudioNode, ndef: NodeDef, param: string, panel: JQuery): JQuery {
@@ -64,7 +78,7 @@ function renderOtherParam(anode: AudioNode, ndef: NodeDef, param: string, panel:
 		combo.on('input', _ => {
 			anode[param] = combo.val();
 		});
-		return combo;
+		return combo.parent();
 	}
 	else if (pdef.min != undefined)
 		return renderSlider(panel, pdef, param, anode[param], value => anode[param] = value);

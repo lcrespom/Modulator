@@ -221,7 +221,32 @@
 	        this.jqParams = jqParams;
 	        this.arrowColor = getCssFromClass('arrow', 'color');
 	        this.ctrlArrowColor = getCssFromClass('arrow-ctrl', 'color');
+	        this.registerNodeDelete();
 	    }
+	    SynthGraphHandler.prototype.registerNodeDelete = function () {
+	        var _this = this;
+	        $('body').keydown(function (evt) {
+	            if (!(evt.keyCode == 46 || (evt.keyCode == 8 && evt.metaKey)))
+	                return;
+	            var selectedNode = _this.getSelectedNode();
+	            if (!selectedNode)
+	                return;
+	            if (selectedNode.data.anode instanceof AudioDestinationNode)
+	                return;
+	            if (!confirm('Delete node?'))
+	                return;
+	            _this.synthUI.removeNode(selectedNode);
+	            _this.jqParams.empty();
+	        });
+	    };
+	    SynthGraphHandler.prototype.getSelectedNode = function () {
+	        for (var _i = 0, _a = this.synthUI.gr.nodes; _i < _a.length; _i++) {
+	            var node = _a[_i];
+	            if (node.element.hasClass('selected'))
+	                return node;
+	        }
+	        return null;
+	    };
 	    SynthGraphHandler.prototype.canBeSource = function (n) {
 	        var data = n.data;
 	        return data.anode.numberOfOutputs > 0;
@@ -258,15 +283,8 @@
 	            srcData.anode.disconnect(dstData.anode);
 	    };
 	    SynthGraphHandler.prototype.nodeSelected = function (n) {
-	        var _this = this;
 	        var data = n.data;
 	        paramsUI_1.renderParams(data, this.jqParams);
-	        if (n.data.anode instanceof AudioDestinationNode)
-	            return;
-	        paramsUI_1.addDeleteButton(this.jqParams, function () {
-	            _this.synthUI.removeNode(n);
-	            _this.jqParams.empty();
-	        });
 	    };
 	    SynthGraphHandler.prototype.nodeRemoved = function (n) {
 	        this.synthUI.removeNodeData(n.data);
@@ -293,7 +311,7 @@
 	            type: data.type,
 	            params: params,
 	            controlParam: data.controlParam,
-	            controlParams: data.controlParams //,
+	            controlParams: data.controlParams
 	        };
 	    };
 	    SynthGraphHandler.prototype.json2data = function (n, json) {
@@ -310,7 +328,6 @@
 	            else
 	                data.anode[pname] = jv;
 	        }
-	        //TODO: complete
 	    };
 	    return SynthGraphHandler;
 	})();
@@ -1287,7 +1304,7 @@
 	function renderParams(ndata, panel) {
 	    panel.empty();
 	    var boxes = [];
-	    if (ndata.nodeDef.control)
+	    if (ndata.nodeDef.control && ndata.controlParams)
 	        boxes.push(renderParamControl(ndata, panel));
 	    var params = Object.keys(ndata.nodeDef.params || {});
 	    if (params.length <= 0)
@@ -1299,6 +1316,7 @@
 	        else
 	            boxes.push(renderOtherParam(ndata.anode, ndata.nodeDef, param, panel));
 	    }
+	    positionBoxes(panel, boxes);
 	}
 	exports.renderParams = renderParams;
 	/**
@@ -1313,6 +1331,20 @@
 	    });
 	}
 	exports.addDeleteButton = addDeleteButton;
+	function positionBoxes(panel, boxes) {
+	    var pw = panel.width();
+	    var bw = boxes[0].width();
+	    var sep = (pw - boxes.length * bw) / (boxes.length + 1);
+	    var x = sep;
+	    for (var _i = 0; _i < boxes.length; _i++) {
+	        var box = boxes[_i];
+	        box.css({
+	            position: 'relative',
+	            left: x
+	        });
+	        x += sep;
+	    }
+	}
 	function renderAudioParam(anode, ndef, param, panel) {
 	    var pdef = ndef.params[param];
 	    var aparam = anode[param];
@@ -1333,7 +1365,7 @@
 	        ndata.controlParam = combo.val();
 	        ndata.anode.connect(ndata.controlTarget[ndata.controlParam]);
 	    });
-	    return combo;
+	    return combo.parent();
 	}
 	function renderOtherParam(anode, ndef, param, panel) {
 	    var pdef = ndef.params[param];
@@ -1342,7 +1374,7 @@
 	        combo.on('input', function (_) {
 	            anode[param] = combo.val();
 	        });
-	        return combo;
+	        return combo.parent();
 	    }
 	    else if (pdef.min != undefined)
 	        return renderSlider(panel, pdef, param, anode[param], function (value) { return anode[param] = value; });

@@ -154,6 +154,25 @@ class SynthGraphHandler implements GraphHandler {
 		this.jqParams = jqParams;
 		this.arrowColor = getCssFromClass('arrow', 'color');
 		this.ctrlArrowColor = getCssFromClass('arrow-ctrl', 'color');
+		this.registerNodeDelete();
+	}
+
+	registerNodeDelete() {
+		$('body').keydown(evt => {
+			if (!(evt.keyCode == 46 || (evt.keyCode == 8 && evt.metaKey))) return;
+			const selectedNode = this.getSelectedNode();
+			if (!selectedNode) return;
+			if (selectedNode.data.anode instanceof AudioDestinationNode) return;
+			if (!confirm('Delete node?')) return;
+			this.synthUI.removeNode(selectedNode);
+			this.jqParams.empty();
+		});
+	}
+
+	getSelectedNode(): Node {
+		for (const node of this.synthUI.gr.nodes)
+			if (node.element.hasClass('selected')) return node;
+		return null;
 	}
 
 	canBeSource(n: Node): boolean {
@@ -197,11 +216,6 @@ class SynthGraphHandler implements GraphHandler {
 	nodeSelected(n: Node): void {
 		const data: NodeData = n.data;
 		renderParams(data, this.jqParams);
-		if (n.data.anode instanceof AudioDestinationNode) return;
-		addDeleteButton(this.jqParams, () => {
-			this.synthUI.removeNode(n);
-			this.jqParams.empty();
-		});
 	}
 
 	nodeRemoved(n: Node) {
@@ -227,9 +241,7 @@ class SynthGraphHandler implements GraphHandler {
 			type: data.type,
 			params,
 			controlParam: data.controlParam,
-			controlParams: data.controlParams//,
-			//controlTarget: will need to search for it in list of nodes
-			//TODO complete
+			controlParams: data.controlParams
 		}
 	}
 
@@ -245,7 +257,6 @@ class SynthGraphHandler implements GraphHandler {
 			}
 			else data.anode[pname] = jv;
 		}
-		//TODO: complete
 	}
 }
 
