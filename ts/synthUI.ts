@@ -38,15 +38,16 @@ export class SynthUI {
 		var self = this;	// JQuery sets 'this' in event handlers
 		$('.palette .node').click(function(evt) {
 			const elem = $(this);
-			self.addNode(elem.attr('data-type'), elem.text());
+			const classes = elem.attr('class').split(/\s+/).filter(c => c != 'node');
+			self.addNode(elem.attr('data-type'), elem.text(), classes.join(' '));
 		});
 	}
 
-	addNode(type: string, text: string): void {
+	addNode(type: string, text: string, classes: string): void {
 		let { x, y } = this.findFreeSpot();
 		const n = new Node(x, y, text);
 		this.createNodeData(n, type);
-		this.gr.addNode(n, n.data.nodeDef.control ? 'node-ctrl' : undefined);
+		this.gr.addNode(n, classes);
 		this.gr.selectNode(n);
 	}
 

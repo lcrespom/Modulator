@@ -128,14 +128,15 @@
 	        var self = this; // JQuery sets 'this' in event handlers
 	        $('.palette .node').click(function (evt) {
 	            var elem = $(this);
-	            self.addNode(elem.attr('data-type'), elem.text());
+	            var classes = elem.attr('class').split(/\s+/).filter(function (c) { return c != 'node'; });
+	            self.addNode(elem.attr('data-type'), elem.text(), classes.join(' '));
 	        });
 	    };
-	    SynthUI.prototype.addNode = function (type, text) {
+	    SynthUI.prototype.addNode = function (type, text, classes) {
 	        var _a = this.findFreeSpot(), x = _a.x, y = _a.y;
 	        var n = new graph_1.Node(x, y, text);
 	        this.createNodeData(n, type);
-	        this.gr.addNode(n, n.data.nodeDef.control ? 'node-ctrl' : undefined);
+	        this.gr.addNode(n, classes);
 	        this.gr.selectNode(n);
 	    };
 	    SynthUI.prototype.removeNode = function (n) {

@@ -48,16 +48,29 @@ body {
 	color: white;
 	text-shadow: 0 -1px 0 rgba(0,0,0,.2);
 	position: absolute;
-	background: green;
+	background-color: green;
 	border-radius: 4px;
 	width: 80px; height: 60px;
 	text-align: center;
 	line-height: 60px;
 }
 
+.node-src {
+	background-color: green;
+}
+
+.node-effect {
+	background-color: green;
+}
+
+.node-out {
+	background-color: green;
+}
+
 .node-ctrl {
 	background-color: royalblue;
 }
+
 .node.selected {
 	box-shadow: 5px 5px 2px rgba(0,0,0,0.5);
 }

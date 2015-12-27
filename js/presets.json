@@ -9,7 +9,7 @@
 				"inputs": [
 					4
 				],
-				"classes": "node"
+				"classes": "node node-out"
 			},
 			{
 				"id": 1,
@@ -21,7 +21,7 @@
 					3,
 					5
 				],
-				"classes": "node"
+				"classes": "node node-effect"
 			},
 			{
 				"id": 2,
@@ -29,7 +29,7 @@
 				"y": 120,
 				"name": "Osc",
 				"inputs": [],
-				"classes": "node"
+				"classes": "node node-src"
 			},
 			{
 				"id": 3,
@@ -37,7 +37,7 @@
 				"y": 240,
 				"name": "Osc",
 				"inputs": [],
-				"classes": "node"
+				"classes": "node node-src"
 			},
 			{
 				"id": 4,
@@ -47,7 +47,7 @@
 				"inputs": [
 					1
 				],
-				"classes": "node"
+				"classes": "node node-effect"
 			},
 			{
 				"id": 5,
@@ -122,7 +122,7 @@
 				"inputs": [
 					2
 				],
-				"classes": "node"
+				"classes": "node node-out"
 			},
 			{
 				"id": 1,
@@ -132,7 +132,7 @@
 				"inputs": [
 					4
 				],
-				"classes": "node"
+				"classes": "node node-src"
 			},
 			{
 				"id": 2,
@@ -142,7 +142,7 @@
 				"inputs": [
 					6
 				],
-				"classes": "node"
+				"classes": "node node-effect"
 			},
 			{
 				"id": 3,
@@ -179,7 +179,7 @@
 					1,
 					5
 				],
-				"classes": "node"
+				"classes": "node node-effect"
 			}
 		],
 		"nodeData": [
@@ -255,7 +255,7 @@
 				"inputs": [
 					1
 				],
-				"classes": "node"
+				"classes": "node node-out"
 			},
 			{
 				"id": 1,
@@ -265,7 +265,7 @@
 				"inputs": [
 					2
 				],
-				"classes": "node"
+				"classes": "node node-src"
 			},
 			{
 				"id": 2,
@@ -316,7 +316,7 @@
 				"inputs": [
 					4
 				],
-				"classes": "node"
+				"classes": "node node-out"
 			},
 			{
 				"id": 1,
@@ -328,7 +328,7 @@
 					3,
 					5
 				],
-				"classes": "node"
+				"classes": "node node-effect"
 			},
 			{
 				"id": 2,
@@ -336,7 +336,7 @@
 				"y": 100,
 				"name": "Osc",
 				"inputs": [],
-				"classes": "node"
+				"classes": "node node-src"
 			},
 			{
 				"id": 3,
@@ -344,7 +344,7 @@
 				"y": 220,
 				"name": "Osc",
 				"inputs": [],
-				"classes": "node"
+				"classes": "node node-src"
 			},
 			{
 				"id": 4,
@@ -354,7 +354,7 @@
 				"inputs": [
 					1
 				],
-				"classes": "node"
+				"classes": "node node-effect"
 			},
 			{
 				"id": 5,
