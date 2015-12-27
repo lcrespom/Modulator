@@ -64,6 +64,9 @@ function renderOtherParam(anode: AudioNode, ndef: NodeDef, param: string, panel:
 	else if (pdef.min != undefined) {
 		renderSlider(panel, pdef, param, anode[param], value => anode[param] = value);
 	}
+	else if (pdef.phandler) {
+		pdef.phandler.renderParam(panel, pdef, anode, param, ucfirst(param));
+	}
 }
 
 

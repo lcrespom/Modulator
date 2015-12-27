@@ -1,10 +1,11 @@
 import { NoteHandler } from './notes';
-import { NodeDef, NodePalette, palette } from './palette';
+import { NodeDef, NodeParamDef, NodePalette, palette } from './palette';
 import { ModernWindow, ModernAudioContext, removeArrayElement } from './modern';
 
 interface ParamHandler {
 	initialize(anode: AudioNode, def: NodeDef): void;
-	edit(anode: AudioNode, def: NodeDef): void;
+	renderParam(panel: JQuery, pdef: NodeParamDef,
+		anode: AudioNode, param: string, label: string): void;
 }
 
 /**
@@ -68,12 +69,14 @@ export class Synth {
 
 	initNodeParams(anode: AudioNode, def: NodeDef, type: string): void {
 		for (const param of Object.keys(def.params || {}))
-			if (!anode[param])
-				console.warn(`Parameter '${param}' not found for node ${type}'`)
+			if (anode[param] === undefined)
+				console.warn(`Parameter '${param}' not found for node '${type}'`)
 			else if (anode[param] instanceof AudioParam)
 				anode[param].value = def.params[param].initial;
-			else if (def.params[param].handler)
-				this.paramHandlers[def.params[param].handler].initialize(anode, def);
+			else if (def.params[param].handler) {
+				def.params[param].phandler = this.paramHandlers[def.params[param].handler];
+				def.params[param].phandler.initialize(anode, def);
+			}
 			else
 				anode[param] = def.params[param].initial;
 	}
@@ -123,16 +126,34 @@ export class ADSR extends CustomNodeBase {
 //-------------------- Parameter handlers --------------------
 
 class BufferURL implements ParamHandler {
+
 	initialize(anode: AudioNode, def: NodeDef): void {
-		//TODO
-		console.log('Initialize buffer:', def.params['buffer'].initial);
+		const absn: AudioBufferSourceNode = <AudioBufferSourceNode>anode;
+		const url: string = <string>def.params['buffer'].initial;
+		this.loadBuffer(absn.context, url, buffer => absn.buffer = buffer);
 	}
-	edit(anode: AudioNode, def: NodeDef): void {
+
+	renderParam(panel: JQuery, pdef: NodeParamDef,
+		anode: AudioNode, param: string, label: string): void {
 		//TODO
-		console.log('Edit buffer');
+		console.log('TODO: Edit buffer');
 	}
-	loadBuffer(absn: AudioBufferSourceNode, url: string): void {
-		//TODO
+
+	loadBuffer(ac: AudioContext, url: string, cb: (buffer: AudioBuffer) => void): void {
+		const w: any = window;
+		w.audioBufferCache = w.audioBufferCache || {};
+		if (w.audioBufferCache[url])
+			return cb(w.audioBufferCache[url]);
+		const xhr = new XMLHttpRequest();
+		xhr.open('GET', url, true);
+		xhr.responseType = 'arraybuffer';
+		xhr.onload = _ => {
+			ac.decodeAudioData(xhr.response, buffer => {
+				w.audioBufferCache[url] = buffer;
+				cb(buffer);
+			});
+		};
+		xhr.send();
 	}
 }
 

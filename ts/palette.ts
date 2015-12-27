@@ -6,6 +6,7 @@ export interface NodeParamDef {
 	linear?: boolean;
 	choices?: string[];
 	handler?: string;
+	phandler?: any;
 }
 
 /** Configuration data for an AudioNode */
@@ -59,6 +60,7 @@ export var palette: NodePalette = {
 				initial: 'https://upload.wikimedia.org/wikipedia/en/8/80/The_Amen_Break%2C_in_context.ogg',
 				handler: 'BufferURL'
 			}
+			//TODO loop / loopStart / loopEnd
 		}
 	},
 	// Effects
