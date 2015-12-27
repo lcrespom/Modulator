@@ -56,19 +56,19 @@ body {
 }
 
 .node-src {
-	background-color: green;
+	background-color: #36B75D;
 }
 
 .node-effect {
-	background-color: green;
+	background-color: royalblue;
 }
 
 .node-out {
-	background-color: green;
+	background-color: #41A6E1;
 }
 
 .node-ctrl {
-	background-color: royalblue;
+	background-color: #C841E1;
 }
 
 .node.selected {
@@ -77,12 +77,12 @@ body {
 
 .arrow {
 	display: none;
-	color: green;
+	color: royalblue;
 }
 
 .arrow-ctrl {
 	display: none;
-	color: royalblue;
+	color: #C841E1;
 }
 
 /*----- Palette box -----*/

@@ -1532,7 +1532,7 @@
 	        return {
 	            name: '',
 	            nodes: [
-	                { id: 0, x: 500, y: 210, name: 'Out', inputs: [], classes: 'node' }
+	                { id: 0, x: 500, y: 210, name: 'Out', inputs: [], classes: 'node node-out' }
 	            ],
 	            nodeData: [
 	                { type: 'out', params: {} }
