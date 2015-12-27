@@ -53,6 +53,9 @@ Contributions are welcome. Preferred language is TypeScript, but it is not manda
 	- Portamento
 	- Polyphonic synth via a graph clone per voice
 	- More testing on instrument load/save
+	- Use Web Midi API to gather events from external midi Keyboard
+		- Play notes
+		- Associate external controls with selected node parameters
 
 - UI
 	- Proper Bootstrap popups instead of crappy browser popups (alert/cofirm/prompt)
