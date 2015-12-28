@@ -1319,18 +1319,6 @@
 	    positionBoxes(panel, boxes);
 	}
 	exports.renderParams = renderParams;
-	/**
-	 * Renders a "delete node" button inside the parameters panel
-	 */
-	function addDeleteButton(panel, handler) {
-	    var button = $("\n\t\t<button class=\"btn btn-danger del-node-but\" type=\"button\">\n\t\t\t<span class=\"glyphicon glyphicon-trash\" aria-hidden=\"true\"></span>\n\t\t</button>\n\t");
-	    panel.append(button);
-	    button.click(function (_) {
-	        if (confirm('Delete node?'))
-	            handler();
-	    });
-	}
-	exports.addDeleteButton = addDeleteButton;
 	function positionBoxes(panel, boxes) {
 	    var pw = panel.width();
 	    var bw = boxes[0].width();

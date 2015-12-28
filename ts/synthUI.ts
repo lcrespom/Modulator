@@ -140,7 +140,7 @@ export class NodeData {
 import { Graph, Node, GraphHandler } from './graph';
 import { Synth } from './synth';
 import { NodeDef } from './palette';
-import { renderParams, addDeleteButton } from './paramsUI';
+import { renderParams } from './paramsUI';
 
 class SynthGraphHandler implements GraphHandler {
 

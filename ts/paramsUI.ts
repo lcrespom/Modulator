@@ -20,20 +20,6 @@ export function renderParams(ndata: NodeData, panel: JQuery): void {
 	positionBoxes(panel, boxes);
 }
 
-/**
- * Renders a "delete node" button inside the parameters panel
- */
-export function addDeleteButton(panel: JQuery, handler: () => void): void {
-	const button = $(`
-		<button class="btn btn-danger del-node-but" type="button">
-			<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
-		</button>
-	`);
-	panel.append(button);
-	button.click(_ => {
-		if (confirm('Delete node?')) handler();
-	});
-}
 
 function positionBoxes(panel: JQuery, boxes: JQuery[]) {
 	const pw = panel.width();

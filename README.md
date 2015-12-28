@@ -65,6 +65,7 @@ on Twitter, or directly within GitHub.
 		- Or else, modify the UI to support multiple destination nodes
 	- Portamento
 	- Polyphonic synth via a graph clone per voice
+		- Should prevent edition or param change during poly mode
 	- More testing on instrument load/save
 	- Use Web Midi API to gather events from external midi Keyboard
 		- Play notes
