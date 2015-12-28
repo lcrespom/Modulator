@@ -29,7 +29,7 @@ on Twitter, or directly within GitHub.
 	evaluate it for inclusion.
 - **Themes**: feel free to modify the `main.css` file to change the look & feel as
 	much as you like. The app is especially in need of a dark theme. I will
-	eventually add a theme selector option so the user can swith among a set of
+	eventually add a theme selector option so the user can switch among a set of
 	available themes.
 - **Code**: There are plenty of ways to improve and expand this application,
 	just check out the TODO list below. The code is in TypeScript, but ES6/ES2015 and
