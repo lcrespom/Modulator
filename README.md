@@ -21,7 +21,7 @@ FireFox or Safari, but has no server-side code.
 You can directly try it out [here](//lcrespom.github.io/synth).
 
 ##Contributing
-Contributions are welcome. You can reach me via [@lcrespo](https://twitter.com/lcrespom)
+Contributions are welcome. You can reach me via [@lcrespom](https://twitter.com/lcrespom)
 on Twitter, or directly within GitHub.
 
 - **Instruments**: please share your synth designs if you want them to be featured
