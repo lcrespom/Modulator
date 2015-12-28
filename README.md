@@ -2,7 +2,8 @@
 A graphical modular synthesizer, using the
 [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API).
 
-Requires a modern browser such as Chrome, FireFox or Safari.
+Modulator is a totally static HTML/JS app. It requires a modern browser such as Chrome,
+FireFox or Safari, but has no server-side code.
 
 ##Usage
 - Click any synth node from the palette at the right to add it to the canvas
@@ -20,7 +21,19 @@ Requires a modern browser such as Chrome, FireFox or Safari.
 You can directly try it out [here](//lcrespom.github.io/synth).
 
 ##Contributing
-Contributions are welcome. Preferred language is TypeScript, but it is not mandatory.
+Contributions are welcome. You can reach me via [@lcrespo](https://twitter.com/lcrespom)
+on Twitter, or directly within GitHub.
+
+- **Instruments**: please share your synth designs if you want them to be featured
+	in the presets section. Just open an issue with the synht's JSON and I will
+	evaluate it for inclusion.
+- **Themes**: feel free to modify the `main.css` file to change the look & feel as
+	much as you like. The app is especially in need of a dark theme. I will
+	eventually add a theme selector option so the user can swith among a set of
+	available themes.
+- **Code**: There are plenty of ways to improve and expand this application,
+	just check out the TODO list below. The code is in TypeScript, but ES6/ES2015 and
+	plain old JavaScript are compatible with it.
 
 ##ToDo
 - Bugs
