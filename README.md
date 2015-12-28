@@ -32,7 +32,7 @@ on Twitter, or directly within GitHub.
 	eventually add a theme selector option so the user can switch among a set of
 	available themes.
 - **Code**: There are plenty of ways to improve and expand this application,
-	just check out the TODO list below. The code is in TypeScript, but ES6/ES2015 and
+	just check out the ToDo list below. The code is in TypeScript, but ES6/ES2015 and
 	plain old JavaScript are compatible with it.
 
 ##ToDo
@@ -40,7 +40,7 @@ on Twitter, or directly within GitHub.
 	- ADSR needs more testing & refining
 	- Popping sound at note on/off (probably needs custom oscillator with gain)
 	- Refine rules to determine whether nodes can connect
-	- Arrows are drawn in wrong position when window is vertically scrolled (low)
+	- Arrows are drawn in wrong position when window is vertically scrolled
 	- Review TODO items inside code
 
 - Functionality
@@ -52,7 +52,7 @@ on Twitter, or directly within GitHub.
 		- Ring modulation using a gain node where the gain is controlled by an oscillator
 	- Improve ADSR
 		- Linear/exponential switch
-		- Depth parameter to control how much the envelope controls the target parameter
+		- Depth parameter to control how much the envelope modifies the target parameter
 	- Review list of pending audio nodes
 		- Line in live input
 		- WaveShaper
