@@ -125,6 +125,7 @@
 	        data.type = 'out';
 	        data.anode = this.synth.ac.destination;
 	        data.nodeDef = this.synth.palette['Speaker'];
+	        data.isOut = true;
 	    };
 	    SynthUI.prototype.registerPaletteHandler = function () {
 	        var self = this; // JQuery sets 'this' in event handlers
@@ -209,6 +210,8 @@
 	 */
 	var NodeData = (function () {
 	    function NodeData() {
+	        // Flag to avoid deleting output node
+	        this.isOut = false;
 	    }
 	    return NodeData;
 	})();
@@ -233,7 +236,7 @@
 	            var selectedNode = _this.getSelectedNode();
 	            if (!selectedNode)
 	                return;
-	            if (selectedNode.data.anode instanceof AudioDestinationNode)
+	            if (selectedNode.data.isOut)
 	                return;
 	            if (!confirm('Delete node?'))
 	                return;

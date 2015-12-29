@@ -98,6 +98,10 @@ on Twitter, or directly within GitHub.
 	- Server-side part, supporting:
 		- Loading & saving of resources: synth modules, songs, samples, etc.
 		- User area storing user's synths, current work, etc.
+		- Public sample library
+	- 100% responsive & mobile / tablet friendly
+	- Mobile app
+	- Local storage with HTML5
 
 - Code
 	- Separate graph.ts into an independent npm module
