@@ -920,7 +920,7 @@
 	        dstn.h = 0;
 	        $(this.graph.nodeCanvas).on('mousemove', function (evt) {
 	            dstn.x = evt.clientX - ofs.left;
-	            dstn.y = evt.clientY - ofs.top;
+	            dstn.y = evt.clientY - ofs.top + $('body').scrollTop();
 	            _this.graph.draw();
 	            _this.gc.save();
 	            _this.gc.setLineDash([10]);
