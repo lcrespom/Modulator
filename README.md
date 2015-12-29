@@ -59,8 +59,6 @@ on Twitter, or directly within GitHub.
 		- Line in live input
 		- WaveShaper
 		- Etc?
-	- Dislay osc/fft using AnalyserNode
-		- Synchronize osc at 0
 	- Display piano keyboard / display PC keys on piano keys / gather mouse input
 	- Provide 10 preset instruments
 	- Limitation: a control node can only control a single node

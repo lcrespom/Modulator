@@ -75,9 +75,10 @@ export class AudioAnalyzer {
 		const [w, h] = this.setupDraw(gc, canvas, data, color);
 		this.anode.getByteTimeDomainData(data);
 		gc.moveTo(0, h / 2);
-		const dx = data.length / canvas.width;
 		let x = 0;
-		//TODO syncronize start when it crosses a 0
+		while (data[x] > 128 && x < data.length/4) x++;
+		while (data[x] < 128 && x < data.length/4) x++;
+		const dx = (data.length * 0.75) / canvas.width;
 		for (let i = 0; i < w; i++) {
 			let y = data[Math.floor(x)];
 			x += dx;

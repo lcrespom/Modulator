@@ -1743,9 +1743,12 @@
 	        var _a = this.setupDraw(gc, canvas, data, color), w = _a[0], h = _a[1];
 	        this.anode.getByteTimeDomainData(data);
 	        gc.moveTo(0, h / 2);
-	        var dx = data.length / canvas.width;
 	        var x = 0;
-	        //TODO syncronize start when it crosses a 0
+	        while (data[x] > 128 && x < data.length / 4)
+	            x++;
+	        while (data[x] < 128 && x < data.length / 4)
+	            x++;
+	        var dx = (data.length * 0.75) / canvas.width;
 	        for (var i = 0; i < w; i++) {
 	            var y = data[Math.floor(x)];
 	            x += dx;
