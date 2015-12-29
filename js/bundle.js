@@ -1682,8 +1682,10 @@
 
 	var AudioAnalyzer = (function () {
 	    function AudioAnalyzer(jqfft, jqosc) {
-	        this.canvas = this.createCanvas(jqosc);
-	        this.gc = this.canvas.getContext('2d');
+	        this.canvasFFT = this.createCanvas(jqfft);
+	        this.gcFFT = this.canvasFFT.getContext('2d');
+	        this.canvasOsc = this.createCanvas(jqosc);
+	        this.gcOsc = this.canvasOsc.getContext('2d');
 	    }
 	    AudioAnalyzer.prototype.createCanvas = function (panel) {
 	        var jqCanvas = $("<canvas width=\"" + panel.width() + "\" height=\"" + panel.height() + "\">");
@@ -1695,6 +1697,7 @@
 	        if (this.anode)
 	            return;
 	        this.anode = ac.createAnalyser();
+	        this.fftData = new Uint8Array(this.anode.fftSize);
 	        this.oscData = new Uint8Array(this.anode.fftSize);
 	    };
 	    AudioAnalyzer.prototype.analyze = function (input) {
@@ -1717,14 +1720,27 @@
 	    AudioAnalyzer.prototype.updateCanvas = function () {
 	        if (!this.input)
 	            return;
-	        this.anode.getByteTimeDomainData(this.oscData);
-	        this.gc.clearRect(0, 0, this.canvas.width, this.canvas.height);
-	        this.gc.strokeStyle = '#FFFF00';
-	        this.gc.beginPath();
-	        this.gc.moveTo(0, 0);
-	        this.gc.lineTo(this.canvas.width, this.canvas.height);
-	        this.gc.closePath();
-	        this.gc.stroke();
+	        //this.drawGraph(this.gcFFT, this.canvasFFT);
+	        this.drawData(this.gcOsc, this.canvasOsc, this.oscData);
+	    };
+	    AudioAnalyzer.prototype.drawData = function (gc, canvas, data) {
+	        this.anode.getByteTimeDomainData(data);
+	        var w = canvas.width;
+	        var h = canvas.height;
+	        gc.clearRect(0, 0, w, h);
+	        gc.beginPath();
+	        gc.strokeStyle = '#FFFF00';
+	        gc.moveTo(0, h / 2);
+	        var dx = data.length / canvas.width;
+	        var x = 0;
+	        //TODO syncronize start when it crosses a 0
+	        for (var i = 0; i < w; i++) {
+	            var y = data[Math.floor(x)];
+	            x += dx;
+	            gc.lineTo(i, h * y / 256);
+	        }
+	        gc.stroke();
+	        gc.closePath();
 	        this.requestAnimationFrame();
 	    };
 	    return AudioAnalyzer;
