@@ -50,12 +50,14 @@
 	var synthUI_1 = __webpack_require__(1);
 	var keyboard_1 = __webpack_require__(8);
 	var presets_1 = __webpack_require__(9);
+	var piano_1 = __webpack_require__(10);
 	setupTheme();
 	setupPalette();
 	var graphCanvas = $('#graph-canvas')[0];
 	var synthUI = new synthUI_1.SynthUI(graphCanvas, $('#node-params'));
 	setupKeyboard();
 	new presets_1.Presets(synthUI);
+	new piano_1.PianoKeyboard($('#piano'));
 	function setupKeyboard() {
 	    var kb = new keyboard_1.Keyboard();
 	    kb.noteOn = function (midi, ratio) {
@@ -1620,6 +1622,44 @@
 	    return Presets;
 	})();
 	exports.Presets = Presets;
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports) {
+
+	var NUM_WHITES = 17;
+	var PianoKeyboard = (function () {
+	    function PianoKeyboard(panel) {
+	        var pw = panel.width();
+	        var ph = panel.height();
+	        var kw = pw / NUM_WHITES + 1;
+	        var bw = kw * 2 / 3;
+	        var bh = ph * 2 / 3;
+	        for (var i = 0; i < NUM_WHITES; i++) {
+	            var key = $('<div class="piano-key">').css({
+	                width: '' + kw + 'px',
+	                height: '' + ph + 'px'
+	            });
+	            panel.append(key);
+	        }
+	        var x = 10 - bw / 2;
+	        for (var i = 0; i < NUM_WHITES - 1; i++) {
+	            x += kw - 1;
+	            if (i % 7 == 2 || i % 7 == 6)
+	                continue;
+	            var key = $('<div class="piano-key piano-black">').css({
+	                width: '' + bw + 'px',
+	                height: '' + bh + 'px',
+	                left: '' + x + 'px',
+	                top: '10px'
+	            });
+	            panel.append(key);
+	        }
+	    }
+	    return PianoKeyboard;
+	})();
+	exports.PianoKeyboard = PianoKeyboard;
 
 
 /***/ }

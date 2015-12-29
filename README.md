@@ -47,6 +47,8 @@ on Twitter, or directly within GitHub.
 	- Custom nodes
 		- Oscillator with gain
 		- LFO with gain
+		- Noise audio source
+		- Noise LFO
 		- Sample buffer with gain
 		- Full synth as a reusable module (long term)
 		- Ring modulation using a gain node where the gain is controlled by an oscillator

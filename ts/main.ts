@@ -5,6 +5,7 @@
 import { SynthUI } from './synthUI';
 import { Keyboard } from './keyboard';
 import { Presets } from './presets';
+import { PianoKeyboard } from './piano';
 
 setupTheme();
 setupPalette();
@@ -12,6 +13,7 @@ const graphCanvas = <HTMLCanvasElement>$('#graph-canvas')[0];
 const synthUI = new SynthUI(graphCanvas, $('#node-params'));
 setupKeyboard();
 new Presets(synthUI);
+new PianoKeyboard($('#piano'));
 
 
 function setupKeyboard() {
