@@ -40,7 +40,6 @@ on Twitter, or directly within GitHub.
 	- ADSR needs more testing & refining
 	- Popping sound at note on/off (probably needs custom oscillator with gain)
 	- Refine rules to determine whether nodes can connect
-	- Arrows are drawn in wrong position when window is vertically scrolled
 	- Review TODO items inside code
 
 - Functionality

@@ -317,7 +317,7 @@ class GraphInteraction {
 		dstn.h = 0;
 		$(this.graph.nodeCanvas).on('mousemove', evt => {
 			dstn.x = evt.clientX - ofs.left;
-			dstn.y = evt.clientY - ofs.top;
+			dstn.y = evt.clientY - ofs.top + $('body').scrollTop();
 			this.graph.draw();
 			this.gc.save();
 			this.gc.setLineDash([10]);
