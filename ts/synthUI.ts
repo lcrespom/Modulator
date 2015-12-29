@@ -30,7 +30,8 @@ export class SynthUI {
 
 	initOutputNodeData(data: NodeData): void {
 		data.type = 'out';
-		data.anode = this.synth.ac.destination;
+		data.anode = this.synth.ac.createGain();
+		data.anode.connect(this.synth.ac.destination);
 		data.nodeDef = this.synth.palette['Speaker'];
 		data.isOut = true;
 	}
@@ -144,6 +145,7 @@ import { Graph, Node, GraphHandler } from './graph';
 import { Synth } from './synth';
 import { NodeDef } from './palette';
 import { renderParams } from './paramsUI';
+import { AudioAnalyzer } from './analyzer';
 
 class SynthGraphHandler implements GraphHandler {
 
@@ -151,6 +153,7 @@ class SynthGraphHandler implements GraphHandler {
 	jqParams: JQuery;
 	arrowColor: string;
 	ctrlArrowColor: string;
+	analyzer: AudioAnalyzer;
 
 	constructor(synthUI: SynthUI, jqParams: JQuery) {
 		this.synthUI = synthUI;
@@ -158,6 +161,7 @@ class SynthGraphHandler implements GraphHandler {
 		this.arrowColor = getCssFromClass('arrow', 'color');
 		this.ctrlArrowColor = getCssFromClass('arrow-ctrl', 'color');
 		this.registerNodeDelete();
+		this.analyzer = new AudioAnalyzer($('#audio-graph-fft'), $('#audio-graph-osc'));
 	}
 
 	registerNodeDelete() {
@@ -219,10 +223,15 @@ class SynthGraphHandler implements GraphHandler {
 	nodeSelected(n: Node): void {
 		const data: NodeData = n.data;
 		renderParams(data, this.jqParams);
+		if (data.nodeDef.control)	//TODO actually LFO could be analyzed
+			this.analyzer.disconnect();
+		else
+			this.analyzer.analyze(data.anode);
 	}
 
 	nodeRemoved(n: Node) {
 		this.synthUI.removeNodeData(n.data);
+		if (n.element.hasClass('selected')) this.analyzer.disconnect();
 	}
 
 	getArrowColor(src: Node, dst: Node): string {

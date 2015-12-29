@@ -123,7 +123,8 @@
 	    };
 	    SynthUI.prototype.initOutputNodeData = function (data) {
 	        data.type = 'out';
-	        data.anode = this.synth.ac.destination;
+	        data.anode = this.synth.ac.createGain();
+	        data.anode.connect(this.synth.ac.destination);
 	        data.nodeDef = this.synth.palette['Speaker'];
 	        data.isOut = true;
 	    };
@@ -220,6 +221,7 @@
 	var graph_1 = __webpack_require__(4);
 	var synth_1 = __webpack_require__(5);
 	var paramsUI_1 = __webpack_require__(7);
+	var analyzer_1 = __webpack_require__(11);
 	var SynthGraphHandler = (function () {
 	    function SynthGraphHandler(synthUI, jqParams) {
 	        this.synthUI = synthUI;
@@ -227,6 +229,7 @@
 	        this.arrowColor = getCssFromClass('arrow', 'color');
 	        this.ctrlArrowColor = getCssFromClass('arrow-ctrl', 'color');
 	        this.registerNodeDelete();
+	        this.analyzer = new analyzer_1.AudioAnalyzer($('#audio-graph-fft'), $('#audio-graph-osc'));
 	    }
 	    SynthGraphHandler.prototype.registerNodeDelete = function () {
 	        var _this = this;
@@ -290,9 +293,15 @@
 	    SynthGraphHandler.prototype.nodeSelected = function (n) {
 	        var data = n.data;
 	        paramsUI_1.renderParams(data, this.jqParams);
+	        if (data.nodeDef.control)
+	            this.analyzer.disconnect();
+	        else
+	            this.analyzer.analyze(data.anode);
 	    };
 	    SynthGraphHandler.prototype.nodeRemoved = function (n) {
 	        this.synthUI.removeNodeData(n.data);
+	        if (n.element.hasClass('selected'))
+	            this.analyzer.disconnect();
 	    };
 	    SynthGraphHandler.prototype.getArrowColor = function (src, dst) {
 	        var srcData = src.data;
@@ -1639,6 +1648,7 @@
 	        var kw = pw / NUM_WHITES + 1;
 	        var bw = kw * 2 / 3;
 	        var bh = ph * 2 / 3;
+	        // Create white keys
 	        for (var i = 0; i < NUM_WHITES; i++) {
 	            var key = $('<div class="piano-key">').css({
 	                width: '' + kw + 'px',
@@ -1646,6 +1656,7 @@
 	            });
 	            panel.append(key);
 	        }
+	        // Create black keys
 	        var x = 10 - bw / 2;
 	        for (var i = 0; i < NUM_WHITES - 1; i++) {
 	            x += kw - 1;
@@ -1663,6 +1674,62 @@
 	    return PianoKeyboard;
 	})();
 	exports.PianoKeyboard = PianoKeyboard;
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports) {
+
+	var AudioAnalyzer = (function () {
+	    function AudioAnalyzer(jqfft, jqosc) {
+	        this.canvas = this.createCanvas(jqosc);
+	        this.gc = this.canvas.getContext('2d');
+	    }
+	    AudioAnalyzer.prototype.createCanvas = function (panel) {
+	        var jqCanvas = $("<canvas width=\"" + panel.width() + "\" height=\"" + panel.height() + "\">");
+	        panel.append(jqCanvas);
+	        var canvas = jqCanvas[0];
+	        return canvas;
+	    };
+	    AudioAnalyzer.prototype.createAnalyzerNode = function (ac) {
+	        if (this.anode)
+	            return;
+	        this.anode = ac.createAnalyser();
+	        this.oscData = new Uint8Array(this.anode.fftSize);
+	    };
+	    AudioAnalyzer.prototype.analyze = function (input) {
+	        this.disconnect();
+	        this.createAnalyzerNode(input.context);
+	        this.input = input;
+	        this.input.connect(this.anode);
+	        this.requestAnimationFrame();
+	    };
+	    AudioAnalyzer.prototype.disconnect = function () {
+	        if (!this.input)
+	            return;
+	        this.input.disconnect(this.anode);
+	        this.input = null;
+	    };
+	    AudioAnalyzer.prototype.requestAnimationFrame = function () {
+	        var _this = this;
+	        window.requestAnimationFrame(function (_) { return _this.updateCanvas(); });
+	    };
+	    AudioAnalyzer.prototype.updateCanvas = function () {
+	        if (!this.input)
+	            return;
+	        this.anode.getByteTimeDomainData(this.oscData);
+	        this.gc.clearRect(0, 0, this.canvas.width, this.canvas.height);
+	        this.gc.strokeStyle = '#FFFF00';
+	        this.gc.beginPath();
+	        this.gc.moveTo(0, 0);
+	        this.gc.lineTo(this.canvas.width, this.canvas.height);
+	        this.gc.closePath();
+	        this.gc.stroke();
+	        this.requestAnimationFrame();
+	    };
+	    return AudioAnalyzer;
+	})();
+	exports.AudioAnalyzer = AudioAnalyzer;
 
 
 /***/ }

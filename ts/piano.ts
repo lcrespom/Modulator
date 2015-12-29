@@ -7,6 +7,7 @@ export class PianoKeyboard {
 		var kw = pw / NUM_WHITES + 1;
 		var bw = kw * 2 / 3;
 		var bh = ph * 2 / 3;
+		// Create white keys
 		for (let i = 0; i < NUM_WHITES; i++) {
 			const key = $('<div class="piano-key">').css({
 				width: '' + kw + 'px',
@@ -14,6 +15,7 @@ export class PianoKeyboard {
 			});
 			panel.append(key);
 		}
+		// Create black keys
 		let x = 10 - bw / 2;
 		for (let i = 0; i < NUM_WHITES - 1; i++) {
 			x += kw - 1;
