@@ -32,6 +32,7 @@ export class SynthUI {
 		data.type = 'out';
 		data.anode = this.synth.ac.destination;
 		data.nodeDef = this.synth.palette['Speaker'];
+		data.isOut = true;
 	}
 
 	registerPaletteHandler() {
@@ -132,6 +133,8 @@ export class NodeData {
 	controlTarget: ModernAudioNode;
 	// Used by source audio nodes
 	noteHandler: NoteHandler;
+	// Flag to avoid deleting output node
+	isOut: boolean = false;
 }
 
 
@@ -162,7 +165,7 @@ class SynthGraphHandler implements GraphHandler {
 			if (!(evt.keyCode == 46 || (evt.keyCode == 8 && evt.metaKey))) return;
 			const selectedNode = this.getSelectedNode();
 			if (!selectedNode) return;
-			if (selectedNode.data.anode instanceof AudioDestinationNode) return;
+			if (selectedNode.data.isOut) return;
 			if (!confirm('Delete node?')) return;
 			this.synthUI.removeNode(selectedNode);
 			this.jqParams.empty();
