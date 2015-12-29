@@ -1720,16 +1720,28 @@
 	    AudioAnalyzer.prototype.updateCanvas = function () {
 	        if (!this.input)
 	            return;
-	        //this.drawGraph(this.gcFFT, this.canvasFFT);
-	        this.drawData(this.gcOsc, this.canvasOsc, this.oscData);
+	        this.drawFFT(this.gcFFT, this.canvasFFT, this.fftData, '#00FF00');
+	        this.drawOsc(this.gcOsc, this.canvasOsc, this.oscData, '#FFFF00');
+	        this.requestAnimationFrame();
 	    };
-	    AudioAnalyzer.prototype.drawData = function (gc, canvas, data) {
+	    AudioAnalyzer.prototype.drawFFT = function (gc, canvas, data, color) {
+	        var _a = this.setupDraw(gc, canvas, data, color), w = _a[0], h = _a[1];
+	        this.anode.getByteFrequencyData(data);
+	        var dx = (data.length / 2) / canvas.width;
+	        var x = 0;
+	        //TODO calculate average of all samples from x to x + dx - 1
+	        for (var i = 0; i < w; i++) {
+	            var y = data[Math.floor(x)];
+	            x += dx;
+	            gc.moveTo(i, h - 1);
+	            gc.lineTo(i, h - 1 - h * y / 256);
+	        }
+	        gc.stroke();
+	        gc.closePath();
+	    };
+	    AudioAnalyzer.prototype.drawOsc = function (gc, canvas, data, color) {
+	        var _a = this.setupDraw(gc, canvas, data, color), w = _a[0], h = _a[1];
 	        this.anode.getByteTimeDomainData(data);
-	        var w = canvas.width;
-	        var h = canvas.height;
-	        gc.clearRect(0, 0, w, h);
-	        gc.beginPath();
-	        gc.strokeStyle = '#FFFF00';
 	        gc.moveTo(0, h / 2);
 	        var dx = data.length / canvas.width;
 	        var x = 0;
@@ -1741,7 +1753,14 @@
 	        }
 	        gc.stroke();
 	        gc.closePath();
-	        this.requestAnimationFrame();
+	    };
+	    AudioAnalyzer.prototype.setupDraw = function (gc, canvas, data, color) {
+	        var w = canvas.width;
+	        var h = canvas.height;
+	        gc.clearRect(0, 0, w, h);
+	        gc.beginPath();
+	        gc.strokeStyle = color;
+	        return [w, h];
 	    };
 	    return AudioAnalyzer;
 	})();

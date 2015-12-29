@@ -50,17 +50,30 @@ export class AudioAnalyzer {
 	}
 	updateCanvas() {
 		if (!this.input) return;
-		//this.drawGraph(this.gcFFT, this.canvasFFT);
-		this.drawData(this.gcOsc, this.canvasOsc, this.oscData);
+		this.drawFFT(this.gcFFT, this.canvasFFT, this.fftData, '#00FF00');
+		this.drawOsc(this.gcOsc, this.canvasOsc, this.oscData, '#FFFF00');
+		this.requestAnimationFrame();
 	}
 
-	drawData(gc, canvas, data) {
+	drawFFT(gc, canvas, data, color) {
+		const [w, h] = this.setupDraw(gc, canvas, data, color);
+		this.anode.getByteFrequencyData(data);
+		const dx = (data.length / 2) / canvas.width;
+		let x = 0;
+		//TODO calculate average of all samples from x to x + dx - 1
+		for (let i = 0; i < w; i++) {
+			let y = data[Math.floor(x)];
+			x += dx;
+			gc.moveTo(i, h - 1);
+			gc.lineTo(i, h - 1 - h * y/256);
+		}
+		gc.stroke();
+		gc.closePath();
+	}
+
+	drawOsc(gc, canvas, data, color) {
+		const [w, h] = this.setupDraw(gc, canvas, data, color);
 		this.anode.getByteTimeDomainData(data);
-		const w = canvas.width;
-		const h = canvas.height;
-		gc.clearRect(0, 0, w, h);
-		gc.beginPath();
-		gc.strokeStyle = '#FFFF00';
 		gc.moveTo(0, h / 2);
 		const dx = data.length / canvas.width;
 		let x = 0;
@@ -72,6 +85,14 @@ export class AudioAnalyzer {
 		}
 		gc.stroke();
 		gc.closePath();
-		this.requestAnimationFrame();
+	}
+
+	setupDraw(gc, canvas, data, color) {
+		const w = canvas.width;
+		const h = canvas.height;
+		gc.clearRect(0, 0, w, h);
+		gc.beginPath();
+		gc.strokeStyle = color;
+		return [w, h];
 	}
 }
