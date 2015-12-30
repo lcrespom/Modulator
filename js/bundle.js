@@ -51,7 +51,6 @@
 	var keyboard_1 = __webpack_require__(9);
 	var presets_1 = __webpack_require__(10);
 	var piano_1 = __webpack_require__(11);
-	setupTheme();
 	setupPalette();
 	var graphCanvas = $('#graph-canvas')[0];
 	var synthUI = new synthUI_1.SynthUI(graphCanvas, $('#node-params'));
@@ -78,25 +77,23 @@
 	    // Bind piano octave with PC keyboard
 	    kb.baseNote = piano.baseNote;
 	    piano.octaveChanged = function (baseNote) { return kb.baseNote = baseNote; };
+	    setupEnvelopeAnimation(piano);
 	}
-	function setupTheme() {
-	    var search = getSearch();
-	    if (search.theme)
-	        $('body').addClass(search.theme);
-	}
-	function getSearch() {
-	    var search = {};
-	    var sstr = document.location.search;
-	    if (!sstr)
-	        return search;
-	    if (sstr[0] == '?')
-	        sstr = sstr.substr(1);
-	    for (var _i = 0, _a = sstr.split('&'); _i < _a.length; _i++) {
-	        var part = _a[_i];
-	        var kv = part.split('=');
-	        search[kv[0]] = kv[1];
-	    }
-	    return search;
+	function setupEnvelopeAnimation(piano) {
+	    var loaded = synthUI.gr.handler.graphLoaded;
+	    synthUI.gr.handler.graphLoaded = function () {
+	        loaded.bind(synthUI.gr.handler)();
+	        var adsr = null;
+	        for (var _i = 0, _a = synthUI.gr.nodes; _i < _a.length; _i++) {
+	            var node = _a[_i];
+	            var data = node.data;
+	            if (data.type == 'ADSR') {
+	                adsr = data.anode;
+	                break;
+	            }
+	        }
+	        piano.setEnvelope(adsr || { attack: 0, release: 0 });
+	    };
 	}
 	function setupPalette() {
 	    $(function () {
@@ -1756,6 +1753,7 @@
 	        this.baseNote = BASE_NOTE;
 	        this.octave = 3;
 	        this.poly = false;
+	        this.envelope = { attack: 0, release: 0 };
 	        this.createKeys(panel);
 	        for (var i = 0; i < this.keys.length; i++)
 	            this.registerKey(this.keys[i], i);
@@ -1842,6 +1840,7 @@
 	            return;
 	        if (!this.poly && this.lastKey)
 	            this.displayKeyUp(this.lastKey);
+	        key.css('transition', "background-color " + this.envelope.attack + "s linear");
 	        key.addClass('piano-key-pressed');
 	        this.lastKey = key;
 	    };
@@ -1850,10 +1849,14 @@
 	            key = this.midi2key(key);
 	        if (!key)
 	            return;
+	        key.css('transition', "background-color " + this.envelope.release + "s linear");
 	        key.removeClass('piano-key-pressed');
 	    };
 	    PianoKeyboard.prototype.midi2key = function (midi) {
 	        return this.keys[midi - this.baseNote];
+	    };
+	    PianoKeyboard.prototype.setEnvelope = function (adsr) {
+	        this.envelope = adsr;
 	    };
 	    PianoKeyboard.prototype.noteOn = function (midi, ratio) { };
 	    PianoKeyboard.prototype.noteOff = function (midi) { };

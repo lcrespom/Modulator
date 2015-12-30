@@ -212,7 +212,7 @@ input[type=range][orient=vertical] {
 }
 
 .piano-key-pressed {
-	background-color: #0FF;
+	background-color: #0CC;
 }
 
 #piano-buttons {

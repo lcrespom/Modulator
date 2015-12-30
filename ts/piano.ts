@@ -10,11 +10,13 @@ export class PianoKeyboard {
 	octave: number;
 	poly: boolean;
 	lastKey: JQuery;
+	envelope: { attack: number; release: number };
 
 	constructor(panel: JQuery) {
 		this.baseNote = BASE_NOTE;
 		this.octave = 3;
 		this.poly = false;
+		this.envelope = { attack: 0, release: 0 };
 		this.createKeys(panel);
 		for (let i = 0; i < this.keys.length; i++)
 			this.registerKey(this.keys[i], i);
@@ -101,6 +103,7 @@ export class PianoKeyboard {
 		if (typeof key == 'number') key = this.midi2key(key);
 		if (!key) return;
 		if (!this.poly && this.lastKey) this.displayKeyUp(this.lastKey);
+		key.css('transition', `background-color ${this.envelope.attack}s linear`);
 		key.addClass('piano-key-pressed');
 		this.lastKey = key;
 	}
@@ -108,11 +111,16 @@ export class PianoKeyboard {
 	displayKeyUp(key) {
 		if (typeof key == 'number') key = this.midi2key(key);
 		if (!key) return;
+		key.css('transition', `background-color ${this.envelope.release}s linear`);
 		key.removeClass('piano-key-pressed');
 	}
 
 	midi2key(midi: number) {
 		return this.keys[midi - this.baseNote];
+	}
+
+	setEnvelope(adsr) {
+		this.envelope = adsr;
 	}
 
 	noteOn(midi: number, ratio: number):void {}

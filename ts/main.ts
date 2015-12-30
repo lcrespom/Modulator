@@ -2,12 +2,11 @@
  * Main entry point: setup synth editor and keyboard listener.
  */
 
-import { SynthUI } from './synthUI';
+import { SynthUI, NodeData } from './synthUI';
 import { Keyboard } from './keyboard';
 import { Presets } from './presets';
 import { PianoKeyboard } from './piano';
 
-setupTheme();
 setupPalette();
 const graphCanvas = <HTMLCanvasElement>$('#graph-canvas')[0];
 const synthUI = new SynthUI(graphCanvas, $('#node-params'));
@@ -35,24 +34,23 @@ function setupKeyboard() {
 	// Bind piano octave with PC keyboard
 	kb.baseNote = piano.baseNote;
 	piano.octaveChanged = baseNote => kb.baseNote = baseNote;
+	setupEnvelopeAnimation(piano);
 }
 
-function setupTheme() {
-	const search: any = getSearch();
-	if (search.theme)
-		$('body').addClass(search.theme);
-}
-
-function getSearch() {
-	const search = {};
-	let sstr = document.location.search;
-	if (!sstr) return search;
-	if (sstr[0] == '?') sstr = sstr.substr(1);
-	for (const part of sstr.split('&')) {
-		const kv = part.split('=');
-		search[kv[0]] = kv[1];
+function setupEnvelopeAnimation(piano: PianoKeyboard) {
+	const loaded = synthUI.gr.handler.graphLoaded;
+	synthUI.gr.handler.graphLoaded = function() {
+		loaded.bind(synthUI.gr.handler)();
+		let adsr = null;
+		for (const node of synthUI.gr.nodes) {
+			const data: NodeData = node.data;
+			if (data.type == 'ADSR') {
+				adsr = data.anode;
+				break;
+			}
+		}
+		piano.setEnvelope(adsr || { attack: 0, release: 0 });
 	}
-	return search;
 }
 
 function setupPalette() {
