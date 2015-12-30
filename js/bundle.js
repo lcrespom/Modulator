@@ -1043,6 +1043,7 @@
 	        this.ac = new CtxClass();
 	        this.palette = palette_1.palette;
 	        this.registerCustomNode('createADSR', ADSR);
+	        this.registerCustomNode('createNoise', NoiseGenerator);
 	        this.registerParamHandler('BufferURL', new BufferURL());
 	    }
 	    Synth.prototype.createAudioNode = function (type) {
@@ -1141,6 +1142,34 @@
 	    return ADSR;
 	})(CustomNodeBase);
 	exports.ADSR = ADSR;
+	var NoiseGenerator = (function (_super) {
+	    __extends(NoiseGenerator, _super);
+	    function NoiseGenerator() {
+	        _super.apply(this, arguments);
+	        this.gain = 1;
+	    }
+	    NoiseGenerator.prototype.connect = function (node) {
+	        if (!this.sproc)
+	            this.createScriptProcessor(node.context);
+	        this.sproc.connect(node);
+	    };
+	    NoiseGenerator.prototype.disconnect = function () {
+	        this.sproc.disconnect();
+	    };
+	    NoiseGenerator.prototype.createScriptProcessor = function (ac) {
+	        var _this = this;
+	        this.sproc = ac.createScriptProcessor();
+	        this.sproc.onaudioprocess = function (evt) { return _this.processAudio(evt); };
+	    };
+	    NoiseGenerator.prototype.processAudio = function (evt) {
+	        for (var channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
+	            var out = evt.outputBuffer.getChannelData(channel);
+	            for (var sample = 0; sample < out.length; sample++)
+	                out[sample] = this.gain * (Math.random() * 2 - 1);
+	        }
+	    };
+	    return NoiseGenerator;
+	})(CustomNodeBase);
 	//-------------------- Parameter handlers --------------------
 	var BufferURL = (function () {
 	    function BufferURL() {
@@ -1230,6 +1259,13 @@
 	            loop: { initial: false },
 	            loopStart: { initial: 0, min: 0, max: 10 },
 	            loopEnd: { initial: 3, min: 0, max: 10 }
+	        }
+	    },
+	    Noise: {
+	        constructor: 'createNoise',
+	        custom: true,
+	        params: {
+	            gain: { initial: 1, min: 0, max: 10 }
 	        }
 	    },
 	    // Effects

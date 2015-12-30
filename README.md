@@ -63,6 +63,7 @@ on Twitter, or directly within GitHub.
 		- WaveShaper
 		- Etc?
 	- Provide 10 preset instruments
+	- Accept URL to directly download instrument preset
 	- Limitation: a control node can only control a single node
 		- Prevent from connecting a control node to more than one destination
 		- Or else, modify the UI to support multiple destination nodes

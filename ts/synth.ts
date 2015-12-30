@@ -25,6 +25,7 @@ export class Synth {
 		this.ac = new CtxClass();
 		this.palette = palette;
 		this.registerCustomNode('createADSR', ADSR);
+		this.registerCustomNode('createNoise', NoiseGenerator);
 		this.registerParamHandler('BufferURL', new BufferURL());
 	}
 
@@ -121,6 +122,33 @@ export class ADSR extends CustomNodeBase {
 	//TODO 0 <= depth <= 1
 	//TODO linear / exponential
 	//TODO kb trigger (boolean)
+}
+
+class NoiseGenerator extends CustomNodeBase {
+	gain: number = 1;
+	sproc: ScriptProcessorNode;
+
+	connect(node: AudioNode) {
+		if (!this.sproc) this.createScriptProcessor(node.context);
+		this.sproc.connect(node);
+	}
+
+	disconnect() {
+		this.sproc.disconnect();
+	}
+
+	createScriptProcessor(ac: AudioContext) {
+		this.sproc = ac.createScriptProcessor();
+		this.sproc.onaudioprocess = evt => this.processAudio(evt);
+	}
+
+	processAudio(evt: AudioProcessingEvent) {
+		for (let channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
+			let out = evt.outputBuffer.getChannelData(channel);
+			for (let sample = 0; sample < out.length; sample++)
+				out[sample] = this.gain * (Math.random() * 2 - 1);
+		}
+	}
 }
 
 //-------------------- Parameter handlers --------------------

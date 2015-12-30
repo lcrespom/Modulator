@@ -65,6 +65,13 @@ export var palette: NodePalette = {
 			loopEnd: { initial: 3, min: 0, max: 10 }
 		}
 	},
+	Noise: {
+		constructor: 'createNoise',
+		custom: true,
+		params: {
+			gain:  { initial: 1, min: 0, max: 10 }
+		}
+	},
 	// Effects
 	Gain: {
 		constructor: 'createGain',
