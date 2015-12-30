@@ -48,9 +48,9 @@
 	 * Main entry point: setup synth editor and keyboard listener.
 	 */
 	var synthUI_1 = __webpack_require__(1);
-	var keyboard_1 = __webpack_require__(9);
-	var presets_1 = __webpack_require__(10);
-	var piano_1 = __webpack_require__(11);
+	var keyboard_1 = __webpack_require__(10);
+	var presets_1 = __webpack_require__(11);
+	var piano_1 = __webpack_require__(12);
 	setupPalette();
 	var graphCanvas = $('#graph-canvas')[0];
 	var synthUI = new synthUI_1.SynthUI(graphCanvas, $('#node-params'));
@@ -107,7 +107,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var notes_1 = __webpack_require__(2);
-	var popups = __webpack_require__(12);
+	var popups = __webpack_require__(4);
 	/**
 	 * Customizes the generic graph editor in order to manipulate and control a graph of
 	 * AudioNodes
@@ -226,10 +226,10 @@
 	})();
 	exports.NodeData = NodeData;
 	//-------------------- Privates --------------------
-	var graph_1 = __webpack_require__(4);
-	var synth_1 = __webpack_require__(5);
-	var paramsUI_1 = __webpack_require__(7);
-	var analyzer_1 = __webpack_require__(8);
+	var graph_1 = __webpack_require__(5);
+	var synth_1 = __webpack_require__(6);
+	var paramsUI_1 = __webpack_require__(8);
+	var analyzer_1 = __webpack_require__(9);
 	var SynthGraphHandler = (function () {
 	    function SynthGraphHandler(synthUI, jqParams) {
 	        this.synthUI = synthUI;
@@ -630,6 +630,70 @@
 /* 4 */
 /***/ function(module, exports) {
 
+	function alert(msg, title) {
+	    popup.find('.popup-message').html(msg);
+	    popup.find('.modal-title').text(title || 'Alert');
+	    popup.find('.popup-ok').hide();
+	    popup.find('.popup-close').html('Close');
+	    popup.find('.popup-prompt > input').hide();
+	    popup.modal();
+	}
+	exports.alert = alert;
+	function confirm(msg, title, cbClose, cbOpen) {
+	    var result = false;
+	    popup.find('.popup-message').html(msg);
+	    popup.find('.modal-title').text(title || 'Please confirm');
+	    var okButton = popup.find('.popup-ok');
+	    okButton.show().click(function (_) { return result = true; });
+	    popup.find('.popup-prompt > input').hide();
+	    popup.find('.popup-close').text('Cancel');
+	    popup.one('shown.bs.modal', function (_) {
+	        okButton.focus();
+	        if (cbOpen)
+	            cbOpen();
+	    });
+	    popup.find('form').one('submit', function (_) {
+	        result = true;
+	        okButton.click();
+	        return false;
+	    });
+	    popup.one('hide.bs.modal', function (_) {
+	        okButton.off('click');
+	        cbClose(result);
+	    });
+	    popup.modal();
+	}
+	exports.confirm = confirm;
+	function prompt(msg, title, initialValue, cb) {
+	    var input = popup.find('.popup-prompt > input');
+	    confirm(msg, title, function (confirmed) {
+	        if (!cb)
+	            return;
+	        if (!confirmed)
+	            cb(null);
+	        else
+	            cb(input.val());
+	    }, function () {
+	        input.show();
+	        input.focus();
+	        if (initialValue) {
+	            input.val(initialValue);
+	            var hinput = input[0];
+	            hinput.select();
+	        }
+	        else
+	            input.val('');
+	    });
+	}
+	exports.prompt = prompt;
+	var popup = $("\n\t<div class=\"normal-font modal fade\" id=\"myModal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"myModalLabel\">\n\t<div class=\"modal-dialog\" role=\"document\">\n\t\t<div class=\"modal-content\">\n\t\t<div class=\"modal-header\">\n\t\t\t<button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n\t\t\t<h4 class=\"modal-title\" id=\"myModalLabel\"></h4>\n\t\t</div>\n\t\t<div class=\"modal-body\">\n\t\t\t<div class=\"popup-message\"></div>\n\t\t\t<form class=\"popup-prompt\">\n\t\t\t\t<input type=\"text\" style=\"width: 100%\">\n\t\t\t</form>\n\t\t</div>\n\t\t<div class=\"modal-footer\">\n\t\t\t<button type=\"button\" class=\"btn btn-default popup-close\" data-dismiss=\"modal\"></button>\n\t\t\t<button type=\"button\" class=\"btn btn-primary popup-ok\" data-dismiss=\"modal\">OK</button>\n\t\t</div>\n\t\t</div>\n\t</div>\n\t</div>\n");
+	$('body').append(popup);
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
 	var SHIFT_KEY = 16;
 	var CAPS_LOCK = 20;
 	/**
@@ -1022,7 +1086,7 @@
 
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __extends = (this && this.__extends) || function (d, b) {
@@ -1030,9 +1094,9 @@
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var palette_1 = __webpack_require__(6);
+	var palette_1 = __webpack_require__(7);
 	var modern_1 = __webpack_require__(3);
-	var popups = __webpack_require__(12);
+	var popups = __webpack_require__(4);
 	/**
 	 * Performs global operations on all AudioNodes:
 	 * - Manages AudioNode creation and initialization from the palette
@@ -1221,7 +1285,7 @@
 
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports) {
 
 	//-------------------- Node palette definition --------------------
@@ -1357,7 +1421,7 @@
 
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports) {
 
 	/**
@@ -1536,7 +1600,7 @@
 
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports) {
 
 	var AudioAnalyzer = (function () {
@@ -1630,7 +1694,7 @@
 
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports) {
 
 	var KB_NOTES = 'ZSXDCVGBHNJMQ2W3ER5T6Y7UI9O0P';
@@ -1685,10 +1749,10 @@
 
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var popups = __webpack_require__(12);
+	var popups = __webpack_require__(4);
 	var MAX_PRESETS = 20;
 	/**
 	 * Manages the presets box:
@@ -1783,11 +1847,11 @@
 
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var keyboard_1 = __webpack_require__(9);
-	var popups = __webpack_require__(12);
+	var keyboard_1 = __webpack_require__(10);
+	var popups = __webpack_require__(4);
 	var NUM_WHITES = 17;
 	var BASE_NOTE = 36;
 	var PianoKeyboard = (function () {
@@ -1907,70 +1971,6 @@
 	    return PianoKeyboard;
 	})();
 	exports.PianoKeyboard = PianoKeyboard;
-
-
-/***/ },
-/* 12 */
-/***/ function(module, exports) {
-
-	function alert(msg, title) {
-	    popup.find('.popup-message').html(msg);
-	    popup.find('.modal-title').text(title || 'Alert');
-	    popup.find('.popup-ok').hide();
-	    popup.find('.popup-close').html('Close');
-	    popup.find('.popup-prompt > input').hide();
-	    popup.modal();
-	}
-	exports.alert = alert;
-	function confirm(msg, title, cbClose, cbOpen) {
-	    var result = false;
-	    popup.find('.popup-message').html(msg);
-	    popup.find('.modal-title').text(title || 'Please confirm');
-	    var okButton = popup.find('.popup-ok');
-	    okButton.show().click(function (_) { return result = true; });
-	    popup.find('.popup-prompt > input').hide();
-	    popup.find('.popup-close').text('Cancel');
-	    popup.one('shown.bs.modal', function (_) {
-	        okButton.focus();
-	        if (cbOpen)
-	            cbOpen();
-	    });
-	    popup.find('form').one('submit', function (_) {
-	        result = true;
-	        okButton.click();
-	        return false;
-	    });
-	    popup.one('hide.bs.modal', function (_) {
-	        okButton.off('click');
-	        cbClose(result);
-	    });
-	    popup.modal();
-	}
-	exports.confirm = confirm;
-	function prompt(msg, title, initialValue, cb) {
-	    var input = popup.find('.popup-prompt > input');
-	    confirm(msg, title, function (confirmed) {
-	        if (!cb)
-	            return;
-	        if (!confirmed)
-	            cb(null);
-	        else
-	            cb(input.val());
-	    }, function () {
-	        input.show();
-	        input.focus();
-	        if (initialValue) {
-	            input.val(initialValue);
-	            var hinput = input[0];
-	            hinput.select();
-	        }
-	        else
-	            input.val('');
-	    });
-	}
-	exports.prompt = prompt;
-	var popup = $("\n\t<div class=\"normal-font modal fade\" id=\"myModal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"myModalLabel\">\n\t<div class=\"modal-dialog\" role=\"document\">\n\t\t<div class=\"modal-content\">\n\t\t<div class=\"modal-header\">\n\t\t\t<button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n\t\t\t<h4 class=\"modal-title\" id=\"myModalLabel\"></h4>\n\t\t</div>\n\t\t<div class=\"modal-body\">\n\t\t\t<div class=\"popup-message\"></div>\n\t\t\t<form class=\"popup-prompt\">\n\t\t\t\t<input type=\"text\" style=\"width: 100%\">\n\t\t\t</form>\n\t\t</div>\n\t\t<div class=\"modal-footer\">\n\t\t\t<button type=\"button\" class=\"btn btn-default popup-close\" data-dismiss=\"modal\"></button>\n\t\t\t<button type=\"button\" class=\"btn btn-primary popup-ok\" data-dismiss=\"modal\">OK</button>\n\t\t</div>\n\t\t</div>\n\t</div>\n\t</div>\n");
-	$('body').append(popup);
 
 
 /***/ }
