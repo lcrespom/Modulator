@@ -37,6 +37,7 @@ on Twitter, or directly within GitHub.
 
 ##ToDo
 - Bugs
+	- Buffer source node fails to load & save the buffer URL property
 	- ADSR needs more testing & refining
 	- Popping sound at note on/off
 		- Usage of ADSR is the most probable cause. Should be fixed when introducing
