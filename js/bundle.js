@@ -1839,17 +1839,18 @@
 	        if (!key)
 	            return;
 	        if (!this.poly && this.lastKey)
-	            this.displayKeyUp(this.lastKey);
+	            this.displayKeyUp(this.lastKey, true);
 	        key.css('transition', "background-color " + this.envelope.attack + "s linear");
 	        key.addClass('piano-key-pressed');
 	        this.lastKey = key;
 	    };
-	    PianoKeyboard.prototype.displayKeyUp = function (key) {
+	    PianoKeyboard.prototype.displayKeyUp = function (key, immediate) {
 	        if (typeof key == 'number')
 	            key = this.midi2key(key);
 	        if (!key)
 	            return;
-	        key.css('transition', "background-color " + this.envelope.release + "s linear");
+	        var release = immediate ? 0 : this.envelope.release;
+	        key.css('transition', "background-color " + release + "s linear");
 	        key.removeClass('piano-key-pressed');
 	    };
 	    PianoKeyboard.prototype.midi2key = function (midi) {
