@@ -108,7 +108,7 @@ export class PianoKeyboard {
 		this.lastKey = key;
 	}
 
-	displayKeyUp(key, immediate) {
+	displayKeyUp(key, immediate?) {
 		if (typeof key == 'number') key = this.midi2key(key);
 		if (!key) return;
 		const release = immediate ? 0 : this.envelope.release;
