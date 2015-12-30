@@ -16,18 +16,22 @@ new Presets(synthUI);
 
 
 function setupKeyboard() {
+	// Setup piano panel
+	var piano = new PianoKeyboard($('#piano'));
+	piano.noteOn = (midi, ratio) => synthUI.synth.noteOn(midi, 1, ratio);
+	piano.noteOff = (midi) => synthUI.synth.noteOff(midi, 1);
+	// Setup PC keyboard
 	var kb = new Keyboard();
 	kb.noteOn = (midi, ratio) => {
 		if (document.activeElement.nodeName == 'INPUT' &&
 			document.activeElement.getAttribute('type') != 'range') return;
 		synthUI.synth.noteOn(midi, 1, ratio);
+		piano.displayKeyDown(midi);
 	};
 	kb.noteOff = (midi) => {
 		synthUI.synth.noteOff(midi, 1);
+		piano.displayKeyUp(midi);
 	};
-	var piano = new PianoKeyboard($('#piano'));
-	piano.noteOn = (midi, ratio) => synthUI.synth.noteOn(midi, 1, ratio);
-	piano.noteOff = (midi) => synthUI.synth.noteOff(midi, 1);
 }
 
 function setupTheme() {

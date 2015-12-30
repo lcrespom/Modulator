@@ -40,6 +40,7 @@ on Twitter, or directly within GitHub.
 	- ADSR needs more testing & refining
 	- Popping sound at note on/off (probably needs custom oscillator with gain)
 	- Refine rules to determine whether nodes can connect
+	- Analyzer should detect when no sound is playing and clean osc and fft graphs
 	- Review TODO items inside code
 
 - Functionality
@@ -105,9 +106,11 @@ on Twitter, or directly within GitHub.
 	- Local storage with HTML5
 
 - Code
+	- Avoid hardcoded DOM id's in code, e.g. $('#my-button'), except
+		for specifying containers at top level
 	- Separate graph.ts into an independent npm module
-	- Better, cleaner implementation of HTML/CSS in index.html and main.css
-	- API to load & play presets without displaying the node graph
+	- Reusable API to load & play presets without displaying the node graph,
+		eventually to become an independent npm module (long term)
 
 - Share
 	- Document

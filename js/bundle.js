@@ -58,19 +58,23 @@
 	setupKeyboard();
 	new presets_1.Presets(synthUI);
 	function setupKeyboard() {
+	    // Setup piano panel
+	    var piano = new piano_1.PianoKeyboard($('#piano'));
+	    piano.noteOn = function (midi, ratio) { return synthUI.synth.noteOn(midi, 1, ratio); };
+	    piano.noteOff = function (midi) { return synthUI.synth.noteOff(midi, 1); };
+	    // Setup PC keyboard
 	    var kb = new keyboard_1.Keyboard();
 	    kb.noteOn = function (midi, ratio) {
 	        if (document.activeElement.nodeName == 'INPUT' &&
 	            document.activeElement.getAttribute('type') != 'range')
 	            return;
 	        synthUI.synth.noteOn(midi, 1, ratio);
+	        piano.displayKeyDown(midi);
 	    };
 	    kb.noteOff = function (midi) {
 	        synthUI.synth.noteOff(midi, 1);
+	        piano.displayKeyUp(midi);
 	    };
-	    var piano = new piano_1.PianoKeyboard($('#piano'));
-	    piano.noteOn = function (midi, ratio) { return synthUI.synth.noteOn(midi, 1, ratio); };
-	    piano.noteOff = function (midi) { return synthUI.synth.noteOff(midi, 1); };
 	}
 	function setupTheme() {
 	    var search = getSearch();
@@ -1746,6 +1750,7 @@
 	var PianoKeyboard = (function () {
 	    function PianoKeyboard(panel) {
 	        this.baseNote = BASE_NOTE;
+	        this.poly = false;
 	        this.createKeys(panel);
 	        for (var i = 0; i < this.keys.length; i++)
 	            this.registerKey(this.keys[i], i);
@@ -1796,17 +1801,37 @@
 	        var _this = this;
 	        var midi = knum + this.baseNote;
 	        key.mousedown(function (_) {
-	            key.addClass('piano-key-pressed');
+	            _this.displayKeyDown(key);
 	            _this.noteOn(midi, keyboard_1.midi2freqRatio(midi));
 	        });
 	        key.mouseup(function (_) {
-	            key.removeClass('piano-key-pressed');
+	            _this.displayKeyUp(key);
 	            _this.noteOff(midi);
 	        });
 	    };
 	    PianoKeyboard.prototype.registerButtons = function () {
 	        //TODO
 	        $('#poly-but').click(function (_) { return alert('Sorry, polyphonic mode not available yet'); });
+	    };
+	    PianoKeyboard.prototype.displayKeyDown = function (key) {
+	        if (typeof key == 'number')
+	            key = this.midi2key(key);
+	        if (!key)
+	            return;
+	        key.addClass('piano-key-pressed');
+	        if (!this.poly && this.lastKey)
+	            this.displayKeyUp(this.lastKey);
+	        this.lastKey = key;
+	    };
+	    PianoKeyboard.prototype.displayKeyUp = function (key) {
+	        if (typeof key == 'number')
+	            key = this.midi2key(key);
+	        if (!key)
+	            return;
+	        key.removeClass('piano-key-pressed');
+	    };
+	    PianoKeyboard.prototype.midi2key = function (midi) {
+	        return this.keys[midi - this.baseNote];
 	    };
 	    PianoKeyboard.prototype.noteOn = function (midi, ratio) { };
 	    PianoKeyboard.prototype.noteOff = function (midi) { };

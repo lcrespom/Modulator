@@ -7,9 +7,12 @@ export class PianoKeyboard {
 	keys: JQuery[];
 	k1note: number;
 	baseNote: number;
+	poly: boolean;
+	lastKey: JQuery;
 
 	constructor(panel: JQuery) {
 		this.baseNote = BASE_NOTE;
+		this.poly = false;
 		this.createKeys(panel);
 		for (let i = 0; i < this.keys.length; i++)
 			this.registerKey(this.keys[i], i);
@@ -60,11 +63,11 @@ export class PianoKeyboard {
 	registerKey(key: JQuery, knum: number): void {
 		const midi = knum + this.baseNote;
 		key.mousedown(_ => {
-			key.addClass('piano-key-pressed');
+			this.displayKeyDown(key);
 			this.noteOn(midi, midi2freqRatio(midi));
 		});
 		key.mouseup(_ => {
-			key.removeClass('piano-key-pressed');
+			this.displayKeyUp(key);
 			this.noteOff(midi);
 		});
 	}
@@ -73,6 +76,24 @@ export class PianoKeyboard {
 		//TODO
 		$('#poly-but').click(_ => alert(
 			'Sorry, polyphonic mode not available yet'));
+	}
+
+	displayKeyDown(key): void {
+		if (typeof key == 'number') key = this.midi2key(key);
+		if (!key) return;
+		key.addClass('piano-key-pressed');
+		if (!this.poly && this.lastKey) this.displayKeyUp(this.lastKey);
+		this.lastKey = key;
+	}
+
+	displayKeyUp(key) {
+		if (typeof key == 'number') key = this.midi2key(key);
+		if (!key) return;
+		key.removeClass('piano-key-pressed');
+	}
+
+	midi2key(midi: number) {
+		return this.keys[midi - this.baseNote];
 	}
 
 	noteOn(midi: number, ratio: number):void {}
