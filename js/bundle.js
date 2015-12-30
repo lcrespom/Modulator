@@ -57,7 +57,6 @@
 	var synthUI = new synthUI_1.SynthUI(graphCanvas, $('#node-params'));
 	setupKeyboard();
 	new presets_1.Presets(synthUI);
-	new piano_1.PianoKeyboard($('#piano'));
 	function setupKeyboard() {
 	    var kb = new keyboard_1.Keyboard();
 	    kb.noteOn = function (midi, ratio) {
@@ -69,6 +68,9 @@
 	    kb.noteOff = function (midi) {
 	        synthUI.synth.noteOff(midi, 1);
 	    };
+	    var piano = new piano_1.PianoKeyboard($('#piano'));
+	    piano.noteOn = function (midi, ratio) { return synthUI.synth.noteOn(midi, 1, ratio); };
+	    piano.noteOff = function (midi) { return synthUI.synth.noteOff(midi, 1); };
 	}
 	function setupTheme() {
 	    var search = getSearch();
@@ -1608,7 +1610,7 @@
 	            var midi = _this.key2midi(evt.keyCode);
 	            if (midi < 0)
 	                return;
-	            _this.noteOn(midi, _this.midi2freqRatio(midi));
+	            _this.noteOn(midi, midi2freqRatio(midi));
 	        })
 	            .on('keyup', function (evt) {
 	            pressedKeys[evt.keyCode] = false;
@@ -1624,14 +1626,15 @@
 	            return -1;
 	        return BASE_NOTE + pos;
 	    };
-	    Keyboard.prototype.midi2freqRatio = function (midi) {
-	        return Math.pow(SEMITONE, midi - A4);
-	    };
 	    Keyboard.prototype.noteOn = function (midi, ratio) { };
 	    Keyboard.prototype.noteOff = function (midi) { };
 	    return Keyboard;
 	})();
 	exports.Keyboard = Keyboard;
+	function midi2freqRatio(midi) {
+	    return Math.pow(SEMITONE, midi - A4);
+	}
+	exports.midi2freqRatio = midi2freqRatio;
 
 
 /***/ },
@@ -1732,11 +1735,20 @@
 
 /***/ },
 /* 11 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
+	var keyboard_1 = __webpack_require__(9);
 	var NUM_WHITES = 17;
+	var BASE_NOTE = 36;
 	var PianoKeyboard = (function () {
 	    function PianoKeyboard(panel) {
+	        this.baseNote = BASE_NOTE;
+	        this.createKeys(panel);
+	        for (var i = 0; i < this.keys.length; i++)
+	            this.registerKey(this.keys[i], i);
+	        this.registerButtons();
+	    }
+	    PianoKeyboard.prototype.createKeys = function (panel) {
 	        this.keys = [];
 	        var pw = panel.width();
 	        var ph = panel.height();
@@ -1772,12 +1784,28 @@
 	            panel.append(key);
 	            this.keys[knum++] = key;
 	        }
-	        console.log(this.keys);
-	    }
+	    };
 	    PianoKeyboard.prototype.hasBlack = function (num) {
 	        var mod7 = num % 7;
 	        return mod7 != 2 && mod7 != 6;
 	    };
+	    PianoKeyboard.prototype.registerKey = function (key, knum) {
+	        var _this = this;
+	        var midi = knum + this.baseNote;
+	        key.mousedown(function (_) {
+	            key.addClass('piano-key-pressed');
+	            _this.noteOn(midi, keyboard_1.midi2freqRatio(midi));
+	        });
+	        key.mouseup(function (_) {
+	            key.removeClass('piano-key-pressed');
+	            _this.noteOff(midi);
+	        });
+	    };
+	    PianoKeyboard.prototype.registerButtons = function () {
+	        //TODO
+	    };
+	    PianoKeyboard.prototype.noteOn = function (midi, ratio) { };
+	    PianoKeyboard.prototype.noteOff = function (midi) { };
 	    return PianoKeyboard;
 	})();
 	exports.PianoKeyboard = PianoKeyboard;

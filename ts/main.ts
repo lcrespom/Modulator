@@ -13,7 +13,6 @@ const graphCanvas = <HTMLCanvasElement>$('#graph-canvas')[0];
 const synthUI = new SynthUI(graphCanvas, $('#node-params'));
 setupKeyboard();
 new Presets(synthUI);
-new PianoKeyboard($('#piano'));
 
 
 function setupKeyboard() {
@@ -26,6 +25,9 @@ function setupKeyboard() {
 	kb.noteOff = (midi) => {
 		synthUI.synth.noteOff(midi, 1);
 	};
+	var piano = new PianoKeyboard($('#piano'));
+	piano.noteOn = (midi, ratio) => synthUI.synth.noteOn(midi, 1, ratio);
+	piano.noteOff = (midi) => synthUI.synth.noteOff(midi, 1);
 }
 
 function setupTheme() {

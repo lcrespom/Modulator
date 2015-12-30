@@ -16,7 +16,7 @@ FireFox or Safari, but has no server-side code.
 	- Release the shift key to make the connection
 - To disconnect two nodes, simply make the same connection again,
 	and this time it will be removed
-- Use the keyboard to play notes: note C2 is in 'z', note C3 is in 'a'.
+- Use the keyboard to play notes: note C3 is in 'z', note C4 is in 'a'.
 
 You can directly try it out [here](//lcrespom.github.io/synth).
 

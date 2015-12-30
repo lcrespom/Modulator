@@ -1,11 +1,22 @@
-const NUM_WHITES = 17;
+import { midi2freqRatio } from './keyboard';
 
+const NUM_WHITES = 17;
+const BASE_NOTE = 36;
 
 export class PianoKeyboard {
 	keys: JQuery[];
 	k1note: number;
+	baseNote: number;
 
 	constructor(panel: JQuery) {
+		this.baseNote = BASE_NOTE;
+		this.createKeys(panel);
+		for (let i = 0; i < this.keys.length; i++)
+			this.registerKey(this.keys[i], i);
+		this.registerButtons();
+	}
+
+	createKeys(panel: JQuery) {
 		this.keys = [];
 		var pw = panel.width();
 		var ph = panel.height();
@@ -39,7 +50,6 @@ export class PianoKeyboard {
 			panel.append(key);
 			this.keys[knum++] = key;
 		}
-		console.log(this.keys);
 	}
 
 	hasBlack(num: number): boolean {
@@ -47,4 +57,22 @@ export class PianoKeyboard {
 		return mod7 != 2 && mod7 != 6;
 	}
 
+	registerKey(key: JQuery, knum: number): void {
+		const midi = knum + this.baseNote;
+		key.mousedown(_ => {
+			key.addClass('piano-key-pressed');
+			this.noteOn(midi, midi2freqRatio(midi));
+		});
+		key.mouseup(_ => {
+			key.removeClass('piano-key-pressed');
+			this.noteOff(midi);
+		});
+	}
+
+	registerButtons(): void {
+		//TODO
+	}
+
+	noteOn(midi: number, ratio: number):void {}
+	noteOff(midi: number): void {}
 }

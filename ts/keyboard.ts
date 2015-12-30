@@ -21,7 +21,7 @@ export class Keyboard {
 			pressedKeys[evt.keyCode] = true;
 			const midi = this.key2midi(evt.keyCode);
 			if (midi < 0) return;
-			this.noteOn(midi, this.midi2freqRatio(midi));
+			this.noteOn(midi, midi2freqRatio(midi));
 		})
 		.on('keyup', evt => {
 			pressedKeys[evt.keyCode] = false;
@@ -37,10 +37,11 @@ export class Keyboard {
 		return BASE_NOTE + pos;
 	}
 
-	midi2freqRatio(midi: number): number {
-		return Math.pow(SEMITONE, midi - A4);
-	}
-
 	noteOn(midi: number, ratio: number):void {}
 	noteOff(midi: number): void {}
 }
+
+export function midi2freqRatio(midi: number): number {
+	return Math.pow(SEMITONE, midi - A4);
+}
+

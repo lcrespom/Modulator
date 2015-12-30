@@ -211,6 +211,10 @@ input[type=range][orient=vertical] {
 	position: absolute;
 }
 
+.piano-key-pressed {
+	background-color: #0FF;
+}
+
 #piano-buttons {
 	width:550px;
 	height: 40px;
