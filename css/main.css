@@ -16,6 +16,10 @@ body {
 	padding: 0; margin: 0;
 }
 
+.graph-row {
+	white-space: nowrap;
+}
+
 .graph-box {
 	background-color: white;
 	border: 1px solid #999;
@@ -118,6 +122,7 @@ body {
 	overflow-x: auto;
 	display: inline-block;
 	position: static;
+	white-space: normal;
 }
 
 input[type=range][orient=vertical] {
