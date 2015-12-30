@@ -7,11 +7,13 @@ export class PianoKeyboard {
 	keys: JQuery[];
 	k1note: number;
 	baseNote: number;
+	octave: number;
 	poly: boolean;
 	lastKey: JQuery;
 
 	constructor(panel: JQuery) {
 		this.baseNote = BASE_NOTE;
+		this.octave = 3;
 		this.poly = false;
 		this.createKeys(panel);
 		for (let i = 0; i < this.keys.length; i++)
@@ -61,28 +63,45 @@ export class PianoKeyboard {
 	}
 
 	registerKey(key: JQuery, knum: number): void {
-		const midi = knum + this.baseNote;
 		key.mousedown(_ => {
+			const midi = knum + this.baseNote;
 			this.displayKeyDown(key);
 			this.noteOn(midi, midi2freqRatio(midi));
 		});
 		key.mouseup(_ => {
+			const midi = knum + this.baseNote;
 			this.displayKeyUp(key);
 			this.noteOff(midi);
 		});
 	}
 
 	registerButtons(): void {
-		//TODO
 		$('#poly-but').click(_ => alert(
 			'Sorry, polyphonic mode not available yet'));
+		$('#prev-octave-but').click(_ => {
+			this.octave--;
+			this.baseNote -= 12;
+			this.updateOctave();
+		});
+		$('#next-octave-but').click(_ => {
+			this.octave++;
+			this.baseNote += 12;
+			this.updateOctave();
+		});
+	}
+
+	updateOctave() {
+		$('#prev-octave-but').prop('disabled', this.octave <= 1);
+		$('#next-octave-but').prop('disabled', this.octave >= 8);
+		$('#octave-label').text('C' + this.octave);
+		this.octaveChanged(this.baseNote);
 	}
 
 	displayKeyDown(key): void {
 		if (typeof key == 'number') key = this.midi2key(key);
 		if (!key) return;
-		key.addClass('piano-key-pressed');
 		if (!this.poly && this.lastKey) this.displayKeyUp(this.lastKey);
+		key.addClass('piano-key-pressed');
 		this.lastKey = key;
 	}
 
@@ -98,4 +117,5 @@ export class PianoKeyboard {
 
 	noteOn(midi: number, ratio: number):void {}
 	noteOff(midi: number): void {}
+	octaveChanged(baseNote) {}
 }

@@ -75,6 +75,9 @@
 	        synthUI.synth.noteOff(midi, 1);
 	        piano.displayKeyUp(midi);
 	    };
+	    // Bind piano octave with PC keyboard
+	    kb.baseNote = piano.baseNote;
+	    piano.octaveChanged = function (baseNote) { return kb.baseNote = baseNote; };
 	}
 	function setupTheme() {
 	    var search = getSearch();
@@ -1605,6 +1608,7 @@
 	var Keyboard = (function () {
 	    function Keyboard() {
 	        this.setupHandler();
+	        this.baseNote = BASE_NOTE;
 	    }
 	    Keyboard.prototype.setupHandler = function () {
 	        var _this = this;
@@ -1631,7 +1635,7 @@
 	        var pos = KB_NOTES.indexOf(String.fromCharCode(keyCode));
 	        if (pos < 0)
 	            return -1;
-	        return BASE_NOTE + pos;
+	        return this.baseNote + pos;
 	    };
 	    Keyboard.prototype.noteOn = function (midi, ratio) { };
 	    Keyboard.prototype.noteOff = function (midi) { };
@@ -1750,6 +1754,7 @@
 	var PianoKeyboard = (function () {
 	    function PianoKeyboard(panel) {
 	        this.baseNote = BASE_NOTE;
+	        this.octave = 3;
 	        this.poly = false;
 	        this.createKeys(panel);
 	        for (var i = 0; i < this.keys.length; i++)
@@ -1799,28 +1804,45 @@
 	    };
 	    PianoKeyboard.prototype.registerKey = function (key, knum) {
 	        var _this = this;
-	        var midi = knum + this.baseNote;
 	        key.mousedown(function (_) {
+	            var midi = knum + _this.baseNote;
 	            _this.displayKeyDown(key);
 	            _this.noteOn(midi, keyboard_1.midi2freqRatio(midi));
 	        });
 	        key.mouseup(function (_) {
+	            var midi = knum + _this.baseNote;
 	            _this.displayKeyUp(key);
 	            _this.noteOff(midi);
 	        });
 	    };
 	    PianoKeyboard.prototype.registerButtons = function () {
-	        //TODO
+	        var _this = this;
 	        $('#poly-but').click(function (_) { return alert('Sorry, polyphonic mode not available yet'); });
+	        $('#prev-octave-but').click(function (_) {
+	            _this.octave--;
+	            _this.baseNote -= 12;
+	            _this.updateOctave();
+	        });
+	        $('#next-octave-but').click(function (_) {
+	            _this.octave++;
+	            _this.baseNote += 12;
+	            _this.updateOctave();
+	        });
+	    };
+	    PianoKeyboard.prototype.updateOctave = function () {
+	        $('#prev-octave-but').prop('disabled', this.octave <= 1);
+	        $('#next-octave-but').prop('disabled', this.octave >= 8);
+	        $('#octave-label').text('C' + this.octave);
+	        this.octaveChanged(this.baseNote);
 	    };
 	    PianoKeyboard.prototype.displayKeyDown = function (key) {
 	        if (typeof key == 'number')
 	            key = this.midi2key(key);
 	        if (!key)
 	            return;
-	        key.addClass('piano-key-pressed');
 	        if (!this.poly && this.lastKey)
 	            this.displayKeyUp(this.lastKey);
+	        key.addClass('piano-key-pressed');
 	        this.lastKey = key;
 	    };
 	    PianoKeyboard.prototype.displayKeyUp = function (key) {
@@ -1835,6 +1857,7 @@
 	    };
 	    PianoKeyboard.prototype.noteOn = function (midi, ratio) { };
 	    PianoKeyboard.prototype.noteOff = function (midi) { };
+	    PianoKeyboard.prototype.octaveChanged = function (baseNote) { };
 	    return PianoKeyboard;
 	})();
 	exports.PianoKeyboard = PianoKeyboard;

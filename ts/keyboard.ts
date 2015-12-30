@@ -9,8 +9,11 @@ const A4 = 57;
  */
 export class Keyboard {
 
+	baseNote: number;
+
 	constructor() {
 		this.setupHandler();
+		this.baseNote = BASE_NOTE;
 	}
 
 	setupHandler() {
@@ -34,7 +37,7 @@ export class Keyboard {
 	key2midi(keyCode: number): number {
 		const pos = KB_NOTES.indexOf(String.fromCharCode(keyCode));
 		if (pos < 0) return -1;
-		return BASE_NOTE + pos;
+		return this.baseNote + pos;
 	}
 
 	noteOn(midi: number, ratio: number):void {}

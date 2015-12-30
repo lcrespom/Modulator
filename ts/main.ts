@@ -32,6 +32,9 @@ function setupKeyboard() {
 		synthUI.synth.noteOff(midi, 1);
 		piano.displayKeyUp(midi);
 	};
+	// Bind piano octave with PC keyboard
+	kb.baseNote = piano.baseNote;
+	piano.octaveChanged = baseNote => kb.baseNote = baseNote;
 }
 
 function setupTheme() {
