@@ -1329,7 +1329,7 @@
 	        constructor: 'createGain',
 	        control: true,
 	        params: {
-	            gain: { initial: 10, min: 0, max: 1000, linear: true }
+	            gain: { initial: 10, min: 0, max: 100, linear: true }
 	        }
 	    },
 	    // Output
@@ -1716,7 +1716,7 @@
 	        return {
 	            name: '',
 	            nodes: [
-	                { id: 0, x: 500, y: 210, name: 'Out', inputs: [], classes: 'node node-out' }
+	                { id: 0, x: 500, y: 180, name: 'Out', inputs: [], classes: 'node node-out' }
 	            ],
 	            nodeData: [
 	                { type: 'out', params: {} }

@@ -133,7 +133,7 @@ export var palette: NodePalette = {
 		constructor: 'createGain',
 		control: true,
 		params: {
-			gain: { initial: 10, min: 0, max: 1000, linear: true }
+			gain: { initial: 10, min: 0, max: 100, linear: true }
 		}
 	},
 	// Output

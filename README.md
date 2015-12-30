@@ -48,12 +48,12 @@ on Twitter, or directly within GitHub.
 
 - Functionality
 	- Custom nodes
+		- Noise LFO
+		- Ring modulation using a gain node where the gain is controlled by an oscillator
 		- Oscillator with gain
 		- LFO with gain
-		- Noise LFO
 		- Sample buffer with gain
 		- Full synth as a reusable module (long term)
-		- Ring modulation using a gain node where the gain is controlled by an oscillator
 	- Improve ADSR
 		- Linear/exponential switch
 		- Depth parameter to control how much the envelope modifies the target parameter
