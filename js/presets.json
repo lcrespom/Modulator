@@ -418,5 +418,100 @@
 			}
 		],
 		"name": "Tesla"
+	},
+	{
+		"nodes": [
+			{
+				"id": 0,
+				"x": 500,
+				"y": 120,
+				"name": "Out",
+				"inputs": [
+					2
+				],
+				"classes": "node node-out"
+			},
+			{
+				"id": 1,
+				"x": 100,
+				"y": 120,
+				"name": "Noise",
+				"inputs": [],
+				"classes": "node node-src"
+			},
+			{
+				"id": 2,
+				"x": 300,
+				"y": 120,
+				"name": "Filter",
+				"inputs": [
+					1,
+					4
+				],
+				"classes": "node node-effect"
+			},
+			{
+				"id": 3,
+				"x": 100,
+				"y": 240,
+				"name": "LFO",
+				"inputs": [],
+				"classes": "node node-ctrl"
+			},
+			{
+				"id": 4,
+				"x": 300,
+				"y": 240,
+				"name": "Gain Ctrl",
+				"inputs": [
+					3
+				],
+				"classes": "node node-ctrl"
+			}
+		],
+		"nodeData": [
+			{
+				"type": "out",
+				"params": {}
+			},
+			{
+				"type": "Noise",
+				"params": {
+					"gain": 0.5
+				}
+			},
+			{
+				"type": "Filter",
+				"params": {
+					"frequency": 834.6763263399934,
+					"Q": 19.082089254437985,
+					"detune": 0,
+					"gain": 0,
+					"type": "lowpass"
+				}
+			},
+			{
+				"type": "LFO",
+				"params": {
+					"frequency": 0.25,
+					"detune": 0,
+					"type": "sine"
+				}
+			},
+			{
+				"type": "GainCtrl",
+				"params": {
+					"gain": 300
+				},
+				"controlParam": "frequency",
+				"controlParams": [
+					"frequency",
+					"Q",
+					"detune",
+					"gain"
+				]
+			}
+		],
+		"name": "Wind"
 	}
 ]
