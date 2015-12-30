@@ -10,6 +10,7 @@ export class SynthUI {
 	synth: Synth;
 	nw: number;
 	nh: number;
+	outNode: ModernAudioNode;
 
 	constructor(graphCanvas: HTMLCanvasElement, jqParams: JQuery) {
 		this.gr = new Graph(graphCanvas);
@@ -34,6 +35,7 @@ export class SynthUI {
 		data.anode.connect(this.synth.ac.destination);
 		data.nodeDef = this.synth.palette['Speaker'];
 		data.isOut = true;
+		this.outNode = data.anode;
 	}
 
 	registerPaletteHandler() {
@@ -223,15 +225,10 @@ class SynthGraphHandler implements GraphHandler {
 	nodeSelected(n: Node): void {
 		const data: NodeData = n.data;
 		renderParams(data, this.jqParams);
-		if (data.nodeDef.control)	//TODO actually LFO could be analyzed
-			this.analyzer.disconnect();
-		else
-			this.analyzer.analyze(data.anode);
 	}
 
 	nodeRemoved(n: Node) {
 		this.synthUI.removeNodeData(n.data);
-		if (n.element.hasClass('selected')) this.analyzer.disconnect();
 	}
 
 	getArrowColor(src: Node, dst: Node): string {
@@ -270,6 +267,12 @@ class SynthGraphHandler implements GraphHandler {
 			else data.anode[pname] = jv;
 		}
 	}
+
+	graphLoaded() {
+		this.analyzer.analyze(this.synthUI.outNode);
+	}
+
+	graphSaved() {}
 }
 
 

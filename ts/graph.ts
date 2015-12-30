@@ -94,6 +94,7 @@ export class Graph {
 			nodes: jsonNodes,
 			nodeData: jsonNodeData
 		}
+		this.handler.graphSaved();
 		return jsonGraph;
 	}
 
@@ -129,6 +130,7 @@ export class Graph {
 				this.handler.connected(src, dst);
 		// And finally, draw the new graph
 		this.draw();
+		this.handler.graphLoaded();
 	}
 
 	nodeById(id: number): Node {
@@ -197,6 +199,8 @@ export interface GraphHandler {
 	getArrowColor(src: Node, dst: Node): string;
 	data2json(n: Node): any;
 	json2data(n: Node, json: any): void;
+	graphLoaded(): void;
+	graphSaved(): void;
 }
 
 
@@ -213,6 +217,8 @@ class DefaultGraphHandler implements GraphHandler {
 	getArrowColor(src: Node, dst: Node): string { return "black"; }
 	data2json(n: Node): any { return {}; }
 	json2data(n: Node, json: any): void {}
+	graphLoaded(): void {}
+	graphSaved(): void {}
 }
 
 /**

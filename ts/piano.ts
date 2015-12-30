@@ -71,6 +71,8 @@ export class PianoKeyboard {
 
 	registerButtons(): void {
 		//TODO
+		$('#poly-but').click(_ => alert(
+			'Sorry, polyphonic mode not available yet'));
 	}
 
 	noteOn(midi: number, ratio: number):void {}

@@ -129,6 +129,7 @@
 	        data.anode.connect(this.synth.ac.destination);
 	        data.nodeDef = this.synth.palette['Speaker'];
 	        data.isOut = true;
+	        this.outNode = data.anode;
 	    };
 	    SynthUI.prototype.registerPaletteHandler = function () {
 	        var self = this; // JQuery sets 'this' in event handlers
@@ -295,15 +296,9 @@
 	    SynthGraphHandler.prototype.nodeSelected = function (n) {
 	        var data = n.data;
 	        paramsUI_1.renderParams(data, this.jqParams);
-	        if (data.nodeDef.control)
-	            this.analyzer.disconnect();
-	        else
-	            this.analyzer.analyze(data.anode);
 	    };
 	    SynthGraphHandler.prototype.nodeRemoved = function (n) {
 	        this.synthUI.removeNodeData(n.data);
-	        if (n.element.hasClass('selected'))
-	            this.analyzer.disconnect();
 	    };
 	    SynthGraphHandler.prototype.getArrowColor = function (src, dst) {
 	        var srcData = src.data;
@@ -345,6 +340,10 @@
 	                data.anode[pname] = jv;
 	        }
 	    };
+	    SynthGraphHandler.prototype.graphLoaded = function () {
+	        this.analyzer.analyze(this.synthUI.outNode);
+	    };
+	    SynthGraphHandler.prototype.graphSaved = function () { };
 	    return SynthGraphHandler;
 	})();
 	function getCssFromClass(className, propName) {
@@ -712,6 +711,7 @@
 	            nodes: jsonNodes,
 	            nodeData: jsonNodeData
 	        };
+	        this.handler.graphSaved();
 	        return jsonGraph;
 	    };
 	    Graph.prototype.fromJSON = function (json) {
@@ -752,6 +752,7 @@
 	        }
 	        // And finally, draw the new graph
 	        this.draw();
+	        this.handler.graphLoaded();
 	    };
 	    Graph.prototype.nodeById = function (id) {
 	        for (var _i = 0, _a = this.nodes; _i < _a.length; _i++) {
@@ -815,6 +816,8 @@
 	    DefaultGraphHandler.prototype.getArrowColor = function (src, dst) { return "black"; };
 	    DefaultGraphHandler.prototype.data2json = function (n) { return {}; };
 	    DefaultGraphHandler.prototype.json2data = function (n, json) { };
+	    DefaultGraphHandler.prototype.graphLoaded = function () { };
+	    DefaultGraphHandler.prototype.graphSaved = function () { };
 	    return DefaultGraphHandler;
 	})();
 	/**
@@ -1803,6 +1806,7 @@
 	    };
 	    PianoKeyboard.prototype.registerButtons = function () {
 	        //TODO
+	        $('#poly-but').click(function (_) { return alert('Sorry, polyphonic mode not available yet'); });
 	    };
 	    PianoKeyboard.prototype.noteOn = function (midi, ratio) { };
 	    PianoKeyboard.prototype.noteOff = function (midi) { };
