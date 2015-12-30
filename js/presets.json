@@ -249,67 +249,6 @@
 		"nodes": [
 			{
 				"id": 0,
-				"x": 460,
-				"y": 120,
-				"name": "Out",
-				"inputs": [
-					1
-				],
-				"classes": "node node-out"
-			},
-			{
-				"id": 1,
-				"x": 240,
-				"y": 120,
-				"name": "Osc",
-				"inputs": [
-					2
-				],
-				"classes": "node node-src"
-			},
-			{
-				"id": 2,
-				"x": 240,
-				"y": 260,
-				"name": "ADSR",
-				"inputs": [],
-				"classes": "node node-ctrl"
-			}
-		],
-		"nodeData": [
-			{
-				"type": "out",
-				"params": {}
-			},
-			{
-				"type": "Oscillator",
-				"params": {
-					"frequency": 1195.6321071267505,
-					"detune": 0,
-					"type": "square"
-				}
-			},
-			{
-				"type": "ADSR",
-				"params": {
-					"attack": 0,
-					"decay": 0.5,
-					"sustain": 0,
-					"release": 0
-				},
-				"controlParam": "frequency",
-				"controlParams": [
-					"frequency",
-					"detune"
-				]
-			}
-		],
-		"name": "Pew!"
-	},
-	{
-		"nodes": [
-			{
-				"id": 0,
 				"x": 520,
 				"y": 160,
 				"name": "Out",
@@ -513,5 +452,66 @@
 			}
 		],
 		"name": "Wind"
+	},
+	{
+		"nodes": [
+			{
+				"id": 0,
+				"x": 460,
+				"y": 120,
+				"name": "Out",
+				"inputs": [
+					1
+				],
+				"classes": "node node-out"
+			},
+			{
+				"id": 1,
+				"x": 240,
+				"y": 120,
+				"name": "Osc",
+				"inputs": [
+					2
+				],
+				"classes": "node node-src"
+			},
+			{
+				"id": 2,
+				"x": 240,
+				"y": 260,
+				"name": "ADSR",
+				"inputs": [],
+				"classes": "node node-ctrl"
+			}
+		],
+		"nodeData": [
+			{
+				"type": "out",
+				"params": {}
+			},
+			{
+				"type": "Oscillator",
+				"params": {
+					"frequency": 1195.6321071267505,
+					"detune": 0,
+					"type": "square"
+				}
+			},
+			{
+				"type": "ADSR",
+				"params": {
+					"attack": 0,
+					"decay": 0.5,
+					"sustain": 0,
+					"release": 0
+				},
+				"controlParam": "frequency",
+				"controlParams": [
+					"frequency",
+					"detune"
+				]
+			}
+		],
+		"name": "Pew!"
 	}
 ]
