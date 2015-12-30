@@ -1,6 +1,7 @@
 import { NoteHandler } from './notes';
 import { NodeDef, NodeParamDef, NodePalette, palette } from './palette';
 import { ModernWindow, ModernAudioContext, removeArrayElement } from './modern';
+import * as popups from './popups';
 
 interface ParamHandler {
 	initialize(anode: AudioNode, def: NodeDef): void;
@@ -169,12 +170,11 @@ class BufferURL implements ParamHandler {
 		button.after('<br/><br/>' + label);
 		panel.append(box);
 		button.click(_ => {
-			const url = prompt('Audio buffer URL:');
-			if (!url) return;
-			const absn: AudioBufferSourceNode = <AudioBufferSourceNode>anode;
-			//TODO problem: buffer can only be set once
-			// solution: save buffer to different property, set it just before play
-			this.loadBuffer(absn.context, url, buffer => absn['_buffer'] = buffer);
+			popups.prompt('Audio buffer URL:', 'Please provide URL', null, url => {
+				if (!url) return;
+				const absn: AudioBufferSourceNode = <AudioBufferSourceNode>anode;
+				this.loadBuffer(absn.context, url, buffer => absn['_buffer'] = buffer);
+			});
 		});
 		return box;
 	}

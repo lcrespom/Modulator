@@ -1,4 +1,5 @@
 import { SynthUI } from './synthUI';
+import * as popups from './popups';
 
 const MAX_PRESETS = 20;
 
@@ -52,17 +53,19 @@ export class Presets {
 		$('#save-but').click(_ => {
 			const json = this.synthUI.gr.toJSON();
 			json.name = $('#preset-name').val();
-			prompt(
+			popups.prompt(
 				'Copy the text below to the clipboard and save it to a local text file',
-				JSON.stringify(json)
-			);
+				'Save preset', JSON.stringify(json), null);
 		});
 		$('#load-but').click(_ => {
-			const json = prompt('Paste below the contents of a previously saved synth');
-			if (json) {
-				this.presets[this.presetNum] = JSON.parse(json);
-				this.preset2synth();
-			}
+			popups.prompt(
+				'Paste below the contents of a previously saved synth',
+				'Load preset', null, json => {
+					if (!json) return;
+					this.presets[this.presetNum] = JSON.parse(json);
+					this.preset2synth();
+				}
+			);
 		});
 		$('#prev-preset-but').click(_ => this.changePreset(-1));
 		$('#next-preset-but').click(_ => this.changePreset(+1));

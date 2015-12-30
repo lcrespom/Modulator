@@ -1,4 +1,5 @@
 import { midi2freqRatio } from './keyboard';
+import * as popups from './popups';
 
 const NUM_WHITES = 17;
 const BASE_NOTE = 36;
@@ -78,8 +79,8 @@ export class PianoKeyboard {
 	}
 
 	registerButtons(): void {
-		$('#poly-but').click(_ => alert(
-			'Sorry, polyphonic mode not available yet'));
+		$('#poly-but').click(_ => popups.alert(
+			'Polyphonic mode not available yet', 'Sorry'));
 		$('#prev-octave-but').click(_ => {
 			this.octave--;
 			this.baseNote -= 12;

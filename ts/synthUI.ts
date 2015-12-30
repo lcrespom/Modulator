@@ -1,5 +1,6 @@
 import { NoteHandler, NoteHandlers } from './notes';
 import { ModernAudioNode } from './modern';
+import * as popups from './popups';
 
 /**
  * Customizes the generic graph editor in order to manipulate and control a graph of
@@ -172,9 +173,12 @@ class SynthGraphHandler implements GraphHandler {
 			const selectedNode = this.getSelectedNode();
 			if (!selectedNode) return;
 			if (selectedNode.data.isOut) return;
-			if (!confirm('Delete node?')) return;
-			this.synthUI.removeNode(selectedNode);
-			this.jqParams.empty();
+			popups.confirm('Delete node?',
+				'Please confirm node deletion', confirmed => {
+				if (!confirmed) return;
+				this.synthUI.removeNode(selectedNode);
+				this.jqParams.empty();
+			});
 		});
 	}
 

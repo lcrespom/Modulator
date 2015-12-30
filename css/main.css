@@ -10,6 +10,10 @@ body {
 	margin: auto;
 }
 
+.normal-font {
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
 /*----- General -----*/
 
 .graph {

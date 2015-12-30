@@ -75,7 +75,6 @@ on Twitter, or directly within GitHub.
 		- Associate external controls with selected node parameters
 
 - UI
-	- Proper Bootstrap popups instead of crappy browser popups (alert/cofirm/prompt)
 	- Parameters panel
 		- Use cool knobs for parameters instead of default browser sliders
 	- Help

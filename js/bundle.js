@@ -107,6 +107,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var notes_1 = __webpack_require__(2);
+	var popups = __webpack_require__(12);
 	/**
 	 * Customizes the generic graph editor in order to manipulate and control a graph of
 	 * AudioNodes
@@ -248,10 +249,12 @@
 	                return;
 	            if (selectedNode.data.isOut)
 	                return;
-	            if (!confirm('Delete node?'))
-	                return;
-	            _this.synthUI.removeNode(selectedNode);
-	            _this.jqParams.empty();
+	            popups.confirm('Delete node?', 'Please confirm node deletion', function (confirmed) {
+	                if (!confirmed)
+	                    return;
+	                _this.synthUI.removeNode(selectedNode);
+	                _this.jqParams.empty();
+	            });
 	        });
 	    };
 	    SynthGraphHandler.prototype.getSelectedNode = function () {
@@ -1029,6 +1032,7 @@
 	};
 	var palette_1 = __webpack_require__(6);
 	var modern_1 = __webpack_require__(3);
+	var popups = __webpack_require__(12);
 	/**
 	 * Performs global operations on all AudioNodes:
 	 * - Manages AudioNode creation and initialization from the palette
@@ -1187,13 +1191,12 @@
 	        button.after('<br/><br/>' + label);
 	        panel.append(box);
 	        button.click(function (_) {
-	            var url = prompt('Audio buffer URL:');
-	            if (!url)
-	                return;
-	            var absn = anode;
-	            //TODO problem: buffer can only be set once
-	            // solution: save buffer to different property, set it just before play
-	            _this.loadBuffer(absn.context, url, function (buffer) { return absn['_buffer'] = buffer; });
+	            popups.prompt('Audio buffer URL:', 'Please provide URL', null, function (url) {
+	                if (!url)
+	                    return;
+	                var absn = anode;
+	                _this.loadBuffer(absn.context, url, function (buffer) { return absn['_buffer'] = buffer; });
+	            });
 	        });
 	        return box;
 	    };
@@ -1683,8 +1686,9 @@
 
 /***/ },
 /* 10 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
+	var popups = __webpack_require__(12);
 	var MAX_PRESETS = 20;
 	/**
 	 * Manages the presets box:
@@ -1732,14 +1736,15 @@
 	        $('#save-but').click(function (_) {
 	            var json = _this.synthUI.gr.toJSON();
 	            json.name = $('#preset-name').val();
-	            prompt('Copy the text below to the clipboard and save it to a local text file', JSON.stringify(json));
+	            popups.prompt('Copy the text below to the clipboard and save it to a local text file', 'Save preset', JSON.stringify(json), null);
 	        });
 	        $('#load-but').click(function (_) {
-	            var json = prompt('Paste below the contents of a previously saved synth');
-	            if (json) {
+	            popups.prompt('Paste below the contents of a previously saved synth', 'Load preset', null, function (json) {
+	                if (!json)
+	                    return;
 	                _this.presets[_this.presetNum] = JSON.parse(json);
 	                _this.preset2synth();
-	            }
+	            });
 	        });
 	        $('#prev-preset-but').click(function (_) { return _this.changePreset(-1); });
 	        $('#next-preset-but').click(function (_) { return _this.changePreset(+1); });
@@ -1782,6 +1787,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var keyboard_1 = __webpack_require__(9);
+	var popups = __webpack_require__(12);
 	var NUM_WHITES = 17;
 	var BASE_NOTE = 36;
 	var PianoKeyboard = (function () {
@@ -1851,7 +1857,7 @@
 	    };
 	    PianoKeyboard.prototype.registerButtons = function () {
 	        var _this = this;
-	        $('#poly-but').click(function (_) { return alert('Sorry, polyphonic mode not available yet'); });
+	        $('#poly-but').click(function (_) { return popups.alert('Polyphonic mode not available yet', 'Sorry'); });
 	        $('#prev-octave-but').click(function (_) {
 	            _this.octave--;
 	            _this.baseNote -= 12;
@@ -1901,6 +1907,70 @@
 	    return PianoKeyboard;
 	})();
 	exports.PianoKeyboard = PianoKeyboard;
+
+
+/***/ },
+/* 12 */
+/***/ function(module, exports) {
+
+	function alert(msg, title) {
+	    popup.find('.popup-message').html(msg);
+	    popup.find('.modal-title').text(title || 'Alert');
+	    popup.find('.popup-ok').hide();
+	    popup.find('.popup-close').html('Close');
+	    popup.find('.popup-prompt > input').hide();
+	    popup.modal();
+	}
+	exports.alert = alert;
+	function confirm(msg, title, cbClose, cbOpen) {
+	    var result = false;
+	    popup.find('.popup-message').html(msg);
+	    popup.find('.modal-title').text(title || 'Please confirm');
+	    var okButton = popup.find('.popup-ok');
+	    okButton.show().click(function (_) { return result = true; });
+	    popup.find('.popup-prompt > input').hide();
+	    popup.find('.popup-close').text('Cancel');
+	    popup.one('shown.bs.modal', function (_) {
+	        okButton.focus();
+	        if (cbOpen)
+	            cbOpen();
+	    });
+	    popup.find('form').one('submit', function (_) {
+	        result = true;
+	        okButton.click();
+	        return false;
+	    });
+	    popup.one('hide.bs.modal', function (_) {
+	        okButton.off('click');
+	        cbClose(result);
+	    });
+	    popup.modal();
+	}
+	exports.confirm = confirm;
+	function prompt(msg, title, initialValue, cb) {
+	    var input = popup.find('.popup-prompt > input');
+	    confirm(msg, title, function (confirmed) {
+	        if (!cb)
+	            return;
+	        if (!confirmed)
+	            cb(null);
+	        else
+	            cb(input.val());
+	    }, function () {
+	        input.show();
+	        input.focus();
+	        if (initialValue) {
+	            input.val(initialValue);
+	            var hinput = input[0];
+	            hinput.select();
+	        }
+	        else
+	            input.val('');
+	    });
+	}
+	exports.prompt = prompt;
+	var popup = $("\n\t<div class=\"normal-font modal fade\" id=\"myModal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"myModalLabel\">\n\t<div class=\"modal-dialog\" role=\"document\">\n\t\t<div class=\"modal-content\">\n\t\t<div class=\"modal-header\">\n\t\t\t<button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n\t\t\t<h4 class=\"modal-title\" id=\"myModalLabel\"></h4>\n\t\t</div>\n\t\t<div class=\"modal-body\">\n\t\t\t<div class=\"popup-message\"></div>\n\t\t\t<form class=\"popup-prompt\">\n\t\t\t\t<input type=\"text\" style=\"width: 100%\">\n\t\t\t</form>\n\t\t</div>\n\t\t<div class=\"modal-footer\">\n\t\t\t<button type=\"button\" class=\"btn btn-default popup-close\" data-dismiss=\"modal\"></button>\n\t\t\t<button type=\"button\" class=\"btn btn-primary popup-ok\" data-dismiss=\"modal\">OK</button>\n\t\t</div>\n\t\t</div>\n\t</div>\n\t</div>\n");
+	$('body').append(popup);
 
 
 /***/ }
