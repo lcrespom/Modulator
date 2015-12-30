@@ -513,5 +513,153 @@
 			}
 		],
 		"name": "Pew!"
+	},
+	{
+		"nodes": [
+			{
+				"id": 0,
+				"x": 540,
+				"y": 160,
+				"name": "Out",
+				"inputs": [
+					2
+				],
+				"classes": "node node-out"
+			},
+			{
+				"id": 1,
+				"x": 80,
+				"y": 40,
+				"name": "Osc",
+				"inputs": [],
+				"classes": "node node-src"
+			},
+			{
+				"id": 2,
+				"x": 380,
+				"y": 160,
+				"name": "Gain",
+				"inputs": [
+					4,
+					5
+				],
+				"classes": "node node-effect"
+			},
+			{
+				"id": 3,
+				"x": 240,
+				"y": 40,
+				"name": "LFO",
+				"inputs": [],
+				"classes": "node node-ctrl"
+			},
+			{
+				"id": 4,
+				"x": 380,
+				"y": 40,
+				"name": "Gain Ctrl",
+				"inputs": [
+					3
+				],
+				"classes": "node node-ctrl"
+			},
+			{
+				"id": 5,
+				"x": 240,
+				"y": 160,
+				"name": "Filter",
+				"inputs": [
+					7
+				],
+				"classes": "node node-effect"
+			},
+			{
+				"id": 6,
+				"x": 80,
+				"y": 280,
+				"name": "ADSR",
+				"inputs": [],
+				"classes": "node node-ctrl"
+			},
+			{
+				"id": 7,
+				"x": 80,
+				"y": 160,
+				"name": "Gain",
+				"inputs": [
+					1,
+					6
+				],
+				"classes": "node node-effect"
+			}
+		],
+		"nodeData": [
+			{
+				"type": "out",
+				"params": {}
+			},
+			{
+				"type": "Oscillator",
+				"params": {
+					"frequency": 700,
+					"detune": 0,
+					"type": "sine"
+				}
+			},
+			{
+				"type": "Gain",
+				"params": {
+					"gain": 0.5
+				}
+			},
+			{
+				"type": "LFO",
+				"params": {
+					"frequency": 2500,
+					"detune": 0,
+					"type": "sine"
+				}
+			},
+			{
+				"type": "GainCtrl",
+				"params": {
+					"gain": 0.8
+				},
+				"controlParam": "gain",
+				"controlParams": [
+					"gain"
+				]
+			},
+			{
+				"type": "Filter",
+				"params": {
+					"frequency": 1856.2509043867556,
+					"Q": 2.041175275711987,
+					"detune": 0,
+					"gain": 0,
+					"type": "lowpass"
+				}
+			},
+			{
+				"type": "ADSR",
+				"params": {
+					"attack": 0,
+					"decay": 0,
+					"sustain": 1,
+					"release": 0.942968562844335
+				},
+				"controlParam": "gain",
+				"controlParams": [
+					"gain"
+				]
+			},
+			{
+				"type": "Gain",
+				"params": {
+					"gain": 1
+				}
+			}
+		],
+		"name": "Bells"
 	}
 ]
