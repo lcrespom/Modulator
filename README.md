@@ -38,7 +38,10 @@ on Twitter, or directly within GitHub.
 ##ToDo
 - Bugs
 	- ADSR needs more testing & refining
-	- Popping sound at note on/off (probably needs custom oscillator with gain)
+	- Popping sound at note on/off
+		- Usage of ADSR is the most probable cause. Should be fixed when introducing
+			a depth parameter.
+		- Also, short ramps should be applied at note start/end, maybe even without ADSR.
 	- Refine rules to determine whether nodes can connect
 	- Analyzer should detect when no sound is playing and clean osc and fft graphs
 	- Review TODO items inside code
