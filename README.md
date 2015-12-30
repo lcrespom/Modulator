@@ -70,7 +70,6 @@ on Twitter, or directly within GitHub.
 	- Portamento
 	- Polyphonic synth via a graph clone per voice
 		- Should prevent edition or param change during poly mode
-	- More testing on instrument load/save
 	- Use Web Midi API to gather events from external midi Keyboard
 		- Play notes
 		- Associate external controls with selected node parameters
@@ -102,7 +101,6 @@ on Twitter, or directly within GitHub.
 		- Public sample library
 	- 100% responsive & mobile / tablet friendly
 	- Mobile app
-	- Local storage with HTML5
 
 - Code
 	- Avoid hardcoded DOM id's in code, e.g. $('#my-button'), except
