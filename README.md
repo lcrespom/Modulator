@@ -52,6 +52,12 @@ on Twitter, or directly within GitHub.
 		- LFO with gain
 		- Sample buffer with gain
 		- Full synth as a reusable module (long term)
+	- Navbar with:
+		- Synth button
+		- Tracker button showing "not available yet"
+		- Logo
+		- About button
+		- Help button
 	- Improve ADSR
 		- Linear/exponential switch
 		- Depth parameter to control how much the envelope modifies the target parameter
