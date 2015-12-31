@@ -48,6 +48,7 @@ on Twitter, or directly within GitHub.
 	- Custom nodes
 		- Noise LFO
 		- Ring modulation using a gain node where the gain is controlled by an oscillator
+			(low: it can be implemented using an LFO controlling a gain).
 		- Oscillator with gain
 		- LFO with gain
 		- Sample buffer with gain
@@ -60,7 +61,6 @@ on Twitter, or directly within GitHub.
 		- Help button
 	- Improve ADSR
 		- Linear/exponential switch
-		- Depth parameter to control how much the envelope modifies the target parameter
 	- Review list of pending audio nodes
 		- Line in live input
 		- WaveShaper

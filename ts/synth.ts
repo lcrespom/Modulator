@@ -127,6 +127,7 @@ export class ADSR extends CustomNodeBase {
 class NoiseGenerator extends CustomNodeBase {
 	gain: number = 1;
 	sproc: ScriptProcessorNode;
+	playing: boolean = false;
 
 	connect(node: AudioNode) {
 		if (!this.sproc) this.createScriptProcessor(node.context);
@@ -146,8 +147,16 @@ class NoiseGenerator extends CustomNodeBase {
 		for (let channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
 			let out = evt.outputBuffer.getChannelData(channel);
 			for (let sample = 0; sample < out.length; sample++)
-				out[sample] = this.gain * (Math.random() * 2 - 1);
+				out[sample] = this.playing ? this.gain * (Math.random() * 2 - 1) : 0;
 		}
+	}
+
+	start() {
+		this.playing = true;
+	}
+
+	stop() {
+		this.playing = false;
 	}
 }
 

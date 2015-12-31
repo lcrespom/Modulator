@@ -203,13 +203,42 @@ class ADSRNoteHandler extends BaseNoteHandler {
 }
 
 /**
+ * Handles note events for any node that allows calling start() after stop(),
+ * such as custom nodes.
+ */
+class RestartableNoteHandler extends BaseNoteHandler {
+	lastNote: number;
+	playing = false;
+
+	noteOn(midi: number, gain: number, ratio: number):void {
+		if (this.playing) this.noteEnd(midi);
+		this.playing = true;
+		this.node.data.anode.start();
+		this.lastNote = midi;
+	}
+
+	noteOff(midi: number, gain: number): void {
+		if (midi != this.lastNote) return;
+		if (!this.playAfterNoteOff) this.noteEnd(midi);
+	}
+
+	noteEnd(midi: number): void {
+		// Stop and disconnect
+		if (!this.playing) return;
+		this.playing = false;
+		this.node.data.anode.stop();
+	}
+}
+
+/**
  * Exports available note handlers so they are used by their respective
  * nodes from the palette.
  */
 export const NoteHandlers = {
 	'osc': OscNoteHandler,
 	'buffer': BufferNoteHandler,
-	'ADSR': ADSRNoteHandler
+	'ADSR': ADSRNoteHandler,
+	'restartable': RestartableNoteHandler
 };
 
 

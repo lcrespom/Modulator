@@ -538,13 +538,46 @@
 	    return ADSRNoteHandler;
 	})(BaseNoteHandler);
 	/**
+	 * Handles note events for any node that allows calling start() after stop(),
+	 * such as custom nodes.
+	 */
+	var RestartableNoteHandler = (function (_super) {
+	    __extends(RestartableNoteHandler, _super);
+	    function RestartableNoteHandler() {
+	        _super.apply(this, arguments);
+	        this.playing = false;
+	    }
+	    RestartableNoteHandler.prototype.noteOn = function (midi, gain, ratio) {
+	        if (this.playing)
+	            this.noteEnd(midi);
+	        this.playing = true;
+	        this.node.data.anode.start();
+	        this.lastNote = midi;
+	    };
+	    RestartableNoteHandler.prototype.noteOff = function (midi, gain) {
+	        if (midi != this.lastNote)
+	            return;
+	        if (!this.playAfterNoteOff)
+	            this.noteEnd(midi);
+	    };
+	    RestartableNoteHandler.prototype.noteEnd = function (midi) {
+	        // Stop and disconnect
+	        if (!this.playing)
+	            return;
+	        this.playing = false;
+	        this.node.data.anode.stop();
+	    };
+	    return RestartableNoteHandler;
+	})(BaseNoteHandler);
+	/**
 	 * Exports available note handlers so they are used by their respective
 	 * nodes from the palette.
 	 */
 	exports.NoteHandlers = {
 	    'osc': OscNoteHandler,
 	    'buffer': BufferNoteHandler,
-	    'ADSR': ADSRNoteHandler
+	    'ADSR': ADSRNoteHandler,
+	    'restartable': RestartableNoteHandler
 	};
 	/**
 	 * Tracks a node output connections and disconnections, to be used
@@ -1193,6 +1226,7 @@
 	    function NoiseGenerator() {
 	        _super.apply(this, arguments);
 	        this.gain = 1;
+	        this.playing = false;
 	    }
 	    NoiseGenerator.prototype.connect = function (node) {
 	        if (!this.sproc)
@@ -1211,8 +1245,14 @@
 	        for (var channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
 	            var out = evt.outputBuffer.getChannelData(channel);
 	            for (var sample = 0; sample < out.length; sample++)
-	                out[sample] = this.gain * (Math.random() * 2 - 1);
+	                out[sample] = this.playing ? this.gain * (Math.random() * 2 - 1) : 0;
 	        }
+	    };
+	    NoiseGenerator.prototype.start = function () {
+	        this.playing = true;
+	    };
+	    NoiseGenerator.prototype.stop = function () {
+	        this.playing = false;
 	    };
 	    return NoiseGenerator;
 	})(CustomNodeBase);
@@ -1308,6 +1348,7 @@
 	    },
 	    Noise: {
 	        constructor: 'createNoise',
+	        noteHandler: 'restartable',
 	        custom: true,
 	        params: {
 	            gain: { initial: 1, min: 0, max: 10 }

@@ -67,6 +67,7 @@ export var palette: NodePalette = {
 	},
 	Noise: {
 		constructor: 'createNoise',
+		noteHandler: 'restartable',
 		custom: true,
 		params: {
 			gain:  { initial: 1, min: 0, max: 10 }
