@@ -133,15 +133,20 @@ export class PianoKeyboard {
 			$('body').append(cover);
 			$('#poly-but').text('Back to mono');
 			popups.isOpen = true;
+			this.polyOn();
 		}
 		else {
 			$('.editor-cover').remove();
-			popups.isOpen = false;
 			$('#poly-but').text('Poly');
+			popups.isOpen = false;
+			this.polyOff();
 		}
 	}
 
+	// Simple event handlers
 	noteOn(midi: number, ratio: number): void {}
 	noteOff(midi: number): void {}
+	polyOn() {}
+	polyOff() {}
 	octaveChanged(baseNote) {}
 }

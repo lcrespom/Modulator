@@ -113,6 +113,8 @@ on Twitter, or directly within GitHub.
 		for specifying containers at top level
 	- Review jQuery event registration to check that no event gets registered
 		more than once
+	- Move all generic code to modern.ts
+		- Use a common way to capture function calls, e.g. beforeCall(obj, fname, cb)
 	- Separate graph.ts into an independent npm module
 	- Reusable API to load & play presets without displaying the node graph,
 		eventually to become an independent npm module (long term)

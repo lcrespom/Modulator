@@ -53,7 +53,7 @@
 	setupPalette();
 	var graphCanvas = $('#graph-canvas')[0];
 	var synthUI = new synthUI_1.SynthUI(graphCanvas, $('#node-params'));
-	noteInputs_1.setupNoteInputs(synthUI);
+	new noteInputs_1.NoteInputs(synthUI);
 	new presets_1.Presets(synthUI);
 	function setupPalette() {
 	    $(function () {
@@ -1671,46 +1671,82 @@
 
 	var keyboard_1 = __webpack_require__(11);
 	var piano_1 = __webpack_require__(12);
-	function setupNoteInputs(synthUI) {
-	    // Setup piano panel
-	    var piano = new piano_1.PianoKeyboard($('#piano'));
-	    piano.noteOn = function (midi, ratio) { return synthUI.synth.noteOn(midi, 1, ratio); };
-	    piano.noteOff = function (midi) { return synthUI.synth.noteOff(midi, 1); };
-	    // Setup PC keyboard
-	    var kb = new keyboard_1.Keyboard();
-	    kb.noteOn = function (midi, ratio) {
-	        if (document.activeElement.nodeName == 'INPUT' &&
-	            document.activeElement.getAttribute('type') != 'range')
-	            return;
-	        synthUI.synth.noteOn(midi, 1, ratio);
-	        piano.displayKeyDown(midi);
-	    };
-	    kb.noteOff = function (midi) {
-	        synthUI.synth.noteOff(midi, 1);
-	        piano.displayKeyUp(midi);
-	    };
-	    // Bind piano octave with PC keyboard
-	    kb.baseNote = piano.baseNote;
-	    piano.octaveChanged = function (baseNote) { return kb.baseNote = baseNote; };
-	    setupEnvelopeAnimation(piano, synthUI);
-	}
-	exports.setupNoteInputs = setupNoteInputs;
-	function setupEnvelopeAnimation(piano, synthUI) {
-	    var loaded = synthUI.gr.handler.graphLoaded;
-	    synthUI.gr.handler.graphLoaded = function () {
-	        loaded.bind(synthUI.gr.handler)();
-	        var adsr = null;
-	        for (var _i = 0, _a = synthUI.gr.nodes; _i < _a.length; _i++) {
-	            var node = _a[_i];
-	            var data = node.data;
-	            if (data.type == 'ADSR') {
-	                adsr = data.anode;
-	                break;
+	var instrument_1 = __webpack_require__(14);
+	var NUM_VOICES = 5;
+	var NoteInputs = (function () {
+	    function NoteInputs(synthUI) {
+	        var _this = this;
+	        this.synthUI = synthUI;
+	        this.poly = false;
+	        // Setup piano panel
+	        var piano = new piano_1.PianoKeyboard($('#piano'));
+	        piano.noteOn = function (midi, ratio) { return _this.noteOn(midi, 1, ratio); };
+	        piano.noteOff = function (midi) { return _this.noteOff(midi, 1); };
+	        // Register poly on/off handlers
+	        piano.polyOn = function () { return _this.polyOn(); };
+	        piano.polyOff = function () { return _this.polyOff(); };
+	        // Setup PC keyboard
+	        var kb = new keyboard_1.Keyboard();
+	        kb.noteOn = function (midi, ratio) {
+	            if (document.activeElement.nodeName == 'INPUT' &&
+	                document.activeElement.getAttribute('type') != 'range')
+	                return;
+	            _this.noteOn(midi, 1, ratio);
+	            piano.displayKeyDown(midi);
+	        };
+	        kb.noteOff = function (midi) {
+	            _this.noteOff(midi, 1);
+	            piano.displayKeyUp(midi);
+	        };
+	        // Bind piano octave with PC keyboard
+	        kb.baseNote = piano.baseNote;
+	        piano.octaveChanged = function (baseNote) { return kb.baseNote = baseNote; };
+	        this.setupEnvelopeAnimation(piano);
+	    }
+	    NoteInputs.prototype.setupEnvelopeAnimation = function (piano) {
+	        var loaded = this.synthUI.gr.handler.graphLoaded;
+	        this.synthUI.gr.handler.graphLoaded = function () {
+	            loaded.bind(this.synthUI.gr.handler)();
+	            var adsr = null;
+	            for (var _i = 0, _a = this.synthUI.gr.nodes; _i < _a.length; _i++) {
+	                var node = _a[_i];
+	                var data = node.data;
+	                if (data.type == 'ADSR') {
+	                    adsr = data.anode;
+	                    break;
+	                }
 	            }
-	        }
-	        piano.setEnvelope(adsr || { attack: 0, release: 0 });
+	            piano.setEnvelope(adsr || { attack: 0, release: 0 });
+	        };
 	    };
-	}
+	    NoteInputs.prototype.noteOn = function (midi, velocity, ratio) {
+	        this.lastNote = midi;
+	        if (this.poly)
+	            this.instrument.noteOn(midi, velocity, ratio);
+	        else
+	            this.synthUI.synth.noteOn(midi, velocity, ratio);
+	    };
+	    NoteInputs.prototype.noteOff = function (midi, velocity) {
+	        this.lastNote = 0;
+	        if (this.poly)
+	            this.instrument.noteOff(midi, velocity);
+	        else
+	            this.synthUI.synth.noteOff(midi, velocity);
+	    };
+	    NoteInputs.prototype.polyOn = function () {
+	        if (this.lastNote)
+	            this.noteOff(this.lastNote, 1);
+	        this.poly = true;
+	        var json = this.synthUI.gr.toJSON();
+	        this.instrument = new instrument_1.Instrument(json, NUM_VOICES);
+	    };
+	    NoteInputs.prototype.polyOff = function () {
+	        this.poly = false;
+	        this.instrument.close();
+	    };
+	    return NoteInputs;
+	})();
+	exports.NoteInputs = NoteInputs;
 
 
 /***/ },
@@ -1896,15 +1932,20 @@
 	            $('body').append(cover);
 	            $('#poly-but').text('Back to mono');
 	            popups.isOpen = true;
+	            this.polyOn();
 	        }
 	        else {
 	            $('.editor-cover').remove();
-	            popups.isOpen = false;
 	            $('#poly-but').text('Poly');
+	            popups.isOpen = false;
+	            this.polyOff();
 	        }
 	    };
+	    // Simple event handlers
 	    PianoKeyboard.prototype.noteOn = function (midi, ratio) { };
 	    PianoKeyboard.prototype.noteOff = function (midi) { };
+	    PianoKeyboard.prototype.polyOn = function () { };
+	    PianoKeyboard.prototype.polyOff = function () { };
 	    PianoKeyboard.prototype.octaveChanged = function (baseNote) { };
 	    return PianoKeyboard;
 	})();
@@ -2007,6 +2048,62 @@
 	    return Presets;
 	})();
 	exports.Presets = Presets;
+
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	//TODO use independent code to build voice
+	var synthUI_1 = __webpack_require__(1);
+	var Instrument = (function () {
+	    function Instrument(json, numVoices) {
+	        this.voices = [];
+	        for (var i = 0; i < numVoices; i++)
+	            this.voices.push(new Voice(json));
+	        this.voiceNum = 0;
+	    }
+	    Instrument.prototype.close = function () {
+	    };
+	    Instrument.prototype.noteOn = function (midi, velocity, ratio) {
+	        var voice = this.voices[this.voiceNum];
+	        voice.noteOn(midi, velocity, ratio);
+	        this.voiceNum = (this.voiceNum + 1) % this.voices.length;
+	    };
+	    Instrument.prototype.noteOff = function (midi, velocity) {
+	        for (var _i = 0, _a = this.voices; _i < _a.length; _i++) {
+	            var voice = _a[_i];
+	            if (voice.lastNote == midi) {
+	                voice.noteOff(midi, velocity);
+	                break;
+	            }
+	        }
+	    };
+	    return Instrument;
+	})();
+	exports.Instrument = Instrument;
+	//TODO fix canvas problem
+	//TODO use a more global audio context
+	var Voice = (function () {
+	    function Voice(json) {
+	        var jqCanvas = $('<canvas width="100" height="100" style="display: none">');
+	        var dummyCanvas = jqCanvas[0];
+	        this.synthUI = new synthUI_1.SynthUI(dummyCanvas, null);
+	        //this.synthUI = new SynthUI(null, null);
+	        this.synthUI.gr.fromJSON(json);
+	        this.lastNote = 0;
+	    }
+	    Voice.prototype.noteOn = function (midi, velocity, ratio) {
+	        this.synthUI.synth.noteOn(midi, velocity, ratio);
+	        this.lastNote = midi;
+	    };
+	    Voice.prototype.noteOff = function (midi, velocity) {
+	        this.synthUI.synth.noteOff(midi, velocity);
+	        this.lastNote = 0;
+	    };
+	    return Voice;
+	})();
+	exports.Voice = Voice;
 
 
 /***/ }

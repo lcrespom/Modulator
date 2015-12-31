@@ -3,13 +3,13 @@
  */
 
 import { SynthUI } from './synthUI';
-import { setupNoteInputs } from './noteInputs'
+import { NoteInputs } from './noteInputs'
 import { Presets } from './presets';
 
 setupPalette();
 const graphCanvas = <HTMLCanvasElement>$('#graph-canvas')[0];
 const synthUI = new SynthUI(graphCanvas, $('#node-params'));
-setupNoteInputs(synthUI);
+new NoteInputs(synthUI);
 new Presets(synthUI);
 
 
