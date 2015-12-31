@@ -170,6 +170,7 @@ class SynthGraphHandler implements GraphHandler {
 	registerNodeDelete() {
 		$('body').keydown(evt => {
 			if (!(evt.keyCode == 46 || (evt.keyCode == 8 && evt.metaKey))) return;
+			if (popups.isOpen) return;
 			const selectedNode = this.getSelectedNode();
 			if (!selectedNode) return;
 			if (selectedNode.data.isOut) return;

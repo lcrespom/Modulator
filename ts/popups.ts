@@ -1,9 +1,13 @@
+export let isOpen: boolean = false;
+
 export function alert(msg: string, title?: string): void {
 	popup.find('.popup-message').html(msg);
 	popup.find('.modal-title').text(title || 'Alert');
 	popup.find('.popup-ok').hide();
 	popup.find('.popup-close').html('Close');
 	popup.find('.popup-prompt > input').hide();
+	isOpen = true;
+	popup.one('hidden.bs.modal', _ => isOpen = false);
 	popup.modal();
 }
 
@@ -27,8 +31,10 @@ export function confirm(msg: string, title: string,
 	});
 	popup.one('hide.bs.modal', _ => {
 		okButton.off('click');
+		isOpen = false;
 		cbClose(result);
 	});
+	isOpen = true;
 	popup.modal();
 }
 

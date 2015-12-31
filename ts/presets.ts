@@ -70,7 +70,7 @@ export class Presets {
 		$('#prev-preset-but').click(_ => this.changePreset(-1));
 		$('#next-preset-but').click(_ => this.changePreset(+1));
 		$('body').keydown(evt => {
-			if (evt.target.nodeName == 'INPUT') return;
+			if (evt.target.nodeName == 'INPUT' || popups.isOpen) return;
 			if (evt.keyCode == 37) this.changePreset(-1);
 			if (evt.keyCode == 39) this.changePreset(+1);
 		});

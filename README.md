@@ -105,6 +105,8 @@ on Twitter, or directly within GitHub.
 - Code
 	- Avoid hardcoded DOM id's in code, e.g. $('#my-button'), except
 		for specifying containers at top level
+	- Review jQuery event registration to check that no event gets registered
+		more than once
 	- Separate graph.ts into an independent npm module
 	- Reusable API to load & play presets without displaying the node graph,
 		eventually to become an independent npm module (long term)
