@@ -39,7 +39,6 @@ on Twitter, or directly within GitHub.
 - Bugs
 	- Buffer source node fails to load & save the buffer URL property
 	- ADSR needs more testing & refining
-		- Depth should be applied to decay and sustain phase
 	- Popping sound at note on/off (improved after adding adsr depth parameter)
 	- Refine rules to determine whether nodes can connect
 	- Analyzer should detect when no sound is playing and clean osc and fft graphs

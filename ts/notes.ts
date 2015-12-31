@@ -161,7 +161,8 @@ class ADSRNoteHandler extends BaseNoteHandler {
 			const initial = (1 - adsr.depth) * v;
 			out.linearRampToValueAtTime(initial, now);
 			out.linearRampToValueAtTime(v, now + adsr.attack);
-			out.linearRampToValueAtTime(v * adsr.sustain, now + adsr.attack + adsr.decay);
+			const target = v * adsr.sustain + initial * (1 - adsr.sustain);
+			out.linearRampToValueAtTime(target, now + adsr.attack + adsr.decay);
 		});
 	}
 
