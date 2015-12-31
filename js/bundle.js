@@ -48,53 +48,13 @@
 	 * Main entry point: setup synth editor and keyboard listener.
 	 */
 	var synthUI_1 = __webpack_require__(1);
-	var keyboard_1 = __webpack_require__(10);
-	var presets_1 = __webpack_require__(11);
-	var piano_1 = __webpack_require__(12);
+	var noteInputs_1 = __webpack_require__(10);
+	var presets_1 = __webpack_require__(13);
 	setupPalette();
 	var graphCanvas = $('#graph-canvas')[0];
 	var synthUI = new synthUI_1.SynthUI(graphCanvas, $('#node-params'));
-	setupKeyboard();
+	noteInputs_1.setupNoteInputs(synthUI);
 	new presets_1.Presets(synthUI);
-	function setupKeyboard() {
-	    // Setup piano panel
-	    var piano = new piano_1.PianoKeyboard($('#piano'));
-	    piano.noteOn = function (midi, ratio) { return synthUI.synth.noteOn(midi, 1, ratio); };
-	    piano.noteOff = function (midi) { return synthUI.synth.noteOff(midi, 1); };
-	    // Setup PC keyboard
-	    var kb = new keyboard_1.Keyboard();
-	    kb.noteOn = function (midi, ratio) {
-	        if (document.activeElement.nodeName == 'INPUT' &&
-	            document.activeElement.getAttribute('type') != 'range')
-	            return;
-	        synthUI.synth.noteOn(midi, 1, ratio);
-	        piano.displayKeyDown(midi);
-	    };
-	    kb.noteOff = function (midi) {
-	        synthUI.synth.noteOff(midi, 1);
-	        piano.displayKeyUp(midi);
-	    };
-	    // Bind piano octave with PC keyboard
-	    kb.baseNote = piano.baseNote;
-	    piano.octaveChanged = function (baseNote) { return kb.baseNote = baseNote; };
-	    setupEnvelopeAnimation(piano);
-	}
-	function setupEnvelopeAnimation(piano) {
-	    var loaded = synthUI.gr.handler.graphLoaded;
-	    synthUI.gr.handler.graphLoaded = function () {
-	        loaded.bind(synthUI.gr.handler)();
-	        var adsr = null;
-	        for (var _i = 0, _a = synthUI.gr.nodes; _i < _a.length; _i++) {
-	            var node = _a[_i];
-	            var data = node.data;
-	            if (data.type == 'ADSR') {
-	                adsr = data.anode;
-	                break;
-	            }
-	        }
-	        piano.setEnvelope(adsr || { attack: 0, release: 0 });
-	    };
-	}
 	function setupPalette() {
 	    $(function () {
 	        $('.nano')['nanoScroller']();
@@ -1707,6 +1667,54 @@
 
 /***/ },
 /* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var keyboard_1 = __webpack_require__(11);
+	var piano_1 = __webpack_require__(12);
+	function setupNoteInputs(synthUI) {
+	    // Setup piano panel
+	    var piano = new piano_1.PianoKeyboard($('#piano'));
+	    piano.noteOn = function (midi, ratio) { return synthUI.synth.noteOn(midi, 1, ratio); };
+	    piano.noteOff = function (midi) { return synthUI.synth.noteOff(midi, 1); };
+	    // Setup PC keyboard
+	    var kb = new keyboard_1.Keyboard();
+	    kb.noteOn = function (midi, ratio) {
+	        if (document.activeElement.nodeName == 'INPUT' &&
+	            document.activeElement.getAttribute('type') != 'range')
+	            return;
+	        synthUI.synth.noteOn(midi, 1, ratio);
+	        piano.displayKeyDown(midi);
+	    };
+	    kb.noteOff = function (midi) {
+	        synthUI.synth.noteOff(midi, 1);
+	        piano.displayKeyUp(midi);
+	    };
+	    // Bind piano octave with PC keyboard
+	    kb.baseNote = piano.baseNote;
+	    piano.octaveChanged = function (baseNote) { return kb.baseNote = baseNote; };
+	    setupEnvelopeAnimation(piano, synthUI);
+	}
+	exports.setupNoteInputs = setupNoteInputs;
+	function setupEnvelopeAnimation(piano, synthUI) {
+	    var loaded = synthUI.gr.handler.graphLoaded;
+	    synthUI.gr.handler.graphLoaded = function () {
+	        loaded.bind(synthUI.gr.handler)();
+	        var adsr = null;
+	        for (var _i = 0, _a = synthUI.gr.nodes; _i < _a.length; _i++) {
+	            var node = _a[_i];
+	            var data = node.data;
+	            if (data.type == 'ADSR') {
+	                adsr = data.anode;
+	                break;
+	            }
+	        }
+	        piano.setEnvelope(adsr || { attack: 0, release: 0 });
+	    };
+	}
+
+
+/***/ },
+/* 11 */
 /***/ function(module, exports) {
 
 	var KB_NOTES = 'ZSXDCVGBHNJMQ2W3ER5T6Y7UI9O0P';
@@ -1761,108 +1769,10 @@
 
 
 /***/ },
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var popups = __webpack_require__(4);
-	var MAX_PRESETS = 20;
-	/**
-	 * Manages the presets box:
-	 * - Handles navigation through presets
-	 * - Handles preset loading & saving
-	 */
-	var Presets = (function () {
-	    function Presets(synthUI) {
-	        this.presetNum = 0;
-	        this.synthUI = synthUI;
-	        this.registerListeners();
-	        this.loadPresets();
-	    }
-	    Presets.prototype.loadPresets = function () {
-	        var _this = this;
-	        this.presets = new Array(MAX_PRESETS);
-	        for (var i = 0; i < MAX_PRESETS; i++)
-	            this.presets[i] = this.getEmptyPreset();
-	        $.get('js/presets.json', function (data) {
-	            if (!(data instanceof Array))
-	                return;
-	            for (var i = 0; i < MAX_PRESETS; i++)
-	                if (data[i])
-	                    _this.presets[i] = data[i];
-	            _this.preset2synth();
-	        });
-	    };
-	    Presets.prototype.getEmptyPreset = function () {
-	        return {
-	            name: '',
-	            nodes: [
-	                { id: 0, x: 500, y: 180, name: 'Out', inputs: [], classes: 'node node-out' }
-	            ],
-	            nodeData: [
-	                { type: 'out', params: {} }
-	            ]
-	        };
-	    };
-	    Presets.prototype.checkButtons = function () {
-	        $('#prev-preset-but').prop('disabled', this.presetNum <= 0);
-	        $('#next-preset-but').prop('disabled', this.presetNum >= MAX_PRESETS - 1);
-	    };
-	    Presets.prototype.registerListeners = function () {
-	        var _this = this;
-	        $('#save-but').click(function (_) {
-	            var json = _this.synthUI.gr.toJSON();
-	            json.name = $('#preset-name').val();
-	            popups.prompt('Copy the text below to the clipboard and save it to a local text file', 'Save preset', JSON.stringify(json), null);
-	        });
-	        $('#load-but').click(function (_) {
-	            popups.prompt('Paste below the contents of a previously saved synth', 'Load preset', null, function (json) {
-	                if (!json)
-	                    return;
-	                _this.presets[_this.presetNum] = JSON.parse(json);
-	                _this.preset2synth();
-	            });
-	        });
-	        $('#prev-preset-but').click(function (_) { return _this.changePreset(-1); });
-	        $('#next-preset-but').click(function (_) { return _this.changePreset(+1); });
-	        $('body').keydown(function (evt) {
-	            if (evt.target.nodeName == 'INPUT' || popups.isOpen)
-	                return;
-	            if (evt.keyCode == 37)
-	                _this.changePreset(-1);
-	            if (evt.keyCode == 39)
-	                _this.changePreset(+1);
-	        });
-	    };
-	    Presets.prototype.changePreset = function (increment) {
-	        var newNum = this.presetNum + increment;
-	        if (newNum < 0 || newNum >= MAX_PRESETS)
-	            return;
-	        this.synth2preset();
-	        this.presetNum = newNum;
-	        this.preset2synth();
-	    };
-	    Presets.prototype.synth2preset = function () {
-	        this.presets[this.presetNum] = this.synthUI.gr.toJSON();
-	        this.presets[this.presetNum].name = $('#preset-name').val();
-	    };
-	    Presets.prototype.preset2synth = function () {
-	        var preset = this.presets[this.presetNum];
-	        $('#preset-num').text(this.presetNum + 1);
-	        $('#preset-name').val(preset.name);
-	        $('#node-params').empty();
-	        this.checkButtons();
-	        this.synthUI.gr.fromJSON(preset);
-	    };
-	    return Presets;
-	})();
-	exports.Presets = Presets;
-
-
-/***/ },
 /* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var keyboard_1 = __webpack_require__(10);
+	var keyboard_1 = __webpack_require__(11);
 	var popups = __webpack_require__(4);
 	var NUM_WHITES = 17;
 	var BASE_NOTE = 36;
@@ -1983,6 +1893,104 @@
 	    return PianoKeyboard;
 	})();
 	exports.PianoKeyboard = PianoKeyboard;
+
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var popups = __webpack_require__(4);
+	var MAX_PRESETS = 20;
+	/**
+	 * Manages the presets box:
+	 * - Handles navigation through presets
+	 * - Handles preset loading & saving
+	 */
+	var Presets = (function () {
+	    function Presets(synthUI) {
+	        this.presetNum = 0;
+	        this.synthUI = synthUI;
+	        this.registerListeners();
+	        this.loadPresets();
+	    }
+	    Presets.prototype.loadPresets = function () {
+	        var _this = this;
+	        this.presets = new Array(MAX_PRESETS);
+	        for (var i = 0; i < MAX_PRESETS; i++)
+	            this.presets[i] = this.getEmptyPreset();
+	        $.get('js/presets.json', function (data) {
+	            if (!(data instanceof Array))
+	                return;
+	            for (var i = 0; i < MAX_PRESETS; i++)
+	                if (data[i])
+	                    _this.presets[i] = data[i];
+	            _this.preset2synth();
+	        });
+	    };
+	    Presets.prototype.getEmptyPreset = function () {
+	        return {
+	            name: '',
+	            nodes: [
+	                { id: 0, x: 500, y: 180, name: 'Out', inputs: [], classes: 'node node-out' }
+	            ],
+	            nodeData: [
+	                { type: 'out', params: {} }
+	            ]
+	        };
+	    };
+	    Presets.prototype.checkButtons = function () {
+	        $('#prev-preset-but').prop('disabled', this.presetNum <= 0);
+	        $('#next-preset-but').prop('disabled', this.presetNum >= MAX_PRESETS - 1);
+	    };
+	    Presets.prototype.registerListeners = function () {
+	        var _this = this;
+	        $('#save-but').click(function (_) {
+	            var json = _this.synthUI.gr.toJSON();
+	            json.name = $('#preset-name').val();
+	            popups.prompt('Copy the text below to the clipboard and save it to a local text file', 'Save preset', JSON.stringify(json), null);
+	        });
+	        $('#load-but').click(function (_) {
+	            popups.prompt('Paste below the contents of a previously saved synth', 'Load preset', null, function (json) {
+	                if (!json)
+	                    return;
+	                _this.presets[_this.presetNum] = JSON.parse(json);
+	                _this.preset2synth();
+	            });
+	        });
+	        $('#prev-preset-but').click(function (_) { return _this.changePreset(-1); });
+	        $('#next-preset-but').click(function (_) { return _this.changePreset(+1); });
+	        $('body').keydown(function (evt) {
+	            if (evt.target.nodeName == 'INPUT' || popups.isOpen)
+	                return;
+	            if (evt.keyCode == 37)
+	                _this.changePreset(-1);
+	            if (evt.keyCode == 39)
+	                _this.changePreset(+1);
+	        });
+	    };
+	    Presets.prototype.changePreset = function (increment) {
+	        var newNum = this.presetNum + increment;
+	        if (newNum < 0 || newNum >= MAX_PRESETS)
+	            return;
+	        this.synth2preset();
+	        this.presetNum = newNum;
+	        this.preset2synth();
+	    };
+	    Presets.prototype.synth2preset = function () {
+	        this.presets[this.presetNum] = this.synthUI.gr.toJSON();
+	        this.presets[this.presetNum].name = $('#preset-name').val();
+	    };
+	    Presets.prototype.preset2synth = function () {
+	        var preset = this.presets[this.presetNum];
+	        $('#preset-num').text(this.presetNum + 1);
+	        $('#preset-name').val(preset.name);
+	        $('#node-params').empty();
+	        this.checkButtons();
+	        this.synthUI.gr.fromJSON(preset);
+	    };
+	    return Presets;
+	})();
+	exports.Presets = Presets;
 
 
 /***/ }
