@@ -158,7 +158,8 @@ class ADSRNoteHandler extends BaseNoteHandler {
 		this.loopParams(out => {
 			const v = this.getParamValue(out);
 			out.cancelScheduledValues(now);
-			out.linearRampToValueAtTime(0, now);
+			const initial = (1 - adsr.depth) * v;
+			out.linearRampToValueAtTime(initial, now);
 			out.linearRampToValueAtTime(v, now + adsr.attack);
 			out.linearRampToValueAtTime(v * adsr.sustain, now + adsr.attack + adsr.decay);
 		});
@@ -170,9 +171,10 @@ class ADSRNoteHandler extends BaseNoteHandler {
 		const now = adsr.context.currentTime;
 		this.loopParams(out => {
 			const v = out.value;	// Get the really current value
+			const finalv = (1 - adsr.depth) * v;
 			out.cancelScheduledValues(now);
 			out.linearRampToValueAtTime(v, now);
-			out.linearRampToValueAtTime(0, now + adsr.release);
+			out.linearRampToValueAtTime(finalv, now + adsr.release);
 			//setTimeout(_ => this.sendNoteEnd(midi), adsr.release * 2000);
 		});
 	}

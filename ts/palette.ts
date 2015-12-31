@@ -152,6 +152,7 @@ export var palette: NodePalette = {
 			decay:   { initial: 0.5, min: 0, max: 10 },
 			sustain: { initial: 0.5, min: 0, max: 1, linear: true },
 			release: { initial: 1.0, min: 0, max: 10 },
+			depth:   { initial: 1.0, min: 0, max: 1 }
 		}
 	}
 

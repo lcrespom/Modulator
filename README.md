@@ -39,10 +39,8 @@ on Twitter, or directly within GitHub.
 - Bugs
 	- Buffer source node fails to load & save the buffer URL property
 	- ADSR needs more testing & refining
-	- Popping sound at note on/off
-		- Usage of ADSR is the most probable cause. Should be fixed when introducing
-			a depth parameter.
-		- Also, short ramps should be applied at note start/end, maybe even without ADSR.
+		- Depth should be applied to decay and sustain phase
+	- Popping sound at note on/off (improved after adding adsr depth parameter)
 	- Refine rules to determine whether nodes can connect
 	- Analyzer should detect when no sound is playing and clean osc and fft graphs
 	- Review TODO items inside code

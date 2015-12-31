@@ -524,7 +524,8 @@
 	        this.loopParams(function (out) {
 	            var v = _this.getParamValue(out);
 	            out.cancelScheduledValues(now);
-	            out.linearRampToValueAtTime(0, now);
+	            var initial = (1 - adsr.depth) * v;
+	            out.linearRampToValueAtTime(initial, now);
 	            out.linearRampToValueAtTime(v, now + adsr.attack);
 	            out.linearRampToValueAtTime(v * adsr.sustain, now + adsr.attack + adsr.decay);
 	        });
@@ -536,9 +537,10 @@
 	        var now = adsr.context.currentTime;
 	        this.loopParams(function (out) {
 	            var v = out.value; // Get the really current value
+	            var finalv = (1 - adsr.depth) * v;
 	            out.cancelScheduledValues(now);
 	            out.linearRampToValueAtTime(v, now);
-	            out.linearRampToValueAtTime(0, now + adsr.release);
+	            out.linearRampToValueAtTime(finalv, now + adsr.release);
 	            //setTimeout(_ => this.sendNoteEnd(midi), adsr.release * 2000);
 	        });
 	    };
@@ -1213,6 +1215,7 @@
 	        this.decay = 0.5;
 	        this.sustain = 0.5;
 	        this.release = 1;
+	        this.depth = 1;
 	    }
 	    return ADSR;
 	})(CustomNodeBase);
@@ -1422,6 +1425,7 @@
 	            decay: { initial: 0.5, min: 0, max: 10 },
 	            sustain: { initial: 0.5, min: 0, max: 1, linear: true },
 	            release: { initial: 1.0, min: 0, max: 10 },
+	            depth: { initial: 1.0, min: 0, max: 1 }
 	        }
 	    }
 	};

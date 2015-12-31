@@ -100,7 +100,8 @@
 					"attack": 0.40228525869896803,
 					"decay": 0.5,
 					"sustain": 0.5,
-					"release": 1
+					"release": 1,
+					"depth": 0.999
 				},
 				"controlParam": "frequency",
 				"controlParams": [
@@ -346,7 +347,8 @@
 					"attack": 0.40228525869896803,
 					"decay": 0.5,
 					"sustain": 1,
-					"release": 1
+					"release": 1,
+					"depth": 0.999
 				},
 				"controlParam": "frequency",
 				"controlParams": [
