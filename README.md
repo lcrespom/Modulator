@@ -46,13 +46,15 @@ on Twitter, or directly within GitHub.
 
 - Functionality
 	- Custom nodes
-		- Noise LFO
+		- Noise LFO control node
+		- Keyboard control node
+			- To control other parameters based on the note being pressed, centered
+				on A4
+			- With depth parameter
+			- Based on ScriptProcessor... no other way to generically control parameters
+		- Full synth as a reusable module (long term)
 		- Ring modulation using a gain node where the gain is controlled by an oscillator
 			(low: it can be implemented using an LFO controlling a gain).
-		- Oscillator with gain
-		- LFO with gain
-		- Sample buffer with gain
-		- Full synth as a reusable module (long term)
 	- Navbar with:
 		- Synth button
 		- Tracker button showing "not available yet"
