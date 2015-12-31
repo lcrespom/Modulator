@@ -26,6 +26,7 @@ export class Synth {
 		this.palette = palette;
 		this.registerCustomNode('createADSR', ADSR);
 		this.registerCustomNode('createNoise', NoiseGenerator);
+		this.registerCustomNode('createNoiseCtrl', NoiseCtrlGenerator);
 		this.registerParamHandler('BufferURL', new BufferURL());
 	}
 
@@ -83,7 +84,7 @@ export class Synth {
 	}
 
 	registerCustomNode(constructorName: string, nodeClass: any): void {
-		this.customNodes[constructorName] = () => new nodeClass();
+		this.customNodes[constructorName] = () => new nodeClass(this.ac);
 	}
 
 	registerParamHandler(hname: string, handler: ParamHandler): void {
@@ -157,6 +158,40 @@ class NoiseGenerator extends CustomNodeBase {
 
 	stop() {
 		this.playing = false;
+	}
+}
+
+class NoiseCtrlGenerator extends NoiseGenerator {
+	ac: ModernAudioContext;
+	frequency: number;
+	depth: number;
+	sct: number;
+	v: number;
+	constructor(ac: ModernAudioContext) {
+		super();
+		this.ac = ac;
+		this.frequency = 4;
+		this.depth = 20;
+		this.sct = 0;
+		this.v = 0;
+	}
+	connect(param: any) {
+		if (!this.sproc) this.createScriptProcessor(this.ac);
+		this.sproc.connect(param);
+	}
+	processAudio(evt: AudioProcessingEvent) {
+		const samplesPerCycle = this.ac.sampleRate / this.frequency;
+		for (let channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
+			let out = evt.outputBuffer.getChannelData(channel);
+			for (let sample = 0; sample < out.length; sample++) {
+				this.sct ++;
+				if (this.sct > samplesPerCycle) {
+					this.v = this.depth * (Math.random() * 2 - 1);
+					this.sct = 0; //this.sct - Math.floor(this.sct);
+				}
+				out[sample] = this.v;
+			}
+		}
 	}
 }
 

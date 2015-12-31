@@ -46,7 +46,6 @@ on Twitter, or directly within GitHub.
 
 - Functionality
 	- Custom nodes
-		- Noise LFO control node
 		- Keyboard control node
 			- To control other parameters based on the note being pressed, centered
 				on A4

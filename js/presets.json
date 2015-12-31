@@ -663,5 +663,137 @@
 			}
 		],
 		"name": "Bells"
+	},
+	{
+		"nodes": [
+			{
+				"id": 0,
+				"x": 560,
+				"y": 140,
+				"name": "Out",
+				"inputs": [
+					6
+				],
+				"classes": "node node-out"
+			},
+			{
+				"id": 1,
+				"x": 40,
+				"y": 140,
+				"name": "Osc",
+				"inputs": [
+					2
+				],
+				"classes": "node node-src"
+			},
+			{
+				"id": 2,
+				"x": 40,
+				"y": 260,
+				"name": "Noise",
+				"inputs": [],
+				"classes": "node node-ctrl"
+			},
+			{
+				"id": 3,
+				"x": 220,
+				"y": 140,
+				"name": "Gain",
+				"inputs": [
+					1,
+					5
+				],
+				"classes": "node node-effect"
+			},
+			{
+				"id": 4,
+				"x": 400,
+				"y": 260,
+				"name": "LFO",
+				"inputs": [],
+				"classes": "node node-ctrl"
+			},
+			{
+				"id": 5,
+				"x": 220,
+				"y": 260,
+				"name": "Gain Ctrl",
+				"inputs": [
+					4
+				],
+				"classes": "node node-ctrl"
+			},
+			{
+				"id": 6,
+				"x": 400,
+				"y": 140,
+				"name": "Filter",
+				"inputs": [
+					3
+				],
+				"classes": "node node-effect"
+			}
+		],
+		"nodeData": [
+			{
+				"type": "out",
+				"params": {}
+			},
+			{
+				"type": "Oscillator",
+				"params": {
+					"frequency": 440,
+					"detune": 0,
+					"type": "square"
+				}
+			},
+			{
+				"type": "NoiseCtrl",
+				"params": {
+					"frequency": 4,
+					"depth": 200
+				},
+				"controlParam": "frequency",
+				"controlParams": [
+					"frequency",
+					"detune"
+				]
+			},
+			{
+				"type": "Gain",
+				"params": {
+					"gain": 1
+				}
+			},
+			{
+				"type": "LFO",
+				"params": {
+					"frequency": 52.3902787888206,
+					"detune": 0,
+					"type": "triangle"
+				}
+			},
+			{
+				"type": "GainCtrl",
+				"params": {
+					"gain": 0.5
+				},
+				"controlParam": "gain",
+				"controlParams": [
+					"gain"
+				]
+			},
+			{
+				"type": "Filter",
+				"params": {
+					"frequency": 4000,
+					"Q": 0,
+					"detune": 0,
+					"gain": 0,
+					"type": "lowpass"
+				}
+			}
+		],
+		"name": "Robot"
 	}
 ]

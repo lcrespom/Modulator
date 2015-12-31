@@ -137,12 +137,6 @@ export var palette: NodePalette = {
 			gain: { initial: 10, min: 0, max: 100, linear: true }
 		}
 	},
-	// Output
-	Speaker: {
-		constructor: null,
-		params: {}
-	},
-	// Custom
 	ADSR: {
 		constructor: 'createADSR',
 		noteHandler: 'ADSR',
@@ -155,6 +149,19 @@ export var palette: NodePalette = {
 			release: { initial: 1.0, min: 0, max: 10 },
 			depth:   { initial: 1.0, min: 0, max: 1 }
 		}
+	},
+	NoiseCtrl: {
+		constructor: 'createNoiseCtrl',
+		control: true,
+		custom: true,
+		params: {
+			frequency: { initial: 4, min: 0, max: 200 },
+			depth:  { initial: 20, min: 0, max: 200 }
+		}
+	},
+	// Output
+	Speaker: {
+		constructor: null,
+		params: {}
 	}
-
 };

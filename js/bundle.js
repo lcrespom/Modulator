@@ -1122,6 +1122,7 @@
 	        this.palette = palette_1.palette;
 	        this.registerCustomNode('createADSR', ADSR);
 	        this.registerCustomNode('createNoise', NoiseGenerator);
+	        this.registerCustomNode('createNoiseCtrl', NoiseCtrlGenerator);
 	        this.registerParamHandler('BufferURL', new BufferURL());
 	    }
 	    Synth.prototype.createAudioNode = function (type) {
@@ -1179,7 +1180,8 @@
 	        }
 	    };
 	    Synth.prototype.registerCustomNode = function (constructorName, nodeClass) {
-	        this.customNodes[constructorName] = function () { return new nodeClass(); };
+	        var _this = this;
+	        this.customNodes[constructorName] = function () { return new nodeClass(_this.ac); };
 	    };
 	    Synth.prototype.registerParamHandler = function (hname, handler) {
 	        this.paramHandlers[hname] = handler;
@@ -1256,6 +1258,37 @@
 	    };
 	    return NoiseGenerator;
 	})(CustomNodeBase);
+	var NoiseCtrlGenerator = (function (_super) {
+	    __extends(NoiseCtrlGenerator, _super);
+	    function NoiseCtrlGenerator(ac) {
+	        _super.call(this);
+	        this.ac = ac;
+	        this.frequency = 4;
+	        this.depth = 20;
+	        this.sct = 0;
+	        this.v = 0;
+	    }
+	    NoiseCtrlGenerator.prototype.connect = function (param) {
+	        if (!this.sproc)
+	            this.createScriptProcessor(this.ac);
+	        this.sproc.connect(param);
+	    };
+	    NoiseCtrlGenerator.prototype.processAudio = function (evt) {
+	        var samplesPerCycle = this.ac.sampleRate / this.frequency;
+	        for (var channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
+	            var out = evt.outputBuffer.getChannelData(channel);
+	            for (var sample = 0; sample < out.length; sample++) {
+	                this.sct++;
+	                if (this.sct > samplesPerCycle) {
+	                    this.v = this.depth * (Math.random() * 2 - 1);
+	                    this.sct = 0; //this.sct - Math.floor(this.sct);
+	                }
+	                out[sample] = this.v;
+	            }
+	        }
+	    };
+	    return NoiseCtrlGenerator;
+	})(NoiseGenerator);
 	//-------------------- Parameter handlers --------------------
 	var BufferURL = (function () {
 	    function BufferURL() {
@@ -1418,12 +1451,6 @@
 	            gain: { initial: 10, min: 0, max: 100, linear: true }
 	        }
 	    },
-	    // Output
-	    Speaker: {
-	        constructor: null,
-	        params: {}
-	    },
-	    // Custom
 	    ADSR: {
 	        constructor: 'createADSR',
 	        noteHandler: 'ADSR',
@@ -1436,6 +1463,20 @@
 	            release: { initial: 1.0, min: 0, max: 10 },
 	            depth: { initial: 1.0, min: 0, max: 1 }
 	        }
+	    },
+	    NoiseCtrl: {
+	        constructor: 'createNoiseCtrl',
+	        control: true,
+	        custom: true,
+	        params: {
+	            frequency: { initial: 4, min: 0, max: 200 },
+	            depth: { initial: 20, min: 0, max: 200 }
+	        }
+	    },
+	    // Output
+	    Speaker: {
+	        constructor: null,
+	        params: {}
 	    }
 	};
 
