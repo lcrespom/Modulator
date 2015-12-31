@@ -75,7 +75,7 @@ export class NoteInputs {
 		if (this.lastNote) this.noteOff(this.lastNote, 1);
 		this.poly = true;
 		const json = this.synthUI.gr.toJSON();
-		this.instrument = new Instrument(json, NUM_VOICES);
+		this.instrument = new Instrument(this.synthUI.synth.ac, json, NUM_VOICES);
 	}
 
 	polyOff() {

@@ -1,6 +1,6 @@
 import { NoteHandler } from './notes';
 import { NodeDef, NodeParamDef, NodePalette, palette } from './palette';
-import { ModernWindow, ModernAudioContext, removeArrayElement } from './modern';
+import { ModernAudioContext, removeArrayElement } from './modern';
 import * as popups from './popups';
 
 interface ParamHandler {
@@ -21,9 +21,8 @@ export class Synth {
 	palette: NodePalette;
 	noteHandlers: NoteHandler[] = [];
 
-	constructor() {
-		const CtxClass: any = window.AudioContext || window.webkitAudioContext;
-		this.ac = new CtxClass();
+	constructor(ac: ModernAudioContext) {
+		this.ac = ac;
 		this.palette = palette;
 		this.registerCustomNode('createADSR', ADSR);
 		this.registerCustomNode('createNoise', NoiseGenerator);
@@ -196,6 +195,3 @@ class BufferURL implements ParamHandler {
 		xhr.send();
 	}
 }
-
-
-declare var window: ModernWindow;

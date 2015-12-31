@@ -49,12 +49,16 @@
 	 */
 	var synthUI_1 = __webpack_require__(1);
 	var noteInputs_1 = __webpack_require__(10);
-	var presets_1 = __webpack_require__(13);
+	var presets_1 = __webpack_require__(14);
 	setupPalette();
 	var graphCanvas = $('#graph-canvas')[0];
-	var synthUI = new synthUI_1.SynthUI(graphCanvas, $('#node-params'));
+	var synthUI = new synthUI_1.SynthUI(createAudioContext(), graphCanvas, $('#node-params'), $('#audio-graph-fft'), $('#audio-graph-osc'));
 	new noteInputs_1.NoteInputs(synthUI);
 	new presets_1.Presets(synthUI);
+	function createAudioContext() {
+	    var CtxClass = window.AudioContext || window.webkitAudioContext;
+	    return new CtxClass();
+	}
 	function setupPalette() {
 	    $(function () {
 	        $('.nano')['nanoScroller']();
@@ -73,10 +77,10 @@
 	 * AudioNodes
 	 */
 	var SynthUI = (function () {
-	    function SynthUI(graphCanvas, jqParams) {
+	    function SynthUI(ac, graphCanvas, jqParams, jqFFT, jqOsc) {
 	        this.gr = new graph_1.Graph(graphCanvas);
-	        this.gr.handler = new SynthGraphHandler(this, jqParams);
-	        this.synth = new synth_1.Synth();
+	        this.gr.handler = new SynthGraphHandler(this, jqParams, jqFFT, jqOsc);
+	        this.synth = new synth_1.Synth(ac);
 	        this.registerPaletteHandler();
 	        this.addOutputNode();
 	    }
@@ -191,13 +195,13 @@
 	var paramsUI_1 = __webpack_require__(8);
 	var analyzer_1 = __webpack_require__(9);
 	var SynthGraphHandler = (function () {
-	    function SynthGraphHandler(synthUI, jqParams) {
+	    function SynthGraphHandler(synthUI, jqParams, jqFFT, jqOsc) {
 	        this.synthUI = synthUI;
 	        this.jqParams = jqParams;
 	        this.arrowColor = getCssFromClass('arrow', 'color');
 	        this.ctrlArrowColor = getCssFromClass('arrow-ctrl', 'color');
 	        this.registerNodeDelete();
-	        this.analyzer = new analyzer_1.AudioAnalyzer($('#audio-graph-fft'), $('#audio-graph-osc'));
+	        this.analyzer = new analyzer_1.AudioAnalyzer(jqFFT, jqOsc);
 	    }
 	    SynthGraphHandler.prototype.registerNodeDelete = function () {
 	        var _this = this;
@@ -1073,12 +1077,11 @@
 	 * - Distributes MIDI keyboard events to NoteHandlers
 	 */
 	var Synth = (function () {
-	    function Synth() {
+	    function Synth(ac) {
 	        this.customNodes = {};
 	        this.paramHandlers = {};
 	        this.noteHandlers = [];
-	        var CtxClass = window.AudioContext || window.webkitAudioContext;
-	        this.ac = new CtxClass();
+	        this.ac = ac;
 	        this.palette = palette_1.palette;
 	        this.registerCustomNode('createADSR', ADSR);
 	        this.registerCustomNode('createNoise', NoiseGenerator);
@@ -1671,7 +1674,7 @@
 
 	var keyboard_1 = __webpack_require__(11);
 	var piano_1 = __webpack_require__(12);
-	var instrument_1 = __webpack_require__(14);
+	var instrument_1 = __webpack_require__(13);
 	var NUM_VOICES = 5;
 	var NoteInputs = (function () {
 	    function NoteInputs(synthUI) {
@@ -1738,7 +1741,7 @@
 	            this.noteOff(this.lastNote, 1);
 	        this.poly = true;
 	        var json = this.synthUI.gr.toJSON();
-	        this.instrument = new instrument_1.Instrument(json, NUM_VOICES);
+	        this.instrument = new instrument_1.Instrument(this.synthUI.synth.ac, json, NUM_VOICES);
 	    };
 	    NoteInputs.prototype.polyOff = function () {
 	        this.poly = false;
@@ -1927,8 +1930,7 @@
 	        this.poly = !this.poly;
 	        if (this.poly) {
 	            var cover = $('<div>').addClass('editor-cover');
-	            cover.append('<p>Sorry, polyphonic mode not available yet</p>');
-	            //cover.append('<p>Synth editing is disabled in polyphonic mode</p>');
+	            cover.append('<p>Synth editing is disabled in polyphonic mode</p>');
 	            $('body').append(cover);
 	            $('#poly-but').text('Back to mono');
 	            popups.isOpen = true;
@@ -1954,6 +1956,72 @@
 
 /***/ },
 /* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	//TODO use independent code to build voice
+	var synthUI_1 = __webpack_require__(1);
+	var Instrument = (function () {
+	    function Instrument(ac, json, numVoices) {
+	        this.voices = [];
+	        for (var i = 0; i < numVoices; i++)
+	            this.voices.push(new Voice(ac, json));
+	        this.voiceNum = 0;
+	    }
+	    Instrument.prototype.close = function () {
+	        for (var _i = 0, _a = this.voices; _i < _a.length; _i++) {
+	            var voice = _a[_i];
+	            voice.close();
+	        }
+	    };
+	    Instrument.prototype.noteOn = function (midi, velocity, ratio) {
+	        var voice = this.voices[this.voiceNum];
+	        voice.noteOn(midi, velocity, ratio);
+	        this.voiceNum = (this.voiceNum + 1) % this.voices.length;
+	    };
+	    Instrument.prototype.noteOff = function (midi, velocity) {
+	        for (var _i = 0, _a = this.voices; _i < _a.length; _i++) {
+	            var voice = _a[_i];
+	            if (voice.lastNote == midi) {
+	                voice.noteOff(midi, velocity);
+	                break;
+	            }
+	        }
+	    };
+	    return Instrument;
+	})();
+	exports.Instrument = Instrument;
+	var Voice = (function () {
+	    function Voice(ac, json) {
+	        var jqCanvas = $('<canvas width="100" height="100" style="display: none">');
+	        var dummyCanvas = jqCanvas[0];
+	        this.synthUI = new synthUI_1.SynthUI(ac, dummyCanvas, null, jqCanvas, jqCanvas);
+	        this.synthUI.gr.fromJSON(json);
+	        this.lastNote = 0;
+	    }
+	    Voice.prototype.noteOn = function (midi, velocity, ratio) {
+	        this.synthUI.synth.noteOn(midi, velocity, ratio);
+	        this.lastNote = midi;
+	    };
+	    Voice.prototype.close = function () {
+	        if (this.lastNote)
+	            this.noteOff(this.lastNote, 1);
+	        var nodes = this.synthUI.gr.nodes.slice();
+	        for (var _i = 0; _i < nodes.length; _i++) {
+	            var node = nodes[_i];
+	            this.synthUI.removeNode(node);
+	        }
+	    };
+	    Voice.prototype.noteOff = function (midi, velocity) {
+	        this.synthUI.synth.noteOff(midi, velocity);
+	        this.lastNote = 0;
+	    };
+	    return Voice;
+	})();
+	exports.Voice = Voice;
+
+
+/***/ },
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var popups = __webpack_require__(4);
@@ -2048,62 +2116,6 @@
 	    return Presets;
 	})();
 	exports.Presets = Presets;
-
-
-/***/ },
-/* 14 */
-/***/ function(module, exports, __webpack_require__) {
-
-	//TODO use independent code to build voice
-	var synthUI_1 = __webpack_require__(1);
-	var Instrument = (function () {
-	    function Instrument(json, numVoices) {
-	        this.voices = [];
-	        for (var i = 0; i < numVoices; i++)
-	            this.voices.push(new Voice(json));
-	        this.voiceNum = 0;
-	    }
-	    Instrument.prototype.close = function () {
-	    };
-	    Instrument.prototype.noteOn = function (midi, velocity, ratio) {
-	        var voice = this.voices[this.voiceNum];
-	        voice.noteOn(midi, velocity, ratio);
-	        this.voiceNum = (this.voiceNum + 1) % this.voices.length;
-	    };
-	    Instrument.prototype.noteOff = function (midi, velocity) {
-	        for (var _i = 0, _a = this.voices; _i < _a.length; _i++) {
-	            var voice = _a[_i];
-	            if (voice.lastNote == midi) {
-	                voice.noteOff(midi, velocity);
-	                break;
-	            }
-	        }
-	    };
-	    return Instrument;
-	})();
-	exports.Instrument = Instrument;
-	//TODO fix canvas problem
-	//TODO use a more global audio context
-	var Voice = (function () {
-	    function Voice(json) {
-	        var jqCanvas = $('<canvas width="100" height="100" style="display: none">');
-	        var dummyCanvas = jqCanvas[0];
-	        this.synthUI = new synthUI_1.SynthUI(dummyCanvas, null);
-	        //this.synthUI = new SynthUI(null, null);
-	        this.synthUI.gr.fromJSON(json);
-	        this.lastNote = 0;
-	    }
-	    Voice.prototype.noteOn = function (midi, velocity, ratio) {
-	        this.synthUI.synth.noteOn(midi, velocity, ratio);
-	        this.lastNote = midi;
-	    };
-	    Voice.prototype.noteOff = function (midi, velocity) {
-	        this.synthUI.synth.noteOff(midi, velocity);
-	        this.lastNote = 0;
-	    };
-	    return Voice;
-	})();
-	exports.Voice = Voice;
 
 
 /***/ }

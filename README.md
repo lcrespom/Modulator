@@ -71,11 +71,6 @@ on Twitter, or directly within GitHub.
 		- Prevent from connecting a control node to more than one destination
 		- Or else, modify the UI to support multiple destination nodes
 	- Portamento
-	- Polyphonic synth via a graph clone per voice
-		- Should prevent edition or param change during poly mode
-		- Transparent cover CSS
-		- Create new Voice class to clone voice from Synth
-			- Eventually make Voice an API to load instruments from JSON
 	- Use Web Midi API to gather events from external midi Keyboard
 		- Play notes
 		- Associate external controls with selected node parameters
@@ -118,6 +113,11 @@ on Twitter, or directly within GitHub.
 	- Separate graph.ts into an independent npm module
 	- Reusable API to load & play presets without displaying the node graph,
 		eventually to become an independent npm module (long term)
+	- Cleanup of polyphonic mode
+		- Make Voice an independent API:
+			- Decoupled from Graph and SynthUI
+			- Not requiring a dummy canvas element
+		- Then, make SynthUI dependant on voice, and not the other way around
 
 - Share
 	- Document

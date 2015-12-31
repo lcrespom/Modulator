@@ -1,5 +1,5 @@
 import { NoteHandler, NoteHandlers } from './notes';
-import { ModernAudioNode } from './modern';
+import { ModernAudioContext, ModernAudioNode } from './modern';
 import * as popups from './popups';
 
 /**
@@ -13,10 +13,10 @@ export class SynthUI {
 	nh: number;
 	outNode: ModernAudioNode;
 
-	constructor(graphCanvas: HTMLCanvasElement, jqParams: JQuery) {
+	constructor(ac: ModernAudioContext, graphCanvas: HTMLCanvasElement, jqParams: JQuery, jqFFT: JQuery, jqOsc: JQuery) {
 		this.gr = new Graph(graphCanvas);
-		this.gr.handler = new SynthGraphHandler(this, jqParams);
-		this.synth = new Synth();
+		this.gr.handler = new SynthGraphHandler(this, jqParams, jqFFT, jqOsc);
+		this.synth = new Synth(ac);
 		this.registerPaletteHandler();
 		this.addOutputNode();
 	}
@@ -158,13 +158,13 @@ class SynthGraphHandler implements GraphHandler {
 	ctrlArrowColor: string;
 	analyzer: AudioAnalyzer;
 
-	constructor(synthUI: SynthUI, jqParams: JQuery) {
+	constructor(synthUI: SynthUI, jqParams: JQuery, jqFFT: JQuery, jqOsc: JQuery) {
 		this.synthUI = synthUI;
 		this.jqParams = jqParams;
 		this.arrowColor = getCssFromClass('arrow', 'color');
 		this.ctrlArrowColor = getCssFromClass('arrow-ctrl', 'color');
 		this.registerNodeDelete();
-		this.analyzer = new AudioAnalyzer($('#audio-graph-fft'), $('#audio-graph-osc'));
+		this.analyzer = new AudioAnalyzer(jqFFT, jqOsc);
 	}
 
 	registerNodeDelete() {
