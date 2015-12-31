@@ -145,7 +145,6 @@ class BufferNoteHandler extends BaseNoteHandler {
 /**
  * Handles note events for a custom ADSR node
  */
-
 class ADSRNoteHandler extends BaseNoteHandler {
 	lastNote: number;
 	kbTrigger = true;

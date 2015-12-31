@@ -580,7 +580,7 @@
 
 	/**
 	 * Modernize browser interfaces so that TypeScript does not complain
-	 * when calling new features.
+	 * when using new features.
 	 *
 	 * Also provides some basic utility funcitons which should be part of
 	 * the standard JavaScript library.
@@ -599,7 +599,9 @@
 /* 4 */
 /***/ function(module, exports) {
 
+	/** Informs whether a popup is open or not */
 	exports.isOpen = false;
+	/** Bootstrap-based equivalent of standard alert function */
 	function alert(msg, title) {
 	    popup.find('.popup-message').html(msg);
 	    popup.find('.modal-title').text(title || 'Alert');
@@ -611,6 +613,7 @@
 	    popup.modal();
 	}
 	exports.alert = alert;
+	/** Bootstrap-based equivalent of standard confirm function */
 	function confirm(msg, title, cbClose, cbOpen) {
 	    var result = false;
 	    popup.find('.popup-message').html(msg);
@@ -638,6 +641,7 @@
 	    popup.modal();
 	}
 	exports.confirm = confirm;
+	/** Bootstrap-based equivalent of standard prompt function */
 	function prompt(msg, title, initialValue, cb) {
 	    var input = popup.find('.popup-prompt > input');
 	    confirm(msg, title, function (confirmed) {
@@ -1578,6 +1582,9 @@
 /* 9 */
 /***/ function(module, exports) {
 
+	/**
+	 * Displays FFT and Oscilloscope graphs from the output of a given AudioNode
+	 */
 	var AudioAnalyzer = (function () {
 	    function AudioAnalyzer(jqfft, jqosc) {
 	        this.canvasFFT = this.createCanvas(jqfft);
@@ -1676,6 +1683,13 @@
 	var piano_1 = __webpack_require__(12);
 	var instrument_1 = __webpack_require__(13);
 	var NUM_VOICES = 5;
+	/**
+	 * Manages all note-generation inputs:
+	 * 	- PC Keyboard
+	 * 	- Virtual piano keyboard
+	 *	- Eventually it should also integrate with Web MIDI
+	 * Handles switching to polyphonic mode and back to mono
+	 */
 	var NoteInputs = (function () {
 	    function NoteInputs(synthUI) {
 	        var _this = this;
@@ -1815,6 +1829,13 @@
 	var popups = __webpack_require__(4);
 	var NUM_WHITES = 17;
 	var BASE_NOTE = 36;
+	/**
+	 * A virtual piano keyboard that:
+	 * 	- Captures mouse input and generates corresponding note events
+	 * 	- Displays note events as CSS-animated colors in the pressed keys
+	 * 	- Supports octave switching
+	 * 	- Provides a poly/mono button
+	 */
 	var PianoKeyboard = (function () {
 	    function PianoKeyboard(panel) {
 	        this.baseNote = BASE_NOTE;
@@ -1960,6 +1981,9 @@
 
 	//TODO use independent code to build voice
 	var synthUI_1 = __webpack_require__(1);
+	/**
+	 * A polyphonic synth controlling an array of voices
+	 */
 	var Instrument = (function () {
 	    function Instrument(ac, json, numVoices) {
 	        this.voices = [];
@@ -1990,8 +2014,12 @@
 	    return Instrument;
 	})();
 	exports.Instrument = Instrument;
+	/**
+	 * An independent monophonic synth
+	 */
 	var Voice = (function () {
 	    function Voice(ac, json) {
+	        //TODO make an "invisible" voice, decoupled form SynthUI, canvas, and Graph editor
 	        var jqCanvas = $('<canvas width="100" height="100" style="display: none">');
 	        var dummyCanvas = jqCanvas[0];
 	        this.synthUI = new synthUI_1.SynthUI(ac, dummyCanvas, null, jqCanvas, jqCanvas);

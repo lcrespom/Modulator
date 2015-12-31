@@ -1,6 +1,6 @@
 /**
  * Modernize browser interfaces so that TypeScript does not complain
- * when calling new features.
+ * when using new features.
  *
  * Also provides some basic utility funcitons which should be part of
  * the standard JavaScript library.

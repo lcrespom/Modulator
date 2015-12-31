@@ -4,6 +4,9 @@ import { ModernAudioContext } from './modern';
 import { Node } from './graph';
 
 
+/**
+ * A polyphonic synth controlling an array of voices
+ */
 export class Instrument {
 	voices: Voice[];
 	voiceNum: number;
@@ -38,11 +41,15 @@ export class Instrument {
 }
 
 
+/**
+ * An independent monophonic synth
+ */
 export class Voice {
 	synthUI: SynthUI;
 	lastNote: number;
 
 	constructor(ac: ModernAudioContext, json: any) {
+		//TODO make an "invisible" voice, decoupled form SynthUI, canvas, and Graph editor
 		const jqCanvas = $('<canvas width="100" height="100" style="display: none">');
 		const dummyCanvas: HTMLCanvasElement = <HTMLCanvasElement>jqCanvas[0];
 		this.synthUI = new SynthUI(ac, dummyCanvas, null, jqCanvas, jqCanvas);

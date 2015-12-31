@@ -1,5 +1,8 @@
 import { ModernAudioNode } from './modern';
 
+/**
+ * Displays FFT and Oscilloscope graphs from the output of a given AudioNode
+ */
 export class AudioAnalyzer {
 	input: ModernAudioNode;
 	anode: AnalyserNode;

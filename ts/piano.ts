@@ -4,6 +4,13 @@ import * as popups from './popups';
 const NUM_WHITES = 17;
 const BASE_NOTE = 36;
 
+/**
+ * A virtual piano keyboard that:
+ * 	- Captures mouse input and generates corresponding note events
+ * 	- Displays note events as CSS-animated colors in the pressed keys
+ * 	- Supports octave switching
+ * 	- Provides a poly/mono button
+ */
 export class PianoKeyboard {
 	keys: JQuery[];
 	k1note: number;

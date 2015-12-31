@@ -1,5 +1,7 @@
+/** Informs whether a popup is open or not */
 export let isOpen: boolean = false;
 
+/** Bootstrap-based equivalent of standard alert function */
 export function alert(msg: string, title?: string): void {
 	popup.find('.popup-message').html(msg);
 	popup.find('.modal-title').text(title || 'Alert');
@@ -11,6 +13,7 @@ export function alert(msg: string, title?: string): void {
 	popup.modal();
 }
 
+/** Bootstrap-based equivalent of standard confirm function */
 export function confirm(msg: string, title: string,
 	cbClose: (boolean) => void, cbOpen?: () => void) {
 	let result = false;
@@ -38,6 +41,7 @@ export function confirm(msg: string, title: string,
 	popup.modal();
 }
 
+/** Bootstrap-based equivalent of standard prompt function */
 export function prompt(msg: string, title: string,
 	initialValue: string, cb: (string) => void): void {
 	const input = popup.find('.popup-prompt > input');

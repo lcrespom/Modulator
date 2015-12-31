@@ -94,7 +94,7 @@ on Twitter, or directly within GitHub.
 
 - Long term:
 	- Tracker
-	- Custom nodes with WebWorker
+	- Custom nodes with WebWorker... when available
 	- Record & save audio
 	- Server-side part, supporting:
 		- Loading & saving of resources: synth modules, songs, samples, etc.
