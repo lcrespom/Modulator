@@ -73,14 +73,7 @@ on Twitter, or directly within GitHub.
 	- Portamento
 	- Polyphonic synth via a graph clone per voice
 		- Should prevent edition or param change during poly mode
-		- Transparent cover CSS:
-			position: absolute;
-			top: 0px;
-			width: 100%;
-			height: 685px;
-			z-index: 1000;
-			opacity: 0.8;
-			background-color: white;
+		- Transparent cover CSS
 		- Create new Voice class to clone voice from Synth
 			- Eventually make Voice an API to load instruments from JSON
 	- Use Web Midi API to gather events from external midi Keyboard

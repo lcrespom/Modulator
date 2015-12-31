@@ -1843,7 +1843,7 @@
 	    };
 	    PianoKeyboard.prototype.registerButtons = function () {
 	        var _this = this;
-	        $('#poly-but').click(function (_) { return popups.alert('Polyphonic mode not available yet', 'Sorry'); });
+	        $('#poly-but').click(function (_) { return _this.togglePoly(); });
 	        $('#prev-octave-but').click(function (_) {
 	            _this.octave--;
 	            _this.baseNote -= 12;
@@ -1886,6 +1886,22 @@
 	    };
 	    PianoKeyboard.prototype.setEnvelope = function (adsr) {
 	        this.envelope = adsr;
+	    };
+	    PianoKeyboard.prototype.togglePoly = function () {
+	        this.poly = !this.poly;
+	        if (this.poly) {
+	            var cover = $('<div>').addClass('editor-cover');
+	            cover.append('<p>Sorry, polyphonic mode not available yet</p>');
+	            //cover.append('<p>Synth editing is disabled in polyphonic mode</p>');
+	            $('body').append(cover);
+	            $('#poly-but').text('Back to mono');
+	            popups.isOpen = true;
+	        }
+	        else {
+	            $('.editor-cover').remove();
+	            popups.isOpen = false;
+	            $('#poly-but').text('Poly');
+	        }
 	    };
 	    PianoKeyboard.prototype.noteOn = function (midi, ratio) { };
 	    PianoKeyboard.prototype.noteOff = function (midi) { };

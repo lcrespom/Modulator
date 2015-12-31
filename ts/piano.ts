@@ -79,8 +79,7 @@ export class PianoKeyboard {
 	}
 
 	registerButtons(): void {
-		$('#poly-but').click(_ => popups.alert(
-			'Polyphonic mode not available yet', 'Sorry'));
+		$('#poly-but').click(_ => this.togglePoly());
 		$('#prev-octave-but').click(_ => {
 			this.octave--;
 			this.baseNote -= 12;
@@ -125,7 +124,24 @@ export class PianoKeyboard {
 		this.envelope = adsr;
 	}
 
-	noteOn(midi: number, ratio: number):void {}
+	togglePoly() {
+		this.poly = !this.poly;
+		if (this.poly) {
+			const cover = $('<div>').addClass('editor-cover');
+			cover.append('<p>Sorry, polyphonic mode not available yet</p>');
+			//cover.append('<p>Synth editing is disabled in polyphonic mode</p>');
+			$('body').append(cover);
+			$('#poly-but').text('Back to mono');
+			popups.isOpen = true;
+		}
+		else {
+			$('.editor-cover').remove();
+			popups.isOpen = false;
+			$('#poly-but').text('Poly');
+		}
+	}
+
+	noteOn(midi: number, ratio: number): void {}
 	noteOff(midi: number): void {}
 	octaveChanged(baseNote) {}
 }
