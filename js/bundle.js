@@ -643,7 +643,7 @@
 	/** Informs whether a popup is open or not */
 	exports.isOpen = false;
 	/** Bootstrap-based equivalent of standard alert function */
-	function alert(msg, title, hideClose) {
+	function alert(msg, title, hideClose, options) {
 	    popup.find('.popup-message').html(msg);
 	    popup.find('.modal-title').text(title || 'Alert');
 	    popup.find('.popup-ok').hide();
@@ -654,12 +654,12 @@
 	    popup.find('.popup-prompt > input').hide();
 	    exports.isOpen = true;
 	    popup.one('hidden.bs.modal', function (_) { return exports.isOpen = false; });
-	    popup.modal();
+	    popup.modal(options);
 	}
 	exports.alert = alert;
 	/** Like an alert, but without a close button */
 	function progress(msg, title) {
-	    alert(msg, title, true);
+	    alert(msg, title, true, { keyboard: false });
 	}
 	exports.progress = progress;
 	/** Closes a popup in case it is open */
@@ -1146,6 +1146,7 @@
 	        this.registerCustomNode('createADSR', ADSR);
 	        this.registerCustomNode('createNoise', NoiseGenerator);
 	        this.registerCustomNode('createNoiseCtrl', NoiseCtrlGenerator);
+	        this.registerCustomNode('createLineIn', LineInNode);
 	        this.registerParamHandler('BufferURL', new BufferURL());
 	    }
 	    Synth.prototype.createAudioNode = function (type) {
@@ -1263,7 +1264,7 @@
 	    };
 	    NoiseGenerator.prototype.createScriptProcessor = function (ac) {
 	        var _this = this;
-	        this.sproc = ac.createScriptProcessor();
+	        this.sproc = ac.createScriptProcessor(1024);
 	        this.sproc.onaudioprocess = function (evt) { return _this.processAudio(evt); };
 	    };
 	    NoiseGenerator.prototype.processAudio = function (evt) {
@@ -1312,6 +1313,35 @@
 	    };
 	    return NoiseCtrlGenerator;
 	})(NoiseGenerator);
+	var LineInNode = (function (_super) {
+	    __extends(LineInNode, _super);
+	    function LineInNode() {
+	        _super.apply(this, arguments);
+	    }
+	    LineInNode.prototype.connect = function (anode) {
+	        var _this = this;
+	        var navigator = window.navigator;
+	        navigator.getUserMedia = (navigator.getUserMedia ||
+	            navigator.webkitGetUserMedia ||
+	            navigator.mozGetUserMedia ||
+	            navigator.msGetUserMedia);
+	        navigator.getUserMedia({ audio: true }, function (stream) {
+	            var ac = anode.context;
+	            _this.srcNode = ac.createMediaStreamSource(stream);
+	            _this.srcNode.connect(anode);
+	            _this.dstNode = anode;
+	        }, function (error) { return console.error(error); });
+	    };
+	    LineInNode.prototype.disconnect = function () {
+	        if (!this.srcNode)
+	            return;
+	        var track = this.srcNode['mediaStream'].getAudioTracks()[0];
+	        track.stop();
+	        this.srcNode.disconnect(this.dstNode);
+	        this.srcNode = null;
+	    };
+	    return LineInNode;
+	})(CustomNodeBase);
 	//-------------------- Parameter handlers --------------------
 	var BufferURL = (function () {
 	    function BufferURL() {
@@ -1428,6 +1458,11 @@
 	        params: {
 	            gain: { initial: 1, min: 0, max: 10 }
 	        }
+	    },
+	    LineIn: {
+	        constructor: 'createLineIn',
+	        custom: true,
+	        params: {}
 	    },
 	    // Effects
 	    Gain: {
@@ -1914,6 +1949,8 @@
 	            .on('keydown', function (evt) {
 	            if (pressedKeys[evt.keyCode])
 	                return; // Skip repetitions
+	            if (evt.metaKey || evt.altKey)
+	                return; // Skip browser shortcuts
 	            pressedKeys[evt.keyCode] = true;
 	            var midi = _this.key2midi(evt.keyCode);
 	            if (midi < 0)

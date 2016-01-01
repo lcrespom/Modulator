@@ -1,6 +1,6 @@
 import { NoteHandler } from './notes';
 import { NodeDef, NodeParamDef, NodePalette, palette } from './palette';
-import { ModernAudioContext, removeArrayElement } from './modern';
+import { ModernAudioContext, ModernAudioNode, removeArrayElement } from './modern';
 import * as popups from './popups';
 
 interface ParamHandler {
@@ -29,6 +29,7 @@ export class Synth {
 		this.registerCustomNode('createADSR', ADSR);
 		this.registerCustomNode('createNoise', NoiseGenerator);
 		this.registerCustomNode('createNoiseCtrl', NoiseCtrlGenerator);
+		this.registerCustomNode('createLineIn', LineInNode);
 		this.registerParamHandler('BufferURL', new BufferURL());
 	}
 
@@ -142,7 +143,7 @@ class NoiseGenerator extends CustomNodeBase {
 	}
 
 	createScriptProcessor(ac: AudioContext) {
-		this.sproc = ac.createScriptProcessor();
+		this.sproc = ac.createScriptProcessor(1024);
 		this.sproc.onaudioprocess = evt => this.processAudio(evt);
 	}
 
@@ -194,6 +195,31 @@ class NoiseCtrlGenerator extends NoiseGenerator {
 				out[sample] = this.v;
 			}
 		}
+	}
+}
+
+class LineInNode extends CustomNodeBase {
+	srcNode: ModernAudioNode;
+	dstNode: ModernAudioNode;
+	connect(anode: AudioNode) {
+		const navigator: any = window.navigator;
+		navigator.getUserMedia = (navigator.getUserMedia ||
+			navigator.webkitGetUserMedia ||
+			navigator.mozGetUserMedia ||
+			navigator.msGetUserMedia);
+		navigator.getUserMedia({ audio: true }, stream => {
+			const ac: any = anode.context;
+			this.srcNode = ac.createMediaStreamSource(stream);
+			this.srcNode.connect(anode);
+			this.dstNode = anode;
+		}, error => console.error(error));
+	}
+	disconnect() {
+		if (!this.srcNode) return;
+		const track = this.srcNode['mediaStream'].getAudioTracks()[0];
+		track.stop();
+		this.srcNode.disconnect(this.dstNode);
+		this.srcNode = null;
 	}
 }
 

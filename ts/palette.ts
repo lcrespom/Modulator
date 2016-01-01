@@ -73,6 +73,11 @@ export var palette: NodePalette = {
 			gain:  { initial: 1, min: 0, max: 10 }
 		}
 	},
+	LineIn: {
+		constructor: 'createLineIn',
+		custom: true,
+		params: {}
+	},
 	// Effects
 	Gain: {
 		constructor: 'createGain',

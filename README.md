@@ -37,12 +37,14 @@ on Twitter, or directly within GitHub.
 
 ##ToDo
 - Bugs
-	- Buffer source node fails to load & save the buffer URL property
 	- ADSR needs more testing & refining
 	- Popping sound at note on/off (improved after adding adsr depth parameter)
 	- Refine rules to determine whether nodes can connect
 	- Analyzer should detect when no sound is playing and clean osc and fft graphs
 	- Review TODO items inside code
+	- Browser incompatibilities
+		- Line in is silent in Chrome
+		- Combo parameter change event not captured in FireFox
 
 - Functionality
 	- Custom nodes

@@ -49,6 +49,7 @@
 					<div class="node node-src" data-type="Oscillator">Osc</div>
 					<div class="node node-src" data-type="Buffer">Buffer</div>
 					<div class="node node-src" data-type="Noise">Noise</div>
+					<div class="node node-src" data-type="LineIn">Line In</div>
 					<div class="palette-section">Effects</div>
 					<div class="node node-effect" data-type="Gain">Gain</div>
 					<div class="node node-effect" data-type="Filter">Filter</div>
@@ -75,24 +76,26 @@
 	 --><div class="presets-box graph-box">
 			<h5 class="bg-primary box-header">Presets</h5>
 			<div id="presets">
-				<div style="margin: 20px 30px 0px 30px">
+				<div style="margin: 20px 30px 0px 30px; position: relative">
 					<button id="prev-preset-but" class="btn btn-primary">
 						<span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
 					</button>
 					<div id="preset-num">1</div>
-					<button id="next-preset-but" class="btn btn-primary" style="float: right">
+					<button id="next-preset-but" class="btn btn-primary"
+						style="position: absolute; right: 0">
 						<span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
 					</button>
 				</div>
 				<div style="margin: 20px">
 					<input id="preset-name">
 				</div>
-				<div style="margin: 45px 10px 0px 10px">
+				<div style="margin: 45px 10px 0px 10px; position: relative">
 					<button id="load-but" class="btn btn-primary">
 						Load&nbsp;
 						<span class="glyphicon glyphicon-open" aria-hidden="true"></span>
 					</button>
-					<button id="save-but" class="btn btn-primary" style="float: right">
+					<button id="save-but" class="btn btn-primary"
+						style="position: absolute; right: 0">
 						Save&nbsp;
 						<span class="glyphicon glyphicon-save" aria-hidden="true"></span>
 					</button>
