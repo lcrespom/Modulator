@@ -48,8 +48,11 @@ class BaseNoteHandler implements NoteHandler {
 				anode[pname] = param;
 		}
 		// Copy output connections
-		for (const out of this.outTracker.outputs)
-			anode.connect(out);
+		for (const out of this.outTracker.outputs) {
+			let o2: any = out;
+			if (o2.custom && o2.anode) o2 = o2.anode;
+			anode.connect(o2);
+		}
 		// Copy control input connections
 		for (const inNode of this.node.inputs) {
 			const inData: NodeData = inNode.data;
@@ -250,7 +253,10 @@ class OutputTracker {
 	outputs: (AudioNode | AudioParam) [] = [];
 
 	constructor(anode: AudioNode) {
-		this.onBefore(anode, 'connect', this.connect);
+		this.onBefore(anode, 'connect', this.connect, (oldf, obj, args) => {
+			if (args[0].custom && args[0].anode) args[0] = args[0].anode;
+			oldf.apply(obj, args);
+		});
 		this.onBefore(anode, 'disconnect', this.disconnect);
 	}
 
@@ -262,12 +268,13 @@ class OutputTracker {
 		removeArrayElement(this.outputs, np);
 	}
 
-	onBefore(obj: any, fname: string, funcToCall: Function) {
+	onBefore(obj: any, fname: string, funcToCall: Function, cb?: (oldf, obj, args) => void): void {
 		const oldf = obj[fname];
 		const self = this;
 		obj[fname] = function() {
 			funcToCall.apply(self, arguments);
-			oldf.apply(obj, arguments);
+			if (cb) cb(oldf, obj, arguments)
+			else oldf.apply(obj, arguments);
 		}
 	}
 }

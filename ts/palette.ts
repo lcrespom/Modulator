@@ -122,6 +122,13 @@ export var palette: NodePalette = {
 			release: { initial: 0.25, min: 0, max: 1 }
 		}
 	},
+	Detuner: {
+		constructor: 'createDetuner',
+		custom: true,
+		params: {
+			octave: { initial: 0, min: -2, max: 2, linear: true }
+		}
+	},
 	// Controllers
 	LFO: {
 		constructor: 'createOscillator',

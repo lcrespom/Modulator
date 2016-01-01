@@ -75,6 +75,10 @@ on Twitter, or directly within GitHub.
 	- Use Web Midi API to gather events from external midi Keyboard
 		- Play notes
 		- Associate external controls with selected node parameters
+	- Improve detuner
+		- So other nodes can connect to it before it is connected. Otherwise,
+			display a popup explaining the problem.
+		- Improve code to clean hack that checks for custom nodes.
 
 - UI
 	- Parameters panel
@@ -105,6 +109,7 @@ on Twitter, or directly within GitHub.
 	- Mobile app
 
 - Code
+	- Separate all custom nodes into independent files on a subdirectory
 	- Avoid hardcoded DOM id's in code, e.g. $('#my-button'), except
 		for specifying containers at top level
 	- Review jQuery event registration to check that no event gets registered

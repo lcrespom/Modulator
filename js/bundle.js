@@ -376,7 +376,10 @@
 	        // Copy output connections
 	        for (var _b = 0, _c = this.outTracker.outputs; _b < _c.length; _b++) {
 	            var out = _c[_b];
-	            anode.connect(out);
+	            var o2 = out;
+	            if (o2.custom && o2.anode)
+	                o2 = o2.anode;
+	            anode.connect(o2);
 	        }
 	        // Copy control input connections
 	        for (var _d = 0, _e = this.node.inputs; _d < _e.length; _d++) {
@@ -594,7 +597,11 @@
 	var OutputTracker = (function () {
 	    function OutputTracker(anode) {
 	        this.outputs = [];
-	        this.onBefore(anode, 'connect', this.connect);
+	        this.onBefore(anode, 'connect', this.connect, function (oldf, obj, args) {
+	            if (args[0].custom && args[0].anode)
+	                args[0] = args[0].anode;
+	            oldf.apply(obj, args);
+	        });
 	        this.onBefore(anode, 'disconnect', this.disconnect);
 	    }
 	    OutputTracker.prototype.connect = function (np) {
@@ -603,12 +610,15 @@
 	    OutputTracker.prototype.disconnect = function (np) {
 	        modern_1.removeArrayElement(this.outputs, np);
 	    };
-	    OutputTracker.prototype.onBefore = function (obj, fname, funcToCall) {
+	    OutputTracker.prototype.onBefore = function (obj, fname, funcToCall, cb) {
 	        var oldf = obj[fname];
 	        var self = this;
 	        obj[fname] = function () {
 	            funcToCall.apply(self, arguments);
-	            oldf.apply(obj, arguments);
+	            if (cb)
+	                cb(oldf, obj, arguments);
+	            else
+	                oldf.apply(obj, arguments);
 	        };
 	    };
 	    return OutputTracker;
@@ -1147,6 +1157,7 @@
 	        this.registerCustomNode('createNoise', NoiseGenerator);
 	        this.registerCustomNode('createNoiseCtrl', NoiseCtrlGenerator);
 	        this.registerCustomNode('createLineIn', LineInNode);
+	        this.registerCustomNode('createDetuner', Detuner);
 	        this.registerParamHandler('BufferURL', new BufferURL());
 	    }
 	    Synth.prototype.createAudioNode = function (type) {
@@ -1231,9 +1242,6 @@
 	    CustomNodeBase.prototype.removeEventListener = function () { };
 	    return CustomNodeBase;
 	})();
-	/**
-	 * A custom AudioNode providing ADSR envelope control
-	 */
 	var ADSR = (function (_super) {
 	    __extends(ADSR, _super);
 	    function ADSR() {
@@ -1247,26 +1255,40 @@
 	    return ADSR;
 	})(CustomNodeBase);
 	exports.ADSR = ADSR;
-	var NoiseGenerator = (function (_super) {
-	    __extends(NoiseGenerator, _super);
-	    function NoiseGenerator() {
+	var ScriptProcessor = (function (_super) {
+	    __extends(ScriptProcessor, _super);
+	    function ScriptProcessor() {
 	        _super.apply(this, arguments);
 	        this.gain = 1;
 	        this.playing = false;
 	    }
-	    NoiseGenerator.prototype.connect = function (node) {
-	        if (!this.sproc)
+	    ScriptProcessor.prototype.connect = function (node) {
+	        if (!this.anode)
 	            this.createScriptProcessor(node.context);
-	        this.sproc.connect(node);
+	        this.anode.connect(node);
 	    };
-	    NoiseGenerator.prototype.disconnect = function () {
-	        this.sproc.disconnect();
+	    ScriptProcessor.prototype.disconnect = function () {
+	        this.anode.disconnect();
 	    };
-	    NoiseGenerator.prototype.createScriptProcessor = function (ac) {
+	    ScriptProcessor.prototype.createScriptProcessor = function (ac) {
 	        var _this = this;
-	        this.sproc = ac.createScriptProcessor(1024);
-	        this.sproc.onaudioprocess = function (evt) { return _this.processAudio(evt); };
+	        this.anode = ac.createScriptProcessor(1024);
+	        this.anode.onaudioprocess = function (evt) { return _this.processAudio(evt); };
 	    };
+	    ScriptProcessor.prototype.start = function () {
+	        this.playing = true;
+	    };
+	    ScriptProcessor.prototype.stop = function () {
+	        this.playing = false;
+	    };
+	    ScriptProcessor.prototype.processAudio = function (evt) { };
+	    return ScriptProcessor;
+	})(CustomNodeBase);
+	var NoiseGenerator = (function (_super) {
+	    __extends(NoiseGenerator, _super);
+	    function NoiseGenerator() {
+	        _super.apply(this, arguments);
+	    }
 	    NoiseGenerator.prototype.processAudio = function (evt) {
 	        for (var channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
 	            var out = evt.outputBuffer.getChannelData(channel);
@@ -1274,14 +1296,8 @@
 	                out[sample] = this.playing ? this.gain * (Math.random() * 2 - 1) : 0;
 	        }
 	    };
-	    NoiseGenerator.prototype.start = function () {
-	        this.playing = true;
-	    };
-	    NoiseGenerator.prototype.stop = function () {
-	        this.playing = false;
-	    };
 	    return NoiseGenerator;
-	})(CustomNodeBase);
+	})(ScriptProcessor);
 	var NoiseCtrlGenerator = (function (_super) {
 	    __extends(NoiseCtrlGenerator, _super);
 	    function NoiseCtrlGenerator(ac) {
@@ -1293,9 +1309,9 @@
 	        this.v = 0;
 	    }
 	    NoiseCtrlGenerator.prototype.connect = function (param) {
-	        if (!this.sproc)
+	        if (!this.anode)
 	            this.createScriptProcessor(this.ac);
-	        this.sproc.connect(param);
+	        this.anode.connect(param);
 	    };
 	    NoiseCtrlGenerator.prototype.processAudio = function (evt) {
 	        var samplesPerCycle = this.ac.sampleRate / this.frequency;
@@ -1312,7 +1328,30 @@
 	        }
 	    };
 	    return NoiseCtrlGenerator;
-	})(NoiseGenerator);
+	})(ScriptProcessor);
+	var Detuner = (function (_super) {
+	    __extends(Detuner, _super);
+	    function Detuner() {
+	        _super.apply(this, arguments);
+	        this.octave = 0;
+	        this.numberOfInputs = 1;
+	    }
+	    Detuner.prototype.processAudio = function (evt) {
+	        var dx = Math.pow(2, this.octave);
+	        for (var channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
+	            var out = evt.outputBuffer.getChannelData(channel);
+	            var inbuf = evt.inputBuffer.getChannelData(channel);
+	            var sct = 0;
+	            for (var sample = 0; sample < out.length; sample++) {
+	                out[sample] = inbuf[Math.floor(sct)];
+	                sct += dx;
+	                if (sct >= inbuf.length)
+	                    sct = 0;
+	            }
+	        }
+	    };
+	    return Detuner;
+	})(ScriptProcessor);
 	var LineInNode = (function (_super) {
 	    __extends(LineInNode, _super);
 	    function LineInNode() {
@@ -1333,7 +1372,10 @@
 	        navigator.getUserMedia({ audio: true }, function (stream) {
 	            var ac = anode.context;
 	            _this.srcNode = ac.createMediaStreamSource(stream);
-	            _this.srcNode.connect(anode);
+	            var a2 = anode;
+	            if (a2.custom && a2.anode)
+	                a2 = a2.anode;
+	            _this.srcNode.connect(a2);
 	            _this.dstNode = anode;
 	            _this.stream = stream;
 	        }, function (error) { return console.error(error); });
@@ -1507,6 +1549,13 @@
 	            reduction: { initial: 0, min: -20, max: 0, linear: true },
 	            attack: { initial: 0.003, min: 0, max: 1 },
 	            release: { initial: 0.25, min: 0, max: 1 }
+	        }
+	    },
+	    Detuner: {
+	        constructor: 'createDetuner',
+	        custom: true,
+	        params: {
+	            octave: { initial: 0, min: -2, max: 2, linear: true }
 	        }
 	    },
 	    // Controllers

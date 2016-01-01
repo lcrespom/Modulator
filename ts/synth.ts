@@ -30,6 +30,7 @@ export class Synth {
 		this.registerCustomNode('createNoise', NoiseGenerator);
 		this.registerCustomNode('createNoiseCtrl', NoiseCtrlGenerator);
 		this.registerCustomNode('createLineIn', LineInNode);
+		this.registerCustomNode('createDetuner', Detuner);
 		this.registerParamHandler('BufferURL', new BufferURL());
 	}
 
@@ -115,9 +116,7 @@ class CustomNodeBase implements AudioNode {
 	removeEventListener(){}
 }
 
-/**
- * A custom AudioNode providing ADSR envelope control
- */
+
 export class ADSR extends CustomNodeBase {
 	attack: number = 0.2;
 	decay: number = 0.5;
@@ -128,31 +127,24 @@ export class ADSR extends CustomNodeBase {
 	//TODO kb trigger (boolean)
 }
 
-class NoiseGenerator extends CustomNodeBase {
+
+class ScriptProcessor extends CustomNodeBase {
 	gain: number = 1;
-	sproc: ScriptProcessorNode;
+	anode: ScriptProcessorNode;
 	playing: boolean = false;
 
 	connect(node: AudioNode) {
-		if (!this.sproc) this.createScriptProcessor(node.context);
-		this.sproc.connect(node);
+		if (!this.anode) this.createScriptProcessor(node.context);
+		this.anode.connect(node);
 	}
 
 	disconnect() {
-		this.sproc.disconnect();
+		this.anode.disconnect();
 	}
 
 	createScriptProcessor(ac: AudioContext) {
-		this.sproc = ac.createScriptProcessor(1024);
-		this.sproc.onaudioprocess = evt => this.processAudio(evt);
-	}
-
-	processAudio(evt: AudioProcessingEvent) {
-		for (let channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
-			let out = evt.outputBuffer.getChannelData(channel);
-			for (let sample = 0; sample < out.length; sample++)
-				out[sample] = this.playing ? this.gain * (Math.random() * 2 - 1) : 0;
-		}
+		this.anode = ac.createScriptProcessor(1024);
+		this.anode.onaudioprocess = evt => this.processAudio(evt);
 	}
 
 	start() {
@@ -162,14 +154,29 @@ class NoiseGenerator extends CustomNodeBase {
 	stop() {
 		this.playing = false;
 	}
+
+	processAudio(evt: AudioProcessingEvent) {}
 }
 
-class NoiseCtrlGenerator extends NoiseGenerator {
+
+class NoiseGenerator extends ScriptProcessor {
+	processAudio(evt: AudioProcessingEvent) {
+		for (let channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
+			let out = evt.outputBuffer.getChannelData(channel);
+			for (let sample = 0; sample < out.length; sample++)
+				out[sample] = this.playing ? this.gain * (Math.random() * 2 - 1) : 0;
+		}
+	}
+}
+
+
+class NoiseCtrlGenerator extends ScriptProcessor {
 	ac: ModernAudioContext;
 	frequency: number;
 	depth: number;
 	sct: number;
 	v: number;
+
 	constructor(ac: ModernAudioContext) {
 		super();
 		this.ac = ac;
@@ -178,16 +185,18 @@ class NoiseCtrlGenerator extends NoiseGenerator {
 		this.sct = 0;
 		this.v = 0;
 	}
+
 	connect(param: any) {
-		if (!this.sproc) this.createScriptProcessor(this.ac);
-		this.sproc.connect(param);
+		if (!this.anode) this.createScriptProcessor(this.ac);
+		this.anode.connect(param);
 	}
+
 	processAudio(evt: AudioProcessingEvent) {
 		const samplesPerCycle = this.ac.sampleRate / this.frequency;
 		for (let channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
 			let out = evt.outputBuffer.getChannelData(channel);
 			for (let sample = 0; sample < out.length; sample++) {
-				this.sct ++;
+				this.sct++;
 				if (this.sct > samplesPerCycle) {
 					this.v = this.depth * (Math.random() * 2 - 1);
 					this.sct = 0; //this.sct - Math.floor(this.sct);
@@ -197,6 +206,27 @@ class NoiseCtrlGenerator extends NoiseGenerator {
 		}
 	}
 }
+
+
+class Detuner extends ScriptProcessor {
+	octave: number = 0;
+	numberOfInputs = 1;
+
+	processAudio(evt: AudioProcessingEvent) {
+		const dx = Math.pow(2, this.octave);
+		for (let channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
+			let out = evt.outputBuffer.getChannelData(channel);
+			let inbuf = evt.inputBuffer.getChannelData(channel);
+			let sct = 0;
+			for (let sample = 0; sample < out.length; sample++) {
+				out[sample] = inbuf[Math.floor(sct)];
+				sct += dx;
+				if (sct >= inbuf.length) sct = 0;
+			}
+		}
+	}
+}
+
 
 class LineInNode extends CustomNodeBase {
 	srcNode: ModernAudioNode;
@@ -217,7 +247,9 @@ class LineInNode extends CustomNodeBase {
 		navigator.getUserMedia({ audio: true }, stream => {
 			const ac: any = anode.context;
 			this.srcNode = ac.createMediaStreamSource(stream);
-			this.srcNode.connect(anode);
+			let a2: any = anode;
+			if (a2.custom && a2.anode) a2 = a2.anode;
+			this.srcNode.connect(a2);
 			this.dstNode = anode;
 			this.stream = stream;
 		}, error => console.error(error));
