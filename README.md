@@ -42,9 +42,6 @@ on Twitter, or directly within GitHub.
 	- Refine rules to determine whether nodes can connect
 	- Analyzer should detect when no sound is playing and clean osc and fft graphs
 	- Review TODO items inside code
-	- Browser incompatibilities
-		- Line in is silent in Chrome
-		- Combo parameter change event not captured in FireFox
 
 - Functionality
 	- Custom nodes

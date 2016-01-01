@@ -1320,6 +1320,11 @@
 	    }
 	    LineInNode.prototype.connect = function (anode) {
 	        var _this = this;
+	        if (this.srcNode) {
+	            this.srcNode.connect(anode);
+	            this.dstNode = anode;
+	            return;
+	        }
 	        var navigator = window.navigator;
 	        navigator.getUserMedia = (navigator.getUserMedia ||
 	            navigator.webkitGetUserMedia ||
@@ -1330,15 +1335,11 @@
 	            _this.srcNode = ac.createMediaStreamSource(stream);
 	            _this.srcNode.connect(anode);
 	            _this.dstNode = anode;
+	            _this.stream = stream;
 	        }, function (error) { return console.error(error); });
 	    };
 	    LineInNode.prototype.disconnect = function () {
-	        if (!this.srcNode)
-	            return;
-	        var track = this.srcNode['mediaStream'].getAudioTracks()[0];
-	        track.stop();
 	        this.srcNode.disconnect(this.dstNode);
-	        this.srcNode = null;
 	    };
 	    return LineInNode;
 	})(CustomNodeBase);
@@ -1611,7 +1612,7 @@
 	    if (!ndata.controlParams)
 	        return;
 	    var combo = renderCombo(panel, ndata.controlParams, ndata.controlParam, 'Controlling');
-	    combo.on('input', function (_) {
+	    combo.change(function (_) {
 	        if (ndata.controlParam)
 	            ndata.anode.disconnect(ndata.controlTarget[ndata.controlParam]);
 	        ndata.controlParam = combo.val();
@@ -1623,7 +1624,7 @@
 	    var pdef = ndef.params[param];
 	    if (pdef.choices) {
 	        var combo = renderCombo(panel, pdef.choices, anode[param], ucfirst(param));
-	        combo.on('input', function (_) {
+	        combo.change(function (_) {
 	            anode[param] = combo.val();
 	        });
 	        return combo.parent();

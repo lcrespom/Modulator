@@ -201,7 +201,14 @@ class NoiseCtrlGenerator extends NoiseGenerator {
 class LineInNode extends CustomNodeBase {
 	srcNode: ModernAudioNode;
 	dstNode: ModernAudioNode;
+	stream: any;
+
 	connect(anode: AudioNode) {
+		if (this.srcNode) {
+			this.srcNode.connect(anode);
+			this.dstNode = anode;
+			return;
+		}
 		const navigator: any = window.navigator;
 		navigator.getUserMedia = (navigator.getUserMedia ||
 			navigator.webkitGetUserMedia ||
@@ -212,14 +219,12 @@ class LineInNode extends CustomNodeBase {
 			this.srcNode = ac.createMediaStreamSource(stream);
 			this.srcNode.connect(anode);
 			this.dstNode = anode;
+			this.stream = stream;
 		}, error => console.error(error));
 	}
+
 	disconnect() {
-		if (!this.srcNode) return;
-		const track = this.srcNode['mediaStream'].getAudioTracks()[0];
-		track.stop();
 		this.srcNode.disconnect(this.dstNode);
-		this.srcNode = null;
 	}
 }
 

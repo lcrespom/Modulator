@@ -48,7 +48,7 @@ function renderAudioParam(anode: AudioNode, ndef: NodeDef, param: string, panel:
 function renderParamControl(ndata: NodeData, panel: JQuery): JQuery {
 	if (!ndata.controlParams) return;
 	const combo = renderCombo(panel, ndata.controlParams, ndata.controlParam, 'Controlling');
-	combo.on('input', _ => {
+	combo.change(_ => {
 		if (ndata.controlParam)
 			ndata.anode.disconnect(ndata.controlTarget[ndata.controlParam]);
 		ndata.controlParam = combo.val();
@@ -61,7 +61,7 @@ function renderOtherParam(anode: AudioNode, ndef: NodeDef, param: string, panel:
 	const pdef: NodeParamDef = ndef.params[param];
 	if (pdef.choices) {
 		const combo = renderCombo(panel, pdef.choices, anode[param], ucfirst(param));
-		combo.on('input', _ => {
+		combo.change(_ => {
 			anode[param] = combo.val();
 		});
 		return combo.parent();
