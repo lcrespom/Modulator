@@ -283,7 +283,11 @@
 	        for (var _i = 0, _a = Object.keys(data.nodeDef.params); _i < _a.length; _i++) {
 	            var pname = _a[_i];
 	            var pvalue = data.anode[pname];
-	            if (pvalue instanceof AudioParam)
+	            if (data.nodeDef.params[pname].handler)
+	                params[pname] = this.synthUI.synth
+	                    .paramHandlers[data.nodeDef.params[pname].handler]
+	                    .param2json(data.anode);
+	            else if (pvalue instanceof AudioParam)
 	                if (pvalue['_value'] === undefined)
 	                    params[pname] = pvalue.value;
 	                else
@@ -305,7 +309,11 @@
 	            var pname = _a[_i];
 	            var pvalue = data.anode[pname];
 	            var jv = json.params[pname];
-	            if (pvalue instanceof AudioParam) {
+	            if (data.nodeDef.params[pname].handler)
+	                this.synthUI.synth
+	                    .paramHandlers[data.nodeDef.params[pname].handler]
+	                    .json2param(data.anode, jv);
+	            else if (pvalue instanceof AudioParam) {
 	                pvalue.value = jv;
 	                pvalue['_value'] = jv;
 	            }
@@ -1296,7 +1304,7 @@
 	    BufferURL.prototype.initialize = function (anode, def) {
 	        var absn = anode;
 	        var url = def.params['buffer'].initial;
-	        this.loadBuffer(absn.context, url, function (buffer) { return absn['_buffer'] = buffer; });
+	        this.loadBufferParam(absn, url);
 	    };
 	    BufferURL.prototype.renderParam = function (panel, pdef, anode, param, label) {
 	        var _this = this;
@@ -1310,10 +1318,22 @@
 	                if (!url)
 	                    return;
 	                var absn = anode;
-	                _this.loadBuffer(absn.context, url, function (buffer) { return absn['_buffer'] = buffer; });
+	                _this.loadBufferParam(absn, url);
 	            });
 	        });
 	        return box;
+	    };
+	    BufferURL.prototype.param2json = function (anode) {
+	        return anode['_url'];
+	    };
+	    BufferURL.prototype.json2param = function (anode, json) {
+	        this.loadBufferParam(anode, json);
+	    };
+	    BufferURL.prototype.loadBufferParam = function (absn, url) {
+	        this.loadBuffer(absn.context, url, function (buffer) {
+	            absn['_buffer'] = buffer;
+	            absn['_url'] = url;
+	        });
 	    };
 	    BufferURL.prototype.loadBuffer = function (ac, url, cb) {
 	        var w = window;

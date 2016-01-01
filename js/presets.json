@@ -795,5 +795,45 @@
 			}
 		],
 		"name": "Robot"
+	},
+	{
+		"nodes": [
+			{
+				"id": 0,
+				"x": 460,
+				"y": 160,
+				"name": "Out",
+				"inputs": [
+					1
+				],
+				"classes": "node node-out"
+			},
+			{
+				"id": 1,
+				"x": 160,
+				"y": 160,
+				"name": "Buffer",
+				"inputs": [],
+				"classes": "node node-src"
+			}
+		],
+		"nodeData": [
+			{
+				"type": "out",
+				"params": {}
+			},
+			{
+				"type": "Buffer",
+				"params": {
+					"playbackRate": 1,
+					"detune": 0,
+					"buffer": "http://lcrespom.github.io/tests/drums1.wav",
+					"loop": true,
+					"loopStart": 0,
+					"loopEnd": 10
+				}
+			}
+		],
+		"name": "Drum Loop"
 	}
 ]

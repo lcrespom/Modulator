@@ -7,6 +7,8 @@ interface ParamHandler {
 	initialize(anode: AudioNode, def: NodeDef): void;
 	renderParam(panel: JQuery, pdef: NodeParamDef,
 		anode: AudioNode, param: string, label: string): JQuery;
+	param2json(anode: AudioNode): any;
+	json2param(anode: AudioNode, json: any);
 }
 
 /**
@@ -202,7 +204,7 @@ class BufferURL implements ParamHandler {
 	initialize(anode: AudioNode, def: NodeDef): void {
 		const absn: AudioBufferSourceNode = <AudioBufferSourceNode>anode;
 		const url: string = <string>def.params['buffer'].initial;
-		this.loadBuffer(absn.context, url, buffer => absn['_buffer'] = buffer);
+		this.loadBufferParam(absn, url);
 	}
 
 	renderParam(panel: JQuery, pdef: NodeParamDef,
@@ -216,10 +218,25 @@ class BufferURL implements ParamHandler {
 			popups.prompt('Audio buffer URL:', 'Please provide URL', null, url => {
 				if (!url) return;
 				const absn: AudioBufferSourceNode = <AudioBufferSourceNode>anode;
-				this.loadBuffer(absn.context, url, buffer => absn['_buffer'] = buffer);
+				this.loadBufferParam(absn, url);
 			});
 		});
 		return box;
+	}
+
+	param2json(anode: AudioNode): any {
+		return anode['_url'];
+	}
+
+	json2param(anode: AudioNode, json: any) {
+		this.loadBufferParam(<AudioBufferSourceNode>anode, json);
+	}
+
+	loadBufferParam(absn: AudioBufferSourceNode, url: string): void {
+		this.loadBuffer(absn.context, url, buffer => {
+			absn['_buffer'] = buffer;
+			absn['_url'] = url;
+		});
 	}
 
 	loadBuffer(ac: AudioContext, url: string, cb: (buffer: AudioBuffer) => void): void {

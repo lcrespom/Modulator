@@ -246,7 +246,11 @@ class SynthGraphHandler implements GraphHandler {
 		const params = {};
 		for (const pname of Object.keys(data.nodeDef.params)) {
 			const pvalue = data.anode[pname];
-			if (pvalue instanceof AudioParam)
+			if (data.nodeDef.params[pname].handler)
+				params[pname] = this.synthUI.synth
+					.paramHandlers[data.nodeDef.params[pname].handler]
+					.param2json(data.anode);
+			else if (pvalue instanceof AudioParam)
 				if (pvalue['_value'] === undefined) params[pname] = pvalue.value;
 				else params[pname] = pvalue['_value'];
 			else params[pname] = pvalue;
@@ -265,7 +269,11 @@ class SynthGraphHandler implements GraphHandler {
 		for (const pname of Object.keys(json.params)) {
 			const pvalue = data.anode[pname];
 			const jv = json.params[pname];
-			if (pvalue instanceof AudioParam) {
+			if (data.nodeDef.params[pname].handler)
+				this.synthUI.synth
+					.paramHandlers[data.nodeDef.params[pname].handler]
+					.json2param(data.anode, jv);
+			else if (pvalue instanceof AudioParam) {
 				pvalue.value = jv;
 				pvalue['_value'] = jv;
 			}
