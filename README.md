@@ -142,21 +142,20 @@ on Twitter, or directly within GitHub.
 	while Chrome provides the API but remains silent.
 	Here is the JSON for a preset to load in FireFox to test the Line In node
 	in combination with the **Detune** effect to obtain *Smurf & Shrek* voice:
-```
-{ "nodes": [
-	{"id":0,"x":520,"y":140,"name":"Out","inputs":[1],"classes":"node node-out"},
-	{"id":1,"x":320,"y":140,"name":"Detuner","inputs":[2],"classes":"node node-effect"},
-	{"id":2,"x":120,"y":140,"name":"Line In","inputs":[],"classes":"node node-src"}
-  ],
- "nodeData": [
-	{"type":"out","params":{}},
-	{"type":"Detuner","params":{"octave":-0.5}},
-	{"type":"LineIn","params":{}}
- ],
- "name":"Smurf & Shrek"
-}
-```
-
+	```
+	{ "nodes": [
+		{"id":0,"x":520,"y":140,"name":"Out","inputs":[1],"classes":"node node-out"},
+		{"id":1,"x":320,"y":140,"name":"Detuner","inputs":[2],"classes":"node node-effect"},
+		{"id":2,"x":120,"y":140,"name":"Line In","inputs":[],"classes":"node node-src"}
+	],
+	"nodeData": [
+		{"type":"out","params":{}},
+		{"type":"Detuner","params":{"octave":-0.5}},
+		{"type":"LineIn","params":{}}
+	],
+	"name":"Smurf & Shrek"
+	}
+	```
 3. FireFox consumes a huge amount of CPU when Modulator is running. It is probably
 a consequence of how Web Audio is implemented in FF.
 
