@@ -643,17 +643,32 @@
 	/** Informs whether a popup is open or not */
 	exports.isOpen = false;
 	/** Bootstrap-based equivalent of standard alert function */
-	function alert(msg, title) {
+	function alert(msg, title, hideClose) {
 	    popup.find('.popup-message').html(msg);
 	    popup.find('.modal-title').text(title || 'Alert');
 	    popup.find('.popup-ok').hide();
-	    popup.find('.popup-close').html('Close');
+	    if (hideClose)
+	        popup.find('.popup-close').hide();
+	    else
+	        popup.find('.popup-close').html('Close');
 	    popup.find('.popup-prompt > input').hide();
 	    exports.isOpen = true;
 	    popup.one('hidden.bs.modal', function (_) { return exports.isOpen = false; });
 	    popup.modal();
 	}
 	exports.alert = alert;
+	/** Like an alert, but without a close button */
+	function progress(msg, title) {
+	    alert(msg, title, true);
+	}
+	exports.progress = progress;
+	/** Closes a popup in case it is open */
+	function close() {
+	    if (!exports.isOpen)
+	        return;
+	    popup.find('.popup-ok').click();
+	}
+	exports.close = close;
 	/** Bootstrap-based equivalent of standard confirm function */
 	function confirm(msg, title, cbClose, cbOpen) {
 	    var result = false;
@@ -1304,6 +1319,8 @@
 	    BufferURL.prototype.initialize = function (anode, def) {
 	        var absn = anode;
 	        var url = def.params['buffer'].initial;
+	        if (!url)
+	            return;
 	        this.loadBufferParam(absn, url);
 	    };
 	    BufferURL.prototype.renderParam = function (panel, pdef, anode, param, label) {
@@ -1344,12 +1361,17 @@
 	        xhr.open('GET', url, true);
 	        xhr.responseType = 'arraybuffer';
 	        xhr.onload = function (_) {
+	            popups.close();
 	            ac.decodeAudioData(xhr.response, function (buffer) {
 	                w.audioBufferCache[url] = buffer;
 	                cb(buffer);
 	            });
 	        };
 	        xhr.send();
+	        setTimeout(function (_) {
+	            if (xhr.readyState != xhr.DONE)
+	                popups.progress('Loading ' + url + '...');
+	        }, 300);
 	    };
 	    return BufferURL;
 	})();
@@ -1391,7 +1413,7 @@
 	            playbackRate: { initial: 1, min: 0, max: 8 },
 	            detune: OCTAVE_DETUNE,
 	            buffer: {
-	                initial: 'https://upload.wikimedia.org/wikipedia/en/8/80/The_Amen_Break%2C_in_context.ogg',
+	                initial: null,
 	                handler: 'BufferURL'
 	            },
 	            loop: { initial: false },

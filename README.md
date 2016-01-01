@@ -37,6 +37,7 @@ on Twitter, or directly within GitHub.
 
 ##ToDo
 - Bugs
+	- Buffer source node fails to load & save the buffer URL property
 	- ADSR needs more testing & refining
 	- Popping sound at note on/off (improved after adding adsr depth parameter)
 	- Refine rules to determine whether nodes can connect
@@ -53,7 +54,7 @@ on Twitter, or directly within GitHub.
 		- Full synth as a reusable module (long term)
 		- Ring modulation using a gain node where the gain is controlled by an oscillator
 			(low: it can be implemented using an LFO controlling a gain).
-		- Drumkit with 1 sample per note, ideal for rythm tracks
+		- Soundbank: multiple samples, one sample per note, ideal for rythm tracks
 	- Navbar with:
 		- Synth button
 		- Tracker button showing "not available yet"

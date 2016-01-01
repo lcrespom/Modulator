@@ -2,15 +2,29 @@
 export let isOpen: boolean = false;
 
 /** Bootstrap-based equivalent of standard alert function */
-export function alert(msg: string, title?: string): void {
+export function alert(msg: string, title?: string, hideClose?: boolean): void {
 	popup.find('.popup-message').html(msg);
 	popup.find('.modal-title').text(title || 'Alert');
 	popup.find('.popup-ok').hide();
-	popup.find('.popup-close').html('Close');
+	if (hideClose)
+		popup.find('.popup-close').hide();
+	else
+		popup.find('.popup-close').html('Close');
 	popup.find('.popup-prompt > input').hide();
 	isOpen = true;
 	popup.one('hidden.bs.modal', _ => isOpen = false);
 	popup.modal();
+}
+
+/** Like an alert, but without a close button */
+export function progress(msg: string, title?: string): void {
+	alert(msg, title, true);
+}
+
+/** Closes a popup in case it is open */
+export function close() {
+	if (!isOpen) return;
+	popup.find('.popup-ok').click();
 }
 
 /** Bootstrap-based equivalent of standard confirm function */

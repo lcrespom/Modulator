@@ -204,6 +204,7 @@ class BufferURL implements ParamHandler {
 	initialize(anode: AudioNode, def: NodeDef): void {
 		const absn: AudioBufferSourceNode = <AudioBufferSourceNode>anode;
 		const url: string = <string>def.params['buffer'].initial;
+		if (!url) return;
 		this.loadBufferParam(absn, url);
 	}
 
@@ -248,11 +249,16 @@ class BufferURL implements ParamHandler {
 		xhr.open('GET', url, true);
 		xhr.responseType = 'arraybuffer';
 		xhr.onload = _ => {
+			popups.close();
 			ac.decodeAudioData(xhr.response, buffer => {
 				w.audioBufferCache[url] = buffer;
 				cb(buffer);
 			});
 		};
 		xhr.send();
+		setTimeout(_ => {
+			if (xhr.readyState != xhr.DONE)
+				popups.progress('Loading ' + url + '...');
+		}, 300);
 	}
 }

@@ -57,7 +57,7 @@ export var palette: NodePalette = {
 			playbackRate: { initial: 1, min: 0, max: 8 },
 			detune: OCTAVE_DETUNE,
 			buffer: {
-				initial: 'https://upload.wikimedia.org/wikipedia/en/8/80/The_Amen_Break%2C_in_context.ogg',
+				initial: null,
 				handler: 'BufferURL'
 			},
 			loop: { initial: false },
