@@ -133,12 +133,12 @@ on Twitter, or directly within GitHub.
 
 
 ##Browser limitations
-1) Modulator has been tested to work in Chrome, FireFox and Safari.
+1. Modulator has been tested to work in Chrome, FireFox and Safari.
 	Although Web Audio is available in most mobile platforms, only the desktop
 	version has been tested. Node drag & drop and connection will probably not work
 	in the mobile browsers.
 
-2) The **Line In** node is only properly supported by FireFox. Safari gives an error,
+2. The **Line In** node is only properly supported by FireFox. Safari gives an error,
 	while Chrome provides the API but remains silent.
 	Here is the JSON for a preset to load in FireFox to test the Line In node
 	in combination with the **Detune** effect to obtain *Smurf & Shrek* voice:
@@ -157,7 +157,7 @@ on Twitter, or directly within GitHub.
 }
 ```
 
-3) FireFox consumes a huge amount of CPU when Modulator is running. It is probably
+3. FireFox consumes a huge amount of CPU when Modulator is running. It is probably
 a consequence of how Web Audio is implemented in FF.
 
 
