@@ -42,6 +42,8 @@ on Twitter, or directly within GitHub.
 	- Refine rules to determine whether nodes can connect
 	- Analyzer should detect when no sound is playing and clean osc and fft graphs
 	- Review TODO items inside code
+	- In FireFox, when app window is scrolled down, node connection
+		draws arrows incorrectly
 
 - Functionality
 	- Custom nodes
