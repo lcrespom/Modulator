@@ -312,8 +312,9 @@ class GraphInteraction {
 		const hovered = $(':hover');
 		if (hovered.length <= 0) return null;
 		const jqNode = $(hovered.get(hovered.length - 1));
-		if (!jqNode.hasClass('node')) return null;
-		return jqNode;
+		if (jqNode.hasClass('node')) return jqNode;
+		if (jqNode.parent().hasClass('node')) return jqNode.parent();
+		return null;
 	}
 
 	registerRubberBanding(srcn: Node) {

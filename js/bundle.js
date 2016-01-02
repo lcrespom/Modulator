@@ -1028,9 +1028,11 @@
 	        if (hovered.length <= 0)
 	            return null;
 	        var jqNode = $(hovered.get(hovered.length - 1));
-	        if (!jqNode.hasClass('node'))
-	            return null;
-	        return jqNode;
+	        if (jqNode.hasClass('node'))
+	            return jqNode;
+	        if (jqNode.parent().hasClass('node'))
+	            return jqNode.parent();
+	        return null;
 	    };
 	    GraphInteraction.prototype.registerRubberBanding = function (srcn) {
 	        var _this = this;
