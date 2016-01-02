@@ -1,5 +1,5 @@
 import { Node } from './graph';
-import { NodeDef, NodeParamDef } from './palette';
+import { NodeDef, NodeParamDef } from './synth/palette';
 import { NodeData } from './synthUI';
 
 /**

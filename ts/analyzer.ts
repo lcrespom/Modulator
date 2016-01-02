@@ -1,4 +1,4 @@
-import { ModernAudioNode } from './modern';
+import { ModernAudioNode } from './synth/modern';
 
 /**
  * Displays FFT and Oscilloscope graphs from the output of a given AudioNode

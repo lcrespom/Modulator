@@ -5,7 +5,7 @@
 import { SynthUI } from './synthUI';
 import { NoteInputs } from './noteInputs'
 import { Presets } from './presets';
-import { ModernWindow, ModernAudioContext } from './modern';
+import { ModernWindow, ModernAudioContext } from './synth/modern';
 
 setupPalette();
 const graphCanvas = <HTMLCanvasElement>$('#graph-canvas')[0];

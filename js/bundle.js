@@ -48,8 +48,8 @@
 	 * Main entry point: setup synth editor and keyboard listener.
 	 */
 	var synthUI_1 = __webpack_require__(1);
-	var noteInputs_1 = __webpack_require__(10);
-	var presets_1 = __webpack_require__(14);
+	var noteInputs_1 = __webpack_require__(11);
+	var presets_1 = __webpack_require__(15);
 	setupPalette();
 	var graphCanvas = $('#graph-canvas')[0];
 	var synthUI = new synthUI_1.SynthUI(createAudioContext(), graphCanvas, $('#node-params'), $('#audio-graph-fft'), $('#audio-graph-osc'));
@@ -192,8 +192,8 @@
 	//-------------------- Privates --------------------
 	var graph_1 = __webpack_require__(5);
 	var synth_1 = __webpack_require__(6);
-	var paramsUI_1 = __webpack_require__(8);
-	var analyzer_1 = __webpack_require__(9);
+	var paramsUI_1 = __webpack_require__(9);
+	var analyzer_1 = __webpack_require__(10);
 	var SynthGraphHandler = (function () {
 	    function SynthGraphHandler(synthUI, jqParams, jqFFT, jqOsc) {
 	        this.synthUI = synthUI;
@@ -1137,8 +1137,7 @@
 
 	var palette_1 = __webpack_require__(7);
 	var modern_1 = __webpack_require__(3);
-	var popups = __webpack_require__(4);
-	var custom = __webpack_require__(15);
+	var custom = __webpack_require__(8);
 	/**
 	 * Performs global operations on all AudioNodes:
 	 * - Manages AudioNode creation and initialization from the palette
@@ -1223,6 +1222,7 @@
 	})();
 	exports.Synth = Synth;
 	//-------------------- Parameter handlers --------------------
+	var popups = __webpack_require__(4);
 	var BufferURL = (function () {
 	    function BufferURL() {
 	    }
@@ -1449,754 +1449,6 @@
 /* 8 */
 /***/ function(module, exports) {
 
-	/**
-	 * Renders the UI controls associated with the parameters of a given node
-	 */
-	function renderParams(ndata, panel) {
-	    panel.empty();
-	    var boxes = [];
-	    if (ndata.nodeDef.control && ndata.controlParams)
-	        boxes.push(renderParamControl(ndata, panel));
-	    var params = Object.keys(ndata.nodeDef.params || {});
-	    if (params.length <= 0)
-	        return;
-	    for (var _i = 0; _i < params.length; _i++) {
-	        var param = params[_i];
-	        if (ndata.anode[param] instanceof AudioParam)
-	            boxes.push(renderAudioParam(ndata.anode, ndata.nodeDef, param, panel));
-	        else
-	            boxes.push(renderOtherParam(ndata.anode, ndata.nodeDef, param, panel));
-	    }
-	    positionBoxes(panel, boxes);
-	}
-	exports.renderParams = renderParams;
-	function positionBoxes(panel, boxes) {
-	    var pw = panel.width();
-	    var bw = boxes[0].width();
-	    var sep = (pw - boxes.length * bw) / (boxes.length + 1);
-	    var x = sep;
-	    for (var _i = 0; _i < boxes.length; _i++) {
-	        var box = boxes[_i];
-	        box.css({
-	            position: 'relative',
-	            left: x
-	        });
-	        x += sep;
-	    }
-	}
-	function renderAudioParam(anode, ndef, param, panel) {
-	    var pdef = ndef.params[param];
-	    var aparam = anode[param];
-	    if (aparam['_value'])
-	        aparam.value = aparam['_value'];
-	    return renderSlider(panel, pdef, param, aparam.value, function (value) {
-	        aparam.value = value;
-	        aparam['_value'] = value;
-	    });
-	}
-	function renderParamControl(ndata, panel) {
-	    if (!ndata.controlParams)
-	        return;
-	    var combo = renderCombo(panel, ndata.controlParams, ndata.controlParam, 'Controlling');
-	    combo.change(function (_) {
-	        if (ndata.controlParam)
-	            ndata.anode.disconnect(ndata.controlTarget[ndata.controlParam]);
-	        ndata.controlParam = combo.val();
-	        ndata.anode.connect(ndata.controlTarget[ndata.controlParam]);
-	    });
-	    return combo.parent();
-	}
-	function renderOtherParam(anode, ndef, param, panel) {
-	    var pdef = ndef.params[param];
-	    if (pdef.choices) {
-	        var combo = renderCombo(panel, pdef.choices, anode[param], ucfirst(param));
-	        combo.change(function (_) {
-	            anode[param] = combo.val();
-	        });
-	        return combo.parent();
-	    }
-	    else if (pdef.min != undefined)
-	        return renderSlider(panel, pdef, param, anode[param], function (value) { return anode[param] = value; });
-	    else if (typeof pdef.initial == 'boolean')
-	        return renderBoolean(panel, pdef, param, anode, ucfirst(param));
-	    else if (pdef.phandler)
-	        return pdef.phandler.renderParam(panel, pdef, anode, param, ucfirst(param));
-	}
-	function renderSlider(panel, pdef, param, value, setValue) {
-	    var sliderBox = $('<div class="slider-box">');
-	    var slider = $('<input type="range" orient="vertical">')
-	        .attr('min', 0)
-	        .attr('max', 1)
-	        .attr('step', 0.001)
-	        .attr('value', param2slider(value, pdef));
-	    var numInput = $('<input type="number">')
-	        .attr('min', pdef.min)
-	        .attr('max', pdef.max)
-	        .attr('value', truncateFloat(value, 5));
-	    sliderBox.append(numInput);
-	    sliderBox.append(slider);
-	    sliderBox.append($('<span><br/>' + ucfirst(param) + '</span>'));
-	    panel.append(sliderBox);
-	    slider.on('input', function (_) {
-	        var value = slider2param(parseFloat(slider.val()), pdef);
-	        numInput.val(truncateFloat(value, 5));
-	        setValue(value);
-	    });
-	    numInput.on('input', function (_) {
-	        var value = parseFloat(numInput.val());
-	        if (isNaN(value))
-	            return;
-	        slider.val(param2slider(value, pdef));
-	        setValue(value);
-	    });
-	    return sliderBox;
-	}
-	function renderCombo(panel, choices, selected, label) {
-	    var choiceBox = $('<div class="choice-box">');
-	    var combo = $('<select>').attr('size', choices.length);
-	    for (var _i = 0; _i < choices.length; _i++) {
-	        var choice = choices[_i];
-	        var option = $('<option>').text(choice);
-	        if (choice == selected)
-	            option.attr('selected', 'selected');
-	        combo.append(option);
-	    }
-	    choiceBox.append(combo);
-	    combo.after('<br/><br/>' + label);
-	    panel.append(choiceBox);
-	    return combo;
-	}
-	function renderBoolean(panel, pdef, param, anode, label) {
-	    var box = $('<div class="choice-box">');
-	    var button = $('<button class="btn btn-info" data-toggle="button" aria-pressed="false">');
-	    box.append(button);
-	    button.after('<br/><br/>' + label);
-	    panel.append(box);
-	    if (anode[param]) {
-	        button.text('Enabled');
-	        button.addClass('active');
-	        button.attr('aria-pressed', 'true');
-	    }
-	    else {
-	        button.text('Disabled');
-	        button.removeClass('active');
-	        button.attr('aria-pressed', 'false');
-	    }
-	    button.click(function (_) {
-	        anode[param] = !anode[param];
-	        button.text(anode[param] ? 'Enabled' : 'Disabled');
-	    });
-	    return box;
-	}
-	var LOG_BASE = 2;
-	function logarithm(base, x) {
-	    return Math.log(x) / Math.log(base);
-	}
-	function param2slider(paramValue, pdef) {
-	    if (pdef.linear) {
-	        return (paramValue - pdef.min) / (pdef.max - pdef.min);
-	    }
-	    else {
-	        var logRange = logarithm(LOG_BASE, pdef.max + 1 - pdef.min);
-	        return logarithm(LOG_BASE, paramValue + 1 - pdef.min) / logRange;
-	    }
-	}
-	function slider2param(sliderValue, pdef) {
-	    if (pdef.linear) {
-	        return pdef.min + sliderValue * (pdef.max - pdef.min);
-	    }
-	    else {
-	        var logRange = logarithm(LOG_BASE, pdef.max + 1 - pdef.min);
-	        return pdef.min + Math.pow(LOG_BASE, sliderValue * logRange) - 1;
-	    }
-	}
-	//-------------------- Misc utilities --------------------
-	function ucfirst(str) {
-	    return str[0].toUpperCase() + str.substring(1);
-	}
-	function truncateFloat(f, len) {
-	    var s = '' + f;
-	    s = s.substr(0, len);
-	    if (s[s.length - 1] == '.')
-	        return s.substr(0, len - 1);
-	    else
-	        return s;
-	}
-
-
-/***/ },
-/* 9 */
-/***/ function(module, exports) {
-
-	/**
-	 * Displays FFT and Oscilloscope graphs from the output of a given AudioNode
-	 */
-	var AudioAnalyzer = (function () {
-	    function AudioAnalyzer(jqfft, jqosc) {
-	        this.canvasFFT = this.createCanvas(jqfft);
-	        this.gcFFT = this.canvasFFT.getContext('2d');
-	        this.canvasOsc = this.createCanvas(jqosc);
-	        this.gcOsc = this.canvasOsc.getContext('2d');
-	    }
-	    AudioAnalyzer.prototype.createCanvas = function (panel) {
-	        var jqCanvas = $("<canvas width=\"" + panel.width() + "\" height=\"" + panel.height() + "\">");
-	        panel.append(jqCanvas);
-	        var canvas = jqCanvas[0];
-	        return canvas;
-	    };
-	    AudioAnalyzer.prototype.createAnalyzerNode = function (ac) {
-	        if (this.anode)
-	            return;
-	        this.anode = ac.createAnalyser();
-	        this.fftData = new Uint8Array(this.anode.fftSize);
-	        this.oscData = new Uint8Array(this.anode.fftSize);
-	    };
-	    AudioAnalyzer.prototype.analyze = function (input) {
-	        this.disconnect();
-	        this.createAnalyzerNode(input.context);
-	        this.input = input;
-	        this.input.connect(this.anode);
-	        this.requestAnimationFrame();
-	    };
-	    AudioAnalyzer.prototype.disconnect = function () {
-	        if (!this.input)
-	            return;
-	        this.input.disconnect(this.anode);
-	        this.input = null;
-	    };
-	    AudioAnalyzer.prototype.requestAnimationFrame = function () {
-	        var _this = this;
-	        window.requestAnimationFrame(function (_) { return _this.updateCanvas(); });
-	    };
-	    AudioAnalyzer.prototype.updateCanvas = function () {
-	        if (!this.input)
-	            return;
-	        this.drawFFT(this.gcFFT, this.canvasFFT, this.fftData, '#00FF00');
-	        this.drawOsc(this.gcOsc, this.canvasOsc, this.oscData, '#FFFF00');
-	        this.requestAnimationFrame();
-	    };
-	    AudioAnalyzer.prototype.drawFFT = function (gc, canvas, data, color) {
-	        var _a = this.setupDraw(gc, canvas, data, color), w = _a[0], h = _a[1];
-	        this.anode.getByteFrequencyData(data);
-	        var dx = (data.length / 2) / canvas.width;
-	        var x = 0;
-	        //TODO calculate average of all samples from x to x + dx - 1
-	        for (var i = 0; i < w; i++) {
-	            var y = data[Math.floor(x)];
-	            x += dx;
-	            gc.moveTo(i, h - 1);
-	            gc.lineTo(i, h - 1 - h * y / 256);
-	        }
-	        gc.stroke();
-	        gc.closePath();
-	    };
-	    AudioAnalyzer.prototype.drawOsc = function (gc, canvas, data, color) {
-	        var _a = this.setupDraw(gc, canvas, data, color), w = _a[0], h = _a[1];
-	        this.anode.getByteTimeDomainData(data);
-	        gc.moveTo(0, h / 2);
-	        var x = 0;
-	        while (data[x] > 128 && x < data.length / 4)
-	            x++;
-	        while (data[x] < 128 && x < data.length / 4)
-	            x++;
-	        var dx = (data.length * 0.75) / canvas.width;
-	        for (var i = 0; i < w; i++) {
-	            var y = data[Math.floor(x)];
-	            x += dx;
-	            gc.lineTo(i, h * y / 256);
-	        }
-	        gc.stroke();
-	        gc.closePath();
-	    };
-	    AudioAnalyzer.prototype.setupDraw = function (gc, canvas, data, color) {
-	        var w = canvas.width;
-	        var h = canvas.height;
-	        gc.clearRect(0, 0, w, h);
-	        gc.beginPath();
-	        gc.strokeStyle = color;
-	        return [w, h];
-	    };
-	    return AudioAnalyzer;
-	})();
-	exports.AudioAnalyzer = AudioAnalyzer;
-
-
-/***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var keyboard_1 = __webpack_require__(11);
-	var piano_1 = __webpack_require__(12);
-	var instrument_1 = __webpack_require__(13);
-	var NUM_VOICES = 5;
-	/**
-	 * Manages all note-generation inputs:
-	 * 	- PC Keyboard
-	 * 	- Virtual piano keyboard
-	 *	- Eventually it should also integrate with Web MIDI
-	 * Handles switching to polyphonic mode and back to mono
-	 */
-	var NoteInputs = (function () {
-	    function NoteInputs(synthUI) {
-	        var _this = this;
-	        this.synthUI = synthUI;
-	        this.poly = false;
-	        // Setup piano panel
-	        var piano = new piano_1.PianoKeyboard($('#piano'));
-	        piano.noteOn = function (midi, ratio) { return _this.noteOn(midi, 1, ratio); };
-	        piano.noteOff = function (midi) { return _this.noteOff(midi, 1); };
-	        // Register poly on/off handlers
-	        piano.polyOn = function () { return _this.polyOn(); };
-	        piano.polyOff = function () { return _this.polyOff(); };
-	        // Setup PC keyboard
-	        var kb = new keyboard_1.Keyboard();
-	        kb.noteOn = function (midi, ratio) {
-	            if (document.activeElement.nodeName == 'INPUT' &&
-	                document.activeElement.getAttribute('type') != 'range')
-	                return;
-	            _this.noteOn(midi, 1, ratio);
-	            piano.displayKeyDown(midi);
-	        };
-	        kb.noteOff = function (midi) {
-	            _this.noteOff(midi, 1);
-	            piano.displayKeyUp(midi);
-	        };
-	        // Bind piano octave with PC keyboard
-	        kb.baseNote = piano.baseNote;
-	        piano.octaveChanged = function (baseNote) { return kb.baseNote = baseNote; };
-	        this.setupEnvelopeAnimation(piano);
-	    }
-	    NoteInputs.prototype.setupEnvelopeAnimation = function (piano) {
-	        var loaded = this.synthUI.gr.handler.graphLoaded;
-	        this.synthUI.gr.handler.graphLoaded = function () {
-	            loaded.bind(this.synthUI.gr.handler)();
-	            var adsr = null;
-	            for (var _i = 0, _a = this.synthUI.gr.nodes; _i < _a.length; _i++) {
-	                var node = _a[_i];
-	                var data = node.data;
-	                if (data.type == 'ADSR') {
-	                    adsr = data.anode;
-	                    break;
-	                }
-	            }
-	            piano.setEnvelope(adsr || { attack: 0, release: 0 });
-	        };
-	    };
-	    NoteInputs.prototype.noteOn = function (midi, velocity, ratio) {
-	        this.lastNote = midi;
-	        if (this.poly)
-	            this.instrument.noteOn(midi, velocity, ratio);
-	        else
-	            this.synthUI.synth.noteOn(midi, velocity, ratio);
-	    };
-	    NoteInputs.prototype.noteOff = function (midi, velocity) {
-	        this.lastNote = 0;
-	        if (this.poly)
-	            this.instrument.noteOff(midi, velocity);
-	        else
-	            this.synthUI.synth.noteOff(midi, velocity);
-	    };
-	    NoteInputs.prototype.polyOn = function () {
-	        if (this.lastNote)
-	            this.noteOff(this.lastNote, 1);
-	        this.poly = true;
-	        var json = this.synthUI.gr.toJSON();
-	        this.instrument = new instrument_1.Instrument(this.synthUI.synth.ac, json, NUM_VOICES);
-	    };
-	    NoteInputs.prototype.polyOff = function () {
-	        this.poly = false;
-	        this.instrument.close();
-	    };
-	    return NoteInputs;
-	})();
-	exports.NoteInputs = NoteInputs;
-
-
-/***/ },
-/* 11 */
-/***/ function(module, exports) {
-
-	var KB_NOTES = 'ZSXDCVGBHNJMQ2W3ER5T6Y7UI9O0P';
-	var BASE_NOTE = 36;
-	var SEMITONE = Math.pow(2, 1 / 12);
-	var A4 = 57;
-	/**
-	 * Provides a piano keyboard using the PC keyboard.
-	 * Listens to keyboard events and generates MIDI-style noteOn/noteOff events.
-	 */
-	var Keyboard = (function () {
-	    function Keyboard() {
-	        this.setupHandler();
-	        this.baseNote = BASE_NOTE;
-	    }
-	    Keyboard.prototype.setupHandler = function () {
-	        var _this = this;
-	        var pressedKeys = {};
-	        $('body')
-	            .on('keydown', function (evt) {
-	            if (pressedKeys[evt.keyCode])
-	                return; // Skip repetitions
-	            if (evt.metaKey || evt.altKey)
-	                return; // Skip browser shortcuts
-	            pressedKeys[evt.keyCode] = true;
-	            var midi = _this.key2midi(evt.keyCode);
-	            if (midi < 0)
-	                return;
-	            _this.noteOn(midi, midi2freqRatio(midi));
-	        })
-	            .on('keyup', function (evt) {
-	            pressedKeys[evt.keyCode] = false;
-	            var midi = _this.key2midi(evt.keyCode);
-	            if (midi < 0)
-	                return;
-	            _this.noteOff(midi);
-	        });
-	    };
-	    Keyboard.prototype.key2midi = function (keyCode) {
-	        var pos = KB_NOTES.indexOf(String.fromCharCode(keyCode));
-	        if (pos < 0)
-	            return -1;
-	        return this.baseNote + pos;
-	    };
-	    Keyboard.prototype.noteOn = function (midi, ratio) { };
-	    Keyboard.prototype.noteOff = function (midi) { };
-	    return Keyboard;
-	})();
-	exports.Keyboard = Keyboard;
-	function midi2freqRatio(midi) {
-	    return Math.pow(SEMITONE, midi - A4);
-	}
-	exports.midi2freqRatio = midi2freqRatio;
-
-
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var keyboard_1 = __webpack_require__(11);
-	var popups = __webpack_require__(4);
-	var NUM_WHITES = 17;
-	var BASE_NOTE = 36;
-	/**
-	 * A virtual piano keyboard that:
-	 * 	- Captures mouse input and generates corresponding note events
-	 * 	- Displays note events as CSS-animated colors in the pressed keys
-	 * 	- Supports octave switching
-	 * 	- Provides a poly/mono button
-	 */
-	var PianoKeyboard = (function () {
-	    function PianoKeyboard(panel) {
-	        this.baseNote = BASE_NOTE;
-	        this.octave = 3;
-	        this.poly = false;
-	        this.envelope = { attack: 0, release: 0 };
-	        this.createKeys(panel);
-	        for (var i = 0; i < this.keys.length; i++)
-	            this.registerKey(this.keys[i], i);
-	        this.registerButtons();
-	    }
-	    PianoKeyboard.prototype.createKeys = function (panel) {
-	        this.keys = [];
-	        var pw = panel.width();
-	        var ph = panel.height();
-	        var kw = pw / NUM_WHITES + 1;
-	        var bw = kw * 2 / 3;
-	        var bh = ph * 2 / 3;
-	        // Create white keys
-	        var knum = 0;
-	        for (var i = 0; i < NUM_WHITES; i++) {
-	            var key = $('<div class="piano-key">').css({
-	                width: '' + kw + 'px',
-	                height: '' + ph + 'px'
-	            });
-	            panel.append(key);
-	            this.keys[knum++] = key;
-	            if (this.hasBlack(i))
-	                knum++;
-	        }
-	        // Create black keys
-	        var knum = 0;
-	        var x = 10 - bw / 2;
-	        for (var i = 0; i < NUM_WHITES - 1; i++) {
-	            x += kw - 1;
-	            knum++;
-	            if (!this.hasBlack(i))
-	                continue;
-	            var key = $('<div class="piano-key piano-black">').css({
-	                width: '' + bw + 'px',
-	                height: '' + bh + 'px',
-	                left: '' + x + 'px',
-	                top: '10px'
-	            });
-	            panel.append(key);
-	            this.keys[knum++] = key;
-	        }
-	    };
-	    PianoKeyboard.prototype.hasBlack = function (num) {
-	        var mod7 = num % 7;
-	        return mod7 != 2 && mod7 != 6;
-	    };
-	    PianoKeyboard.prototype.registerKey = function (key, knum) {
-	        var _this = this;
-	        key.mousedown(function (_) {
-	            var midi = knum + _this.baseNote;
-	            _this.displayKeyDown(key);
-	            _this.noteOn(midi, keyboard_1.midi2freqRatio(midi));
-	        });
-	        key.mouseup(function (_) {
-	            var midi = knum + _this.baseNote;
-	            _this.displayKeyUp(key);
-	            _this.noteOff(midi);
-	        });
-	    };
-	    PianoKeyboard.prototype.registerButtons = function () {
-	        var _this = this;
-	        $('#poly-but').click(function (_) { return _this.togglePoly(); });
-	        $('#prev-octave-but').click(function (_) {
-	            _this.octave--;
-	            _this.baseNote -= 12;
-	            _this.updateOctave();
-	        });
-	        $('#next-octave-but').click(function (_) {
-	            _this.octave++;
-	            _this.baseNote += 12;
-	            _this.updateOctave();
-	        });
-	    };
-	    PianoKeyboard.prototype.updateOctave = function () {
-	        $('#prev-octave-but').prop('disabled', this.octave <= 1);
-	        $('#next-octave-but').prop('disabled', this.octave >= 8);
-	        $('#octave-label').text('C' + this.octave);
-	        this.octaveChanged(this.baseNote);
-	    };
-	    PianoKeyboard.prototype.displayKeyDown = function (key) {
-	        if (typeof key == 'number')
-	            key = this.midi2key(key);
-	        if (!key)
-	            return;
-	        if (!this.poly && this.lastKey)
-	            this.displayKeyUp(this.lastKey, true);
-	        key.css('transition', "background-color " + this.envelope.attack + "s linear");
-	        key.addClass('piano-key-pressed');
-	        this.lastKey = key;
-	    };
-	    PianoKeyboard.prototype.displayKeyUp = function (key, immediate) {
-	        if (typeof key == 'number')
-	            key = this.midi2key(key);
-	        if (!key)
-	            return;
-	        var release = immediate ? 0 : this.envelope.release;
-	        key.css('transition', "background-color " + release + "s linear");
-	        key.removeClass('piano-key-pressed');
-	    };
-	    PianoKeyboard.prototype.midi2key = function (midi) {
-	        return this.keys[midi - this.baseNote];
-	    };
-	    PianoKeyboard.prototype.setEnvelope = function (adsr) {
-	        this.envelope = adsr;
-	    };
-	    PianoKeyboard.prototype.togglePoly = function () {
-	        this.poly = !this.poly;
-	        if (this.poly) {
-	            var cover = $('<div>').addClass('editor-cover');
-	            cover.append('<p>Synth editing is disabled in polyphonic mode</p>');
-	            $('body').append(cover);
-	            $('#poly-but').text('Back to mono');
-	            popups.isOpen = true;
-	            this.polyOn();
-	        }
-	        else {
-	            $('.editor-cover').remove();
-	            $('#poly-but').text('Poly');
-	            popups.isOpen = false;
-	            this.polyOff();
-	        }
-	    };
-	    // Simple event handlers
-	    PianoKeyboard.prototype.noteOn = function (midi, ratio) { };
-	    PianoKeyboard.prototype.noteOff = function (midi) { };
-	    PianoKeyboard.prototype.polyOn = function () { };
-	    PianoKeyboard.prototype.polyOff = function () { };
-	    PianoKeyboard.prototype.octaveChanged = function (baseNote) { };
-	    return PianoKeyboard;
-	})();
-	exports.PianoKeyboard = PianoKeyboard;
-
-
-/***/ },
-/* 13 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var synthUI_1 = __webpack_require__(1);
-	/**
-	 * A polyphonic synth controlling an array of voices
-	 */
-	var Instrument = (function () {
-	    function Instrument(ac, json, numVoices) {
-	        this.voices = [];
-	        for (var i = 0; i < numVoices; i++)
-	            this.voices.push(new Voice(ac, json));
-	        this.voiceNum = 0;
-	    }
-	    Instrument.prototype.close = function () {
-	        for (var _i = 0, _a = this.voices; _i < _a.length; _i++) {
-	            var voice = _a[_i];
-	            voice.close();
-	        }
-	    };
-	    Instrument.prototype.noteOn = function (midi, velocity, ratio) {
-	        var voice = this.voices[this.voiceNum];
-	        voice.noteOn(midi, velocity, ratio);
-	        this.voiceNum = (this.voiceNum + 1) % this.voices.length;
-	    };
-	    Instrument.prototype.noteOff = function (midi, velocity) {
-	        for (var _i = 0, _a = this.voices; _i < _a.length; _i++) {
-	            var voice = _a[_i];
-	            if (voice.lastNote == midi) {
-	                voice.noteOff(midi, velocity);
-	                break;
-	            }
-	        }
-	    };
-	    return Instrument;
-	})();
-	exports.Instrument = Instrument;
-	/**
-	 * An independent monophonic synth
-	 */
-	var Voice = (function () {
-	    function Voice(ac, json) {
-	        //TODO make an "invisible" voice, decoupled form SynthUI, canvas, and Graph editor
-	        var jqCanvas = $('<canvas width="100" height="100" style="display: none">');
-	        var dummyCanvas = jqCanvas[0];
-	        this.synthUI = new synthUI_1.SynthUI(ac, dummyCanvas, null, jqCanvas, jqCanvas);
-	        this.synthUI.gr.fromJSON(json);
-	        this.lastNote = 0;
-	    }
-	    Voice.prototype.noteOn = function (midi, velocity, ratio) {
-	        this.synthUI.synth.noteOn(midi, velocity, ratio);
-	        this.lastNote = midi;
-	    };
-	    Voice.prototype.close = function () {
-	        if (this.lastNote)
-	            this.noteOff(this.lastNote, 1);
-	        var nodes = this.synthUI.gr.nodes.slice();
-	        for (var _i = 0; _i < nodes.length; _i++) {
-	            var node = nodes[_i];
-	            this.synthUI.removeNode(node);
-	        }
-	    };
-	    Voice.prototype.noteOff = function (midi, velocity) {
-	        this.synthUI.synth.noteOff(midi, velocity);
-	        this.lastNote = 0;
-	    };
-	    return Voice;
-	})();
-	exports.Voice = Voice;
-
-
-/***/ },
-/* 14 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var popups = __webpack_require__(4);
-	var MAX_PRESETS = 20;
-	/**
-	 * Manages the presets box:
-	 * - Handles navigation through presets
-	 * - Handles preset loading & saving
-	 */
-	var Presets = (function () {
-	    function Presets(synthUI) {
-	        this.presetNum = 0;
-	        this.synthUI = synthUI;
-	        this.registerListeners();
-	        this.loadPresets();
-	    }
-	    Presets.prototype.loadPresets = function () {
-	        var _this = this;
-	        this.presets = new Array(MAX_PRESETS);
-	        for (var i = 0; i < MAX_PRESETS; i++)
-	            this.presets[i] = this.getEmptyPreset();
-	        $.get('js/presets.json', function (data) {
-	            if (!(data instanceof Array))
-	                return;
-	            for (var i = 0; i < MAX_PRESETS; i++)
-	                if (data[i])
-	                    _this.presets[i] = data[i];
-	            _this.preset2synth();
-	        });
-	    };
-	    Presets.prototype.getEmptyPreset = function () {
-	        return {
-	            name: '',
-	            nodes: [
-	                { id: 0, x: 500, y: 180, name: 'Out', inputs: [], classes: 'node node-out' }
-	            ],
-	            nodeData: [
-	                { type: 'out', params: {} }
-	            ]
-	        };
-	    };
-	    Presets.prototype.checkButtons = function () {
-	        $('#prev-preset-but').prop('disabled', this.presetNum <= 0);
-	        $('#next-preset-but').prop('disabled', this.presetNum >= MAX_PRESETS - 1);
-	    };
-	    Presets.prototype.registerListeners = function () {
-	        var _this = this;
-	        $('#save-but').click(function (_) {
-	            var json = _this.synthUI.gr.toJSON();
-	            json.name = $('#preset-name').val();
-	            popups.prompt('Copy the text below to the clipboard and save it to a local text file', 'Save preset', JSON.stringify(json), null);
-	        });
-	        $('#load-but').click(function (_) {
-	            popups.prompt('Paste below the contents of a previously saved synth', 'Load preset', null, function (json) {
-	                if (!json)
-	                    return;
-	                _this.presets[_this.presetNum] = JSON.parse(json);
-	                _this.preset2synth();
-	            });
-	        });
-	        $('#prev-preset-but').click(function (_) { return _this.changePreset(-1); });
-	        $('#next-preset-but').click(function (_) { return _this.changePreset(+1); });
-	        $('body').keydown(function (evt) {
-	            if (evt.target.nodeName == 'INPUT' || popups.isOpen)
-	                return;
-	            if (evt.keyCode == 37)
-	                _this.changePreset(-1);
-	            if (evt.keyCode == 39)
-	                _this.changePreset(+1);
-	        });
-	    };
-	    Presets.prototype.changePreset = function (increment) {
-	        var newNum = this.presetNum + increment;
-	        if (newNum < 0 || newNum >= MAX_PRESETS)
-	            return;
-	        this.synth2preset();
-	        this.presetNum = newNum;
-	        this.preset2synth();
-	    };
-	    Presets.prototype.synth2preset = function () {
-	        this.presets[this.presetNum] = this.synthUI.gr.toJSON();
-	        this.presets[this.presetNum].name = $('#preset-name').val();
-	    };
-	    Presets.prototype.preset2synth = function () {
-	        var preset = this.presets[this.presetNum];
-	        $('#preset-num').text(this.presetNum + 1);
-	        $('#preset-name').val(preset.name);
-	        $('#node-params').empty();
-	        this.checkButtons();
-	        this.synthUI.gr.fromJSON(preset);
-	    };
-	    return Presets;
-	})();
-	exports.Presets = Presets;
-
-
-/***/ },
-/* 15 */
-/***/ function(module, exports) {
-
 	var __extends = (this && this.__extends) || function (d, b) {
 	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
 	    function __() { this.constructor = d; }
@@ -2385,6 +1637,754 @@
 	    return LineInNode;
 	})(CustomNodeBase);
 	exports.LineInNode = LineInNode;
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports) {
+
+	/**
+	 * Renders the UI controls associated with the parameters of a given node
+	 */
+	function renderParams(ndata, panel) {
+	    panel.empty();
+	    var boxes = [];
+	    if (ndata.nodeDef.control && ndata.controlParams)
+	        boxes.push(renderParamControl(ndata, panel));
+	    var params = Object.keys(ndata.nodeDef.params || {});
+	    if (params.length <= 0)
+	        return;
+	    for (var _i = 0; _i < params.length; _i++) {
+	        var param = params[_i];
+	        if (ndata.anode[param] instanceof AudioParam)
+	            boxes.push(renderAudioParam(ndata.anode, ndata.nodeDef, param, panel));
+	        else
+	            boxes.push(renderOtherParam(ndata.anode, ndata.nodeDef, param, panel));
+	    }
+	    positionBoxes(panel, boxes);
+	}
+	exports.renderParams = renderParams;
+	function positionBoxes(panel, boxes) {
+	    var pw = panel.width();
+	    var bw = boxes[0].width();
+	    var sep = (pw - boxes.length * bw) / (boxes.length + 1);
+	    var x = sep;
+	    for (var _i = 0; _i < boxes.length; _i++) {
+	        var box = boxes[_i];
+	        box.css({
+	            position: 'relative',
+	            left: x
+	        });
+	        x += sep;
+	    }
+	}
+	function renderAudioParam(anode, ndef, param, panel) {
+	    var pdef = ndef.params[param];
+	    var aparam = anode[param];
+	    if (aparam['_value'])
+	        aparam.value = aparam['_value'];
+	    return renderSlider(panel, pdef, param, aparam.value, function (value) {
+	        aparam.value = value;
+	        aparam['_value'] = value;
+	    });
+	}
+	function renderParamControl(ndata, panel) {
+	    if (!ndata.controlParams)
+	        return;
+	    var combo = renderCombo(panel, ndata.controlParams, ndata.controlParam, 'Controlling');
+	    combo.change(function (_) {
+	        if (ndata.controlParam)
+	            ndata.anode.disconnect(ndata.controlTarget[ndata.controlParam]);
+	        ndata.controlParam = combo.val();
+	        ndata.anode.connect(ndata.controlTarget[ndata.controlParam]);
+	    });
+	    return combo.parent();
+	}
+	function renderOtherParam(anode, ndef, param, panel) {
+	    var pdef = ndef.params[param];
+	    if (pdef.choices) {
+	        var combo = renderCombo(panel, pdef.choices, anode[param], ucfirst(param));
+	        combo.change(function (_) {
+	            anode[param] = combo.val();
+	        });
+	        return combo.parent();
+	    }
+	    else if (pdef.min != undefined)
+	        return renderSlider(panel, pdef, param, anode[param], function (value) { return anode[param] = value; });
+	    else if (typeof pdef.initial == 'boolean')
+	        return renderBoolean(panel, pdef, param, anode, ucfirst(param));
+	    else if (pdef.phandler)
+	        return pdef.phandler.renderParam(panel, pdef, anode, param, ucfirst(param));
+	}
+	function renderSlider(panel, pdef, param, value, setValue) {
+	    var sliderBox = $('<div class="slider-box">');
+	    var slider = $('<input type="range" orient="vertical">')
+	        .attr('min', 0)
+	        .attr('max', 1)
+	        .attr('step', 0.001)
+	        .attr('value', param2slider(value, pdef));
+	    var numInput = $('<input type="number">')
+	        .attr('min', pdef.min)
+	        .attr('max', pdef.max)
+	        .attr('value', truncateFloat(value, 5));
+	    sliderBox.append(numInput);
+	    sliderBox.append(slider);
+	    sliderBox.append($('<span><br/>' + ucfirst(param) + '</span>'));
+	    panel.append(sliderBox);
+	    slider.on('input', function (_) {
+	        var value = slider2param(parseFloat(slider.val()), pdef);
+	        numInput.val(truncateFloat(value, 5));
+	        setValue(value);
+	    });
+	    numInput.on('input', function (_) {
+	        var value = parseFloat(numInput.val());
+	        if (isNaN(value))
+	            return;
+	        slider.val(param2slider(value, pdef));
+	        setValue(value);
+	    });
+	    return sliderBox;
+	}
+	function renderCombo(panel, choices, selected, label) {
+	    var choiceBox = $('<div class="choice-box">');
+	    var combo = $('<select>').attr('size', choices.length);
+	    for (var _i = 0; _i < choices.length; _i++) {
+	        var choice = choices[_i];
+	        var option = $('<option>').text(choice);
+	        if (choice == selected)
+	            option.attr('selected', 'selected');
+	        combo.append(option);
+	    }
+	    choiceBox.append(combo);
+	    combo.after('<br/><br/>' + label);
+	    panel.append(choiceBox);
+	    return combo;
+	}
+	function renderBoolean(panel, pdef, param, anode, label) {
+	    var box = $('<div class="choice-box">');
+	    var button = $('<button class="btn btn-info" data-toggle="button" aria-pressed="false">');
+	    box.append(button);
+	    button.after('<br/><br/>' + label);
+	    panel.append(box);
+	    if (anode[param]) {
+	        button.text('Enabled');
+	        button.addClass('active');
+	        button.attr('aria-pressed', 'true');
+	    }
+	    else {
+	        button.text('Disabled');
+	        button.removeClass('active');
+	        button.attr('aria-pressed', 'false');
+	    }
+	    button.click(function (_) {
+	        anode[param] = !anode[param];
+	        button.text(anode[param] ? 'Enabled' : 'Disabled');
+	    });
+	    return box;
+	}
+	var LOG_BASE = 2;
+	function logarithm(base, x) {
+	    return Math.log(x) / Math.log(base);
+	}
+	function param2slider(paramValue, pdef) {
+	    if (pdef.linear) {
+	        return (paramValue - pdef.min) / (pdef.max - pdef.min);
+	    }
+	    else {
+	        var logRange = logarithm(LOG_BASE, pdef.max + 1 - pdef.min);
+	        return logarithm(LOG_BASE, paramValue + 1 - pdef.min) / logRange;
+	    }
+	}
+	function slider2param(sliderValue, pdef) {
+	    if (pdef.linear) {
+	        return pdef.min + sliderValue * (pdef.max - pdef.min);
+	    }
+	    else {
+	        var logRange = logarithm(LOG_BASE, pdef.max + 1 - pdef.min);
+	        return pdef.min + Math.pow(LOG_BASE, sliderValue * logRange) - 1;
+	    }
+	}
+	//-------------------- Misc utilities --------------------
+	function ucfirst(str) {
+	    return str[0].toUpperCase() + str.substring(1);
+	}
+	function truncateFloat(f, len) {
+	    var s = '' + f;
+	    s = s.substr(0, len);
+	    if (s[s.length - 1] == '.')
+	        return s.substr(0, len - 1);
+	    else
+	        return s;
+	}
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports) {
+
+	/**
+	 * Displays FFT and Oscilloscope graphs from the output of a given AudioNode
+	 */
+	var AudioAnalyzer = (function () {
+	    function AudioAnalyzer(jqfft, jqosc) {
+	        this.canvasFFT = this.createCanvas(jqfft);
+	        this.gcFFT = this.canvasFFT.getContext('2d');
+	        this.canvasOsc = this.createCanvas(jqosc);
+	        this.gcOsc = this.canvasOsc.getContext('2d');
+	    }
+	    AudioAnalyzer.prototype.createCanvas = function (panel) {
+	        var jqCanvas = $("<canvas width=\"" + panel.width() + "\" height=\"" + panel.height() + "\">");
+	        panel.append(jqCanvas);
+	        var canvas = jqCanvas[0];
+	        return canvas;
+	    };
+	    AudioAnalyzer.prototype.createAnalyzerNode = function (ac) {
+	        if (this.anode)
+	            return;
+	        this.anode = ac.createAnalyser();
+	        this.fftData = new Uint8Array(this.anode.fftSize);
+	        this.oscData = new Uint8Array(this.anode.fftSize);
+	    };
+	    AudioAnalyzer.prototype.analyze = function (input) {
+	        this.disconnect();
+	        this.createAnalyzerNode(input.context);
+	        this.input = input;
+	        this.input.connect(this.anode);
+	        this.requestAnimationFrame();
+	    };
+	    AudioAnalyzer.prototype.disconnect = function () {
+	        if (!this.input)
+	            return;
+	        this.input.disconnect(this.anode);
+	        this.input = null;
+	    };
+	    AudioAnalyzer.prototype.requestAnimationFrame = function () {
+	        var _this = this;
+	        window.requestAnimationFrame(function (_) { return _this.updateCanvas(); });
+	    };
+	    AudioAnalyzer.prototype.updateCanvas = function () {
+	        if (!this.input)
+	            return;
+	        this.drawFFT(this.gcFFT, this.canvasFFT, this.fftData, '#00FF00');
+	        this.drawOsc(this.gcOsc, this.canvasOsc, this.oscData, '#FFFF00');
+	        this.requestAnimationFrame();
+	    };
+	    AudioAnalyzer.prototype.drawFFT = function (gc, canvas, data, color) {
+	        var _a = this.setupDraw(gc, canvas, data, color), w = _a[0], h = _a[1];
+	        this.anode.getByteFrequencyData(data);
+	        var dx = (data.length / 2) / canvas.width;
+	        var x = 0;
+	        //TODO calculate average of all samples from x to x + dx - 1
+	        for (var i = 0; i < w; i++) {
+	            var y = data[Math.floor(x)];
+	            x += dx;
+	            gc.moveTo(i, h - 1);
+	            gc.lineTo(i, h - 1 - h * y / 256);
+	        }
+	        gc.stroke();
+	        gc.closePath();
+	    };
+	    AudioAnalyzer.prototype.drawOsc = function (gc, canvas, data, color) {
+	        var _a = this.setupDraw(gc, canvas, data, color), w = _a[0], h = _a[1];
+	        this.anode.getByteTimeDomainData(data);
+	        gc.moveTo(0, h / 2);
+	        var x = 0;
+	        while (data[x] > 128 && x < data.length / 4)
+	            x++;
+	        while (data[x] < 128 && x < data.length / 4)
+	            x++;
+	        var dx = (data.length * 0.75) / canvas.width;
+	        for (var i = 0; i < w; i++) {
+	            var y = data[Math.floor(x)];
+	            x += dx;
+	            gc.lineTo(i, h * y / 256);
+	        }
+	        gc.stroke();
+	        gc.closePath();
+	    };
+	    AudioAnalyzer.prototype.setupDraw = function (gc, canvas, data, color) {
+	        var w = canvas.width;
+	        var h = canvas.height;
+	        gc.clearRect(0, 0, w, h);
+	        gc.beginPath();
+	        gc.strokeStyle = color;
+	        return [w, h];
+	    };
+	    return AudioAnalyzer;
+	})();
+	exports.AudioAnalyzer = AudioAnalyzer;
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var keyboard_1 = __webpack_require__(12);
+	var piano_1 = __webpack_require__(13);
+	var instrument_1 = __webpack_require__(14);
+	var NUM_VOICES = 5;
+	/**
+	 * Manages all note-generation inputs:
+	 * 	- PC Keyboard
+	 * 	- Virtual piano keyboard
+	 *	- Eventually it should also integrate with Web MIDI
+	 * Handles switching to polyphonic mode and back to mono
+	 */
+	var NoteInputs = (function () {
+	    function NoteInputs(synthUI) {
+	        var _this = this;
+	        this.synthUI = synthUI;
+	        this.poly = false;
+	        // Setup piano panel
+	        var piano = new piano_1.PianoKeyboard($('#piano'));
+	        piano.noteOn = function (midi, ratio) { return _this.noteOn(midi, 1, ratio); };
+	        piano.noteOff = function (midi) { return _this.noteOff(midi, 1); };
+	        // Register poly on/off handlers
+	        piano.polyOn = function () { return _this.polyOn(); };
+	        piano.polyOff = function () { return _this.polyOff(); };
+	        // Setup PC keyboard
+	        var kb = new keyboard_1.Keyboard();
+	        kb.noteOn = function (midi, ratio) {
+	            if (document.activeElement.nodeName == 'INPUT' &&
+	                document.activeElement.getAttribute('type') != 'range')
+	                return;
+	            _this.noteOn(midi, 1, ratio);
+	            piano.displayKeyDown(midi);
+	        };
+	        kb.noteOff = function (midi) {
+	            _this.noteOff(midi, 1);
+	            piano.displayKeyUp(midi);
+	        };
+	        // Bind piano octave with PC keyboard
+	        kb.baseNote = piano.baseNote;
+	        piano.octaveChanged = function (baseNote) { return kb.baseNote = baseNote; };
+	        this.setupEnvelopeAnimation(piano);
+	    }
+	    NoteInputs.prototype.setupEnvelopeAnimation = function (piano) {
+	        var loaded = this.synthUI.gr.handler.graphLoaded;
+	        this.synthUI.gr.handler.graphLoaded = function () {
+	            loaded.bind(this.synthUI.gr.handler)();
+	            var adsr = null;
+	            for (var _i = 0, _a = this.synthUI.gr.nodes; _i < _a.length; _i++) {
+	                var node = _a[_i];
+	                var data = node.data;
+	                if (data.type == 'ADSR') {
+	                    adsr = data.anode;
+	                    break;
+	                }
+	            }
+	            piano.setEnvelope(adsr || { attack: 0, release: 0 });
+	        };
+	    };
+	    NoteInputs.prototype.noteOn = function (midi, velocity, ratio) {
+	        this.lastNote = midi;
+	        if (this.poly)
+	            this.instrument.noteOn(midi, velocity, ratio);
+	        else
+	            this.synthUI.synth.noteOn(midi, velocity, ratio);
+	    };
+	    NoteInputs.prototype.noteOff = function (midi, velocity) {
+	        this.lastNote = 0;
+	        if (this.poly)
+	            this.instrument.noteOff(midi, velocity);
+	        else
+	            this.synthUI.synth.noteOff(midi, velocity);
+	    };
+	    NoteInputs.prototype.polyOn = function () {
+	        if (this.lastNote)
+	            this.noteOff(this.lastNote, 1);
+	        this.poly = true;
+	        var json = this.synthUI.gr.toJSON();
+	        this.instrument = new instrument_1.Instrument(this.synthUI.synth.ac, json, NUM_VOICES);
+	    };
+	    NoteInputs.prototype.polyOff = function () {
+	        this.poly = false;
+	        this.instrument.close();
+	    };
+	    return NoteInputs;
+	})();
+	exports.NoteInputs = NoteInputs;
+
+
+/***/ },
+/* 12 */
+/***/ function(module, exports) {
+
+	var KB_NOTES = 'ZSXDCVGBHNJMQ2W3ER5T6Y7UI9O0P';
+	var BASE_NOTE = 36;
+	var SEMITONE = Math.pow(2, 1 / 12);
+	var A4 = 57;
+	/**
+	 * Provides a piano keyboard using the PC keyboard.
+	 * Listens to keyboard events and generates MIDI-style noteOn/noteOff events.
+	 */
+	var Keyboard = (function () {
+	    function Keyboard() {
+	        this.setupHandler();
+	        this.baseNote = BASE_NOTE;
+	    }
+	    Keyboard.prototype.setupHandler = function () {
+	        var _this = this;
+	        var pressedKeys = {};
+	        $('body')
+	            .on('keydown', function (evt) {
+	            if (pressedKeys[evt.keyCode])
+	                return; // Skip repetitions
+	            if (evt.metaKey || evt.altKey)
+	                return; // Skip browser shortcuts
+	            pressedKeys[evt.keyCode] = true;
+	            var midi = _this.key2midi(evt.keyCode);
+	            if (midi < 0)
+	                return;
+	            _this.noteOn(midi, midi2freqRatio(midi));
+	        })
+	            .on('keyup', function (evt) {
+	            pressedKeys[evt.keyCode] = false;
+	            var midi = _this.key2midi(evt.keyCode);
+	            if (midi < 0)
+	                return;
+	            _this.noteOff(midi);
+	        });
+	    };
+	    Keyboard.prototype.key2midi = function (keyCode) {
+	        var pos = KB_NOTES.indexOf(String.fromCharCode(keyCode));
+	        if (pos < 0)
+	            return -1;
+	        return this.baseNote + pos;
+	    };
+	    Keyboard.prototype.noteOn = function (midi, ratio) { };
+	    Keyboard.prototype.noteOff = function (midi) { };
+	    return Keyboard;
+	})();
+	exports.Keyboard = Keyboard;
+	function midi2freqRatio(midi) {
+	    return Math.pow(SEMITONE, midi - A4);
+	}
+	exports.midi2freqRatio = midi2freqRatio;
+
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var keyboard_1 = __webpack_require__(12);
+	var popups = __webpack_require__(4);
+	var NUM_WHITES = 17;
+	var BASE_NOTE = 36;
+	/**
+	 * A virtual piano keyboard that:
+	 * 	- Captures mouse input and generates corresponding note events
+	 * 	- Displays note events as CSS-animated colors in the pressed keys
+	 * 	- Supports octave switching
+	 * 	- Provides a poly/mono button
+	 */
+	var PianoKeyboard = (function () {
+	    function PianoKeyboard(panel) {
+	        this.baseNote = BASE_NOTE;
+	        this.octave = 3;
+	        this.poly = false;
+	        this.envelope = { attack: 0, release: 0 };
+	        this.createKeys(panel);
+	        for (var i = 0; i < this.keys.length; i++)
+	            this.registerKey(this.keys[i], i);
+	        this.registerButtons();
+	    }
+	    PianoKeyboard.prototype.createKeys = function (panel) {
+	        this.keys = [];
+	        var pw = panel.width();
+	        var ph = panel.height();
+	        var kw = pw / NUM_WHITES + 1;
+	        var bw = kw * 2 / 3;
+	        var bh = ph * 2 / 3;
+	        // Create white keys
+	        var knum = 0;
+	        for (var i = 0; i < NUM_WHITES; i++) {
+	            var key = $('<div class="piano-key">').css({
+	                width: '' + kw + 'px',
+	                height: '' + ph + 'px'
+	            });
+	            panel.append(key);
+	            this.keys[knum++] = key;
+	            if (this.hasBlack(i))
+	                knum++;
+	        }
+	        // Create black keys
+	        var knum = 0;
+	        var x = 10 - bw / 2;
+	        for (var i = 0; i < NUM_WHITES - 1; i++) {
+	            x += kw - 1;
+	            knum++;
+	            if (!this.hasBlack(i))
+	                continue;
+	            var key = $('<div class="piano-key piano-black">').css({
+	                width: '' + bw + 'px',
+	                height: '' + bh + 'px',
+	                left: '' + x + 'px',
+	                top: '10px'
+	            });
+	            panel.append(key);
+	            this.keys[knum++] = key;
+	        }
+	    };
+	    PianoKeyboard.prototype.hasBlack = function (num) {
+	        var mod7 = num % 7;
+	        return mod7 != 2 && mod7 != 6;
+	    };
+	    PianoKeyboard.prototype.registerKey = function (key, knum) {
+	        var _this = this;
+	        key.mousedown(function (_) {
+	            var midi = knum + _this.baseNote;
+	            _this.displayKeyDown(key);
+	            _this.noteOn(midi, keyboard_1.midi2freqRatio(midi));
+	        });
+	        key.mouseup(function (_) {
+	            var midi = knum + _this.baseNote;
+	            _this.displayKeyUp(key);
+	            _this.noteOff(midi);
+	        });
+	    };
+	    PianoKeyboard.prototype.registerButtons = function () {
+	        var _this = this;
+	        $('#poly-but').click(function (_) { return _this.togglePoly(); });
+	        $('#prev-octave-but').click(function (_) {
+	            _this.octave--;
+	            _this.baseNote -= 12;
+	            _this.updateOctave();
+	        });
+	        $('#next-octave-but').click(function (_) {
+	            _this.octave++;
+	            _this.baseNote += 12;
+	            _this.updateOctave();
+	        });
+	    };
+	    PianoKeyboard.prototype.updateOctave = function () {
+	        $('#prev-octave-but').prop('disabled', this.octave <= 1);
+	        $('#next-octave-but').prop('disabled', this.octave >= 8);
+	        $('#octave-label').text('C' + this.octave);
+	        this.octaveChanged(this.baseNote);
+	    };
+	    PianoKeyboard.prototype.displayKeyDown = function (key) {
+	        if (typeof key == 'number')
+	            key = this.midi2key(key);
+	        if (!key)
+	            return;
+	        if (!this.poly && this.lastKey)
+	            this.displayKeyUp(this.lastKey, true);
+	        key.css('transition', "background-color " + this.envelope.attack + "s linear");
+	        key.addClass('piano-key-pressed');
+	        this.lastKey = key;
+	    };
+	    PianoKeyboard.prototype.displayKeyUp = function (key, immediate) {
+	        if (typeof key == 'number')
+	            key = this.midi2key(key);
+	        if (!key)
+	            return;
+	        var release = immediate ? 0 : this.envelope.release;
+	        key.css('transition', "background-color " + release + "s linear");
+	        key.removeClass('piano-key-pressed');
+	    };
+	    PianoKeyboard.prototype.midi2key = function (midi) {
+	        return this.keys[midi - this.baseNote];
+	    };
+	    PianoKeyboard.prototype.setEnvelope = function (adsr) {
+	        this.envelope = adsr;
+	    };
+	    PianoKeyboard.prototype.togglePoly = function () {
+	        this.poly = !this.poly;
+	        if (this.poly) {
+	            var cover = $('<div>').addClass('editor-cover');
+	            cover.append('<p>Synth editing is disabled in polyphonic mode</p>');
+	            $('body').append(cover);
+	            $('#poly-but').text('Back to mono');
+	            popups.isOpen = true;
+	            this.polyOn();
+	        }
+	        else {
+	            $('.editor-cover').remove();
+	            $('#poly-but').text('Poly');
+	            popups.isOpen = false;
+	            this.polyOff();
+	        }
+	    };
+	    // Simple event handlers
+	    PianoKeyboard.prototype.noteOn = function (midi, ratio) { };
+	    PianoKeyboard.prototype.noteOff = function (midi) { };
+	    PianoKeyboard.prototype.polyOn = function () { };
+	    PianoKeyboard.prototype.polyOff = function () { };
+	    PianoKeyboard.prototype.octaveChanged = function (baseNote) { };
+	    return PianoKeyboard;
+	})();
+	exports.PianoKeyboard = PianoKeyboard;
+
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var synthUI_1 = __webpack_require__(1);
+	/**
+	 * A polyphonic synth controlling an array of voices
+	 */
+	var Instrument = (function () {
+	    function Instrument(ac, json, numVoices) {
+	        this.voices = [];
+	        for (var i = 0; i < numVoices; i++)
+	            this.voices.push(new Voice(ac, json));
+	        this.voiceNum = 0;
+	    }
+	    Instrument.prototype.close = function () {
+	        for (var _i = 0, _a = this.voices; _i < _a.length; _i++) {
+	            var voice = _a[_i];
+	            voice.close();
+	        }
+	    };
+	    Instrument.prototype.noteOn = function (midi, velocity, ratio) {
+	        var voice = this.voices[this.voiceNum];
+	        voice.noteOn(midi, velocity, ratio);
+	        this.voiceNum = (this.voiceNum + 1) % this.voices.length;
+	    };
+	    Instrument.prototype.noteOff = function (midi, velocity) {
+	        for (var _i = 0, _a = this.voices; _i < _a.length; _i++) {
+	            var voice = _a[_i];
+	            if (voice.lastNote == midi) {
+	                voice.noteOff(midi, velocity);
+	                break;
+	            }
+	        }
+	    };
+	    return Instrument;
+	})();
+	exports.Instrument = Instrument;
+	/**
+	 * An independent monophonic synth
+	 */
+	var Voice = (function () {
+	    function Voice(ac, json) {
+	        //TODO make an "invisible" voice, decoupled form SynthUI, canvas, and Graph editor
+	        var jqCanvas = $('<canvas width="100" height="100" style="display: none">');
+	        var dummyCanvas = jqCanvas[0];
+	        this.synthUI = new synthUI_1.SynthUI(ac, dummyCanvas, null, jqCanvas, jqCanvas);
+	        this.synthUI.gr.fromJSON(json);
+	        this.lastNote = 0;
+	    }
+	    Voice.prototype.noteOn = function (midi, velocity, ratio) {
+	        this.synthUI.synth.noteOn(midi, velocity, ratio);
+	        this.lastNote = midi;
+	    };
+	    Voice.prototype.close = function () {
+	        if (this.lastNote)
+	            this.noteOff(this.lastNote, 1);
+	        var nodes = this.synthUI.gr.nodes.slice();
+	        for (var _i = 0; _i < nodes.length; _i++) {
+	            var node = nodes[_i];
+	            this.synthUI.removeNode(node);
+	        }
+	    };
+	    Voice.prototype.noteOff = function (midi, velocity) {
+	        this.synthUI.synth.noteOff(midi, velocity);
+	        this.lastNote = 0;
+	    };
+	    return Voice;
+	})();
+	exports.Voice = Voice;
+
+
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var popups = __webpack_require__(4);
+	var MAX_PRESETS = 20;
+	/**
+	 * Manages the presets box:
+	 * - Handles navigation through presets
+	 * - Handles preset loading & saving
+	 */
+	var Presets = (function () {
+	    function Presets(synthUI) {
+	        this.presetNum = 0;
+	        this.synthUI = synthUI;
+	        this.registerListeners();
+	        this.loadPresets();
+	    }
+	    Presets.prototype.loadPresets = function () {
+	        var _this = this;
+	        this.presets = new Array(MAX_PRESETS);
+	        for (var i = 0; i < MAX_PRESETS; i++)
+	            this.presets[i] = this.getEmptyPreset();
+	        $.get('js/presets.json', function (data) {
+	            if (!(data instanceof Array))
+	                return;
+	            for (var i = 0; i < MAX_PRESETS; i++)
+	                if (data[i])
+	                    _this.presets[i] = data[i];
+	            _this.preset2synth();
+	        });
+	    };
+	    Presets.prototype.getEmptyPreset = function () {
+	        return {
+	            name: '',
+	            nodes: [
+	                { id: 0, x: 500, y: 180, name: 'Out', inputs: [], classes: 'node node-out' }
+	            ],
+	            nodeData: [
+	                { type: 'out', params: {} }
+	            ]
+	        };
+	    };
+	    Presets.prototype.checkButtons = function () {
+	        $('#prev-preset-but').prop('disabled', this.presetNum <= 0);
+	        $('#next-preset-but').prop('disabled', this.presetNum >= MAX_PRESETS - 1);
+	    };
+	    Presets.prototype.registerListeners = function () {
+	        var _this = this;
+	        $('#save-but').click(function (_) {
+	            var json = _this.synthUI.gr.toJSON();
+	            json.name = $('#preset-name').val();
+	            popups.prompt('Copy the text below to the clipboard and save it to a local text file', 'Save preset', JSON.stringify(json), null);
+	        });
+	        $('#load-but').click(function (_) {
+	            popups.prompt('Paste below the contents of a previously saved synth', 'Load preset', null, function (json) {
+	                if (!json)
+	                    return;
+	                _this.presets[_this.presetNum] = JSON.parse(json);
+	                _this.preset2synth();
+	            });
+	        });
+	        $('#prev-preset-but').click(function (_) { return _this.changePreset(-1); });
+	        $('#next-preset-but').click(function (_) { return _this.changePreset(+1); });
+	        $('body').keydown(function (evt) {
+	            if (evt.target.nodeName == 'INPUT' || popups.isOpen)
+	                return;
+	            if (evt.keyCode == 37)
+	                _this.changePreset(-1);
+	            if (evt.keyCode == 39)
+	                _this.changePreset(+1);
+	        });
+	    };
+	    Presets.prototype.changePreset = function (increment) {
+	        var newNum = this.presetNum + increment;
+	        if (newNum < 0 || newNum >= MAX_PRESETS)
+	            return;
+	        this.synth2preset();
+	        this.presetNum = newNum;
+	        this.preset2synth();
+	    };
+	    Presets.prototype.synth2preset = function () {
+	        this.presets[this.presetNum] = this.synthUI.gr.toJSON();
+	        this.presets[this.presetNum].name = $('#preset-name').val();
+	    };
+	    Presets.prototype.preset2synth = function () {
+	        var preset = this.presets[this.presetNum];
+	        $('#preset-num').text(this.presetNum + 1);
+	        $('#preset-name').val(preset.name);
+	        $('#node-params').empty();
+	        this.checkButtons();
+	        this.synthUI.gr.fromJSON(preset);
+	    };
+	    return Presets;
+	})();
+	exports.Presets = Presets;
 
 
 /***/ }

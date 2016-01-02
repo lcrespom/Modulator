@@ -1,5 +1,5 @@
 import { SynthUI } from './synthUI';
-import { ModernAudioContext } from './modern';
+import { ModernAudioContext } from './synth/modern';
 import { Node } from './graph';
 
 

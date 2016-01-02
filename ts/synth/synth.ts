@@ -1,9 +1,10 @@
 import { NoteHandler } from './notes';
 import { NodeDef, NodeParamDef, NodePalette, palette } from './palette';
 import { ModernAudioContext, ModernAudioNode, removeArrayElement } from './modern';
-import * as popups from './popups';
 import * as custom from './customNodes';
 
+
+//TODO *** refactor & decouple from UI
 interface ParamHandler {
 	initialize(anode: AudioNode, def: NodeDef): void;
 	renderParam(panel: JQuery, pdef: NodeParamDef,
@@ -101,6 +102,7 @@ export class Synth {
 
 
 //-------------------- Parameter handlers --------------------
+import * as popups from '../popups';
 
 class BufferURL implements ParamHandler {
 

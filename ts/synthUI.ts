@@ -1,5 +1,5 @@
-import { NoteHandler, NoteHandlers } from './notes';
-import { ModernAudioContext, ModernAudioNode } from './modern';
+import { NoteHandler, NoteHandlers } from './synth/notes';
+import { ModernAudioContext, ModernAudioNode } from './synth/modern';
 import * as popups from './popups';
 
 /**
@@ -146,8 +146,8 @@ export class NodeData {
 //-------------------- Privates --------------------
 
 import { Graph, Node, GraphHandler } from './graph';
-import { Synth } from './synth';
-import { NodeDef } from './palette';
+import { Synth } from './synth/synth';
+import { NodeDef } from './synth/palette';
 import { renderParams } from './paramsUI';
 import { AudioAnalyzer } from './analyzer';
 

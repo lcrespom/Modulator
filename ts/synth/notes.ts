@@ -1,7 +1,10 @@
-import { Node } from './graph';
-import { NodeData } from './synthUI';
 import { ADSR } from './customNodes';
 import { ModernAudioNode, removeArrayElement } from './modern';
+
+//TODO *** refactor and decouple from UI
+import { Node } from '../graph';
+import { NodeData } from '../synthUI';
+
 
 /**
  * A note handler handles MIDI keyboard events on behalf of a synth node,
