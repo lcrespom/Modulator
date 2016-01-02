@@ -27,7 +27,7 @@ export class Graph {
 		n.id = this.lastId++;
 		n.element = $('<div>')
 			.addClass('node')
-			.text(n.name)
+			.html(`<div class="node-text">${n.name}</div>`)
 			.css({ left: n.x, top: n.y, cursor: 'default' });
 		if (classes) n.element.addClass(classes);
 		this.nodeCanvas.append(n.element);
@@ -169,7 +169,7 @@ export class Node {
 	constructor(x: number, y: number, name: string) {
 		this.x = x;
 		this.y = y;
-		this.name = name;
+		this.name = name.replace(/<[^<]*>/g, t => t == '<br>' ? t : '');
 	}
 
 	addInput(n: Node) {

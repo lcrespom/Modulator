@@ -60,7 +60,13 @@ body {
 	border-radius: 4px;
 	width: 80px; height: 60px;
 	text-align: center;
-	line-height: 60px;
+	display: table;
+	/*line-height: 60px;*/
+}
+
+.node-text {
+	display: table-cell;
+	vertical-align: middle;
 }
 
 .node-src {

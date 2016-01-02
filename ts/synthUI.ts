@@ -44,7 +44,8 @@ export class SynthUI {
 		$('.palette .node').click(function(evt) {
 			const elem = $(this);
 			const classes = elem.attr('class').split(/\s+/).filter(c => c != 'node');
-			self.addNode(elem.attr('data-type'), elem.text(), classes.join(' '));
+			self.addNode(elem.attr('data-type'),
+				elem.find('.node-text').html(), classes.join(' '));
 		});
 	}
 

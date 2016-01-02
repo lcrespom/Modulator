@@ -157,7 +157,7 @@
 				"id": 4,
 				"x": 180,
 				"y": 300,
-				"name": "Gain Ctrl",
+				"name": "Gain<br>Control",
 				"inputs": [
 					3
 				],
@@ -403,7 +403,7 @@
 				"id": 4,
 				"x": 300,
 				"y": 240,
-				"name": "Gain Ctrl",
+				"name": "Gain<br>Control",
 				"inputs": [
 					3
 				],
@@ -559,7 +559,7 @@
 				"id": 4,
 				"x": 380,
 				"y": 40,
-				"name": "Gain Ctrl",
+				"name": "Gain<br>Control",
 				"inputs": [
 					3
 				],
@@ -717,7 +717,7 @@
 				"id": 5,
 				"x": 220,
 				"y": 260,
-				"name": "Gain Ctrl",
+				"name": "Gain<br>Control",
 				"inputs": [
 					4
 				],

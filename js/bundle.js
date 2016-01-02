@@ -105,7 +105,7 @@
 	        $('.palette .node').click(function (evt) {
 	            var elem = $(this);
 	            var classes = elem.attr('class').split(/\s+/).filter(function (c) { return c != 'node'; });
-	            self.addNode(elem.attr('data-type'), elem.text(), classes.join(' '));
+	            self.addNode(elem.attr('data-type'), elem.find('.node-text').html(), classes.join(' '));
 	        });
 	    };
 	    SynthUI.prototype.addNode = function (type, text, classes) {
@@ -758,7 +758,7 @@
 	        n.id = this.lastId++;
 	        n.element = $('<div>')
 	            .addClass('node')
-	            .text(n.name)
+	            .html("<div class=\"node-text\">" + n.name + "</div>")
 	            .css({ left: n.x, top: n.y, cursor: 'default' });
 	        if (classes)
 	            n.element.addClass(classes);
@@ -902,7 +902,7 @@
 	        this.inputs = [];
 	        this.x = x;
 	        this.y = y;
-	        this.name = name;
+	        this.name = name.replace(/<[^<]*>/g, function (t) { return t == '<br>' ? t : ''; });
 	    }
 	    Node.prototype.addInput = function (n) {
 	        this.inputs.push(n);
