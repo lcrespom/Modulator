@@ -1,6 +1,7 @@
 import { Keyboard } from './keyboard';
 import { PianoKeyboard } from './piano';
-import { SynthUI, NodeData } from '../synthUI/synthUI';
+import { NodeData } from '../synth/synth';
+import { SynthUI } from '../synthUI/synthUI';
 import { Instrument } from '../synth/instrument';
 
 const NUM_VOICES = 5;

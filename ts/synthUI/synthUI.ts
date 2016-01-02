@@ -1,3 +1,4 @@
+import { NodeData } from '../synth/synth';
 import { NoteHandler, NoteHandlers } from '../synth/notes';
 import { ModernAudioContext, ModernAudioNode } from '../synth/modern';
 import * as popups from '../popups';
@@ -122,24 +123,6 @@ export class SynthUI {
 		this.nh = n.element.outerHeight();
 	}
 
-}
-
-/**
- * Holds all data associated with an AudioNode in the graph
- */
-export class NodeData {
-	// Used by all nodes
-	type: string;
-	anode: ModernAudioNode;
-	nodeDef: NodeDef;
-	// Used by control nodes
-	controlParam: string;
-	controlParams: string[];
-	controlTarget: ModernAudioNode;
-	// Used by source audio nodes
-	noteHandler: NoteHandler;
-	// Flag to avoid deleting output node
-	isOut: boolean = false;
 }
 
 

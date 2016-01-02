@@ -4,6 +4,24 @@ import { ModernAudioContext, ModernAudioNode, removeArrayElement } from './moder
 import * as custom from './customNodes';
 
 
+/**
+ * Holds all data associated with an AudioNode
+ */
+export class NodeData {
+	// Used by all nodes
+	type: string;
+	anode: ModernAudioNode;
+	nodeDef: NodeDef;
+	// Used by control nodes
+	controlParam: string;
+	controlParams: string[];
+	controlTarget: ModernAudioNode;
+	// Used by source audio nodes
+	noteHandler: NoteHandler;
+	// Flag to avoid deleting output node
+	isOut: boolean = false;
+}
+
 //TODO *** refactor & decouple from UI
 interface ParamHandler {
 	initialize(anode: AudioNode, def: NodeDef): void;

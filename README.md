@@ -112,8 +112,9 @@ on Twitter, or directly within GitHub.
 			- synth/instrument => synthUI/graph
 			- synth/instrument => synthUI/synthUI
 			- synth/notes => synthUI/graph
-			- synth/notes => synthUI/synthUI
 			- synth/synth => popups
+			- synth/synth contains ParamHandler,
+				which has UI code that should be moved elsewhere
 	- Avoid hardcoded DOM id's in code, e.g. $('#my-button'), except
 		for specifying containers at top level
 	- Review jQuery event registration to check that no event gets registered

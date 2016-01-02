@@ -1,6 +1,6 @@
 import { Node } from './graph';
+import { NodeData } from '../synth/synth';
 import { NodeDef, NodeParamDef } from '../synth/palette';
-import { NodeData } from './synthUI';
 
 /**
  * Renders the UI controls associated with the parameters of a given node
