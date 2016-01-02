@@ -1,5 +1,5 @@
 import { midi2freqRatio } from './keyboard';
-import * as popups from './popups';
+import * as popups from '../popups';
 
 const NUM_WHITES = 17;
 const BASE_NOTE = 36;

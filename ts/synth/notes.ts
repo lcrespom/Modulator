@@ -2,8 +2,8 @@ import { ADSR } from './customNodes';
 import { ModernAudioNode, removeArrayElement } from './modern';
 
 //TODO *** refactor and decouple from UI
-import { Node } from '../graph';
-import { NodeData } from '../synthUI';
+import { Node } from '../synthUI/graph';
+import { NodeData } from '../synthUI/synthUI';
 
 
 /**

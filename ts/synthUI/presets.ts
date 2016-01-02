@@ -1,5 +1,5 @@
 import { SynthUI } from './synthUI';
-import * as popups from './popups';
+import * as popups from '../popups';
 
 const MAX_PRESETS = 20;
 

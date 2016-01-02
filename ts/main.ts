@@ -2,9 +2,9 @@
  * Main entry point: setup synth editor and keyboard listener.
  */
 
-import { SynthUI } from './synthUI';
-import { NoteInputs } from './noteInputs'
-import { Presets } from './presets';
+import { SynthUI } from './synthUI/synthUI';
+import { NoteInputs } from './piano/noteInputs'
+import { Presets } from './synthUI/presets';
 import { ModernWindow, ModernAudioContext } from './synth/modern';
 
 setupPalette();

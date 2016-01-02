@@ -1,6 +1,6 @@
-import { NoteHandler, NoteHandlers } from './synth/notes';
-import { ModernAudioContext, ModernAudioNode } from './synth/modern';
-import * as popups from './popups';
+import { NoteHandler, NoteHandlers } from '../synth/notes';
+import { ModernAudioContext, ModernAudioNode } from '../synth/modern';
+import * as popups from '../popups';
 
 /**
  * Customizes the generic graph editor in order to manipulate and control a graph of
@@ -146,8 +146,8 @@ export class NodeData {
 //-------------------- Privates --------------------
 
 import { Graph, Node, GraphHandler } from './graph';
-import { Synth } from './synth/synth';
-import { NodeDef } from './synth/palette';
+import { Synth } from '../synth/synth';
+import { NodeDef } from '../synth/palette';
 import { renderParams } from './paramsUI';
 import { AudioAnalyzer } from './analyzer';
 
