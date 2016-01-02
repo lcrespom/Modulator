@@ -94,6 +94,7 @@ on Twitter, or directly within GitHub.
 
 - Long term:
 	- Tracker
+		- Review [this article](http://www.html5rocks.com/en/tutorials/audio/scheduling/)
 	- Custom nodes with WebWorker... when available
 	- Record & save audio
 	- Server-side part, supporting:
@@ -126,6 +127,7 @@ on Twitter, or directly within GitHub.
 	- Create proper website in github pages
 	- Present in meetup
 	- Invite contributors
+	- Add "Fork me on GitHub" ribbon
 
 
 ##Browser limitations
