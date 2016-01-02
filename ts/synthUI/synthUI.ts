@@ -1,3 +1,4 @@
+import { Graph, Node, GraphHandler } from './graph';
 import { NodeData } from '../synth/synth';
 import { NoteHandler, NoteHandlers } from '../synth/notes';
 import { ModernAudioContext, ModernAudioNode } from '../synth/modern';
@@ -25,7 +26,7 @@ export class SynthUI {
 	addOutputNode() {
 		//TODO avoid using hardcoded position
 		const out = new Node(500, 210, 'Out');
-		out.data = new NodeData();
+		out.data = new GraphNodeData(out);
 		this.initOutputNodeData(out.data);
 		this.gr.addNode(out, 'node-out');
 		this.initNodeDimensions(out);
@@ -68,7 +69,7 @@ export class SynthUI {
 	}
 
 	createNodeData(n: Node, type: string): void {
-		const data = new NodeData();
+		const data = new GraphNodeData(n);
 		n.data = data;
 		if (type == 'out')
 			return this.initOutputNodeData(n.data);
@@ -79,7 +80,7 @@ export class SynthUI {
 		data.nodeDef = this.synth.palette[type];
 		const nh = data.nodeDef.noteHandler;
 		if (nh) {
-			data.noteHandler = new NoteHandlers[nh](n);
+			data.noteHandler = new NoteHandlers[nh](n.data);
 			this.synth.addNoteHandler(data.noteHandler);
 		}
 		// LFO does not have a note handler yet needs to be started
@@ -128,11 +129,25 @@ export class SynthUI {
 
 //-------------------- Privates --------------------
 
-import { Graph, Node, GraphHandler } from './graph';
 import { Synth } from '../synth/synth';
 import { NodeDef } from '../synth/palette';
 import { renderParams } from './paramsUI';
 import { AudioAnalyzer } from './analyzer';
+
+
+class GraphNodeData extends NodeData {
+	node: Node;
+	constructor(node: Node) {
+		super();
+		this.node = node;
+	}
+	getInputs(): NodeData[] {
+		const result: NodeData[] = [];
+		for (const nin of this.node.inputs)
+			result.push(nin.data);
+		return result;
+	}
+}
 
 class SynthGraphHandler implements GraphHandler {
 

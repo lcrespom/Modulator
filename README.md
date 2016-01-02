@@ -111,7 +111,6 @@ on Twitter, or directly within GitHub.
 		- Eliminate these dependencies:
 			- synth/instrument => synthUI/graph
 			- synth/instrument => synthUI/synthUI
-			- synth/notes => synthUI/graph
 			- synth/synth => popups
 			- synth/synth contains ParamHandler,
 				which has UI code that should be moved elsewhere

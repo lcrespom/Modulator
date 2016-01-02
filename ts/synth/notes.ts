@@ -2,9 +2,6 @@ import { NodeData } from './synth';
 import { ADSR } from './customNodes';
 import { ModernAudioNode, removeArrayElement } from './modern';
 
-//TODO *** refactor and decouple from UI
-import { Node } from '../synthUI/graph';
-
 
 /**
  * A note handler handles MIDI keyboard events on behalf of a synth node,
@@ -23,15 +20,15 @@ export interface NoteHandler {
  * Handles common AudioNode cloning, used by oscillator and buffered data nodes.
  */
 class BaseNoteHandler implements NoteHandler {
-	node: Node;
+	ndata: NodeData;
 	outTracker: OutputTracker;
 	kbTrigger = false;
 	playAfterNoteOff = false;
 	handlers = null;
 
-	constructor(n: Node) {
-		this.node = n;
-		this.outTracker = new OutputTracker(n.data.anode);
+	constructor(ndata: NodeData) {
+		this.ndata = ndata;
+		this.outTracker = new OutputTracker(ndata.anode);
 	}
 
 	noteOn(midi: number, gain: number, ratio: number):void {}
@@ -39,12 +36,11 @@ class BaseNoteHandler implements NoteHandler {
 	noteEnd(midi: number): void {}
 
 	clone(): AudioNode {
-		const data: NodeData = this.node.data;
 		// Create clone
-		const anode = data.anode.context[data.nodeDef.constructor]();
+		const anode = this.ndata.anode.context[this.ndata.nodeDef.constructor]();
 		// Copy parameters
-		for (const pname of Object.keys(data.nodeDef.params)) {
-			const param = data.anode[pname];
+		for (const pname of Object.keys(this.ndata.nodeDef.params)) {
+			const param = this.ndata.anode[pname];
 			if (param instanceof AudioParam)
 				anode[pname].value = param.value;
 			else if (param !== null && param !== undefined)
@@ -57,9 +53,8 @@ class BaseNoteHandler implements NoteHandler {
 			anode.connect(o2);
 		}
 		// Copy control input connections
-		for (const inNode of this.node.inputs) {
-			const inData: NodeData = inNode.data;
-			inNode.data.anode.connect(anode[inData.controlParam]);
+		for (const inData of this.ndata.getInputs()) {
+			inData.anode.connect(anode[inData.controlParam]);
 		}
 		//TODO should copy snapshot of list of inputs and outputs
 		//...in case user connects or disconnects during playback
@@ -71,9 +66,8 @@ class BaseNoteHandler implements NoteHandler {
 		for (const out of this.outTracker.outputs)
 			anode.disconnect(out);
 		// Disconnect control inputs
-		for (const inNode of this.node.inputs) {
-			const inData: NodeData = inNode.data;
-			inNode.data.anode.disconnect(anode[inData.controlParam]);
+		for (const inData of this.ndata.getInputs()) {
+			inData.anode.disconnect(anode[inData.controlParam]);
 		}
 	}
 }
@@ -122,7 +116,7 @@ class BufferNoteHandler extends BaseNoteHandler {
 
 	noteOn(midi: number, gain: number, ratio: number):void {
 		if (this.playing) this.noteEnd(midi);
-		const buf = this.node.data.anode._buffer;
+		const buf = this.ndata.anode['_buffer'];
 		if (!buf) return;	// Buffer still loading or failed
 		this.playing = true;
 		this.absn = <AudioBufferSourceNode>this.clone();
@@ -158,7 +152,7 @@ class ADSRNoteHandler extends BaseNoteHandler {
 	noteOn(midi: number, gain: number, ratio: number):void {
 		this.setupOtherHandlers();
 		this.lastNote = midi;
-		const adsr: ADSR = this.node.data.anode;
+		const adsr: ADSR = <ADSR>this.ndata.anode;
 		const now = adsr.context.currentTime;
 		this.loopParams(out => {
 			const v = this.getParamValue(out);
@@ -173,7 +167,7 @@ class ADSRNoteHandler extends BaseNoteHandler {
 
 	noteOff(midi: number, gain: number): void {
 		if (midi != this.lastNote) return;
-		const adsr: ADSR = this.node.data.anode;
+		const adsr: ADSR = <ADSR>this.ndata.anode;
 		const now = adsr.context.currentTime;
 		this.loopParams(out => {
 			const v = out.value;	// Get the really current value
@@ -219,7 +213,8 @@ class RestartableNoteHandler extends BaseNoteHandler {
 	noteOn(midi: number, gain: number, ratio: number):void {
 		if (this.playing) this.noteEnd(midi);
 		this.playing = true;
-		this.node.data.anode.start();
+		const anode: any = this.ndata.anode;
+		anode.start();
 		this.lastNote = midi;
 	}
 
@@ -232,7 +227,8 @@ class RestartableNoteHandler extends BaseNoteHandler {
 		// Stop and disconnect
 		if (!this.playing) return;
 		this.playing = false;
-		this.node.data.anode.stop();
+		const anode: any = this.ndata.anode;
+		anode.stop();
 	}
 }
 

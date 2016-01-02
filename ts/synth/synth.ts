@@ -20,6 +20,10 @@ export class NodeData {
 	noteHandler: NoteHandler;
 	// Flag to avoid deleting output node
 	isOut: boolean = false;
+	// To be implemented by user code
+	getInputs(): NodeData[] {
+		throw 'Error: getInputs() function should be implemented by user';
+	}
 }
 
 //TODO *** refactor & decouple from UI
