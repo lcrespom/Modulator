@@ -109,7 +109,6 @@ on Twitter, or directly within GitHub.
 	- Mobile app
 
 - Code
-	- Separate all custom nodes into independent files on a subdirectory
 	- Avoid hardcoded DOM id's in code, e.g. $('#my-button'), except
 		for specifying containers at top level
 	- Review jQuery event registration to check that no event gets registered
@@ -138,10 +137,10 @@ on Twitter, or directly within GitHub.
 	version has been tested. Node drag & drop and connection will probably not work
 	in the mobile browsers.
 
-2. The **Line In** node is only properly supported by FireFox. Safari gives an error,
-	while Chrome provides the API but remains silent.
-	Here is the JSON for a preset to load in FireFox to test the Line In node
-	in combination with the **Detune** effect to obtain *Smurf & Shrek* voices:
+2. The **Line In** node is not supported in Safari. Chrome should work, but if
+	fails, try with FireFox.
+	Here is the JSON for a preset to test the Line In node
+	in combination with the **Pitch Shifter** effect to obtain *Smurf & Shrek* voices:
 	```
 	{ "nodes": [
 		{"id":0,"x":520,"y":140,"name":"Out","inputs":[1],"classes":"node node-out"},

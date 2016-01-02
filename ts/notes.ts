@@ -1,6 +1,6 @@
 import { Node } from './graph';
 import { NodeData } from './synthUI';
-import { ADSR } from './synth';
+import { ADSR } from './customNodes';
 import { ModernAudioNode, removeArrayElement } from './modern';
 
 /**

@@ -1,4 +1,3 @@
-//TODO use independent code to build voice
 import { SynthUI } from './synthUI';
 import { ModernAudioContext } from './modern';
 import { Node } from './graph';
