@@ -43,18 +43,18 @@ class ScriptProcessor extends CustomNodeBase {
 	anode: ScriptProcessorNode;
 	playing: boolean = false;
 
+	constructor(ac: AudioContext) {
+		super();
+		this.anode = ac.createScriptProcessor(1024);
+		this.anode.onaudioprocess = evt => this.processAudio(evt);
+	}
+
 	connect(node: AudioNode) {
-		if (!this.anode) this.createScriptProcessor(node.context);
 		this.anode.connect(node);
 	}
 
 	disconnect() {
 		this.anode.disconnect();
-	}
-
-	createScriptProcessor(ac: AudioContext) {
-		this.anode = ac.createScriptProcessor(1024);
-		this.anode.onaudioprocess = evt => this.processAudio(evt);
 	}
 
 	start() {
@@ -95,7 +95,7 @@ export class NoiseCtrlGenerator extends ScriptProcessor {
 	v: number;
 
 	constructor(ac: ModernAudioContext) {
-		super();
+		super(ac);
 		this.ac = ac;
 		this.frequency = 4;
 		this.depth = 20;
@@ -104,7 +104,6 @@ export class NoiseCtrlGenerator extends ScriptProcessor {
 	}
 
 	connect(param: any) {
-		if (!this.anode) this.createScriptProcessor(this.ac);
 		this.anode.connect(param);
 	}
 

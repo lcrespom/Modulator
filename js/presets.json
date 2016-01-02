@@ -835,5 +835,74 @@
 			}
 		],
 		"name": "Drum Loop"
+	},
+	{
+		"nodes": [
+			{
+				"id": 0,
+				"x": 540,
+				"y": 160,
+				"name": "Out",
+				"inputs": [
+					4
+				],
+				"classes": "node node-out"
+			},
+			{
+				"id": 2,
+				"x": 60,
+				"y": 160,
+				"name": "Line In",
+				"inputs": [],
+				"classes": "node node-src"
+			},
+			{
+				"id": 3,
+				"x": 220,
+				"y": 160,
+				"name": "Pitch<br>Shifter",
+				"inputs": [
+					2
+				],
+				"classes": "node node-effect"
+			},
+			{
+				"id": 4,
+				"x": 380,
+				"y": 160,
+				"name": "Filter",
+				"inputs": [
+					3
+				],
+				"classes": "node node-effect"
+			}
+		],
+		"nodeData": [
+			{
+				"type": "out",
+				"params": {}
+			},
+			{
+				"type": "LineIn",
+				"params": {}
+			},
+			{
+				"type": "Detuner",
+				"params": {
+					"octave": 1
+				}
+			},
+			{
+				"type": "Filter",
+				"params": {
+					"frequency": 2027.5101224010734,
+					"Q": 0,
+					"detune": 0,
+					"gain": 0,
+					"type": "lowpass"
+				}
+			}
+		],
+		"name": "Smurf & Shrek"
 	}
 ]

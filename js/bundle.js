@@ -2245,23 +2245,19 @@
 	 */
 	var ScriptProcessor = (function (_super) {
 	    __extends(ScriptProcessor, _super);
-	    function ScriptProcessor() {
-	        _super.apply(this, arguments);
+	    function ScriptProcessor(ac) {
+	        var _this = this;
+	        _super.call(this);
 	        this.gain = 1;
 	        this.playing = false;
+	        this.anode = ac.createScriptProcessor(1024);
+	        this.anode.onaudioprocess = function (evt) { return _this.processAudio(evt); };
 	    }
 	    ScriptProcessor.prototype.connect = function (node) {
-	        if (!this.anode)
-	            this.createScriptProcessor(node.context);
 	        this.anode.connect(node);
 	    };
 	    ScriptProcessor.prototype.disconnect = function () {
 	        this.anode.disconnect();
-	    };
-	    ScriptProcessor.prototype.createScriptProcessor = function (ac) {
-	        var _this = this;
-	        this.anode = ac.createScriptProcessor(1024);
-	        this.anode.onaudioprocess = function (evt) { return _this.processAudio(evt); };
 	    };
 	    ScriptProcessor.prototype.start = function () {
 	        this.playing = true;
@@ -2297,7 +2293,7 @@
 	var NoiseCtrlGenerator = (function (_super) {
 	    __extends(NoiseCtrlGenerator, _super);
 	    function NoiseCtrlGenerator(ac) {
-	        _super.call(this);
+	        _super.call(this, ac);
 	        this.ac = ac;
 	        this.frequency = 4;
 	        this.depth = 20;
@@ -2305,8 +2301,6 @@
 	        this.v = 0;
 	    }
 	    NoiseCtrlGenerator.prototype.connect = function (param) {
-	        if (!this.anode)
-	            this.createScriptProcessor(this.ac);
 	        this.anode.connect(param);
 	    };
 	    NoiseCtrlGenerator.prototype.processAudio = function (evt) {

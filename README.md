@@ -74,11 +74,6 @@ on Twitter, or directly within GitHub.
 	- Use Web Midi API to gather events from external midi Keyboard
 		- Play notes
 		- Associate external controls with selected node parameters
-	- Improve detuner
-		- So other nodes can connect to it before it is connected. Otherwise,
-			display a popup explaining the limitation.
-		- This is a generic limitation of all script processing effect nodes.
-		- Improve code to clean hack that checks for custom nodes.
 
 - UI
 	- Parameters panel
@@ -123,6 +118,8 @@ on Twitter, or directly within GitHub.
 			- Decoupled from Graph and SynthUI
 			- Not requiring a dummy canvas element
 		- Then, make SynthUI dependant on voice, and not the other way around
+		- Eventually make it an independent npm module
+	- Improve code to clean hack that checks for custom nodes.
 
 - Share
 	- Document
