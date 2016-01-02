@@ -63,7 +63,6 @@ on Twitter, or directly within GitHub.
 	- Improve ADSR
 		- Linear/exponential switch
 	- Review list of pending audio nodes
-		- Line in live input
 		- WaveShaper
 		- Etc?
 	- Provide 10 preset instruments
@@ -71,13 +70,14 @@ on Twitter, or directly within GitHub.
 	- Limitation: a control node can only control a single node
 		- Prevent from connecting a control node to more than one destination
 		- Or else, modify the UI to support multiple destination nodes
-	- Portamento
+	- Keyboard portamento
 	- Use Web Midi API to gather events from external midi Keyboard
 		- Play notes
 		- Associate external controls with selected node parameters
 	- Improve detuner
 		- So other nodes can connect to it before it is connected. Otherwise,
-			display a popup explaining the problem.
+			display a popup explaining the limitation.
+		- This is a generic limitation of all script processing effect nodes.
 		- Improve code to clean hack that checks for custom nodes.
 
 - UI
@@ -141,7 +141,7 @@ on Twitter, or directly within GitHub.
 2. The **Line In** node is only properly supported by FireFox. Safari gives an error,
 	while Chrome provides the API but remains silent.
 	Here is the JSON for a preset to load in FireFox to test the Line In node
-	in combination with the **Detune** effect to obtain *Smurf & Shrek* voice:
+	in combination with the **Detune** effect to obtain *Smurf & Shrek* voices:
 	```
 	{ "nodes": [
 		{"id":0,"x":520,"y":140,"name":"Out","inputs":[1],"classes":"node node-out"},
