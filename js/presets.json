@@ -611,7 +611,7 @@
 			{
 				"type": "Gain",
 				"params": {
-					"gain": 0.5
+					"gain": 0.2
 				}
 			},
 			{
@@ -625,7 +625,7 @@
 			{
 				"type": "GainCtrl",
 				"params": {
-					"gain": 0.8
+					"gain": 0.2
 				},
 				"controlParam": "gain",
 				"controlParams": [
