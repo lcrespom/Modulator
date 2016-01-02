@@ -114,6 +114,7 @@ on Twitter, or directly within GitHub.
 			- synth/synth => popups
 			- synth/synth contains ParamHandler,
 				which has UI code that should be moved elsewhere
+	- Try to fix NodeData.getInputs(): it looks like a workaround
 	- Avoid hardcoded DOM id's in code, e.g. $('#my-button'), except
 		for specifying containers at top level
 	- Review jQuery event registration to check that no event gets registered
