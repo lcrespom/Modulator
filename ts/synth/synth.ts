@@ -1,4 +1,4 @@
-import { NoteHandler } from './notes';
+import { NoteHandler, NoteHandlers } from './notes';
 import { NodeDef, NodeParamDef, NodePalette, palette } from './palette';
 import { ModernAudioContext, ModernAudioNode, removeArrayElement } from './modern';
 import * as custom from './customNodes';
@@ -67,6 +67,30 @@ export class Synth {
 		if (!anode.context) anode.context = this.ac;
 		this.initNodeParams(anode, def, type);
 		return anode;
+	}
+
+	initNodeData(ndata: NodeData, type: string): void {
+		ndata.type = type;
+		ndata.anode = this.createAudioNode(type);
+		if (!ndata.anode)
+			return console.error(`No AudioNode found for '${type}'`);
+		ndata.nodeDef = this.palette[type];
+		const nh = ndata.nodeDef.noteHandler;
+		if (nh) {
+			ndata.noteHandler = new NoteHandlers[nh](ndata);
+			this.addNoteHandler(ndata.noteHandler);
+		}
+		// LFO does not have a note handler yet needs to be started
+		//TODO cleanup: assign note handler to LFO and review other source modules
+		else if (ndata.anode['start']) ndata.anode['start']();
+	}
+
+	initOutputNodeData(data: NodeData): void {
+		data.type = 'out';
+		data.anode = this.ac.createGain();
+		data.anode.connect(this.ac.destination);
+		data.nodeDef = this.palette['Speaker'];
+		data.isOut = true;
 	}
 
 	play() {

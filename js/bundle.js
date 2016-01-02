@@ -75,10 +75,9 @@
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var graph_1 = __webpack_require__(8);
-	var synth_1 = __webpack_require__(2);
-	var notes_1 = __webpack_require__(7);
-	var popups = __webpack_require__(6);
+	var graph_1 = __webpack_require__(2);
+	var synth_1 = __webpack_require__(3);
+	var popups = __webpack_require__(8);
 	/**
 	 * Customizes the generic graph editor in order to manipulate and control a graph of
 	 * AudioNodes
@@ -95,17 +94,10 @@
 	        //TODO avoid using hardcoded position
 	        var out = new graph_1.Node(500, 210, 'Out');
 	        out.data = new GraphNodeData(out);
-	        this.initOutputNodeData(out.data);
+	        this.synth.initOutputNodeData(out.data);
+	        this.outNode = out.data.anode;
 	        this.gr.addNode(out, 'node-out');
 	        this.initNodeDimensions(out);
-	    };
-	    SynthUI.prototype.initOutputNodeData = function (data) {
-	        data.type = 'out';
-	        data.anode = this.synth.ac.createGain();
-	        data.anode.connect(this.synth.ac.destination);
-	        data.nodeDef = this.synth.palette['Speaker'];
-	        data.isOut = true;
-	        this.outNode = data.anode;
 	    };
 	    SynthUI.prototype.registerPaletteHandler = function () {
 	        var self = this; // JQuery sets 'this' in event handlers
@@ -130,22 +122,13 @@
 	            this.synth.removeNoteHandler(data.noteHandler);
 	    };
 	    SynthUI.prototype.createNodeData = function (n, type) {
-	        var data = new GraphNodeData(n);
-	        n.data = data;
-	        if (type == 'out')
-	            return this.initOutputNodeData(n.data);
-	        data.type = type;
-	        data.anode = this.synth.createAudioNode(type);
-	        if (!data.anode)
-	            return console.error("No AudioNode found for '" + type + "'");
-	        data.nodeDef = this.synth.palette[type];
-	        var nh = data.nodeDef.noteHandler;
-	        if (nh) {
-	            data.noteHandler = new notes_1.NoteHandlers[nh](n.data);
-	            this.synth.addNoteHandler(data.noteHandler);
+	        n.data = new GraphNodeData(n);
+	        if (type == 'out') {
+	            this.synth.initOutputNodeData(n.data);
+	            this.outNode = n.data.anode;
 	        }
-	        else if (data.anode['start'])
-	            data.anode['start']();
+	        else
+	            this.synth.initNodeData(n.data, type);
 	    };
 	    //----- Rest of methods are used to find a free spot in the canvas -----
 	    SynthUI.prototype.findFreeSpot = function () {
@@ -186,7 +169,7 @@
 	})();
 	exports.SynthUI = SynthUI;
 	//-------------------- Privates --------------------
-	var synth_2 = __webpack_require__(2);
+	var synth_2 = __webpack_require__(3);
 	var paramsUI_1 = __webpack_require__(9);
 	var analyzer_1 = __webpack_require__(10);
 	var GraphNodeData = (function (_super) {
@@ -349,926 +332,6 @@
 
 /***/ },
 /* 2 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var palette_1 = __webpack_require__(3);
-	var modern_1 = __webpack_require__(4);
-	var custom = __webpack_require__(5);
-	/**
-	 * Holds all data associated with an AudioNode
-	 */
-	var NodeData = (function () {
-	    function NodeData() {
-	        // Flag to avoid deleting output node
-	        this.isOut = false;
-	    }
-	    // To be implemented by user code
-	    NodeData.prototype.getInputs = function () {
-	        throw 'Error: getInputs() function should be implemented by user';
-	    };
-	    return NodeData;
-	})();
-	exports.NodeData = NodeData;
-	/**
-	 * Performs global operations on all AudioNodes:
-	 * - Manages AudioNode creation and initialization from the palette
-	 * - Distributes MIDI keyboard events to NoteHandlers
-	 */
-	var Synth = (function () {
-	    function Synth(ac) {
-	        this.customNodes = {};
-	        this.paramHandlers = {};
-	        this.noteHandlers = [];
-	        this.ac = ac;
-	        this.palette = palette_1.palette;
-	        this.registerCustomNode('createADSR', custom.ADSR);
-	        this.registerCustomNode('createNoise', custom.NoiseGenerator);
-	        this.registerCustomNode('createNoiseCtrl', custom.NoiseCtrlGenerator);
-	        this.registerCustomNode('createLineIn', custom.LineInNode);
-	        this.registerCustomNode('createDetuner', custom.Detuner);
-	        this.registerParamHandler('BufferURL', new BufferURL());
-	    }
-	    Synth.prototype.createAudioNode = function (type) {
-	        var def = palette_1.palette[type];
-	        if (!def)
-	            return null;
-	        var factory = def.custom ? this.customNodes : this.ac;
-	        if (!factory[def.constructor])
-	            return null;
-	        var anode = factory[def.constructor]();
-	        if (!anode.context)
-	            anode.context = this.ac;
-	        this.initNodeParams(anode, def, type);
-	        return anode;
-	    };
-	    Synth.prototype.play = function () {
-	        this.ac.resume();
-	    };
-	    Synth.prototype.stop = function () {
-	        this.ac.suspend();
-	    };
-	    Synth.prototype.noteOn = function (midi, gain, ratio) {
-	        for (var _i = 0, _a = this.noteHandlers; _i < _a.length; _i++) {
-	            var nh = _a[_i];
-	            if (nh.kbTrigger)
-	                nh.handlers = this.noteHandlers;
-	            nh.noteOn(midi, gain, ratio);
-	        }
-	    };
-	    Synth.prototype.noteOff = function (midi, gain) {
-	        for (var _i = 0, _a = this.noteHandlers; _i < _a.length; _i++) {
-	            var nh = _a[_i];
-	            nh.noteOff(midi, gain);
-	        }
-	    };
-	    Synth.prototype.addNoteHandler = function (nh) {
-	        this.noteHandlers.push(nh);
-	    };
-	    Synth.prototype.removeNoteHandler = function (nh) {
-	        modern_1.removeArrayElement(this.noteHandlers, nh);
-	    };
-	    Synth.prototype.initNodeParams = function (anode, def, type) {
-	        for (var _i = 0, _a = Object.keys(def.params || {}); _i < _a.length; _i++) {
-	            var param = _a[_i];
-	            if (anode[param] === undefined)
-	                console.warn("Parameter '" + param + "' not found for node '" + type + "'");
-	            else if (anode[param] instanceof AudioParam)
-	                anode[param].value = def.params[param].initial;
-	            else if (def.params[param].handler) {
-	                def.params[param].phandler = this.paramHandlers[def.params[param].handler];
-	                def.params[param].phandler.initialize(anode, def);
-	            }
-	            else
-	                anode[param] = def.params[param].initial;
-	        }
-	    };
-	    Synth.prototype.registerCustomNode = function (constructorName, nodeClass) {
-	        var _this = this;
-	        this.customNodes[constructorName] = function () { return new nodeClass(_this.ac); };
-	    };
-	    Synth.prototype.registerParamHandler = function (hname, handler) {
-	        this.paramHandlers[hname] = handler;
-	    };
-	    return Synth;
-	})();
-	exports.Synth = Synth;
-	//-------------------- Parameter handlers --------------------
-	var popups = __webpack_require__(6);
-	var BufferURL = (function () {
-	    function BufferURL() {
-	    }
-	    BufferURL.prototype.initialize = function (anode, def) {
-	        var absn = anode;
-	        var url = def.params['buffer'].initial;
-	        if (!url)
-	            return;
-	        this.loadBufferParam(absn, url);
-	    };
-	    BufferURL.prototype.renderParam = function (panel, pdef, anode, param, label) {
-	        var _this = this;
-	        var box = $('<div class="choice-box">');
-	        var button = $('<button class="btn btn-primary">URL</button>');
-	        box.append(button);
-	        button.after('<br/><br/>' + label);
-	        panel.append(box);
-	        button.click(function (_) {
-	            popups.prompt('Audio buffer URL:', 'Please provide URL', null, function (url) {
-	                if (!url)
-	                    return;
-	                var absn = anode;
-	                _this.loadBufferParam(absn, url);
-	            });
-	        });
-	        return box;
-	    };
-	    BufferURL.prototype.param2json = function (anode) {
-	        return anode['_url'];
-	    };
-	    BufferURL.prototype.json2param = function (anode, json) {
-	        this.loadBufferParam(anode, json);
-	    };
-	    BufferURL.prototype.loadBufferParam = function (absn, url) {
-	        this.loadBuffer(absn.context, url, function (buffer) {
-	            absn['_buffer'] = buffer;
-	            absn['_url'] = url;
-	        });
-	    };
-	    BufferURL.prototype.loadBuffer = function (ac, url, cb) {
-	        var w = window;
-	        w.audioBufferCache = w.audioBufferCache || {};
-	        if (w.audioBufferCache[url])
-	            return cb(w.audioBufferCache[url]);
-	        var xhr = new XMLHttpRequest();
-	        xhr.open('GET', url, true);
-	        xhr.responseType = 'arraybuffer';
-	        xhr.onload = function (_) {
-	            popups.close();
-	            ac.decodeAudioData(xhr.response, function (buffer) {
-	                w.audioBufferCache[url] = buffer;
-	                cb(buffer);
-	            });
-	        };
-	        xhr.send();
-	        setTimeout(function (_) {
-	            if (xhr.readyState != xhr.DONE)
-	                popups.progress('Loading ' + url + '...');
-	        }, 300);
-	    };
-	    return BufferURL;
-	})();
-
-
-/***/ },
-/* 3 */
-/***/ function(module, exports) {
-
-	//-------------------- Node palette definition --------------------
-	var OCTAVE_DETUNE = {
-	    initial: 0,
-	    min: -1200,
-	    max: 1200,
-	    linear: true
-	};
-	/**
-	 * The set of AudioNodes available to the application, along with
-	 * their configuration.
-	 */
-	exports.palette = {
-	    // Sources
-	    Oscillator: {
-	        constructor: 'createOscillator',
-	        noteHandler: 'osc',
-	        params: {
-	            frequency: { initial: 220, min: 20, max: 20000 },
-	            detune: OCTAVE_DETUNE,
-	            type: {
-	                initial: 'sawtooth',
-	                choices: ['sine', 'square', 'sawtooth', 'triangle']
-	            }
-	        }
-	    },
-	    Buffer: {
-	        constructor: 'createBufferSource',
-	        noteHandler: 'buffer',
-	        params: {
-	            playbackRate: { initial: 1, min: 0, max: 8 },
-	            detune: OCTAVE_DETUNE,
-	            buffer: {
-	                initial: null,
-	                handler: 'BufferURL'
-	            },
-	            loop: { initial: false },
-	            loopStart: { initial: 0, min: 0, max: 10 },
-	            loopEnd: { initial: 3, min: 0, max: 10 }
-	        }
-	    },
-	    Noise: {
-	        constructor: 'createNoise',
-	        noteHandler: 'restartable',
-	        custom: true,
-	        params: {
-	            gain: { initial: 1, min: 0, max: 10 }
-	        }
-	    },
-	    LineIn: {
-	        constructor: 'createLineIn',
-	        custom: true,
-	        params: {}
-	    },
-	    // Effects
-	    Gain: {
-	        constructor: 'createGain',
-	        params: {
-	            gain: { initial: 1, min: 0, max: 10, linear: true }
-	        }
-	    },
-	    Filter: {
-	        constructor: 'createBiquadFilter',
-	        params: {
-	            frequency: { initial: 440, min: 20, max: 20000 },
-	            Q: { initial: 0, min: 0, max: 100 },
-	            detune: OCTAVE_DETUNE,
-	            gain: { initial: 0, min: -40, max: 40, linear: true },
-	            type: {
-	                initial: 'lowpass',
-	                choices: ['lowpass', 'highpass', 'bandpass',
-	                    'lowshelf', 'highshelf', 'peaking', 'notch', 'allpass']
-	            }
-	        },
-	    },
-	    Delay: {
-	        constructor: 'createDelay',
-	        params: {
-	            delayTime: { initial: 1, min: 0, max: 5 }
-	        }
-	    },
-	    StereoPan: {
-	        constructor: 'createStereoPanner',
-	        params: {
-	            pan: { initial: 0, min: -1, max: 1, linear: true }
-	        }
-	    },
-	    Compressor: {
-	        constructor: 'createDynamicsCompressor',
-	        params: {
-	            threshold: { initial: -24, min: -100, max: 0, linear: true },
-	            knee: { initial: 30, min: 0, max: 40, linear: true },
-	            ratio: { initial: 12, min: 1, max: 20, linear: true },
-	            reduction: { initial: 0, min: -20, max: 0, linear: true },
-	            attack: { initial: 0.003, min: 0, max: 1 },
-	            release: { initial: 0.25, min: 0, max: 1 }
-	        }
-	    },
-	    Detuner: {
-	        constructor: 'createDetuner',
-	        custom: true,
-	        params: {
-	            octave: { initial: 0, min: -2, max: 2, linear: true }
-	        }
-	    },
-	    // Controllers
-	    LFO: {
-	        constructor: 'createOscillator',
-	        control: true,
-	        params: {
-	            frequency: { initial: 5, min: 0.01, max: 200 },
-	            detune: OCTAVE_DETUNE,
-	            type: {
-	                initial: 'sine',
-	                choices: ['sine', 'square', 'sawtooth', 'triangle']
-	            }
-	        }
-	    },
-	    GainCtrl: {
-	        constructor: 'createGain',
-	        control: true,
-	        params: {
-	            gain: { initial: 10, min: 0, max: 100, linear: true }
-	        }
-	    },
-	    ADSR: {
-	        constructor: 'createADSR',
-	        noteHandler: 'ADSR',
-	        control: true,
-	        custom: true,
-	        params: {
-	            attack: { initial: 0.2, min: 0, max: 10 },
-	            decay: { initial: 0.5, min: 0, max: 10 },
-	            sustain: { initial: 0.5, min: 0, max: 1, linear: true },
-	            release: { initial: 1.0, min: 0, max: 10 },
-	            depth: { initial: 1.0, min: 0, max: 1 }
-	        }
-	    },
-	    NoiseCtrl: {
-	        constructor: 'createNoiseCtrl',
-	        control: true,
-	        custom: true,
-	        params: {
-	            frequency: { initial: 4, min: 0, max: 200 },
-	            depth: { initial: 20, min: 0, max: 200 }
-	        }
-	    },
-	    // Output
-	    Speaker: {
-	        constructor: null,
-	        params: {}
-	    }
-	};
-
-
-/***/ },
-/* 4 */
-/***/ function(module, exports) {
-
-	/**
-	 * Modernize browser interfaces so that TypeScript does not complain
-	 * when using new features.
-	 *
-	 * Also provides some basic utility funcitons which should be part of
-	 * the standard JavaScript library.
-	 */
-	function removeArrayElement(a, e) {
-	    var pos = a.indexOf(e);
-	    if (pos < 0)
-	        return false; // not found
-	    a.splice(pos, 1);
-	    return true;
-	}
-	exports.removeArrayElement = removeArrayElement;
-
-
-/***/ },
-/* 5 */
-/***/ function(module, exports) {
-
-	var __extends = (this && this.__extends) || function (d, b) {
-	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-	    function __() { this.constructor = d; }
-	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	};
-	/**
-	 * Base class to derive all custom nodes from it
-	 */
-	var CustomNodeBase = (function () {
-	    function CustomNodeBase() {
-	        this.custom = true;
-	        this.channelCount = 2;
-	        this.channelCountMode = 'max';
-	        this.channelInterpretation = 'speakers';
-	        this.numberOfInputs = 0;
-	        this.numberOfOutputs = 1;
-	    }
-	    CustomNodeBase.prototype.connect = function (param) { };
-	    CustomNodeBase.prototype.disconnect = function () { };
-	    // Required for extending EventTarget
-	    CustomNodeBase.prototype.addEventListener = function () { };
-	    CustomNodeBase.prototype.dispatchEvent = function (evt) { return false; };
-	    CustomNodeBase.prototype.removeEventListener = function () { };
-	    return CustomNodeBase;
-	})();
-	/**
-	 * Envelope generator that controls the evolution over time of a destination
-	 * node's parameter. All parameter control is performed in the corresponding
-	 * ADSR note handler.
-	 */
-	var ADSR = (function (_super) {
-	    __extends(ADSR, _super);
-	    function ADSR() {
-	        _super.apply(this, arguments);
-	        this.attack = 0.2;
-	        this.decay = 0.5;
-	        this.sustain = 0.5;
-	        this.release = 1;
-	        this.depth = 1;
-	    }
-	    return ADSR;
-	})(CustomNodeBase);
-	exports.ADSR = ADSR;
-	/**
-	 * Base ScriptProcessor, to derive all custom audio processing nodes from it.
-	 */
-	var ScriptProcessor = (function (_super) {
-	    __extends(ScriptProcessor, _super);
-	    function ScriptProcessor(ac) {
-	        var _this = this;
-	        _super.call(this);
-	        this.gain = 1;
-	        this.playing = false;
-	        this.anode = ac.createScriptProcessor(1024);
-	        this.anode.onaudioprocess = function (evt) { return _this.processAudio(evt); };
-	    }
-	    ScriptProcessor.prototype.connect = function (node) {
-	        this.anode.connect(node);
-	    };
-	    ScriptProcessor.prototype.disconnect = function () {
-	        this.anode.disconnect();
-	    };
-	    ScriptProcessor.prototype.start = function () {
-	        this.playing = true;
-	    };
-	    ScriptProcessor.prototype.stop = function () {
-	        this.playing = false;
-	    };
-	    ScriptProcessor.prototype.processAudio = function (evt) { };
-	    return ScriptProcessor;
-	})(CustomNodeBase);
-	/**
-	 * Simple noise generator
-	 */
-	var NoiseGenerator = (function (_super) {
-	    __extends(NoiseGenerator, _super);
-	    function NoiseGenerator() {
-	        _super.apply(this, arguments);
-	    }
-	    NoiseGenerator.prototype.processAudio = function (evt) {
-	        for (var channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
-	            var out = evt.outputBuffer.getChannelData(channel);
-	            for (var sample = 0; sample < out.length; sample++)
-	                out[sample] = this.playing ? this.gain * (Math.random() * 2 - 1) : 0;
-	        }
-	    };
-	    return NoiseGenerator;
-	})(ScriptProcessor);
-	exports.NoiseGenerator = NoiseGenerator;
-	/**
-	 * Noise generator to be used as control node.
-	 * It uses sample & hold in order to implement the 'frequency' parameter.
-	 */
-	var NoiseCtrlGenerator = (function (_super) {
-	    __extends(NoiseCtrlGenerator, _super);
-	    function NoiseCtrlGenerator(ac) {
-	        _super.call(this, ac);
-	        this.ac = ac;
-	        this.frequency = 4;
-	        this.depth = 20;
-	        this.sct = 0;
-	        this.v = 0;
-	    }
-	    NoiseCtrlGenerator.prototype.connect = function (param) {
-	        this.anode.connect(param);
-	    };
-	    NoiseCtrlGenerator.prototype.processAudio = function (evt) {
-	        var samplesPerCycle = this.ac.sampleRate / this.frequency;
-	        for (var channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
-	            var out = evt.outputBuffer.getChannelData(channel);
-	            for (var sample = 0; sample < out.length; sample++) {
-	                this.sct++;
-	                if (this.sct > samplesPerCycle) {
-	                    this.v = this.depth * (Math.random() * 2 - 1);
-	                    this.sct = 0; //this.sct - Math.floor(this.sct);
-	                }
-	                out[sample] = this.v;
-	            }
-	        }
-	    };
-	    return NoiseCtrlGenerator;
-	})(ScriptProcessor);
-	exports.NoiseCtrlGenerator = NoiseCtrlGenerator;
-	/**
-	 * Simple Pitch Shifter implemented in a quick & dirty way
-	 */
-	var Detuner = (function (_super) {
-	    __extends(Detuner, _super);
-	    function Detuner() {
-	        _super.apply(this, arguments);
-	        this.octave = 0;
-	        this.numberOfInputs = 1;
-	    }
-	    Detuner.prototype.processAudio = function (evt) {
-	        var dx = Math.pow(2, this.octave);
-	        for (var channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
-	            var out = evt.outputBuffer.getChannelData(channel);
-	            var inbuf = evt.inputBuffer.getChannelData(channel);
-	            var sct = 0;
-	            for (var sample = 0; sample < out.length; sample++) {
-	                out[sample] = inbuf[Math.floor(sct)];
-	                sct += dx;
-	                if (sct >= inbuf.length)
-	                    sct = 0;
-	            }
-	        }
-	    };
-	    return Detuner;
-	})(ScriptProcessor);
-	exports.Detuner = Detuner;
-	/**
-	 * Captures audio from the PC audio input.
-	 * Requires user's authorization to grab audio input.
-	 */
-	var LineInNode = (function (_super) {
-	    __extends(LineInNode, _super);
-	    function LineInNode() {
-	        _super.apply(this, arguments);
-	    }
-	    LineInNode.prototype.connect = function (anode) {
-	        var _this = this;
-	        if (this.srcNode) {
-	            this.srcNode.connect(anode);
-	            this.dstNode = anode;
-	            return;
-	        }
-	        var navigator = window.navigator;
-	        navigator.getUserMedia = (navigator.getUserMedia ||
-	            navigator.webkitGetUserMedia ||
-	            navigator.mozGetUserMedia ||
-	            navigator.msGetUserMedia);
-	        navigator.getUserMedia({ audio: true }, function (stream) {
-	            var ac = anode.context;
-	            _this.srcNode = ac.createMediaStreamSource(stream);
-	            var a2 = anode;
-	            if (a2.custom && a2.anode)
-	                a2 = a2.anode;
-	            _this.srcNode.connect(a2);
-	            _this.dstNode = anode;
-	            _this.stream = stream;
-	        }, function (error) { return console.error(error); });
-	    };
-	    LineInNode.prototype.disconnect = function () {
-	        this.srcNode.disconnect(this.dstNode);
-	    };
-	    return LineInNode;
-	})(CustomNodeBase);
-	exports.LineInNode = LineInNode;
-
-
-/***/ },
-/* 6 */
-/***/ function(module, exports) {
-
-	/** Informs whether a popup is open or not */
-	exports.isOpen = false;
-	/** Bootstrap-based equivalent of standard alert function */
-	function alert(msg, title, hideClose, options) {
-	    popup.find('.popup-message').html(msg);
-	    popup.find('.modal-title').text(title || 'Alert');
-	    popup.find('.popup-ok').hide();
-	    if (hideClose)
-	        popup.find('.popup-close').hide();
-	    else
-	        popup.find('.popup-close').html('Close');
-	    popup.find('.popup-prompt > input').hide();
-	    exports.isOpen = true;
-	    popup.one('hidden.bs.modal', function (_) { return exports.isOpen = false; });
-	    popup.modal(options);
-	}
-	exports.alert = alert;
-	/** Like an alert, but without a close button */
-	function progress(msg, title) {
-	    alert(msg, title, true, { keyboard: false });
-	}
-	exports.progress = progress;
-	/** Closes a popup in case it is open */
-	function close() {
-	    if (!exports.isOpen)
-	        return;
-	    popup.find('.popup-ok').click();
-	}
-	exports.close = close;
-	/** Bootstrap-based equivalent of standard confirm function */
-	function confirm(msg, title, cbClose, cbOpen) {
-	    var result = false;
-	    popup.find('.popup-message').html(msg);
-	    popup.find('.modal-title').text(title || 'Please confirm');
-	    var okButton = popup.find('.popup-ok');
-	    okButton.show().click(function (_) { return result = true; });
-	    popup.find('.popup-prompt > input').hide();
-	    popup.find('.popup-close').text('Cancel');
-	    popup.one('shown.bs.modal', function (_) {
-	        okButton.focus();
-	        if (cbOpen)
-	            cbOpen();
-	    });
-	    popup.find('form').one('submit', function (_) {
-	        result = true;
-	        okButton.click();
-	        return false;
-	    });
-	    popup.one('hide.bs.modal', function (_) {
-	        okButton.off('click');
-	        exports.isOpen = false;
-	        cbClose(result);
-	    });
-	    exports.isOpen = true;
-	    popup.modal();
-	}
-	exports.confirm = confirm;
-	/** Bootstrap-based equivalent of standard prompt function */
-	function prompt(msg, title, initialValue, cb) {
-	    var input = popup.find('.popup-prompt > input');
-	    confirm(msg, title, function (confirmed) {
-	        if (!cb)
-	            return;
-	        if (!confirmed)
-	            cb(null);
-	        else
-	            cb(input.val());
-	    }, function () {
-	        input.show();
-	        input.focus();
-	        if (initialValue) {
-	            input.val(initialValue);
-	            var hinput = input[0];
-	            hinput.select();
-	        }
-	        else
-	            input.val('');
-	    });
-	}
-	exports.prompt = prompt;
-	var popup = $("\n\t<div class=\"normal-font modal fade\" id=\"myModal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"myModalLabel\">\n\t<div class=\"modal-dialog\" role=\"document\">\n\t\t<div class=\"modal-content\">\n\t\t<div class=\"modal-header\">\n\t\t\t<button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n\t\t\t<h4 class=\"modal-title\" id=\"myModalLabel\"></h4>\n\t\t</div>\n\t\t<div class=\"modal-body\">\n\t\t\t<div class=\"popup-message\"></div>\n\t\t\t<form class=\"popup-prompt\">\n\t\t\t\t<input type=\"text\" style=\"width: 100%\">\n\t\t\t</form>\n\t\t</div>\n\t\t<div class=\"modal-footer\">\n\t\t\t<button type=\"button\" class=\"btn btn-default popup-close\" data-dismiss=\"modal\"></button>\n\t\t\t<button type=\"button\" class=\"btn btn-primary popup-ok\" data-dismiss=\"modal\">OK</button>\n\t\t</div>\n\t\t</div>\n\t</div>\n\t</div>\n");
-	$('body').append(popup);
-
-
-/***/ },
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var __extends = (this && this.__extends) || function (d, b) {
-	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-	    function __() { this.constructor = d; }
-	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	};
-	var modern_1 = __webpack_require__(4);
-	/**
-	 * Handles common AudioNode cloning, used by oscillator and buffered data nodes.
-	 */
-	var BaseNoteHandler = (function () {
-	    function BaseNoteHandler(ndata) {
-	        this.kbTrigger = false;
-	        this.playAfterNoteOff = false;
-	        this.handlers = null;
-	        this.ndata = ndata;
-	        this.outTracker = new OutputTracker(ndata.anode);
-	    }
-	    BaseNoteHandler.prototype.noteOn = function (midi, gain, ratio) { };
-	    BaseNoteHandler.prototype.noteOff = function (midi, gain) { };
-	    BaseNoteHandler.prototype.noteEnd = function (midi) { };
-	    BaseNoteHandler.prototype.clone = function () {
-	        // Create clone
-	        var anode = this.ndata.anode.context[this.ndata.nodeDef.constructor]();
-	        // Copy parameters
-	        for (var _i = 0, _a = Object.keys(this.ndata.nodeDef.params); _i < _a.length; _i++) {
-	            var pname = _a[_i];
-	            var param = this.ndata.anode[pname];
-	            if (param instanceof AudioParam)
-	                anode[pname].value = param.value;
-	            else if (param !== null && param !== undefined)
-	                anode[pname] = param;
-	        }
-	        // Copy output connections
-	        for (var _b = 0, _c = this.outTracker.outputs; _b < _c.length; _b++) {
-	            var out = _c[_b];
-	            var o2 = out;
-	            if (o2.custom && o2.anode)
-	                o2 = o2.anode;
-	            anode.connect(o2);
-	        }
-	        // Copy control input connections
-	        for (var _d = 0, _e = this.ndata.getInputs(); _d < _e.length; _d++) {
-	            var inData = _e[_d];
-	            inData.anode.connect(anode[inData.controlParam]);
-	        }
-	        //TODO should copy snapshot of list of inputs and outputs
-	        //...in case user connects or disconnects during playback
-	        return anode;
-	    };
-	    BaseNoteHandler.prototype.disconnect = function (anode) {
-	        // Disconnect outputs
-	        for (var _i = 0, _a = this.outTracker.outputs; _i < _a.length; _i++) {
-	            var out = _a[_i];
-	            anode.disconnect(out);
-	        }
-	        // Disconnect control inputs
-	        for (var _b = 0, _c = this.ndata.getInputs(); _b < _c.length; _b++) {
-	            var inData = _c[_b];
-	            inData.anode.disconnect(anode[inData.controlParam]);
-	        }
-	    };
-	    return BaseNoteHandler;
-	})();
-	/**
-	 * Handles note events for an OscillatorNode
-	 */
-	var OscNoteHandler = (function (_super) {
-	    __extends(OscNoteHandler, _super);
-	    function OscNoteHandler() {
-	        _super.apply(this, arguments);
-	        this.playing = false;
-	    }
-	    OscNoteHandler.prototype.noteOn = function (midi, gain, ratio) {
-	        if (this.playing)
-	            this.noteEnd(midi); // Because this is monophonic
-	        this.playing = true;
-	        this.oscClone = this.clone();
-	        //TODO should also listen to value changes on original osc and apply them to clone
-	        this.oscClone.frequency.value = this.oscClone.frequency.value * ratio;
-	        this.oscClone.start();
-	        this.lastNote = midi;
-	    };
-	    OscNoteHandler.prototype.noteOff = function (midi, gain) {
-	        if (midi != this.lastNote)
-	            return;
-	        if (!this.playAfterNoteOff)
-	            this.noteEnd(midi);
-	    };
-	    OscNoteHandler.prototype.noteEnd = function (midi) {
-	        // Stop and disconnect
-	        if (!this.playing)
-	            return;
-	        this.playing = false;
-	        this.oscClone.stop();
-	        this.disconnect(this.oscClone);
-	        this.oscClone = null;
-	    };
-	    return OscNoteHandler;
-	})(BaseNoteHandler);
-	/**
-	 * Handles note events for an AudioBufferSourceNode
-	 */
-	var BufferNoteHandler = (function (_super) {
-	    __extends(BufferNoteHandler, _super);
-	    function BufferNoteHandler() {
-	        _super.apply(this, arguments);
-	        this.playing = false;
-	    }
-	    BufferNoteHandler.prototype.noteOn = function (midi, gain, ratio) {
-	        if (this.playing)
-	            this.noteEnd(midi);
-	        var buf = this.ndata.anode['_buffer'];
-	        if (!buf)
-	            return; // Buffer still loading or failed
-	        this.playing = true;
-	        this.absn = this.clone();
-	        this.absn.buffer = buf;
-	        this.absn.playbackRate.value = this.absn.playbackRate.value * ratio;
-	        this.absn.start();
-	        this.lastNote = midi;
-	    };
-	    BufferNoteHandler.prototype.noteOff = function (midi, gain) {
-	        if (midi != this.lastNote)
-	            return;
-	        if (!this.playAfterNoteOff)
-	            this.noteEnd(midi);
-	    };
-	    BufferNoteHandler.prototype.noteEnd = function (midi) {
-	        // Stop and disconnect
-	        if (!this.playing)
-	            return;
-	        this.playing = false;
-	        this.absn.stop();
-	        this.disconnect(this.absn);
-	        this.absn = null;
-	    };
-	    return BufferNoteHandler;
-	})(BaseNoteHandler);
-	/**
-	 * Handles note events for a custom ADSR node
-	 */
-	var ADSRNoteHandler = (function (_super) {
-	    __extends(ADSRNoteHandler, _super);
-	    function ADSRNoteHandler() {
-	        _super.apply(this, arguments);
-	        this.kbTrigger = true;
-	    }
-	    ADSRNoteHandler.prototype.noteOn = function (midi, gain, ratio) {
-	        var _this = this;
-	        this.setupOtherHandlers();
-	        this.lastNote = midi;
-	        var adsr = this.ndata.anode;
-	        var now = adsr.context.currentTime;
-	        this.loopParams(function (out) {
-	            var v = _this.getParamValue(out);
-	            out.cancelScheduledValues(now);
-	            var initial = (1 - adsr.depth) * v;
-	            out.linearRampToValueAtTime(initial, now);
-	            out.linearRampToValueAtTime(v, now + adsr.attack);
-	            var target = v * adsr.sustain + initial * (1 - adsr.sustain);
-	            out.linearRampToValueAtTime(target, now + adsr.attack + adsr.decay);
-	        });
-	    };
-	    ADSRNoteHandler.prototype.noteOff = function (midi, gain) {
-	        if (midi != this.lastNote)
-	            return;
-	        var adsr = this.ndata.anode;
-	        var now = adsr.context.currentTime;
-	        this.loopParams(function (out) {
-	            var v = out.value; // Get the really current value
-	            var finalv = (1 - adsr.depth) * v;
-	            out.cancelScheduledValues(now);
-	            out.linearRampToValueAtTime(v, now);
-	            out.linearRampToValueAtTime(finalv, now + adsr.release);
-	            //setTimeout(_ => this.sendNoteEnd(midi), adsr.release * 2000);
-	        });
-	    };
-	    ADSRNoteHandler.prototype.noteEnd = function (midi) { };
-	    ADSRNoteHandler.prototype.sendNoteEnd = function (midi) {
-	        for (var _i = 0, _a = this.handlers; _i < _a.length; _i++) {
-	            var nh = _a[_i];
-	            nh.noteEnd(midi);
-	        }
-	    };
-	    ADSRNoteHandler.prototype.setupOtherHandlers = function () {
-	        //TODO should set to false when ADSR node is removed
-	        for (var _i = 0, _a = this.handlers; _i < _a.length; _i++) {
-	            var nh = _a[_i];
-	            nh.playAfterNoteOff = true;
-	        }
-	    };
-	    ADSRNoteHandler.prototype.loopParams = function (cb) {
-	        for (var _i = 0, _a = this.outTracker.outputs; _i < _a.length; _i++) {
-	            var out = _a[_i];
-	            if (out instanceof AudioParam)
-	                cb(out);
-	        }
-	    };
-	    ADSRNoteHandler.prototype.getParamValue = function (p) {
-	        if (p['_value'] === undefined)
-	            p['_value'] = p.value;
-	        return p['_value'];
-	    };
-	    return ADSRNoteHandler;
-	})(BaseNoteHandler);
-	/**
-	 * Handles note events for any node that allows calling start() after stop(),
-	 * such as custom nodes.
-	 */
-	var RestartableNoteHandler = (function (_super) {
-	    __extends(RestartableNoteHandler, _super);
-	    function RestartableNoteHandler() {
-	        _super.apply(this, arguments);
-	        this.playing = false;
-	    }
-	    RestartableNoteHandler.prototype.noteOn = function (midi, gain, ratio) {
-	        if (this.playing)
-	            this.noteEnd(midi);
-	        this.playing = true;
-	        var anode = this.ndata.anode;
-	        anode.start();
-	        this.lastNote = midi;
-	    };
-	    RestartableNoteHandler.prototype.noteOff = function (midi, gain) {
-	        if (midi != this.lastNote)
-	            return;
-	        if (!this.playAfterNoteOff)
-	            this.noteEnd(midi);
-	    };
-	    RestartableNoteHandler.prototype.noteEnd = function (midi) {
-	        // Stop and disconnect
-	        if (!this.playing)
-	            return;
-	        this.playing = false;
-	        var anode = this.ndata.anode;
-	        anode.stop();
-	    };
-	    return RestartableNoteHandler;
-	})(BaseNoteHandler);
-	/**
-	 * Exports available note handlers so they are used by their respective
-	 * nodes from the palette.
-	 */
-	exports.NoteHandlers = {
-	    'osc': OscNoteHandler,
-	    'buffer': BufferNoteHandler,
-	    'ADSR': ADSRNoteHandler,
-	    'restartable': RestartableNoteHandler
-	};
-	/**
-	 * Tracks a node output connections and disconnections, to be used
-	 * when cloning, removing or controlling nodes.
-	 */
-	var OutputTracker = (function () {
-	    function OutputTracker(anode) {
-	        this.outputs = [];
-	        this.onBefore(anode, 'connect', this.connect, function (oldf, obj, args) {
-	            if (args[0].custom && args[0].anode)
-	                args[0] = args[0].anode;
-	            oldf.apply(obj, args);
-	        });
-	        this.onBefore(anode, 'disconnect', this.disconnect);
-	    }
-	    OutputTracker.prototype.connect = function (np) {
-	        this.outputs.push(np);
-	    };
-	    OutputTracker.prototype.disconnect = function (np) {
-	        modern_1.removeArrayElement(this.outputs, np);
-	    };
-	    OutputTracker.prototype.onBefore = function (obj, fname, funcToCall, cb) {
-	        var oldf = obj[fname];
-	        var self = this;
-	        obj[fname] = function () {
-	            funcToCall.apply(self, arguments);
-	            if (cb)
-	                cb(oldf, obj, arguments);
-	            else
-	                oldf.apply(obj, arguments);
-	        };
-	    };
-	    return OutputTracker;
-	})();
-
-
-/***/ },
-/* 8 */
 /***/ function(module, exports) {
 
 	var SHIFT_KEY = 16;
@@ -1662,6 +725,948 @@
 	    };
 	    return GraphDraw;
 	})();
+
+
+/***/ },
+/* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var notes_1 = __webpack_require__(4);
+	var palette_1 = __webpack_require__(6);
+	var modern_1 = __webpack_require__(5);
+	var custom = __webpack_require__(7);
+	/**
+	 * Holds all data associated with an AudioNode
+	 */
+	var NodeData = (function () {
+	    function NodeData() {
+	        // Flag to avoid deleting output node
+	        this.isOut = false;
+	    }
+	    // To be implemented by user code
+	    NodeData.prototype.getInputs = function () {
+	        throw 'Error: getInputs() function should be implemented by user';
+	    };
+	    return NodeData;
+	})();
+	exports.NodeData = NodeData;
+	/**
+	 * Performs global operations on all AudioNodes:
+	 * - Manages AudioNode creation and initialization from the palette
+	 * - Distributes MIDI keyboard events to NoteHandlers
+	 */
+	var Synth = (function () {
+	    function Synth(ac) {
+	        this.customNodes = {};
+	        this.paramHandlers = {};
+	        this.noteHandlers = [];
+	        this.ac = ac;
+	        this.palette = palette_1.palette;
+	        this.registerCustomNode('createADSR', custom.ADSR);
+	        this.registerCustomNode('createNoise', custom.NoiseGenerator);
+	        this.registerCustomNode('createNoiseCtrl', custom.NoiseCtrlGenerator);
+	        this.registerCustomNode('createLineIn', custom.LineInNode);
+	        this.registerCustomNode('createDetuner', custom.Detuner);
+	        this.registerParamHandler('BufferURL', new BufferURL());
+	    }
+	    Synth.prototype.createAudioNode = function (type) {
+	        var def = palette_1.palette[type];
+	        if (!def)
+	            return null;
+	        var factory = def.custom ? this.customNodes : this.ac;
+	        if (!factory[def.constructor])
+	            return null;
+	        var anode = factory[def.constructor]();
+	        if (!anode.context)
+	            anode.context = this.ac;
+	        this.initNodeParams(anode, def, type);
+	        return anode;
+	    };
+	    Synth.prototype.initNodeData = function (ndata, type) {
+	        ndata.type = type;
+	        ndata.anode = this.createAudioNode(type);
+	        if (!ndata.anode)
+	            return console.error("No AudioNode found for '" + type + "'");
+	        ndata.nodeDef = this.palette[type];
+	        var nh = ndata.nodeDef.noteHandler;
+	        if (nh) {
+	            ndata.noteHandler = new notes_1.NoteHandlers[nh](ndata);
+	            this.addNoteHandler(ndata.noteHandler);
+	        }
+	        else if (ndata.anode['start'])
+	            ndata.anode['start']();
+	    };
+	    Synth.prototype.initOutputNodeData = function (data) {
+	        data.type = 'out';
+	        data.anode = this.ac.createGain();
+	        data.anode.connect(this.ac.destination);
+	        data.nodeDef = this.palette['Speaker'];
+	        data.isOut = true;
+	    };
+	    Synth.prototype.play = function () {
+	        this.ac.resume();
+	    };
+	    Synth.prototype.stop = function () {
+	        this.ac.suspend();
+	    };
+	    Synth.prototype.noteOn = function (midi, gain, ratio) {
+	        for (var _i = 0, _a = this.noteHandlers; _i < _a.length; _i++) {
+	            var nh = _a[_i];
+	            if (nh.kbTrigger)
+	                nh.handlers = this.noteHandlers;
+	            nh.noteOn(midi, gain, ratio);
+	        }
+	    };
+	    Synth.prototype.noteOff = function (midi, gain) {
+	        for (var _i = 0, _a = this.noteHandlers; _i < _a.length; _i++) {
+	            var nh = _a[_i];
+	            nh.noteOff(midi, gain);
+	        }
+	    };
+	    Synth.prototype.addNoteHandler = function (nh) {
+	        this.noteHandlers.push(nh);
+	    };
+	    Synth.prototype.removeNoteHandler = function (nh) {
+	        modern_1.removeArrayElement(this.noteHandlers, nh);
+	    };
+	    Synth.prototype.initNodeParams = function (anode, def, type) {
+	        for (var _i = 0, _a = Object.keys(def.params || {}); _i < _a.length; _i++) {
+	            var param = _a[_i];
+	            if (anode[param] === undefined)
+	                console.warn("Parameter '" + param + "' not found for node '" + type + "'");
+	            else if (anode[param] instanceof AudioParam)
+	                anode[param].value = def.params[param].initial;
+	            else if (def.params[param].handler) {
+	                def.params[param].phandler = this.paramHandlers[def.params[param].handler];
+	                def.params[param].phandler.initialize(anode, def);
+	            }
+	            else
+	                anode[param] = def.params[param].initial;
+	        }
+	    };
+	    Synth.prototype.registerCustomNode = function (constructorName, nodeClass) {
+	        var _this = this;
+	        this.customNodes[constructorName] = function () { return new nodeClass(_this.ac); };
+	    };
+	    Synth.prototype.registerParamHandler = function (hname, handler) {
+	        this.paramHandlers[hname] = handler;
+	    };
+	    return Synth;
+	})();
+	exports.Synth = Synth;
+	//-------------------- Parameter handlers --------------------
+	var popups = __webpack_require__(8);
+	var BufferURL = (function () {
+	    function BufferURL() {
+	    }
+	    BufferURL.prototype.initialize = function (anode, def) {
+	        var absn = anode;
+	        var url = def.params['buffer'].initial;
+	        if (!url)
+	            return;
+	        this.loadBufferParam(absn, url);
+	    };
+	    BufferURL.prototype.renderParam = function (panel, pdef, anode, param, label) {
+	        var _this = this;
+	        var box = $('<div class="choice-box">');
+	        var button = $('<button class="btn btn-primary">URL</button>');
+	        box.append(button);
+	        button.after('<br/><br/>' + label);
+	        panel.append(box);
+	        button.click(function (_) {
+	            popups.prompt('Audio buffer URL:', 'Please provide URL', null, function (url) {
+	                if (!url)
+	                    return;
+	                var absn = anode;
+	                _this.loadBufferParam(absn, url);
+	            });
+	        });
+	        return box;
+	    };
+	    BufferURL.prototype.param2json = function (anode) {
+	        return anode['_url'];
+	    };
+	    BufferURL.prototype.json2param = function (anode, json) {
+	        this.loadBufferParam(anode, json);
+	    };
+	    BufferURL.prototype.loadBufferParam = function (absn, url) {
+	        this.loadBuffer(absn.context, url, function (buffer) {
+	            absn['_buffer'] = buffer;
+	            absn['_url'] = url;
+	        });
+	    };
+	    BufferURL.prototype.loadBuffer = function (ac, url, cb) {
+	        var w = window;
+	        w.audioBufferCache = w.audioBufferCache || {};
+	        if (w.audioBufferCache[url])
+	            return cb(w.audioBufferCache[url]);
+	        var xhr = new XMLHttpRequest();
+	        xhr.open('GET', url, true);
+	        xhr.responseType = 'arraybuffer';
+	        xhr.onload = function (_) {
+	            popups.close();
+	            ac.decodeAudioData(xhr.response, function (buffer) {
+	                w.audioBufferCache[url] = buffer;
+	                cb(buffer);
+	            });
+	        };
+	        xhr.send();
+	        setTimeout(function (_) {
+	            if (xhr.readyState != xhr.DONE)
+	                popups.progress('Loading ' + url + '...');
+	        }, 300);
+	    };
+	    return BufferURL;
+	})();
+
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var modern_1 = __webpack_require__(5);
+	/**
+	 * Handles common AudioNode cloning, used by oscillator and buffered data nodes.
+	 */
+	var BaseNoteHandler = (function () {
+	    function BaseNoteHandler(ndata) {
+	        this.kbTrigger = false;
+	        this.playAfterNoteOff = false;
+	        this.handlers = null;
+	        this.ndata = ndata;
+	        this.outTracker = new OutputTracker(ndata.anode);
+	    }
+	    BaseNoteHandler.prototype.noteOn = function (midi, gain, ratio) { };
+	    BaseNoteHandler.prototype.noteOff = function (midi, gain) { };
+	    BaseNoteHandler.prototype.noteEnd = function (midi) { };
+	    BaseNoteHandler.prototype.clone = function () {
+	        // Create clone
+	        var anode = this.ndata.anode.context[this.ndata.nodeDef.constructor]();
+	        // Copy parameters
+	        for (var _i = 0, _a = Object.keys(this.ndata.nodeDef.params); _i < _a.length; _i++) {
+	            var pname = _a[_i];
+	            var param = this.ndata.anode[pname];
+	            if (param instanceof AudioParam)
+	                anode[pname].value = param.value;
+	            else if (param !== null && param !== undefined)
+	                anode[pname] = param;
+	        }
+	        // Copy output connections
+	        for (var _b = 0, _c = this.outTracker.outputs; _b < _c.length; _b++) {
+	            var out = _c[_b];
+	            var o2 = out;
+	            if (o2.custom && o2.anode)
+	                o2 = o2.anode;
+	            anode.connect(o2);
+	        }
+	        // Copy control input connections
+	        for (var _d = 0, _e = this.ndata.getInputs(); _d < _e.length; _d++) {
+	            var inData = _e[_d];
+	            inData.anode.connect(anode[inData.controlParam]);
+	        }
+	        //TODO should copy snapshot of list of inputs and outputs
+	        //...in case user connects or disconnects during playback
+	        return anode;
+	    };
+	    BaseNoteHandler.prototype.disconnect = function (anode) {
+	        // Disconnect outputs
+	        for (var _i = 0, _a = this.outTracker.outputs; _i < _a.length; _i++) {
+	            var out = _a[_i];
+	            anode.disconnect(out);
+	        }
+	        // Disconnect control inputs
+	        for (var _b = 0, _c = this.ndata.getInputs(); _b < _c.length; _b++) {
+	            var inData = _c[_b];
+	            inData.anode.disconnect(anode[inData.controlParam]);
+	        }
+	    };
+	    return BaseNoteHandler;
+	})();
+	/**
+	 * Handles note events for an OscillatorNode
+	 */
+	var OscNoteHandler = (function (_super) {
+	    __extends(OscNoteHandler, _super);
+	    function OscNoteHandler() {
+	        _super.apply(this, arguments);
+	        this.playing = false;
+	    }
+	    OscNoteHandler.prototype.noteOn = function (midi, gain, ratio) {
+	        if (this.playing)
+	            this.noteEnd(midi); // Because this is monophonic
+	        this.playing = true;
+	        this.oscClone = this.clone();
+	        //TODO should also listen to value changes on original osc and apply them to clone
+	        this.oscClone.frequency.value = this.oscClone.frequency.value * ratio;
+	        this.oscClone.start();
+	        this.lastNote = midi;
+	    };
+	    OscNoteHandler.prototype.noteOff = function (midi, gain) {
+	        if (midi != this.lastNote)
+	            return;
+	        if (!this.playAfterNoteOff)
+	            this.noteEnd(midi);
+	    };
+	    OscNoteHandler.prototype.noteEnd = function (midi) {
+	        // Stop and disconnect
+	        if (!this.playing)
+	            return;
+	        this.playing = false;
+	        this.oscClone.stop();
+	        this.disconnect(this.oscClone);
+	        this.oscClone = null;
+	    };
+	    return OscNoteHandler;
+	})(BaseNoteHandler);
+	/**
+	 * Handles note events for an AudioBufferSourceNode
+	 */
+	var BufferNoteHandler = (function (_super) {
+	    __extends(BufferNoteHandler, _super);
+	    function BufferNoteHandler() {
+	        _super.apply(this, arguments);
+	        this.playing = false;
+	    }
+	    BufferNoteHandler.prototype.noteOn = function (midi, gain, ratio) {
+	        if (this.playing)
+	            this.noteEnd(midi);
+	        var buf = this.ndata.anode['_buffer'];
+	        if (!buf)
+	            return; // Buffer still loading or failed
+	        this.playing = true;
+	        this.absn = this.clone();
+	        this.absn.buffer = buf;
+	        this.absn.playbackRate.value = this.absn.playbackRate.value * ratio;
+	        this.absn.start();
+	        this.lastNote = midi;
+	    };
+	    BufferNoteHandler.prototype.noteOff = function (midi, gain) {
+	        if (midi != this.lastNote)
+	            return;
+	        if (!this.playAfterNoteOff)
+	            this.noteEnd(midi);
+	    };
+	    BufferNoteHandler.prototype.noteEnd = function (midi) {
+	        // Stop and disconnect
+	        if (!this.playing)
+	            return;
+	        this.playing = false;
+	        this.absn.stop();
+	        this.disconnect(this.absn);
+	        this.absn = null;
+	    };
+	    return BufferNoteHandler;
+	})(BaseNoteHandler);
+	/**
+	 * Handles note events for a custom ADSR node
+	 */
+	var ADSRNoteHandler = (function (_super) {
+	    __extends(ADSRNoteHandler, _super);
+	    function ADSRNoteHandler() {
+	        _super.apply(this, arguments);
+	        this.kbTrigger = true;
+	    }
+	    ADSRNoteHandler.prototype.noteOn = function (midi, gain, ratio) {
+	        var _this = this;
+	        this.setupOtherHandlers();
+	        this.lastNote = midi;
+	        var adsr = this.ndata.anode;
+	        var now = adsr.context.currentTime;
+	        this.loopParams(function (out) {
+	            var v = _this.getParamValue(out);
+	            out.cancelScheduledValues(now);
+	            var initial = (1 - adsr.depth) * v;
+	            out.linearRampToValueAtTime(initial, now);
+	            out.linearRampToValueAtTime(v, now + adsr.attack);
+	            var target = v * adsr.sustain + initial * (1 - adsr.sustain);
+	            out.linearRampToValueAtTime(target, now + adsr.attack + adsr.decay);
+	        });
+	    };
+	    ADSRNoteHandler.prototype.noteOff = function (midi, gain) {
+	        if (midi != this.lastNote)
+	            return;
+	        var adsr = this.ndata.anode;
+	        var now = adsr.context.currentTime;
+	        this.loopParams(function (out) {
+	            var v = out.value; // Get the really current value
+	            var finalv = (1 - adsr.depth) * v;
+	            out.cancelScheduledValues(now);
+	            out.linearRampToValueAtTime(v, now);
+	            out.linearRampToValueAtTime(finalv, now + adsr.release);
+	            //setTimeout(_ => this.sendNoteEnd(midi), adsr.release * 2000);
+	        });
+	    };
+	    ADSRNoteHandler.prototype.noteEnd = function (midi) { };
+	    ADSRNoteHandler.prototype.sendNoteEnd = function (midi) {
+	        for (var _i = 0, _a = this.handlers; _i < _a.length; _i++) {
+	            var nh = _a[_i];
+	            nh.noteEnd(midi);
+	        }
+	    };
+	    ADSRNoteHandler.prototype.setupOtherHandlers = function () {
+	        //TODO should set to false when ADSR node is removed
+	        for (var _i = 0, _a = this.handlers; _i < _a.length; _i++) {
+	            var nh = _a[_i];
+	            nh.playAfterNoteOff = true;
+	        }
+	    };
+	    ADSRNoteHandler.prototype.loopParams = function (cb) {
+	        for (var _i = 0, _a = this.outTracker.outputs; _i < _a.length; _i++) {
+	            var out = _a[_i];
+	            if (out instanceof AudioParam)
+	                cb(out);
+	        }
+	    };
+	    ADSRNoteHandler.prototype.getParamValue = function (p) {
+	        if (p['_value'] === undefined)
+	            p['_value'] = p.value;
+	        return p['_value'];
+	    };
+	    return ADSRNoteHandler;
+	})(BaseNoteHandler);
+	/**
+	 * Handles note events for any node that allows calling start() after stop(),
+	 * such as custom nodes.
+	 */
+	var RestartableNoteHandler = (function (_super) {
+	    __extends(RestartableNoteHandler, _super);
+	    function RestartableNoteHandler() {
+	        _super.apply(this, arguments);
+	        this.playing = false;
+	    }
+	    RestartableNoteHandler.prototype.noteOn = function (midi, gain, ratio) {
+	        if (this.playing)
+	            this.noteEnd(midi);
+	        this.playing = true;
+	        var anode = this.ndata.anode;
+	        anode.start();
+	        this.lastNote = midi;
+	    };
+	    RestartableNoteHandler.prototype.noteOff = function (midi, gain) {
+	        if (midi != this.lastNote)
+	            return;
+	        if (!this.playAfterNoteOff)
+	            this.noteEnd(midi);
+	    };
+	    RestartableNoteHandler.prototype.noteEnd = function (midi) {
+	        // Stop and disconnect
+	        if (!this.playing)
+	            return;
+	        this.playing = false;
+	        var anode = this.ndata.anode;
+	        anode.stop();
+	    };
+	    return RestartableNoteHandler;
+	})(BaseNoteHandler);
+	/**
+	 * Exports available note handlers so they are used by their respective
+	 * nodes from the palette.
+	 */
+	exports.NoteHandlers = {
+	    'osc': OscNoteHandler,
+	    'buffer': BufferNoteHandler,
+	    'ADSR': ADSRNoteHandler,
+	    'restartable': RestartableNoteHandler
+	};
+	/**
+	 * Tracks a node output connections and disconnections, to be used
+	 * when cloning, removing or controlling nodes.
+	 */
+	var OutputTracker = (function () {
+	    function OutputTracker(anode) {
+	        this.outputs = [];
+	        this.onBefore(anode, 'connect', this.connect, function (oldf, obj, args) {
+	            if (args[0].custom && args[0].anode)
+	                args[0] = args[0].anode;
+	            oldf.apply(obj, args);
+	        });
+	        this.onBefore(anode, 'disconnect', this.disconnect);
+	    }
+	    OutputTracker.prototype.connect = function (np) {
+	        this.outputs.push(np);
+	    };
+	    OutputTracker.prototype.disconnect = function (np) {
+	        modern_1.removeArrayElement(this.outputs, np);
+	    };
+	    OutputTracker.prototype.onBefore = function (obj, fname, funcToCall, cb) {
+	        var oldf = obj[fname];
+	        var self = this;
+	        obj[fname] = function () {
+	            funcToCall.apply(self, arguments);
+	            if (cb)
+	                cb(oldf, obj, arguments);
+	            else
+	                oldf.apply(obj, arguments);
+	        };
+	    };
+	    return OutputTracker;
+	})();
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
+	/**
+	 * Modernize browser interfaces so that TypeScript does not complain
+	 * when using new features.
+	 *
+	 * Also provides some basic utility funcitons which should be part of
+	 * the standard JavaScript library.
+	 */
+	function removeArrayElement(a, e) {
+	    var pos = a.indexOf(e);
+	    if (pos < 0)
+	        return false; // not found
+	    a.splice(pos, 1);
+	    return true;
+	}
+	exports.removeArrayElement = removeArrayElement;
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+	//-------------------- Node palette definition --------------------
+	var OCTAVE_DETUNE = {
+	    initial: 0,
+	    min: -1200,
+	    max: 1200,
+	    linear: true
+	};
+	/**
+	 * The set of AudioNodes available to the application, along with
+	 * their configuration.
+	 */
+	exports.palette = {
+	    // Sources
+	    Oscillator: {
+	        constructor: 'createOscillator',
+	        noteHandler: 'osc',
+	        params: {
+	            frequency: { initial: 220, min: 20, max: 20000 },
+	            detune: OCTAVE_DETUNE,
+	            type: {
+	                initial: 'sawtooth',
+	                choices: ['sine', 'square', 'sawtooth', 'triangle']
+	            }
+	        }
+	    },
+	    Buffer: {
+	        constructor: 'createBufferSource',
+	        noteHandler: 'buffer',
+	        params: {
+	            playbackRate: { initial: 1, min: 0, max: 8 },
+	            detune: OCTAVE_DETUNE,
+	            buffer: {
+	                initial: null,
+	                handler: 'BufferURL'
+	            },
+	            loop: { initial: false },
+	            loopStart: { initial: 0, min: 0, max: 10 },
+	            loopEnd: { initial: 3, min: 0, max: 10 }
+	        }
+	    },
+	    Noise: {
+	        constructor: 'createNoise',
+	        noteHandler: 'restartable',
+	        custom: true,
+	        params: {
+	            gain: { initial: 1, min: 0, max: 10 }
+	        }
+	    },
+	    LineIn: {
+	        constructor: 'createLineIn',
+	        custom: true,
+	        params: {}
+	    },
+	    // Effects
+	    Gain: {
+	        constructor: 'createGain',
+	        params: {
+	            gain: { initial: 1, min: 0, max: 10, linear: true }
+	        }
+	    },
+	    Filter: {
+	        constructor: 'createBiquadFilter',
+	        params: {
+	            frequency: { initial: 440, min: 20, max: 20000 },
+	            Q: { initial: 0, min: 0, max: 100 },
+	            detune: OCTAVE_DETUNE,
+	            gain: { initial: 0, min: -40, max: 40, linear: true },
+	            type: {
+	                initial: 'lowpass',
+	                choices: ['lowpass', 'highpass', 'bandpass',
+	                    'lowshelf', 'highshelf', 'peaking', 'notch', 'allpass']
+	            }
+	        },
+	    },
+	    Delay: {
+	        constructor: 'createDelay',
+	        params: {
+	            delayTime: { initial: 1, min: 0, max: 5 }
+	        }
+	    },
+	    StereoPan: {
+	        constructor: 'createStereoPanner',
+	        params: {
+	            pan: { initial: 0, min: -1, max: 1, linear: true }
+	        }
+	    },
+	    Compressor: {
+	        constructor: 'createDynamicsCompressor',
+	        params: {
+	            threshold: { initial: -24, min: -100, max: 0, linear: true },
+	            knee: { initial: 30, min: 0, max: 40, linear: true },
+	            ratio: { initial: 12, min: 1, max: 20, linear: true },
+	            reduction: { initial: 0, min: -20, max: 0, linear: true },
+	            attack: { initial: 0.003, min: 0, max: 1 },
+	            release: { initial: 0.25, min: 0, max: 1 }
+	        }
+	    },
+	    Detuner: {
+	        constructor: 'createDetuner',
+	        custom: true,
+	        params: {
+	            octave: { initial: 0, min: -2, max: 2, linear: true }
+	        }
+	    },
+	    // Controllers
+	    LFO: {
+	        constructor: 'createOscillator',
+	        control: true,
+	        params: {
+	            frequency: { initial: 5, min: 0.01, max: 200 },
+	            detune: OCTAVE_DETUNE,
+	            type: {
+	                initial: 'sine',
+	                choices: ['sine', 'square', 'sawtooth', 'triangle']
+	            }
+	        }
+	    },
+	    GainCtrl: {
+	        constructor: 'createGain',
+	        control: true,
+	        params: {
+	            gain: { initial: 10, min: 0, max: 100, linear: true }
+	        }
+	    },
+	    ADSR: {
+	        constructor: 'createADSR',
+	        noteHandler: 'ADSR',
+	        control: true,
+	        custom: true,
+	        params: {
+	            attack: { initial: 0.2, min: 0, max: 10 },
+	            decay: { initial: 0.5, min: 0, max: 10 },
+	            sustain: { initial: 0.5, min: 0, max: 1, linear: true },
+	            release: { initial: 1.0, min: 0, max: 10 },
+	            depth: { initial: 1.0, min: 0, max: 1 }
+	        }
+	    },
+	    NoiseCtrl: {
+	        constructor: 'createNoiseCtrl',
+	        control: true,
+	        custom: true,
+	        params: {
+	            frequency: { initial: 4, min: 0, max: 200 },
+	            depth: { initial: 20, min: 0, max: 200 }
+	        }
+	    },
+	    // Output
+	    Speaker: {
+	        constructor: null,
+	        params: {}
+	    }
+	};
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	/**
+	 * Base class to derive all custom nodes from it
+	 */
+	var CustomNodeBase = (function () {
+	    function CustomNodeBase() {
+	        this.custom = true;
+	        this.channelCount = 2;
+	        this.channelCountMode = 'max';
+	        this.channelInterpretation = 'speakers';
+	        this.numberOfInputs = 0;
+	        this.numberOfOutputs = 1;
+	    }
+	    CustomNodeBase.prototype.connect = function (param) { };
+	    CustomNodeBase.prototype.disconnect = function () { };
+	    // Required for extending EventTarget
+	    CustomNodeBase.prototype.addEventListener = function () { };
+	    CustomNodeBase.prototype.dispatchEvent = function (evt) { return false; };
+	    CustomNodeBase.prototype.removeEventListener = function () { };
+	    return CustomNodeBase;
+	})();
+	/**
+	 * Envelope generator that controls the evolution over time of a destination
+	 * node's parameter. All parameter control is performed in the corresponding
+	 * ADSR note handler.
+	 */
+	var ADSR = (function (_super) {
+	    __extends(ADSR, _super);
+	    function ADSR() {
+	        _super.apply(this, arguments);
+	        this.attack = 0.2;
+	        this.decay = 0.5;
+	        this.sustain = 0.5;
+	        this.release = 1;
+	        this.depth = 1;
+	    }
+	    return ADSR;
+	})(CustomNodeBase);
+	exports.ADSR = ADSR;
+	/**
+	 * Base ScriptProcessor, to derive all custom audio processing nodes from it.
+	 */
+	var ScriptProcessor = (function (_super) {
+	    __extends(ScriptProcessor, _super);
+	    function ScriptProcessor(ac) {
+	        var _this = this;
+	        _super.call(this);
+	        this.gain = 1;
+	        this.playing = false;
+	        this.anode = ac.createScriptProcessor(1024);
+	        this.anode.onaudioprocess = function (evt) { return _this.processAudio(evt); };
+	    }
+	    ScriptProcessor.prototype.connect = function (node) {
+	        this.anode.connect(node);
+	    };
+	    ScriptProcessor.prototype.disconnect = function () {
+	        this.anode.disconnect();
+	    };
+	    ScriptProcessor.prototype.start = function () {
+	        this.playing = true;
+	    };
+	    ScriptProcessor.prototype.stop = function () {
+	        this.playing = false;
+	    };
+	    ScriptProcessor.prototype.processAudio = function (evt) { };
+	    return ScriptProcessor;
+	})(CustomNodeBase);
+	/**
+	 * Simple noise generator
+	 */
+	var NoiseGenerator = (function (_super) {
+	    __extends(NoiseGenerator, _super);
+	    function NoiseGenerator() {
+	        _super.apply(this, arguments);
+	    }
+	    NoiseGenerator.prototype.processAudio = function (evt) {
+	        for (var channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
+	            var out = evt.outputBuffer.getChannelData(channel);
+	            for (var sample = 0; sample < out.length; sample++)
+	                out[sample] = this.playing ? this.gain * (Math.random() * 2 - 1) : 0;
+	        }
+	    };
+	    return NoiseGenerator;
+	})(ScriptProcessor);
+	exports.NoiseGenerator = NoiseGenerator;
+	/**
+	 * Noise generator to be used as control node.
+	 * It uses sample & hold in order to implement the 'frequency' parameter.
+	 */
+	var NoiseCtrlGenerator = (function (_super) {
+	    __extends(NoiseCtrlGenerator, _super);
+	    function NoiseCtrlGenerator(ac) {
+	        _super.call(this, ac);
+	        this.ac = ac;
+	        this.frequency = 4;
+	        this.depth = 20;
+	        this.sct = 0;
+	        this.v = 0;
+	    }
+	    NoiseCtrlGenerator.prototype.connect = function (param) {
+	        this.anode.connect(param);
+	    };
+	    NoiseCtrlGenerator.prototype.processAudio = function (evt) {
+	        var samplesPerCycle = this.ac.sampleRate / this.frequency;
+	        for (var channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
+	            var out = evt.outputBuffer.getChannelData(channel);
+	            for (var sample = 0; sample < out.length; sample++) {
+	                this.sct++;
+	                if (this.sct > samplesPerCycle) {
+	                    this.v = this.depth * (Math.random() * 2 - 1);
+	                    this.sct = 0; //this.sct - Math.floor(this.sct);
+	                }
+	                out[sample] = this.v;
+	            }
+	        }
+	    };
+	    return NoiseCtrlGenerator;
+	})(ScriptProcessor);
+	exports.NoiseCtrlGenerator = NoiseCtrlGenerator;
+	/**
+	 * Simple Pitch Shifter implemented in a quick & dirty way
+	 */
+	var Detuner = (function (_super) {
+	    __extends(Detuner, _super);
+	    function Detuner() {
+	        _super.apply(this, arguments);
+	        this.octave = 0;
+	        this.numberOfInputs = 1;
+	    }
+	    Detuner.prototype.processAudio = function (evt) {
+	        var dx = Math.pow(2, this.octave);
+	        for (var channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
+	            var out = evt.outputBuffer.getChannelData(channel);
+	            var inbuf = evt.inputBuffer.getChannelData(channel);
+	            var sct = 0;
+	            for (var sample = 0; sample < out.length; sample++) {
+	                out[sample] = inbuf[Math.floor(sct)];
+	                sct += dx;
+	                if (sct >= inbuf.length)
+	                    sct = 0;
+	            }
+	        }
+	    };
+	    return Detuner;
+	})(ScriptProcessor);
+	exports.Detuner = Detuner;
+	/**
+	 * Captures audio from the PC audio input.
+	 * Requires user's authorization to grab audio input.
+	 */
+	var LineInNode = (function (_super) {
+	    __extends(LineInNode, _super);
+	    function LineInNode() {
+	        _super.apply(this, arguments);
+	    }
+	    LineInNode.prototype.connect = function (anode) {
+	        var _this = this;
+	        if (this.srcNode) {
+	            this.srcNode.connect(anode);
+	            this.dstNode = anode;
+	            return;
+	        }
+	        var navigator = window.navigator;
+	        navigator.getUserMedia = (navigator.getUserMedia ||
+	            navigator.webkitGetUserMedia ||
+	            navigator.mozGetUserMedia ||
+	            navigator.msGetUserMedia);
+	        navigator.getUserMedia({ audio: true }, function (stream) {
+	            var ac = anode.context;
+	            _this.srcNode = ac.createMediaStreamSource(stream);
+	            var a2 = anode;
+	            if (a2.custom && a2.anode)
+	                a2 = a2.anode;
+	            _this.srcNode.connect(a2);
+	            _this.dstNode = anode;
+	            _this.stream = stream;
+	        }, function (error) { return console.error(error); });
+	    };
+	    LineInNode.prototype.disconnect = function () {
+	        this.srcNode.disconnect(this.dstNode);
+	    };
+	    return LineInNode;
+	})(CustomNodeBase);
+	exports.LineInNode = LineInNode;
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports) {
+
+	/** Informs whether a popup is open or not */
+	exports.isOpen = false;
+	/** Bootstrap-based equivalent of standard alert function */
+	function alert(msg, title, hideClose, options) {
+	    popup.find('.popup-message').html(msg);
+	    popup.find('.modal-title').text(title || 'Alert');
+	    popup.find('.popup-ok').hide();
+	    if (hideClose)
+	        popup.find('.popup-close').hide();
+	    else
+	        popup.find('.popup-close').html('Close');
+	    popup.find('.popup-prompt > input').hide();
+	    exports.isOpen = true;
+	    popup.one('hidden.bs.modal', function (_) { return exports.isOpen = false; });
+	    popup.modal(options);
+	}
+	exports.alert = alert;
+	/** Like an alert, but without a close button */
+	function progress(msg, title) {
+	    alert(msg, title, true, { keyboard: false });
+	}
+	exports.progress = progress;
+	/** Closes a popup in case it is open */
+	function close() {
+	    if (!exports.isOpen)
+	        return;
+	    popup.find('.popup-ok').click();
+	}
+	exports.close = close;
+	/** Bootstrap-based equivalent of standard confirm function */
+	function confirm(msg, title, cbClose, cbOpen) {
+	    var result = false;
+	    popup.find('.popup-message').html(msg);
+	    popup.find('.modal-title').text(title || 'Please confirm');
+	    var okButton = popup.find('.popup-ok');
+	    okButton.show().click(function (_) { return result = true; });
+	    popup.find('.popup-prompt > input').hide();
+	    popup.find('.popup-close').text('Cancel');
+	    popup.one('shown.bs.modal', function (_) {
+	        okButton.focus();
+	        if (cbOpen)
+	            cbOpen();
+	    });
+	    popup.find('form').one('submit', function (_) {
+	        result = true;
+	        okButton.click();
+	        return false;
+	    });
+	    popup.one('hide.bs.modal', function (_) {
+	        okButton.off('click');
+	        exports.isOpen = false;
+	        cbClose(result);
+	    });
+	    exports.isOpen = true;
+	    popup.modal();
+	}
+	exports.confirm = confirm;
+	/** Bootstrap-based equivalent of standard prompt function */
+	function prompt(msg, title, initialValue, cb) {
+	    var input = popup.find('.popup-prompt > input');
+	    confirm(msg, title, function (confirmed) {
+	        if (!cb)
+	            return;
+	        if (!confirmed)
+	            cb(null);
+	        else
+	            cb(input.val());
+	    }, function () {
+	        input.show();
+	        input.focus();
+	        if (initialValue) {
+	            input.val(initialValue);
+	            var hinput = input[0];
+	            hinput.select();
+	        }
+	        else
+	            input.val('');
+	    });
+	}
+	exports.prompt = prompt;
+	var popup = $("\n\t<div class=\"normal-font modal fade\" id=\"myModal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"myModalLabel\">\n\t<div class=\"modal-dialog\" role=\"document\">\n\t\t<div class=\"modal-content\">\n\t\t<div class=\"modal-header\">\n\t\t\t<button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n\t\t\t<h4 class=\"modal-title\" id=\"myModalLabel\"></h4>\n\t\t</div>\n\t\t<div class=\"modal-body\">\n\t\t\t<div class=\"popup-message\"></div>\n\t\t\t<form class=\"popup-prompt\">\n\t\t\t\t<input type=\"text\" style=\"width: 100%\">\n\t\t\t</form>\n\t\t</div>\n\t\t<div class=\"modal-footer\">\n\t\t\t<button type=\"button\" class=\"btn btn-default popup-close\" data-dismiss=\"modal\"></button>\n\t\t\t<button type=\"button\" class=\"btn btn-primary popup-ok\" data-dismiss=\"modal\">OK</button>\n\t\t</div>\n\t\t</div>\n\t</div>\n\t</div>\n");
+	$('body').append(popup);
 
 
 /***/ },
@@ -2093,7 +2098,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var keyboard_1 = __webpack_require__(12);
-	var popups = __webpack_require__(6);
+	var popups = __webpack_require__(8);
 	var NUM_WHITES = 17;
 	var BASE_NOTE = 36;
 	/**
@@ -2318,7 +2323,7 @@
 /* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var popups = __webpack_require__(6);
+	var popups = __webpack_require__(8);
 	var MAX_PRESETS = 20;
 	/**
 	 * Manages the presets box:

@@ -1,6 +1,5 @@
 import { Graph, Node, GraphHandler } from './graph';
 import { NodeData } from '../synth/synth';
-import { NoteHandler, NoteHandlers } from '../synth/notes';
 import { ModernAudioContext, ModernAudioNode } from '../synth/modern';
 import * as popups from '../popups';
 
@@ -27,18 +26,10 @@ export class SynthUI {
 		//TODO avoid using hardcoded position
 		const out = new Node(500, 210, 'Out');
 		out.data = new GraphNodeData(out);
-		this.initOutputNodeData(out.data);
+		this.synth.initOutputNodeData(out.data);
+		this.outNode = out.data.anode;
 		this.gr.addNode(out, 'node-out');
 		this.initNodeDimensions(out);
-	}
-
-	initOutputNodeData(data: NodeData): void {
-		data.type = 'out';
-		data.anode = this.synth.ac.createGain();
-		data.anode.connect(this.synth.ac.destination);
-		data.nodeDef = this.synth.palette['Speaker'];
-		data.isOut = true;
-		this.outNode = data.anode;
 	}
 
 	registerPaletteHandler() {
@@ -69,22 +60,13 @@ export class SynthUI {
 	}
 
 	createNodeData(n: Node, type: string): void {
-		const data = new GraphNodeData(n);
-		n.data = data;
-		if (type == 'out')
-			return this.initOutputNodeData(n.data);
-		data.type = type;
-		data.anode = this.synth.createAudioNode(type);
-		if (!data.anode)
-			return console.error(`No AudioNode found for '${type}'`);
-		data.nodeDef = this.synth.palette[type];
-		const nh = data.nodeDef.noteHandler;
-		if (nh) {
-			data.noteHandler = new NoteHandlers[nh](n.data);
-			this.synth.addNoteHandler(data.noteHandler);
+		n.data = new GraphNodeData(n);
+		if (type == 'out') {
+			this.synth.initOutputNodeData(n.data);
+			this.outNode = n.data.anode;
 		}
-		// LFO does not have a note handler yet needs to be started
-		else if (data.anode['start']) data.anode['start']();
+		else
+			this.synth.initNodeData(n.data, type);
 	}
 
 	//----- Rest of methods are used to find a free spot in the canvas -----
