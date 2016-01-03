@@ -945,6 +945,7 @@
 	        this.kbTrigger = false;
 	        this.playAfterNoteOff = false;
 	        this.handlers = null;
+	        this.oldv = 0;
 	        this.ndata = ndata;
 	        this.outTracker = new OutputTracker(ndata.anode);
 	    }
@@ -992,6 +993,17 @@
 	            inData.anode.disconnect(anode[inData.controlParam]);
 	        }
 	    };
+	    BaseNoteHandler.prototype.rampParam = function (param, time, newv) {
+	        if (time > 0 && this.oldv > 0) {
+	            var now = this.ndata.anode.context.currentTime;
+	            param.cancelScheduledValues(now);
+	            param.linearRampToValueAtTime(this.oldv, now);
+	            param.exponentialRampToValueAtTime(newv, now + time);
+	        }
+	        else
+	            param.value = newv;
+	        this.oldv = newv;
+	    };
 	    return BaseNoteHandler;
 	})();
 	/**
@@ -1002,7 +1014,6 @@
 	    function OscNoteHandler() {
 	        _super.apply(this, arguments);
 	        this.playing = false;
-	        this.oldfreq = 0;
 	    }
 	    OscNoteHandler.prototype.noteOn = function (midi, gain, ratio, portamento) {
 	        if (this.playing)
@@ -1011,16 +1022,8 @@
 	        this.oscClone = this.clone();
 	        var fparam = this.oscClone.frequency;
 	        var newFreq = fparam.value * ratio;
-	        if (portamento > 0 && this.oldfreq > 0) {
-	            var now = this.oscClone.context.currentTime;
-	            fparam.cancelScheduledValues(now);
-	            fparam.linearRampToValueAtTime(this.oldfreq, now);
-	            fparam.exponentialRampToValueAtTime(newFreq, now + portamento);
-	        }
-	        else
-	            fparam.value = newFreq;
+	        this.rampParam(fparam, portamento, fparam.value * ratio);
 	        this.oscClone.start();
-	        this.oldfreq = newFreq;
 	        this.lastNote = midi;
 	    };
 	    OscNoteHandler.prototype.noteOff = function (midi, gain) {
@@ -1063,7 +1066,7 @@
 	        _super.apply(this, arguments);
 	        this.playing = false;
 	    }
-	    BufferNoteHandler.prototype.noteOn = function (midi, gain, ratio) {
+	    BufferNoteHandler.prototype.noteOn = function (midi, gain, ratio, portamento) {
 	        if (this.playing)
 	            this.noteEnd(midi);
 	        var buf = this.ndata.anode['_buffer'];
@@ -1072,7 +1075,9 @@
 	        this.playing = true;
 	        this.absn = this.clone();
 	        this.absn.buffer = buf;
-	        this.absn.playbackRate.value = this.absn.playbackRate.value * ratio;
+	        var pbr = this.absn.playbackRate;
+	        var newRate = pbr.value * ratio;
+	        this.rampParam(pbr, portamento, pbr.value * ratio);
 	        this.absn.start();
 	        this.lastNote = midi;
 	    };

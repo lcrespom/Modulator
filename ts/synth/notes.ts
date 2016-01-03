@@ -25,6 +25,7 @@ class BaseNoteHandler implements NoteHandler {
 	kbTrigger = false;
 	playAfterNoteOff = false;
 	handlers = null;
+	oldv = 0;
 
 	constructor(ndata: NodeData) {
 		this.ndata = ndata;
@@ -70,6 +71,17 @@ class BaseNoteHandler implements NoteHandler {
 			inData.anode.disconnect(anode[inData.controlParam]);
 		}
 	}
+
+	rampParam(param: AudioParam, time: number, newv: number): void {
+		if (time > 0 && this.oldv > 0) {
+			const now = this.ndata.anode.context.currentTime;
+			param.cancelScheduledValues(now);
+			param.linearRampToValueAtTime(this.oldv, now);
+			param.exponentialRampToValueAtTime(newv, now + time);
+		}
+		else param.value = newv;
+		this.oldv = newv;
+	}
 }
 
 /**
@@ -79,7 +91,6 @@ class OscNoteHandler extends BaseNoteHandler {
 	oscClone: OscillatorNode;
 	lastNote: number;
 	playing = false;
-	oldfreq = 0;
 
 	noteOn(midi: number, gain: number, ratio: number, portamento: number):void {
 		if (this.playing) this.noteEnd(midi);	// Because this is monophonic
@@ -87,15 +98,8 @@ class OscNoteHandler extends BaseNoteHandler {
 		this.oscClone = <OscillatorNode>this.clone();
 		const fparam = this.oscClone.frequency;
 		const newFreq = fparam.value * ratio;
-		if (portamento > 0 && this.oldfreq > 0) {
-			const now = this.oscClone.context.currentTime;
-			fparam.cancelScheduledValues(now);
-			fparam.linearRampToValueAtTime(this.oldfreq, now);
-			fparam.exponentialRampToValueAtTime(newFreq, now + portamento);
-		}
-		else fparam.value = newFreq;
+		this.rampParam(fparam, portamento, fparam.value * ratio);
 		this.oscClone.start();
-		this.oldfreq = newFreq;
 		this.lastNote = midi;
 	}
 
@@ -132,14 +136,16 @@ class BufferNoteHandler extends BaseNoteHandler {
 	lastNote: number;
 	playing = false;
 
-	noteOn(midi: number, gain: number, ratio: number):void {
+	noteOn(midi: number, gain: number, ratio: number, portamento: number):void {
 		if (this.playing) this.noteEnd(midi);
 		const buf = this.ndata.anode['_buffer'];
 		if (!buf) return;	// Buffer still loading or failed
 		this.playing = true;
 		this.absn = <AudioBufferSourceNode>this.clone();
 		this.absn.buffer = buf;
-		this.absn.playbackRate.value = this.absn.playbackRate.value * ratio;
+		const pbr = this.absn.playbackRate;
+		const newRate = pbr.value * ratio;
+		this.rampParam(pbr, portamento, pbr.value * ratio);
 		this.absn.start();
 		this.lastNote = midi;
 	}
@@ -159,6 +165,7 @@ class BufferNoteHandler extends BaseNoteHandler {
 	}
 
 }
+
 
 /**
  * Handles note events for a custom ADSR node
