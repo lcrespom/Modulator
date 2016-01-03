@@ -48,26 +48,30 @@ on Twitter, or directly within GitHub.
 - Functionality
 	- Custom nodes
 		- Keyboard control node
-			- To control other parameters based on the note being pressed, centered
-				on A4
+			- To control other parameters based on the note being pressed
 			- With depth parameter
 			- Based on ScriptProcessor... no other way to generically control parameters
 		- Full synth as a reusable module (long term)
 		- Soundbank: multiple samples, one sample per note, ideal for rythm tracks
+	- Review list of pending audio nodes
+		- WaveShaper
+		- Etc?
 	- Navbar with:
 		- Left: "Code" button linking to GitHub
 		- Center: Logo
 		- Right: Help button, linking to documentation (help.md in GitHub)
 	- Improve ADSR
 		- Linear/exponential switch
-	- Review list of pending audio nodes
-		- WaveShaper
-		- Etc?
-	- Provide 10 preset instruments
-	- Limitation: a control node can only control a single node
-		- Prevent from connecting a control node to more than one destination
-		- Or else, modify the UI to support multiple destination nodes
-	- Keyboard Portamento in polyphonic mode
+	- Provide more preset instruments
+	- Improve presets panel
+		- When clicking on preset number, let user directly navigate to preset,
+			e.g. by showing a drop down list
+	- Piano keyboard improvements
+		- Portamento in polyphonic mode
+		- Arpeggio
+			- Off / Up / Down / Up&Down
+			- Octaves: 1/2/3
+			- Time slider
 	- Use Web Midi API to gather events from external midi Keyboard
 		- Play notes
 		- Associate external controls with selected node parameters
@@ -77,9 +81,9 @@ on Twitter, or directly within GitHub.
 			http://stackoverflow.com/questions/4309958/can-i-write-files-with-html5-js/14544910#14544910
 		- Get rid of JSON copy+paste when this is fully implemented
 		- Use it also to load audio buffers
-	- Improve presets panel
-		- When clicking on preset number, let user directly navigate to preset,
-			e.g. by showing a drop down list
+	- Limitation: a control node can only control a single node
+		- Prevent from connecting a control node to more than one destination
+		- Or else, modify the UI to support multiple destination nodes
 
 - UI
 	- Parameters panel
@@ -88,11 +92,13 @@ on Twitter, or directly within GitHub.
 		- General help button explaining how to connect etc.
 		- Description of each node
 		- Description of each node parameters
-	- Consider a better way to add nodes from the palette into the canvas
-	- Consider a more user-friendly way to connect and disconnect nodes
+	- Usability / UX
+		- Consider a better way to add nodes from the palette into the canvas
+		- Consider a more user-friendly way to connect and disconnect nodes
 	- Improve layout
-		- Remove hardcoded dimensions from canvas
 		- More flexible layout
+		- Remove hardcoded dimensions from canvas
+	- Option to enable/disable snap to grid - automatically align misaligned nodes
 	- Cool design
 	- Branding
 	- Naming
@@ -100,6 +106,7 @@ on Twitter, or directly within GitHub.
 
 - Long term:
 	- Tracker
+		- Probably as an independent app that can load synth presets
 		- Review [this article](http://www.html5rocks.com/en/tutorials/audio/scheduling/)
 	- Custom nodes with WebWorker... when available
 	- Record & save audio
@@ -123,9 +130,7 @@ on Twitter, or directly within GitHub.
 	- Extract the following independent npm modules:
 		- graph.ts
 		- An npm module with all code in the synth folder
-	- Reusable API to load & play presets without displaying the node graph,
-		eventually to become an independent npm module (long term)
-	- Improve code to clean hack that checks for custom nodes.
+	- Improve code to clean hack that checks for custom nodes when connecting.
 	- Consider compile target to ES6, see https://kangax.github.io/compat-table/es6/
 
 - Share
