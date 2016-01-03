@@ -58,11 +58,9 @@ on Twitter, or directly within GitHub.
 			(low: it can be implemented using an LFO controlling a gain).
 		- Soundbank: multiple samples, one sample per note, ideal for rythm tracks
 	- Navbar with:
-		- Synth button
-		- Tracker button showing "not available yet"
-		- Logo
-		- About button
-		- Help button
+		- Left: "Code" button linking to GitHub
+		- Center: Logo
+		- Right: Help button, linking to documentation (help.md in GitHub)
 	- Improve ADSR
 		- Linear/exponential switch
 	- Review list of pending audio nodes
@@ -131,6 +129,7 @@ on Twitter, or directly within GitHub.
 	- Reusable API to load & play presets without displaying the node graph,
 		eventually to become an independent npm module (long term)
 	- Improve code to clean hack that checks for custom nodes.
+	- Consider compile target to ES6, see https://kangax.github.io/compat-table/es6/
 
 - Share
 	- Document

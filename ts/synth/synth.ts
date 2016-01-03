@@ -93,6 +93,11 @@ export class Synth {
 		data.isOut = true;
 	}
 
+	removeNodeData(data: NodeData) {
+		if (data.noteHandler)
+			this.removeNoteHandler(data.noteHandler);
+	}
+
 	connectNodes(srcData: NodeData, dstData: NodeData): void {
 		if (srcData.nodeDef.control && !dstData.nodeDef.control) {
 			srcData.controlParams = Object.keys(dstData.nodeDef.params)

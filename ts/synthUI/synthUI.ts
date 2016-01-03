@@ -1,5 +1,5 @@
 import { Graph, Node, GraphHandler } from './graph';
-import { NodeData } from '../synth/synth';
+import { Synth, NodeData } from '../synth/synth';
 import { ModernAudioContext, ModernAudioNode } from '../synth/modern';
 import * as popups from '../popups';
 
@@ -56,8 +56,7 @@ export class SynthUI {
 	}
 
 	removeNodeData(data: NodeData): void {
-		if (data.noteHandler)
-			this.synth.removeNoteHandler(data.noteHandler);
+		this.synth.removeNodeData(data);
 	}
 
 	createNodeData(n: Node, type: string): void {
@@ -112,7 +111,6 @@ export class SynthUI {
 
 //-------------------- Privates --------------------
 
-import { Synth } from '../synth/synth';
 import { NodeDef } from '../synth/palette';
 import { renderParams } from './paramsUI';
 import { AudioAnalyzer } from './analyzer';

@@ -86,7 +86,7 @@
 	    function SynthUI(ac, graphCanvas, jqParams, jqFFT, jqOsc) {
 	        this.gr = new graph_1.Graph(graphCanvas);
 	        this.gr.handler = new SynthGraphHandler(this, jqParams, jqFFT, jqOsc);
-	        this.synth = new synth_2.Synth(ac);
+	        this.synth = new synth_1.Synth(ac);
 	        this.synth.paramHandlers.BufferURL.popups = popups;
 	        this.registerPaletteHandler();
 	        this.addOutputNode();
@@ -119,8 +119,7 @@
 	        this.gr.removeNode(n);
 	    };
 	    SynthUI.prototype.removeNodeData = function (data) {
-	        if (data.noteHandler)
-	            this.synth.removeNoteHandler(data.noteHandler);
+	        this.synth.removeNodeData(data);
 	    };
 	    SynthUI.prototype.createNodeData = function (n, type) {
 	        n.data = new GraphNodeData(n);
@@ -169,8 +168,6 @@
 	    return SynthUI;
 	})();
 	exports.SynthUI = SynthUI;
-	//-------------------- Privates --------------------
-	var synth_2 = __webpack_require__(3);
 	var paramsUI_1 = __webpack_require__(9);
 	var analyzer_1 = __webpack_require__(10);
 	var GraphNodeData = (function (_super) {
@@ -750,6 +747,10 @@
 	        data.anode.connect(dst);
 	        data.nodeDef = this.palette['Speaker'];
 	        data.isOut = true;
+	    };
+	    Synth.prototype.removeNodeData = function (data) {
+	        if (data.noteHandler)
+	            this.removeNoteHandler(data.noteHandler);
 	    };
 	    Synth.prototype.connectNodes = function (srcData, dstData) {
 	        if (srcData.nodeDef.control && !dstData.nodeDef.control) {
