@@ -87,6 +87,7 @@
 	        this.gr = new graph_1.Graph(graphCanvas);
 	        this.gr.handler = new SynthGraphHandler(this, jqParams, jqFFT, jqOsc);
 	        this.synth = new synth_2.Synth(ac);
+	        this.synth.paramHandlers.BufferURL.popups = popups;
 	        this.registerPaletteHandler();
 	        this.addOutputNode();
 	    }
@@ -854,7 +855,6 @@
 	})();
 	exports.Synth = Synth;
 	//-------------------- Parameter handlers --------------------
-	var popups = __webpack_require__(8);
 	var BufferURL = (function () {
 	    function BufferURL() {
 	    }
@@ -863,6 +863,12 @@
 	        var url = def.params['buffer'].initial;
 	        if (!url)
 	            return;
+	        if (!this.popups)
+	            this.popups = {
+	                prompt: function () { },
+	                close: function () { },
+	                progress: function () { }
+	            };
 	        this.loadBufferParam(absn, url);
 	    };
 	    BufferURL.prototype.renderParam = function (panel, pdef, anode, param, label) {
@@ -873,7 +879,7 @@
 	        button.after('<br/><br/>' + label);
 	        panel.append(box);
 	        button.click(function (_) {
-	            popups.prompt('Audio buffer URL:', 'Please provide URL', null, function (url) {
+	            _this.popups.prompt('Audio buffer URL:', 'Please provide URL', null, function (url) {
 	                if (!url)
 	                    return;
 	                var absn = anode;
@@ -895,6 +901,7 @@
 	        });
 	    };
 	    BufferURL.prototype.loadBuffer = function (ac, url, cb) {
+	        var _this = this;
 	        var w = window;
 	        w.audioBufferCache = w.audioBufferCache || {};
 	        if (w.audioBufferCache[url])
@@ -903,7 +910,7 @@
 	        xhr.open('GET', url, true);
 	        xhr.responseType = 'arraybuffer';
 	        xhr.onload = function (_) {
-	            popups.close();
+	            _this.popups.close();
 	            ac.decodeAudioData(xhr.response, function (buffer) {
 	                w.audioBufferCache[url] = buffer;
 	                cb(buffer);
@@ -912,7 +919,7 @@
 	        xhr.send();
 	        setTimeout(function (_) {
 	            if (xhr.readyState != xhr.DONE)
-	                popups.progress('Loading ' + url + '...');
+	                _this.popups.progress('Loading ' + url + '...');
 	        }, 300);
 	    };
 	    return BufferURL;

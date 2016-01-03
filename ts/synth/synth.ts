@@ -195,14 +195,19 @@ export class Synth {
 
 
 //-------------------- Parameter handlers --------------------
-import * as popups from '../popups';
 
 class BufferURL implements ParamHandler {
+	popups: any;
 
 	initialize(anode: AudioNode, def: NodeDef): void {
 		const absn: AudioBufferSourceNode = <AudioBufferSourceNode>anode;
 		const url: string = <string>def.params['buffer'].initial;
 		if (!url) return;
+		if (!this.popups) this.popups = {
+			prompt: () => {},
+			close: () => {},
+			progress: () => {}
+		};
 		this.loadBufferParam(absn, url);
 	}
 
@@ -214,7 +219,7 @@ class BufferURL implements ParamHandler {
 		button.after('<br/><br/>' + label);
 		panel.append(box);
 		button.click(_ => {
-			popups.prompt('Audio buffer URL:', 'Please provide URL', null, url => {
+			this.popups.prompt('Audio buffer URL:', 'Please provide URL', null, url => {
 				if (!url) return;
 				const absn: AudioBufferSourceNode = <AudioBufferSourceNode>anode;
 				this.loadBufferParam(absn, url);
@@ -247,7 +252,7 @@ class BufferURL implements ParamHandler {
 		xhr.open('GET', url, true);
 		xhr.responseType = 'arraybuffer';
 		xhr.onload = _ => {
-			popups.close();
+			this.popups.close();
 			ac.decodeAudioData(xhr.response, buffer => {
 				w.audioBufferCache[url] = buffer;
 				cb(buffer);
@@ -256,7 +261,7 @@ class BufferURL implements ParamHandler {
 		xhr.send();
 		setTimeout(_ => {
 			if (xhr.readyState != xhr.DONE)
-				popups.progress('Loading ' + url + '...');
+				this.popups.progress('Loading ' + url + '...');
 		}, 300);
 	}
 }
