@@ -2257,15 +2257,20 @@
 /* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var synthUI_1 = __webpack_require__(1);
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var synth_1 = __webpack_require__(3);
 	/**
 	 * A polyphonic synth controlling an array of voices
 	 */
 	var Instrument = (function () {
-	    function Instrument(ac, json, numVoices) {
+	    function Instrument(ac, json, numVoices, dest) {
 	        this.voices = [];
 	        for (var i = 0; i < numVoices; i++)
-	            this.voices.push(new Voice(ac, json));
+	            this.voices.push(new Voice(ac, json, dest));
 	        this.voiceNum = 0;
 	    }
 	    Instrument.prototype.close = function () {
@@ -2295,34 +2300,88 @@
 	 * An independent monophonic synth
 	 */
 	var Voice = (function () {
-	    function Voice(ac, json) {
+	    function Voice(ac, json, dest) {
 	        //TODO make an "invisible" voice, decoupled form SynthUI, canvas, and Graph editor
 	        var jqCanvas = $('<canvas width="100" height="100" style="display: none">');
 	        var dummyCanvas = jqCanvas[0];
-	        this.synthUI = new synthUI_1.SynthUI(ac, dummyCanvas, null, jqCanvas, jqCanvas);
-	        this.synthUI.gr.fromJSON(json);
+	        this.loader = new SynthLoader();
+	        this.synth = this.loader.load(ac, json, dest || ac.destination);
 	        this.lastNote = 0;
 	    }
 	    Voice.prototype.noteOn = function (midi, velocity, ratio) {
-	        this.synthUI.synth.noteOn(midi, velocity, ratio);
+	        this.synth.noteOn(midi, velocity, ratio);
 	        this.lastNote = midi;
 	    };
 	    Voice.prototype.close = function () {
+	        //TODO very important to avoid memory leaks
 	        if (this.lastNote)
 	            this.noteOff(this.lastNote, 1);
-	        var nodes = this.synthUI.gr.nodes.slice();
-	        for (var _i = 0; _i < nodes.length; _i++) {
-	            var node = nodes[_i];
-	            this.synthUI.removeNode(node);
-	        }
+	        this.loader.close();
 	    };
 	    Voice.prototype.noteOff = function (midi, velocity) {
-	        this.synthUI.synth.noteOff(midi, velocity);
+	        this.synth.noteOff(midi, velocity);
 	        this.lastNote = 0;
 	    };
 	    return Voice;
 	})();
 	exports.Voice = Voice;
+	var VoiceNodeData = (function (_super) {
+	    __extends(VoiceNodeData, _super);
+	    function VoiceNodeData() {
+	        _super.apply(this, arguments);
+	        this.inputs = [];
+	    }
+	    VoiceNodeData.prototype.getInputs = function () {
+	        return this.inputs;
+	    };
+	    return VoiceNodeData;
+	})(synth_1.NodeData);
+	var SynthLoader = (function () {
+	    function SynthLoader() {
+	        this.nodes = [];
+	    }
+	    SynthLoader.prototype.load = function (ac, json, dest) {
+	        var synth = new synth_1.Synth(ac);
+	        // Add nodes into id-based table
+	        for (var _i = 0, _a = json.nodes; _i < _a.length; _i++) {
+	            var jn = _a[_i];
+	            this.nodes[jn.id] = new VoiceNodeData();
+	        }
+	        // Then set their list of inputs
+	        for (var _b = 0, _c = json.nodes; _b < _c.length; _b++) {
+	            var jn = _c[_b];
+	            for (var _d = 0, _e = jn.inputs; _d < _e.length; _d++) {
+	                var inum = _e[_d];
+	                this.nodes[jn.id].inputs.push(this.nodes[inum]);
+	            }
+	        }
+	        // Then set their data
+	        for (var i = 0; i < json.nodes.length; i++) {
+	            var type = json.nodeData[i].type;
+	            if (type == 'out')
+	                synth.initOutputNodeData(this.nodes[i], dest);
+	            else
+	                synth.initNodeData(this.nodes[i], type);
+	            synth.json2NodeData(json.nodeData[i], this.nodes[i]);
+	        }
+	        // Then notify connections to handler
+	        for (var _f = 0, _g = this.nodes; _f < _g.length; _f++) {
+	            var dst = _g[_f];
+	            for (var _h = 0, _j = dst.inputs; _h < _j.length; _h++) {
+	                var src = _j[_h];
+	                synth.connectNodes(src, dst);
+	            }
+	        }
+	        // Finally, return the newly created synth
+	        return synth;
+	    };
+	    SynthLoader.prototype.close = function () {
+	        // const nodes: Node[] = this.synthUI.gr.nodes.slice();
+	        // for (const node of nodes)
+	        // 	this.synthUI.removeNode(node);
+	    };
+	    return SynthLoader;
+	})();
 
 
 /***/ },

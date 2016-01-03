@@ -25,7 +25,7 @@ Contributions are welcome. You can reach me via [@lcrespom](https://twitter.com/
 on Twitter, or directly within GitHub.
 
 - **Instruments**: please share your synth designs if you want them to be featured
-	in the presets section. Just open an issue with the synht's JSON and I will
+	in the presets section. Just open an issue with the synth's JSON and I will
 	evaluate it for inclusion.
 - **Themes**: feel free to modify the `main.css` file to change the look & feel as
 	much as you like. The app is especially in need of a dark theme. I will
@@ -77,6 +77,14 @@ on Twitter, or directly within GitHub.
 	- Use Web Midi API to gather events from external midi Keyboard
 		- Play notes
 		- Associate external controls with selected node parameters
+	- Use the HTML5 file API to load instruments
+		- See http://www.html5rocks.com/en/tutorials/file/dndfiles/
+		- To save instruments, check this Stack Overflow reply:
+			http://stackoverflow.com/questions/4309958/can-i-write-files-with-html5-js/14544910#14544910
+		- Get rid of JSON copy+paste when this is fully implemented
+	- Improve presets panel
+		- When clicking on preset number, let user directly navigate to preset,
+			e.g. by showing a drop down list
 
 - UI
 	- Parameters panel
