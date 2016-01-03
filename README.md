@@ -46,6 +46,7 @@ on Twitter, or directly within GitHub.
 		draws arrows incorrectly
 
 - Functionality
+	- Use a note handler for the LFO node, so it is in sync with noteOn
 	- Custom nodes
 		- Keyboard control node
 			- To control other parameters based on the note being pressed, centered

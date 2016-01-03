@@ -1,4 +1,4 @@
-import { NoteHandler } from './notes';
+import { NoteHandler, NoteHandlers } from './notes';
 import { NodeDef, NodeParamDef, NodePalette, palette } from './palette';
 import { ModernAudioContext, ModernAudioNode, removeArrayElement } from './modern';
 import * as custom from './customNodes';
@@ -37,7 +37,7 @@ interface ParamHandler {
 
 /**
  * Performs global operations on all AudioNodes:
- * - Manages AudioNode creation and initialization from the palette
+ * - Manages AudioNode creation, initialization and connection
  * - Distributes MIDI keyboard events to NoteHandlers
  */
 export class Synth {
@@ -69,12 +69,83 @@ export class Synth {
 		return anode;
 	}
 
-	play() {
-		this.ac.resume();
+	initNodeData(ndata: NodeData, type: string): void {
+		ndata.type = type;
+		ndata.anode = this.createAudioNode(type);
+		if (!ndata.anode)
+			return console.error(`No AudioNode found for '${type}'`);
+		ndata.nodeDef = this.palette[type];
+		const nh = ndata.nodeDef.noteHandler;
+		if (nh) {
+			ndata.noteHandler = new NoteHandlers[nh](ndata);
+			this.addNoteHandler(ndata.noteHandler);
+		}
+		// LFO does not have a note handler yet needs to be started
+		//TODO cleanup: assign note handler to LFO and review other source modules
+		else if (ndata.anode['start']) ndata.anode['start']();
 	}
 
-	stop() {
-		this.ac.suspend();
+	initOutputNodeData(data: NodeData, dst: AudioNode): void {
+		data.type = 'out';
+		data.anode = this.ac.createGain();
+		data.anode.connect(dst);
+		data.nodeDef = this.palette['Speaker'];
+		data.isOut = true;
+	}
+
+	connectNodes(srcData: NodeData, dstData: NodeData): void {
+		if (srcData.nodeDef.control && !dstData.nodeDef.control) {
+			srcData.controlParams = Object.keys(dstData.nodeDef.params)
+				.filter(pname => dstData.anode[pname] instanceof AudioParam);
+			srcData.controlParam = srcData.controlParams[0];
+			srcData.controlTarget = dstData.anode;
+			srcData.anode.connect(dstData.anode[srcData.controlParam]);
+		}
+		else srcData.anode.connect(dstData.anode);
+	}
+
+	disconnectNodes(srcData: NodeData, dstData: NodeData): void {
+		if (srcData.nodeDef.control && !dstData.nodeDef.control) {
+			srcData.controlParams = null;
+			srcData.anode.disconnect(dstData.anode[srcData.controlParam]);
+		}
+		else
+			srcData.anode.disconnect(dstData.anode);
+	}
+
+	json2NodeData(json: any, data: NodeData): void {
+		for (const pname of Object.keys(json.params)) {
+			const pvalue = data.anode[pname];
+			const jv = json.params[pname];
+			if (data.nodeDef.params[pname].handler)
+				this.paramHandlers[data.nodeDef.params[pname].handler]
+					.json2param(data.anode, jv);
+			else if (pvalue instanceof AudioParam) {
+				pvalue.value = jv;
+				pvalue['_value'] = jv;
+			}
+			else data.anode[pname] = jv;
+		}
+	}
+
+	nodeData2json(data: NodeData): any {
+		const params = {};
+		for (const pname of Object.keys(data.nodeDef.params)) {
+			const pvalue = data.anode[pname];
+			if (data.nodeDef.params[pname].handler)
+				params[pname] = this.paramHandlers[data.nodeDef.params[pname].handler]
+					.param2json(data.anode);
+			else if (pvalue instanceof AudioParam)
+				if (pvalue['_value'] === undefined) params[pname] = pvalue.value;
+				else params[pname] = pvalue['_value'];
+			else params[pname] = pvalue;
+		}
+		return {
+			type: data.type,
+			params,
+			controlParam: data.controlParam,
+			controlParams: data.controlParams
+		}
 	}
 
 	noteOn(midi: number, gain: number, ratio: number): void {

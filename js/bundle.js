@@ -77,8 +77,7 @@
 	};
 	var graph_1 = __webpack_require__(2);
 	var synth_1 = __webpack_require__(3);
-	var notes_1 = __webpack_require__(8);
-	var popups = __webpack_require__(7);
+	var popups = __webpack_require__(8);
 	/**
 	 * Customizes the generic graph editor in order to manipulate and control a graph of
 	 * AudioNodes
@@ -95,17 +94,10 @@
 	        //TODO avoid using hardcoded position
 	        var out = new graph_1.Node(500, 210, 'Out');
 	        out.data = new GraphNodeData(out);
-	        this.initOutputNodeData(out.data);
+	        this.synth.initOutputNodeData(out.data, this.synth.ac.destination);
+	        this.outNode = out.data.anode;
 	        this.gr.addNode(out, 'node-out');
 	        this.initNodeDimensions(out);
-	    };
-	    SynthUI.prototype.initOutputNodeData = function (data) {
-	        data.type = 'out';
-	        data.anode = this.synth.ac.createGain();
-	        data.anode.connect(this.synth.ac.destination);
-	        data.nodeDef = this.synth.palette['Speaker'];
-	        data.isOut = true;
-	        this.outNode = data.anode;
 	    };
 	    SynthUI.prototype.registerPaletteHandler = function () {
 	        var self = this; // JQuery sets 'this' in event handlers
@@ -130,22 +122,13 @@
 	            this.synth.removeNoteHandler(data.noteHandler);
 	    };
 	    SynthUI.prototype.createNodeData = function (n, type) {
-	        var data = new GraphNodeData(n);
-	        n.data = data;
-	        if (type == 'out')
-	            return this.initOutputNodeData(n.data);
-	        data.type = type;
-	        data.anode = this.synth.createAudioNode(type);
-	        if (!data.anode)
-	            return console.error("No AudioNode found for '" + type + "'");
-	        data.nodeDef = this.synth.palette[type];
-	        var nh = data.nodeDef.noteHandler;
-	        if (nh) {
-	            data.noteHandler = new notes_1.NoteHandlers[nh](n.data);
-	            this.synth.addNoteHandler(data.noteHandler);
+	        n.data = new GraphNodeData(n);
+	        if (type == 'out') {
+	            this.synth.initOutputNodeData(n.data, this.synth.ac.destination);
+	            this.outNode = n.data.anode;
 	        }
-	        else if (data.anode['start'])
-	            data.anode['start']();
+	        else
+	            this.synth.initNodeData(n.data, type);
 	    };
 	    //----- Rest of methods are used to find a free spot in the canvas -----
 	    SynthUI.prototype.findFreeSpot = function () {
@@ -255,27 +238,11 @@
 	        return dstData.anode.numberOfInputs > 0;
 	    };
 	    SynthGraphHandler.prototype.connected = function (src, dst) {
-	        var srcData = src.data;
-	        var dstData = dst.data;
-	        if (srcData.nodeDef.control && !dstData.nodeDef.control) {
-	            srcData.controlParams = Object.keys(dstData.nodeDef.params)
-	                .filter(function (pname) { return dstData.anode[pname] instanceof AudioParam; });
-	            srcData.controlParam = srcData.controlParams[0];
-	            srcData.controlTarget = dstData.anode;
-	            srcData.anode.connect(dstData.anode[srcData.controlParam]);
-	        }
-	        else
-	            srcData.anode.connect(dstData.anode);
+	        this.synthUI.synth.connectNodes(src.data, dst.data);
+	        //TODO update paramsUI in case selected node is src
 	    };
 	    SynthGraphHandler.prototype.disconnected = function (src, dst) {
-	        var srcData = src.data;
-	        var dstData = dst.data;
-	        if (srcData.nodeDef.control && !dstData.nodeDef.control) {
-	            srcData.controlParams = null;
-	            srcData.anode.disconnect(dstData.anode[srcData.controlParam]);
-	        }
-	        else
-	            srcData.anode.disconnect(dstData.anode);
+	        this.synthUI.synth.disconnectNodes(src.data, dst.data);
 	    };
 	    SynthGraphHandler.prototype.nodeSelected = function (n) {
 	        var data = n.data;
@@ -289,48 +256,11 @@
 	        return srcData.nodeDef.control ? this.ctrlArrowColor : this.arrowColor;
 	    };
 	    SynthGraphHandler.prototype.data2json = function (n) {
-	        var data = n.data;
-	        var params = {};
-	        for (var _i = 0, _a = Object.keys(data.nodeDef.params); _i < _a.length; _i++) {
-	            var pname = _a[_i];
-	            var pvalue = data.anode[pname];
-	            if (data.nodeDef.params[pname].handler)
-	                params[pname] = this.synthUI.synth
-	                    .paramHandlers[data.nodeDef.params[pname].handler]
-	                    .param2json(data.anode);
-	            else if (pvalue instanceof AudioParam)
-	                if (pvalue['_value'] === undefined)
-	                    params[pname] = pvalue.value;
-	                else
-	                    params[pname] = pvalue['_value'];
-	            else
-	                params[pname] = pvalue;
-	        }
-	        return {
-	            type: data.type,
-	            params: params,
-	            controlParam: data.controlParam,
-	            controlParams: data.controlParams
-	        };
+	        return this.synthUI.synth.nodeData2json(n.data);
 	    };
 	    SynthGraphHandler.prototype.json2data = function (n, json) {
 	        this.synthUI.createNodeData(n, json.type);
-	        var data = n.data;
-	        for (var _i = 0, _a = Object.keys(json.params); _i < _a.length; _i++) {
-	            var pname = _a[_i];
-	            var pvalue = data.anode[pname];
-	            var jv = json.params[pname];
-	            if (data.nodeDef.params[pname].handler)
-	                this.synthUI.synth
-	                    .paramHandlers[data.nodeDef.params[pname].handler]
-	                    .json2param(data.anode, jv);
-	            else if (pvalue instanceof AudioParam) {
-	                pvalue.value = jv;
-	                pvalue['_value'] = jv;
-	            }
-	            else
-	                data.anode[pname] = jv;
-	        }
+	        this.synthUI.synth.json2NodeData(json, n.data);
 	    };
 	    SynthGraphHandler.prototype.graphLoaded = function () {
 	        this.analyzer.analyze(this.synthUI.outNode);
@@ -748,9 +678,10 @@
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var palette_1 = __webpack_require__(4);
+	var notes_1 = __webpack_require__(4);
+	var palette_1 = __webpack_require__(6);
 	var modern_1 = __webpack_require__(5);
-	var custom = __webpack_require__(6);
+	var custom = __webpack_require__(7);
 	/**
 	 * Holds all data associated with an AudioNode
 	 */
@@ -768,7 +699,7 @@
 	exports.NodeData = NodeData;
 	/**
 	 * Performs global operations on all AudioNodes:
-	 * - Manages AudioNode creation and initialization from the palette
+	 * - Manages AudioNode creation, initialization and connection
 	 * - Distributes MIDI keyboard events to NoteHandlers
 	 */
 	var Synth = (function () {
@@ -798,11 +729,84 @@
 	        this.initNodeParams(anode, def, type);
 	        return anode;
 	    };
-	    Synth.prototype.play = function () {
-	        this.ac.resume();
+	    Synth.prototype.initNodeData = function (ndata, type) {
+	        ndata.type = type;
+	        ndata.anode = this.createAudioNode(type);
+	        if (!ndata.anode)
+	            return console.error("No AudioNode found for '" + type + "'");
+	        ndata.nodeDef = this.palette[type];
+	        var nh = ndata.nodeDef.noteHandler;
+	        if (nh) {
+	            ndata.noteHandler = new notes_1.NoteHandlers[nh](ndata);
+	            this.addNoteHandler(ndata.noteHandler);
+	        }
+	        else if (ndata.anode['start'])
+	            ndata.anode['start']();
 	    };
-	    Synth.prototype.stop = function () {
-	        this.ac.suspend();
+	    Synth.prototype.initOutputNodeData = function (data, dst) {
+	        data.type = 'out';
+	        data.anode = this.ac.createGain();
+	        data.anode.connect(dst);
+	        data.nodeDef = this.palette['Speaker'];
+	        data.isOut = true;
+	    };
+	    Synth.prototype.connectNodes = function (srcData, dstData) {
+	        if (srcData.nodeDef.control && !dstData.nodeDef.control) {
+	            srcData.controlParams = Object.keys(dstData.nodeDef.params)
+	                .filter(function (pname) { return dstData.anode[pname] instanceof AudioParam; });
+	            srcData.controlParam = srcData.controlParams[0];
+	            srcData.controlTarget = dstData.anode;
+	            srcData.anode.connect(dstData.anode[srcData.controlParam]);
+	        }
+	        else
+	            srcData.anode.connect(dstData.anode);
+	    };
+	    Synth.prototype.disconnectNodes = function (srcData, dstData) {
+	        if (srcData.nodeDef.control && !dstData.nodeDef.control) {
+	            srcData.controlParams = null;
+	            srcData.anode.disconnect(dstData.anode[srcData.controlParam]);
+	        }
+	        else
+	            srcData.anode.disconnect(dstData.anode);
+	    };
+	    Synth.prototype.json2NodeData = function (json, data) {
+	        for (var _i = 0, _a = Object.keys(json.params); _i < _a.length; _i++) {
+	            var pname = _a[_i];
+	            var pvalue = data.anode[pname];
+	            var jv = json.params[pname];
+	            if (data.nodeDef.params[pname].handler)
+	                this.paramHandlers[data.nodeDef.params[pname].handler]
+	                    .json2param(data.anode, jv);
+	            else if (pvalue instanceof AudioParam) {
+	                pvalue.value = jv;
+	                pvalue['_value'] = jv;
+	            }
+	            else
+	                data.anode[pname] = jv;
+	        }
+	    };
+	    Synth.prototype.nodeData2json = function (data) {
+	        var params = {};
+	        for (var _i = 0, _a = Object.keys(data.nodeDef.params); _i < _a.length; _i++) {
+	            var pname = _a[_i];
+	            var pvalue = data.anode[pname];
+	            if (data.nodeDef.params[pname].handler)
+	                params[pname] = this.paramHandlers[data.nodeDef.params[pname].handler]
+	                    .param2json(data.anode);
+	            else if (pvalue instanceof AudioParam)
+	                if (pvalue['_value'] === undefined)
+	                    params[pname] = pvalue.value;
+	                else
+	                    params[pname] = pvalue['_value'];
+	            else
+	                params[pname] = pvalue;
+	        }
+	        return {
+	            type: data.type,
+	            params: params,
+	            controlParam: data.controlParam,
+	            controlParams: data.controlParams
+	        };
 	    };
 	    Synth.prototype.noteOn = function (midi, gain, ratio) {
 	        for (var _i = 0, _a = this.noteHandlers; _i < _a.length; _i++) {
@@ -850,7 +854,7 @@
 	})();
 	exports.Synth = Synth;
 	//-------------------- Parameter handlers --------------------
-	var popups = __webpack_require__(7);
+	var popups = __webpack_require__(8);
 	var BufferURL = (function () {
 	    function BufferURL() {
 	    }
@@ -917,467 +921,6 @@
 
 /***/ },
 /* 4 */
-/***/ function(module, exports) {
-
-	//-------------------- Node palette definition --------------------
-	var OCTAVE_DETUNE = {
-	    initial: 0,
-	    min: -1200,
-	    max: 1200,
-	    linear: true
-	};
-	/**
-	 * The set of AudioNodes available to the application, along with
-	 * their configuration.
-	 */
-	exports.palette = {
-	    // Sources
-	    Oscillator: {
-	        constructor: 'createOscillator',
-	        noteHandler: 'osc',
-	        params: {
-	            frequency: { initial: 220, min: 20, max: 20000 },
-	            detune: OCTAVE_DETUNE,
-	            type: {
-	                initial: 'sawtooth',
-	                choices: ['sine', 'square', 'sawtooth', 'triangle']
-	            }
-	        }
-	    },
-	    Buffer: {
-	        constructor: 'createBufferSource',
-	        noteHandler: 'buffer',
-	        params: {
-	            playbackRate: { initial: 1, min: 0, max: 8 },
-	            detune: OCTAVE_DETUNE,
-	            buffer: {
-	                initial: null,
-	                handler: 'BufferURL'
-	            },
-	            loop: { initial: false },
-	            loopStart: { initial: 0, min: 0, max: 10 },
-	            loopEnd: { initial: 3, min: 0, max: 10 }
-	        }
-	    },
-	    Noise: {
-	        constructor: 'createNoise',
-	        noteHandler: 'restartable',
-	        custom: true,
-	        params: {
-	            gain: { initial: 1, min: 0, max: 10 }
-	        }
-	    },
-	    LineIn: {
-	        constructor: 'createLineIn',
-	        custom: true,
-	        params: {}
-	    },
-	    // Effects
-	    Gain: {
-	        constructor: 'createGain',
-	        params: {
-	            gain: { initial: 1, min: 0, max: 10, linear: true }
-	        }
-	    },
-	    Filter: {
-	        constructor: 'createBiquadFilter',
-	        params: {
-	            frequency: { initial: 440, min: 20, max: 20000 },
-	            Q: { initial: 0, min: 0, max: 100 },
-	            detune: OCTAVE_DETUNE,
-	            gain: { initial: 0, min: -40, max: 40, linear: true },
-	            type: {
-	                initial: 'lowpass',
-	                choices: ['lowpass', 'highpass', 'bandpass',
-	                    'lowshelf', 'highshelf', 'peaking', 'notch', 'allpass']
-	            }
-	        },
-	    },
-	    Delay: {
-	        constructor: 'createDelay',
-	        params: {
-	            delayTime: { initial: 1, min: 0, max: 5 }
-	        }
-	    },
-	    StereoPan: {
-	        constructor: 'createStereoPanner',
-	        params: {
-	            pan: { initial: 0, min: -1, max: 1, linear: true }
-	        }
-	    },
-	    Compressor: {
-	        constructor: 'createDynamicsCompressor',
-	        params: {
-	            threshold: { initial: -24, min: -100, max: 0, linear: true },
-	            knee: { initial: 30, min: 0, max: 40, linear: true },
-	            ratio: { initial: 12, min: 1, max: 20, linear: true },
-	            reduction: { initial: 0, min: -20, max: 0, linear: true },
-	            attack: { initial: 0.003, min: 0, max: 1 },
-	            release: { initial: 0.25, min: 0, max: 1 }
-	        }
-	    },
-	    Detuner: {
-	        constructor: 'createDetuner',
-	        custom: true,
-	        params: {
-	            octave: { initial: 0, min: -2, max: 2, linear: true }
-	        }
-	    },
-	    // Controllers
-	    LFO: {
-	        constructor: 'createOscillator',
-	        control: true,
-	        params: {
-	            frequency: { initial: 5, min: 0.01, max: 200 },
-	            detune: OCTAVE_DETUNE,
-	            type: {
-	                initial: 'sine',
-	                choices: ['sine', 'square', 'sawtooth', 'triangle']
-	            }
-	        }
-	    },
-	    GainCtrl: {
-	        constructor: 'createGain',
-	        control: true,
-	        params: {
-	            gain: { initial: 10, min: 0, max: 100, linear: true }
-	        }
-	    },
-	    ADSR: {
-	        constructor: 'createADSR',
-	        noteHandler: 'ADSR',
-	        control: true,
-	        custom: true,
-	        params: {
-	            attack: { initial: 0.2, min: 0, max: 10 },
-	            decay: { initial: 0.5, min: 0, max: 10 },
-	            sustain: { initial: 0.5, min: 0, max: 1, linear: true },
-	            release: { initial: 1.0, min: 0, max: 10 },
-	            depth: { initial: 1.0, min: 0, max: 1 }
-	        }
-	    },
-	    NoiseCtrl: {
-	        constructor: 'createNoiseCtrl',
-	        control: true,
-	        custom: true,
-	        params: {
-	            frequency: { initial: 4, min: 0, max: 200 },
-	            depth: { initial: 20, min: 0, max: 200 }
-	        }
-	    },
-	    // Output
-	    Speaker: {
-	        constructor: null,
-	        params: {}
-	    }
-	};
-
-
-/***/ },
-/* 5 */
-/***/ function(module, exports) {
-
-	/**
-	 * Modernize browser interfaces so that TypeScript does not complain
-	 * when using new features.
-	 *
-	 * Also provides some basic utility funcitons which should be part of
-	 * the standard JavaScript library.
-	 */
-	function removeArrayElement(a, e) {
-	    var pos = a.indexOf(e);
-	    if (pos < 0)
-	        return false; // not found
-	    a.splice(pos, 1);
-	    return true;
-	}
-	exports.removeArrayElement = removeArrayElement;
-
-
-/***/ },
-/* 6 */
-/***/ function(module, exports) {
-
-	var __extends = (this && this.__extends) || function (d, b) {
-	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-	    function __() { this.constructor = d; }
-	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	};
-	/**
-	 * Base class to derive all custom nodes from it
-	 */
-	var CustomNodeBase = (function () {
-	    function CustomNodeBase() {
-	        this.custom = true;
-	        this.channelCount = 2;
-	        this.channelCountMode = 'max';
-	        this.channelInterpretation = 'speakers';
-	        this.numberOfInputs = 0;
-	        this.numberOfOutputs = 1;
-	    }
-	    CustomNodeBase.prototype.connect = function (param) { };
-	    CustomNodeBase.prototype.disconnect = function () { };
-	    // Required for extending EventTarget
-	    CustomNodeBase.prototype.addEventListener = function () { };
-	    CustomNodeBase.prototype.dispatchEvent = function (evt) { return false; };
-	    CustomNodeBase.prototype.removeEventListener = function () { };
-	    return CustomNodeBase;
-	})();
-	/**
-	 * Envelope generator that controls the evolution over time of a destination
-	 * node's parameter. All parameter control is performed in the corresponding
-	 * ADSR note handler.
-	 */
-	var ADSR = (function (_super) {
-	    __extends(ADSR, _super);
-	    function ADSR() {
-	        _super.apply(this, arguments);
-	        this.attack = 0.2;
-	        this.decay = 0.5;
-	        this.sustain = 0.5;
-	        this.release = 1;
-	        this.depth = 1;
-	    }
-	    return ADSR;
-	})(CustomNodeBase);
-	exports.ADSR = ADSR;
-	/**
-	 * Base ScriptProcessor, to derive all custom audio processing nodes from it.
-	 */
-	var ScriptProcessor = (function (_super) {
-	    __extends(ScriptProcessor, _super);
-	    function ScriptProcessor(ac) {
-	        var _this = this;
-	        _super.call(this);
-	        this.gain = 1;
-	        this.playing = false;
-	        this.anode = ac.createScriptProcessor(1024);
-	        this.anode.onaudioprocess = function (evt) { return _this.processAudio(evt); };
-	    }
-	    ScriptProcessor.prototype.connect = function (node) {
-	        this.anode.connect(node);
-	    };
-	    ScriptProcessor.prototype.disconnect = function () {
-	        this.anode.disconnect();
-	    };
-	    ScriptProcessor.prototype.start = function () {
-	        this.playing = true;
-	    };
-	    ScriptProcessor.prototype.stop = function () {
-	        this.playing = false;
-	    };
-	    ScriptProcessor.prototype.processAudio = function (evt) { };
-	    return ScriptProcessor;
-	})(CustomNodeBase);
-	/**
-	 * Simple noise generator
-	 */
-	var NoiseGenerator = (function (_super) {
-	    __extends(NoiseGenerator, _super);
-	    function NoiseGenerator() {
-	        _super.apply(this, arguments);
-	    }
-	    NoiseGenerator.prototype.processAudio = function (evt) {
-	        for (var channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
-	            var out = evt.outputBuffer.getChannelData(channel);
-	            for (var sample = 0; sample < out.length; sample++)
-	                out[sample] = this.playing ? this.gain * (Math.random() * 2 - 1) : 0;
-	        }
-	    };
-	    return NoiseGenerator;
-	})(ScriptProcessor);
-	exports.NoiseGenerator = NoiseGenerator;
-	/**
-	 * Noise generator to be used as control node.
-	 * It uses sample & hold in order to implement the 'frequency' parameter.
-	 */
-	var NoiseCtrlGenerator = (function (_super) {
-	    __extends(NoiseCtrlGenerator, _super);
-	    function NoiseCtrlGenerator(ac) {
-	        _super.call(this, ac);
-	        this.ac = ac;
-	        this.frequency = 4;
-	        this.depth = 20;
-	        this.sct = 0;
-	        this.v = 0;
-	    }
-	    NoiseCtrlGenerator.prototype.connect = function (param) {
-	        this.anode.connect(param);
-	    };
-	    NoiseCtrlGenerator.prototype.processAudio = function (evt) {
-	        var samplesPerCycle = this.ac.sampleRate / this.frequency;
-	        for (var channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
-	            var out = evt.outputBuffer.getChannelData(channel);
-	            for (var sample = 0; sample < out.length; sample++) {
-	                this.sct++;
-	                if (this.sct > samplesPerCycle) {
-	                    this.v = this.depth * (Math.random() * 2 - 1);
-	                    this.sct = 0; //this.sct - Math.floor(this.sct);
-	                }
-	                out[sample] = this.v;
-	            }
-	        }
-	    };
-	    return NoiseCtrlGenerator;
-	})(ScriptProcessor);
-	exports.NoiseCtrlGenerator = NoiseCtrlGenerator;
-	/**
-	 * Simple Pitch Shifter implemented in a quick & dirty way
-	 */
-	var Detuner = (function (_super) {
-	    __extends(Detuner, _super);
-	    function Detuner() {
-	        _super.apply(this, arguments);
-	        this.octave = 0;
-	        this.numberOfInputs = 1;
-	    }
-	    Detuner.prototype.processAudio = function (evt) {
-	        var dx = Math.pow(2, this.octave);
-	        for (var channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
-	            var out = evt.outputBuffer.getChannelData(channel);
-	            var inbuf = evt.inputBuffer.getChannelData(channel);
-	            var sct = 0;
-	            for (var sample = 0; sample < out.length; sample++) {
-	                out[sample] = inbuf[Math.floor(sct)];
-	                sct += dx;
-	                if (sct >= inbuf.length)
-	                    sct = 0;
-	            }
-	        }
-	    };
-	    return Detuner;
-	})(ScriptProcessor);
-	exports.Detuner = Detuner;
-	/**
-	 * Captures audio from the PC audio input.
-	 * Requires user's authorization to grab audio input.
-	 */
-	var LineInNode = (function (_super) {
-	    __extends(LineInNode, _super);
-	    function LineInNode() {
-	        _super.apply(this, arguments);
-	    }
-	    LineInNode.prototype.connect = function (anode) {
-	        var _this = this;
-	        if (this.srcNode) {
-	            this.srcNode.connect(anode);
-	            this.dstNode = anode;
-	            return;
-	        }
-	        var navigator = window.navigator;
-	        navigator.getUserMedia = (navigator.getUserMedia ||
-	            navigator.webkitGetUserMedia ||
-	            navigator.mozGetUserMedia ||
-	            navigator.msGetUserMedia);
-	        navigator.getUserMedia({ audio: true }, function (stream) {
-	            var ac = anode.context;
-	            _this.srcNode = ac.createMediaStreamSource(stream);
-	            var a2 = anode;
-	            if (a2.custom && a2.anode)
-	                a2 = a2.anode;
-	            _this.srcNode.connect(a2);
-	            _this.dstNode = anode;
-	            _this.stream = stream;
-	        }, function (error) { return console.error(error); });
-	    };
-	    LineInNode.prototype.disconnect = function () {
-	        this.srcNode.disconnect(this.dstNode);
-	    };
-	    return LineInNode;
-	})(CustomNodeBase);
-	exports.LineInNode = LineInNode;
-
-
-/***/ },
-/* 7 */
-/***/ function(module, exports) {
-
-	/** Informs whether a popup is open or not */
-	exports.isOpen = false;
-	/** Bootstrap-based equivalent of standard alert function */
-	function alert(msg, title, hideClose, options) {
-	    popup.find('.popup-message').html(msg);
-	    popup.find('.modal-title').text(title || 'Alert');
-	    popup.find('.popup-ok').hide();
-	    if (hideClose)
-	        popup.find('.popup-close').hide();
-	    else
-	        popup.find('.popup-close').html('Close');
-	    popup.find('.popup-prompt > input').hide();
-	    exports.isOpen = true;
-	    popup.one('hidden.bs.modal', function (_) { return exports.isOpen = false; });
-	    popup.modal(options);
-	}
-	exports.alert = alert;
-	/** Like an alert, but without a close button */
-	function progress(msg, title) {
-	    alert(msg, title, true, { keyboard: false });
-	}
-	exports.progress = progress;
-	/** Closes a popup in case it is open */
-	function close() {
-	    if (!exports.isOpen)
-	        return;
-	    popup.find('.popup-ok').click();
-	}
-	exports.close = close;
-	/** Bootstrap-based equivalent of standard confirm function */
-	function confirm(msg, title, cbClose, cbOpen) {
-	    var result = false;
-	    popup.find('.popup-message').html(msg);
-	    popup.find('.modal-title').text(title || 'Please confirm');
-	    var okButton = popup.find('.popup-ok');
-	    okButton.show().click(function (_) { return result = true; });
-	    popup.find('.popup-prompt > input').hide();
-	    popup.find('.popup-close').text('Cancel');
-	    popup.one('shown.bs.modal', function (_) {
-	        okButton.focus();
-	        if (cbOpen)
-	            cbOpen();
-	    });
-	    popup.find('form').one('submit', function (_) {
-	        result = true;
-	        okButton.click();
-	        return false;
-	    });
-	    popup.one('hide.bs.modal', function (_) {
-	        okButton.off('click');
-	        exports.isOpen = false;
-	        cbClose(result);
-	    });
-	    exports.isOpen = true;
-	    popup.modal();
-	}
-	exports.confirm = confirm;
-	/** Bootstrap-based equivalent of standard prompt function */
-	function prompt(msg, title, initialValue, cb) {
-	    var input = popup.find('.popup-prompt > input');
-	    confirm(msg, title, function (confirmed) {
-	        if (!cb)
-	            return;
-	        if (!confirmed)
-	            cb(null);
-	        else
-	            cb(input.val());
-	    }, function () {
-	        input.show();
-	        input.focus();
-	        if (initialValue) {
-	            input.val(initialValue);
-	            var hinput = input[0];
-	            hinput.select();
-	        }
-	        else
-	            input.val('');
-	    });
-	}
-	exports.prompt = prompt;
-	var popup = $("\n\t<div class=\"normal-font modal fade\" id=\"myModal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"myModalLabel\">\n\t<div class=\"modal-dialog\" role=\"document\">\n\t\t<div class=\"modal-content\">\n\t\t<div class=\"modal-header\">\n\t\t\t<button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n\t\t\t<h4 class=\"modal-title\" id=\"myModalLabel\"></h4>\n\t\t</div>\n\t\t<div class=\"modal-body\">\n\t\t\t<div class=\"popup-message\"></div>\n\t\t\t<form class=\"popup-prompt\">\n\t\t\t\t<input type=\"text\" style=\"width: 100%\">\n\t\t\t</form>\n\t\t</div>\n\t\t<div class=\"modal-footer\">\n\t\t\t<button type=\"button\" class=\"btn btn-default popup-close\" data-dismiss=\"modal\"></button>\n\t\t\t<button type=\"button\" class=\"btn btn-primary popup-ok\" data-dismiss=\"modal\">OK</button>\n\t\t</div>\n\t\t</div>\n\t</div>\n\t</div>\n");
-	$('body').append(popup);
-
-
-/***/ },
-/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __extends = (this && this.__extends) || function (d, b) {
@@ -1662,6 +1205,467 @@
 	    };
 	    return OutputTracker;
 	})();
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
+	/**
+	 * Modernize browser interfaces so that TypeScript does not complain
+	 * when using new features.
+	 *
+	 * Also provides some basic utility funcitons which should be part of
+	 * the standard JavaScript library.
+	 */
+	function removeArrayElement(a, e) {
+	    var pos = a.indexOf(e);
+	    if (pos < 0)
+	        return false; // not found
+	    a.splice(pos, 1);
+	    return true;
+	}
+	exports.removeArrayElement = removeArrayElement;
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+	//-------------------- Node palette definition --------------------
+	var OCTAVE_DETUNE = {
+	    initial: 0,
+	    min: -1200,
+	    max: 1200,
+	    linear: true
+	};
+	/**
+	 * The set of AudioNodes available to the application, along with
+	 * their configuration.
+	 */
+	exports.palette = {
+	    // Sources
+	    Oscillator: {
+	        constructor: 'createOscillator',
+	        noteHandler: 'osc',
+	        params: {
+	            frequency: { initial: 220, min: 20, max: 20000 },
+	            detune: OCTAVE_DETUNE,
+	            type: {
+	                initial: 'sawtooth',
+	                choices: ['sine', 'square', 'sawtooth', 'triangle']
+	            }
+	        }
+	    },
+	    Buffer: {
+	        constructor: 'createBufferSource',
+	        noteHandler: 'buffer',
+	        params: {
+	            playbackRate: { initial: 1, min: 0, max: 8 },
+	            detune: OCTAVE_DETUNE,
+	            buffer: {
+	                initial: null,
+	                handler: 'BufferURL'
+	            },
+	            loop: { initial: false },
+	            loopStart: { initial: 0, min: 0, max: 10 },
+	            loopEnd: { initial: 3, min: 0, max: 10 }
+	        }
+	    },
+	    Noise: {
+	        constructor: 'createNoise',
+	        noteHandler: 'restartable',
+	        custom: true,
+	        params: {
+	            gain: { initial: 1, min: 0, max: 10 }
+	        }
+	    },
+	    LineIn: {
+	        constructor: 'createLineIn',
+	        custom: true,
+	        params: {}
+	    },
+	    // Effects
+	    Gain: {
+	        constructor: 'createGain',
+	        params: {
+	            gain: { initial: 1, min: 0, max: 10, linear: true }
+	        }
+	    },
+	    Filter: {
+	        constructor: 'createBiquadFilter',
+	        params: {
+	            frequency: { initial: 440, min: 20, max: 20000 },
+	            Q: { initial: 0, min: 0, max: 100 },
+	            detune: OCTAVE_DETUNE,
+	            gain: { initial: 0, min: -40, max: 40, linear: true },
+	            type: {
+	                initial: 'lowpass',
+	                choices: ['lowpass', 'highpass', 'bandpass',
+	                    'lowshelf', 'highshelf', 'peaking', 'notch', 'allpass']
+	            }
+	        },
+	    },
+	    Delay: {
+	        constructor: 'createDelay',
+	        params: {
+	            delayTime: { initial: 1, min: 0, max: 5 }
+	        }
+	    },
+	    StereoPan: {
+	        constructor: 'createStereoPanner',
+	        params: {
+	            pan: { initial: 0, min: -1, max: 1, linear: true }
+	        }
+	    },
+	    Compressor: {
+	        constructor: 'createDynamicsCompressor',
+	        params: {
+	            threshold: { initial: -24, min: -100, max: 0, linear: true },
+	            knee: { initial: 30, min: 0, max: 40, linear: true },
+	            ratio: { initial: 12, min: 1, max: 20, linear: true },
+	            reduction: { initial: 0, min: -20, max: 0, linear: true },
+	            attack: { initial: 0.003, min: 0, max: 1 },
+	            release: { initial: 0.25, min: 0, max: 1 }
+	        }
+	    },
+	    Detuner: {
+	        constructor: 'createDetuner',
+	        custom: true,
+	        params: {
+	            octave: { initial: 0, min: -2, max: 2, linear: true }
+	        }
+	    },
+	    // Controllers
+	    LFO: {
+	        constructor: 'createOscillator',
+	        control: true,
+	        params: {
+	            frequency: { initial: 5, min: 0.01, max: 200 },
+	            detune: OCTAVE_DETUNE,
+	            type: {
+	                initial: 'sine',
+	                choices: ['sine', 'square', 'sawtooth', 'triangle']
+	            }
+	        }
+	    },
+	    GainCtrl: {
+	        constructor: 'createGain',
+	        control: true,
+	        params: {
+	            gain: { initial: 10, min: 0, max: 100, linear: true }
+	        }
+	    },
+	    ADSR: {
+	        constructor: 'createADSR',
+	        noteHandler: 'ADSR',
+	        control: true,
+	        custom: true,
+	        params: {
+	            attack: { initial: 0.2, min: 0, max: 10 },
+	            decay: { initial: 0.5, min: 0, max: 10 },
+	            sustain: { initial: 0.5, min: 0, max: 1, linear: true },
+	            release: { initial: 1.0, min: 0, max: 10 },
+	            depth: { initial: 1.0, min: 0, max: 1 }
+	        }
+	    },
+	    NoiseCtrl: {
+	        constructor: 'createNoiseCtrl',
+	        control: true,
+	        custom: true,
+	        params: {
+	            frequency: { initial: 4, min: 0, max: 200 },
+	            depth: { initial: 20, min: 0, max: 200 }
+	        }
+	    },
+	    // Output
+	    Speaker: {
+	        constructor: null,
+	        params: {}
+	    }
+	};
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	/**
+	 * Base class to derive all custom nodes from it
+	 */
+	var CustomNodeBase = (function () {
+	    function CustomNodeBase() {
+	        this.custom = true;
+	        this.channelCount = 2;
+	        this.channelCountMode = 'max';
+	        this.channelInterpretation = 'speakers';
+	        this.numberOfInputs = 0;
+	        this.numberOfOutputs = 1;
+	    }
+	    CustomNodeBase.prototype.connect = function (param) { };
+	    CustomNodeBase.prototype.disconnect = function () { };
+	    // Required for extending EventTarget
+	    CustomNodeBase.prototype.addEventListener = function () { };
+	    CustomNodeBase.prototype.dispatchEvent = function (evt) { return false; };
+	    CustomNodeBase.prototype.removeEventListener = function () { };
+	    return CustomNodeBase;
+	})();
+	/**
+	 * Envelope generator that controls the evolution over time of a destination
+	 * node's parameter. All parameter control is performed in the corresponding
+	 * ADSR note handler.
+	 */
+	var ADSR = (function (_super) {
+	    __extends(ADSR, _super);
+	    function ADSR() {
+	        _super.apply(this, arguments);
+	        this.attack = 0.2;
+	        this.decay = 0.5;
+	        this.sustain = 0.5;
+	        this.release = 1;
+	        this.depth = 1;
+	    }
+	    return ADSR;
+	})(CustomNodeBase);
+	exports.ADSR = ADSR;
+	/**
+	 * Base ScriptProcessor, to derive all custom audio processing nodes from it.
+	 */
+	var ScriptProcessor = (function (_super) {
+	    __extends(ScriptProcessor, _super);
+	    function ScriptProcessor(ac) {
+	        var _this = this;
+	        _super.call(this);
+	        this.gain = 1;
+	        this.playing = false;
+	        this.anode = ac.createScriptProcessor(1024);
+	        this.anode.onaudioprocess = function (evt) { return _this.processAudio(evt); };
+	    }
+	    ScriptProcessor.prototype.connect = function (node) {
+	        this.anode.connect(node);
+	    };
+	    ScriptProcessor.prototype.disconnect = function () {
+	        this.anode.disconnect();
+	    };
+	    ScriptProcessor.prototype.start = function () {
+	        this.playing = true;
+	    };
+	    ScriptProcessor.prototype.stop = function () {
+	        this.playing = false;
+	    };
+	    ScriptProcessor.prototype.processAudio = function (evt) { };
+	    return ScriptProcessor;
+	})(CustomNodeBase);
+	/**
+	 * Simple noise generator
+	 */
+	var NoiseGenerator = (function (_super) {
+	    __extends(NoiseGenerator, _super);
+	    function NoiseGenerator() {
+	        _super.apply(this, arguments);
+	    }
+	    NoiseGenerator.prototype.processAudio = function (evt) {
+	        for (var channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
+	            var out = evt.outputBuffer.getChannelData(channel);
+	            for (var sample = 0; sample < out.length; sample++)
+	                out[sample] = this.playing ? this.gain * (Math.random() * 2 - 1) : 0;
+	        }
+	    };
+	    return NoiseGenerator;
+	})(ScriptProcessor);
+	exports.NoiseGenerator = NoiseGenerator;
+	/**
+	 * Noise generator to be used as control node.
+	 * It uses sample & hold in order to implement the 'frequency' parameter.
+	 */
+	var NoiseCtrlGenerator = (function (_super) {
+	    __extends(NoiseCtrlGenerator, _super);
+	    function NoiseCtrlGenerator(ac) {
+	        _super.call(this, ac);
+	        this.ac = ac;
+	        this.frequency = 4;
+	        this.depth = 20;
+	        this.sct = 0;
+	        this.v = 0;
+	    }
+	    NoiseCtrlGenerator.prototype.connect = function (param) {
+	        this.anode.connect(param);
+	    };
+	    NoiseCtrlGenerator.prototype.processAudio = function (evt) {
+	        var samplesPerCycle = this.ac.sampleRate / this.frequency;
+	        for (var channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
+	            var out = evt.outputBuffer.getChannelData(channel);
+	            for (var sample = 0; sample < out.length; sample++) {
+	                this.sct++;
+	                if (this.sct > samplesPerCycle) {
+	                    this.v = this.depth * (Math.random() * 2 - 1);
+	                    this.sct = 0; //this.sct - Math.floor(this.sct);
+	                }
+	                out[sample] = this.v;
+	            }
+	        }
+	    };
+	    return NoiseCtrlGenerator;
+	})(ScriptProcessor);
+	exports.NoiseCtrlGenerator = NoiseCtrlGenerator;
+	/**
+	 * Simple Pitch Shifter implemented in a quick & dirty way
+	 */
+	var Detuner = (function (_super) {
+	    __extends(Detuner, _super);
+	    function Detuner() {
+	        _super.apply(this, arguments);
+	        this.octave = 0;
+	        this.numberOfInputs = 1;
+	    }
+	    Detuner.prototype.processAudio = function (evt) {
+	        var dx = Math.pow(2, this.octave);
+	        for (var channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
+	            var out = evt.outputBuffer.getChannelData(channel);
+	            var inbuf = evt.inputBuffer.getChannelData(channel);
+	            var sct = 0;
+	            for (var sample = 0; sample < out.length; sample++) {
+	                out[sample] = inbuf[Math.floor(sct)];
+	                sct += dx;
+	                if (sct >= inbuf.length)
+	                    sct = 0;
+	            }
+	        }
+	    };
+	    return Detuner;
+	})(ScriptProcessor);
+	exports.Detuner = Detuner;
+	/**
+	 * Captures audio from the PC audio input.
+	 * Requires user's authorization to grab audio input.
+	 */
+	var LineInNode = (function (_super) {
+	    __extends(LineInNode, _super);
+	    function LineInNode() {
+	        _super.apply(this, arguments);
+	    }
+	    LineInNode.prototype.connect = function (anode) {
+	        var _this = this;
+	        if (this.srcNode) {
+	            this.srcNode.connect(anode);
+	            this.dstNode = anode;
+	            return;
+	        }
+	        var navigator = window.navigator;
+	        navigator.getUserMedia = (navigator.getUserMedia ||
+	            navigator.webkitGetUserMedia ||
+	            navigator.mozGetUserMedia ||
+	            navigator.msGetUserMedia);
+	        navigator.getUserMedia({ audio: true }, function (stream) {
+	            var ac = anode.context;
+	            _this.srcNode = ac.createMediaStreamSource(stream);
+	            var a2 = anode;
+	            if (a2.custom && a2.anode)
+	                a2 = a2.anode;
+	            _this.srcNode.connect(a2);
+	            _this.dstNode = anode;
+	            _this.stream = stream;
+	        }, function (error) { return console.error(error); });
+	    };
+	    LineInNode.prototype.disconnect = function () {
+	        this.srcNode.disconnect(this.dstNode);
+	    };
+	    return LineInNode;
+	})(CustomNodeBase);
+	exports.LineInNode = LineInNode;
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports) {
+
+	/** Informs whether a popup is open or not */
+	exports.isOpen = false;
+	/** Bootstrap-based equivalent of standard alert function */
+	function alert(msg, title, hideClose, options) {
+	    popup.find('.popup-message').html(msg);
+	    popup.find('.modal-title').text(title || 'Alert');
+	    popup.find('.popup-ok').hide();
+	    if (hideClose)
+	        popup.find('.popup-close').hide();
+	    else
+	        popup.find('.popup-close').html('Close');
+	    popup.find('.popup-prompt > input').hide();
+	    exports.isOpen = true;
+	    popup.one('hidden.bs.modal', function (_) { return exports.isOpen = false; });
+	    popup.modal(options);
+	}
+	exports.alert = alert;
+	/** Like an alert, but without a close button */
+	function progress(msg, title) {
+	    alert(msg, title, true, { keyboard: false });
+	}
+	exports.progress = progress;
+	/** Closes a popup in case it is open */
+	function close() {
+	    if (!exports.isOpen)
+	        return;
+	    popup.find('.popup-ok').click();
+	}
+	exports.close = close;
+	/** Bootstrap-based equivalent of standard confirm function */
+	function confirm(msg, title, cbClose, cbOpen) {
+	    var result = false;
+	    popup.find('.popup-message').html(msg);
+	    popup.find('.modal-title').text(title || 'Please confirm');
+	    var okButton = popup.find('.popup-ok');
+	    okButton.show().click(function (_) { return result = true; });
+	    popup.find('.popup-prompt > input').hide();
+	    popup.find('.popup-close').text('Cancel');
+	    popup.one('shown.bs.modal', function (_) {
+	        okButton.focus();
+	        if (cbOpen)
+	            cbOpen();
+	    });
+	    popup.find('form').one('submit', function (_) {
+	        result = true;
+	        okButton.click();
+	        return false;
+	    });
+	    popup.one('hide.bs.modal', function (_) {
+	        okButton.off('click');
+	        exports.isOpen = false;
+	        cbClose(result);
+	    });
+	    exports.isOpen = true;
+	    popup.modal();
+	}
+	exports.confirm = confirm;
+	/** Bootstrap-based equivalent of standard prompt function */
+	function prompt(msg, title, initialValue, cb) {
+	    var input = popup.find('.popup-prompt > input');
+	    confirm(msg, title, function (confirmed) {
+	        if (!cb)
+	            return;
+	        if (!confirmed)
+	            cb(null);
+	        else
+	            cb(input.val());
+	    }, function () {
+	        input.show();
+	        input.focus();
+	        if (initialValue) {
+	            input.val(initialValue);
+	            var hinput = input[0];
+	            hinput.select();
+	        }
+	        else
+	            input.val('');
+	    });
+	}
+	exports.prompt = prompt;
+	var popup = $("\n\t<div class=\"normal-font modal fade\" id=\"myModal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"myModalLabel\">\n\t<div class=\"modal-dialog\" role=\"document\">\n\t\t<div class=\"modal-content\">\n\t\t<div class=\"modal-header\">\n\t\t\t<button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n\t\t\t<h4 class=\"modal-title\" id=\"myModalLabel\"></h4>\n\t\t</div>\n\t\t<div class=\"modal-body\">\n\t\t\t<div class=\"popup-message\"></div>\n\t\t\t<form class=\"popup-prompt\">\n\t\t\t\t<input type=\"text\" style=\"width: 100%\">\n\t\t\t</form>\n\t\t</div>\n\t\t<div class=\"modal-footer\">\n\t\t\t<button type=\"button\" class=\"btn btn-default popup-close\" data-dismiss=\"modal\"></button>\n\t\t\t<button type=\"button\" class=\"btn btn-primary popup-ok\" data-dismiss=\"modal\">OK</button>\n\t\t</div>\n\t\t</div>\n\t</div>\n\t</div>\n");
+	$('body').append(popup);
 
 
 /***/ },
@@ -2093,7 +2097,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var keyboard_1 = __webpack_require__(12);
-	var popups = __webpack_require__(7);
+	var popups = __webpack_require__(8);
 	var NUM_WHITES = 17;
 	var BASE_NOTE = 36;
 	/**
@@ -2318,7 +2322,7 @@
 /* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var popups = __webpack_require__(7);
+	var popups = __webpack_require__(8);
 	var MAX_PRESETS = 20;
 	/**
 	 * Manages the presets box:
