@@ -248,7 +248,7 @@ input[type=range][orient=vertical] {
 .editor-cover {
 	position: absolute;
 	top: 0px;
-	width: 100%;
+	width: 99%;
 	height: 685px;
 	z-index: 1000;
 	opacity: 0.85;
