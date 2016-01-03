@@ -18,6 +18,7 @@ export class SynthUI {
 		this.gr = new Graph(graphCanvas);
 		this.gr.handler = new SynthGraphHandler(this, jqParams, jqFFT, jqOsc);
 		this.synth = new Synth(ac);
+		(<any>this.synth.paramHandlers).BufferURL.popups = popups;
 		this.registerPaletteHandler();
 		this.addOutputNode();
 	}
