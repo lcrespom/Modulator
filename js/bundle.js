@@ -738,8 +738,6 @@
 	            ndata.noteHandler = new notes_1.NoteHandlers[nh](ndata);
 	            this.addNoteHandler(ndata.noteHandler);
 	        }
-	        else if (ndata.anode['start'])
-	            ndata.anode['start']();
 	    };
 	    Synth.prototype.initOutputNodeData = function (data, dst) {
 	        data.type = 'out';
@@ -1347,6 +1345,7 @@
 	    // Controllers
 	    LFO: {
 	        constructor: 'createOscillator',
+	        noteHandler: 'osc',
 	        control: true,
 	        params: {
 	            frequency: { initial: 5, min: 0.01, max: 200 },

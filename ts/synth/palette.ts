@@ -132,6 +132,7 @@ export var palette: NodePalette = {
 	// Controllers
 	LFO: {
 		constructor: 'createOscillator',
+		noteHandler: 'osc',
 		control: true,
 		params: {
 			frequency: { initial: 5, min: 0.01, max: 200 },

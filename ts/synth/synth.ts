@@ -80,9 +80,6 @@ export class Synth {
 			ndata.noteHandler = new NoteHandlers[nh](ndata);
 			this.addNoteHandler(ndata.noteHandler);
 		}
-		// LFO does not have a note handler yet needs to be started
-		//TODO cleanup: assign note handler to LFO and review other source modules
-		else if (ndata.anode['start']) ndata.anode['start']();
 	}
 
 	initOutputNodeData(data: NodeData, dst: AudioNode): void {

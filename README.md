@@ -46,7 +46,6 @@ on Twitter, or directly within GitHub.
 		draws arrows incorrectly
 
 - Functionality
-	- Use a note handler for the LFO node, so it is in sync with noteOn
 	- Custom nodes
 		- Keyboard control node
 			- To control other parameters based on the note being pressed, centered
@@ -54,8 +53,6 @@ on Twitter, or directly within GitHub.
 			- With depth parameter
 			- Based on ScriptProcessor... no other way to generically control parameters
 		- Full synth as a reusable module (long term)
-		- Ring modulation using a gain node where the gain is controlled by an oscillator
-			(low: it can be implemented using an LFO controlling a gain).
 		- Soundbank: multiple samples, one sample per note, ideal for rythm tracks
 	- Navbar with:
 		- Left: "Code" button linking to GitHub
@@ -67,7 +64,6 @@ on Twitter, or directly within GitHub.
 		- WaveShaper
 		- Etc?
 	- Provide 10 preset instruments
-	- Accept URL to directly download instrument preset
 	- Limitation: a control node can only control a single node
 		- Prevent from connecting a control node to more than one destination
 		- Or else, modify the UI to support multiple destination nodes
@@ -80,6 +76,7 @@ on Twitter, or directly within GitHub.
 		- To save instruments, check this Stack Overflow reply:
 			http://stackoverflow.com/questions/4309958/can-i-write-files-with-html5-js/14544910#14544910
 		- Get rid of JSON copy+paste when this is fully implemented
+		- Use it also to load audio buffers
 	- Improve presets panel
 		- When clicking on preset number, let user directly navigate to preset,
 			e.g. by showing a drop down list
@@ -99,7 +96,7 @@ on Twitter, or directly within GitHub.
 	- Cool design
 	- Branding
 	- Naming
-	- Logo: display logo/name in top-center header
+	- Logo: svg
 
 - Long term:
 	- Tracker
