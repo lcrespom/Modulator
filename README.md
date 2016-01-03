@@ -116,28 +116,20 @@ on Twitter, or directly within GitHub.
 	- Mobile app
 
 - Code
-	- Refactor to remove dependency loops and reduce coupling
-		- Eliminate these dependencies:
-			- synth/instrument => synthUI/graph
-			- synth/instrument => synthUI/synthUI
-			- synth/synth contains ParamHandler,
-				which has UI code that should be moved elsewhere
+	- synth.ts contains BufferURL ParamHandler,
+		which has UI code that should be moved elsewhere
 	- Avoid hardcoded DOM id's in code, e.g. $('#my-button'), except
 		for specifying containers at top level.
 		Just do a global search for `$('#` and review all matches not in main.ts.
 	- Review jQuery event registration to check that no event gets registered
 		more than once
 	- Move all generic code to modern.ts
-		- Use a common way to capture function calls, e.g. beforeCall(obj, fname, cb)
-	- Separate graph.ts into an independent npm module
+		- Review for very common code to be placed in there
+	- Extract the following independent npm modules:
+		- graph.ts
+		- An npm module with all code in the synth folder
 	- Reusable API to load & play presets without displaying the node graph,
 		eventually to become an independent npm module (long term)
-	- Cleanup of polyphonic mode
-		- Make Voice an independent API:
-			- Decoupled from Graph and SynthUI
-			- Not requiring a dummy canvas element
-		- Then, make SynthUI dependant on voice, and not the other way around
-		- Eventually make it an independent npm module
 	- Improve code to clean hack that checks for custom nodes.
 
 - Share

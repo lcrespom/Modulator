@@ -17,8 +17,7 @@ export class Instrument {
 	}
 
 	close() {
-		for (const voice of this.voices)
-			voice.close();
+		for (const voice of this.voices) voice.close();
 	}
 
 	noteOn(midi: number, velocity: number, ratio: number): void {
@@ -74,6 +73,8 @@ export class Voice {
 }
 
 
+//-------------------- Private --------------------
+
 class VoiceNodeData extends NodeData {
 	inputs: NodeData[] = [];
 	getInputs(): NodeData[] {
@@ -83,6 +84,7 @@ class VoiceNodeData extends NodeData {
 
 class SynthLoader {
 	nodes: VoiceNodeData[] = [];
+	synth: Synth;
 
 	load(ac: ModernAudioContext, json: any, dest: AudioNode): Synth {
 		const synth = new Synth(ac);
@@ -107,12 +109,13 @@ class SynthLoader {
 			for (const src of dst.inputs)
 				synth.connectNodes(src, dst);
 		// Finally, return the newly created synth
+		this.synth = synth;
 		return synth;
 	}
 
 	close() {
-		// const nodes: Node[] = this.synthUI.gr.nodes.slice();
-		// for (const node of nodes)
-		// 	this.synthUI.removeNode(node);
+		for (const node of this.nodes)
+			for (const input of node.inputs)
+				this.synth.disconnectNodes(input, node);
 	}
 }

@@ -2325,6 +2325,7 @@
 	    return Voice;
 	})();
 	exports.Voice = Voice;
+	//-------------------- Private --------------------
 	var VoiceNodeData = (function (_super) {
 	    __extends(VoiceNodeData, _super);
 	    function VoiceNodeData() {
@@ -2373,12 +2374,17 @@
 	            }
 	        }
 	        // Finally, return the newly created synth
+	        this.synth = synth;
 	        return synth;
 	    };
 	    SynthLoader.prototype.close = function () {
-	        // const nodes: Node[] = this.synthUI.gr.nodes.slice();
-	        // for (const node of nodes)
-	        // 	this.synthUI.removeNode(node);
+	        for (var _i = 0, _a = this.nodes; _i < _a.length; _i++) {
+	            var node = _a[_i];
+	            for (var _b = 0, _c = node.inputs; _b < _c.length; _b++) {
+	                var input = _c[_b];
+	                this.synth.disconnectNodes(input, node);
+	            }
+	        }
 	    };
 	    return SynthLoader;
 	})();
