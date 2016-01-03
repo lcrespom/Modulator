@@ -16,10 +16,6 @@ export class Instrument {
 		this.voiceNum = 0;
 	}
 
-	close() {
-		for (const voice of this.voices) voice.close();
-	}
-
 	noteOn(midi: number, velocity: number, ratio: number): void {
 		const voice = this.voices[this.voiceNum];
 		voice.noteOn(midi, velocity, ratio);
@@ -35,6 +31,9 @@ export class Instrument {
 		}
 	}
 
+	close() {
+		for (const voice of this.voices) voice.close();
+	}
 }
 
 
@@ -47,9 +46,6 @@ export class Voice {
 	loader: SynthLoader;
 
 	constructor(ac: ModernAudioContext, json: any, dest?: AudioNode) {
-		//TODO make an "invisible" voice, decoupled form SynthUI, canvas, and Graph editor
-		const jqCanvas = $('<canvas width="100" height="100" style="display: none">');
-		const dummyCanvas: HTMLCanvasElement = <HTMLCanvasElement>jqCanvas[0];
 		this.loader = new SynthLoader();
 		this.synth = this.loader.load(ac, json, dest || ac.destination);
 		this.lastNote = 0;
@@ -60,15 +56,15 @@ export class Voice {
 		this.lastNote = midi;
 	}
 
-	close() {
-		//TODO very important to avoid memory leaks
-		if (this.lastNote) this.noteOff(this.lastNote, 1);
-		this.loader.close();
-	}
-
 	noteOff(midi: number, velocity: number): void {
 		this.synth.noteOff(midi, velocity);
 		this.lastNote = 0;
+	}
+
+	close() {
+		// This method must be called to avoid memory leaks at the Web Audio level
+		if (this.lastNote) this.noteOff(this.lastNote, 1);
+		this.loader.close();
 	}
 }
 
