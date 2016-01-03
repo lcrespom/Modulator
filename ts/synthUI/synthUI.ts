@@ -26,7 +26,7 @@ export class SynthUI {
 		//TODO avoid using hardcoded position
 		const out = new Node(500, 210, 'Out');
 		out.data = new GraphNodeData(out);
-		this.synth.initOutputNodeData(out.data);
+		this.synth.initOutputNodeData(out.data, this.synth.ac.destination);
 		this.outNode = out.data.anode;
 		this.gr.addNode(out, 'node-out');
 		this.initNodeDimensions(out);
@@ -62,7 +62,7 @@ export class SynthUI {
 	createNodeData(n: Node, type: string): void {
 		n.data = new GraphNodeData(n);
 		if (type == 'out') {
-			this.synth.initOutputNodeData(n.data);
+			this.synth.initOutputNodeData(n.data, this.synth.ac.destination);
 			this.outNode = n.data.anode;
 		}
 		else
@@ -184,28 +184,12 @@ class SynthGraphHandler implements GraphHandler {
 	}
 
 	connected(src: Node, dst: Node): void {
-		const srcData: NodeData = src.data;
-		const dstData: NodeData = dst.data;
-		if (srcData.nodeDef.control && !dstData.nodeDef.control) {
-			srcData.controlParams = Object.keys(dstData.nodeDef.params)
-				.filter(pname => dstData.anode[pname] instanceof AudioParam);
-			srcData.controlParam = srcData.controlParams[0];
-			srcData.controlTarget = dstData.anode;
-			srcData.anode.connect(dstData.anode[srcData.controlParam]);
-			//TODO update params box in case selected node is src
-		}
-		else srcData.anode.connect(dstData.anode);
+		this.synthUI.synth.connectNodes(src.data, dst.data);
+		//TODO update paramsUI in case selected node is src
 	}
 
 	disconnected(src: Node, dst: Node): void {
-		const srcData: NodeData = src.data;
-		const dstData: NodeData = dst.data;
-		if (srcData.nodeDef.control && !dstData.nodeDef.control) {
-			srcData.controlParams = null;
-			srcData.anode.disconnect(dstData.anode[srcData.controlParam]);
-		}
-		else
-			srcData.anode.disconnect(dstData.anode);
+		this.synthUI.synth.disconnectNodes(src.data, dst.data);
 	}
 
 	nodeSelected(n: Node): void {
@@ -223,43 +207,12 @@ class SynthGraphHandler implements GraphHandler {
 	}
 
 	data2json(n: Node): any {
-		const data: NodeData = n.data;
-		const params = {};
-		for (const pname of Object.keys(data.nodeDef.params)) {
-			const pvalue = data.anode[pname];
-			if (data.nodeDef.params[pname].handler)
-				params[pname] = this.synthUI.synth
-					.paramHandlers[data.nodeDef.params[pname].handler]
-					.param2json(data.anode);
-			else if (pvalue instanceof AudioParam)
-				if (pvalue['_value'] === undefined) params[pname] = pvalue.value;
-				else params[pname] = pvalue['_value'];
-			else params[pname] = pvalue;
-		}
-		return {
-			type: data.type,
-			params,
-			controlParam: data.controlParam,
-			controlParams: data.controlParams
-		}
+		return this.synthUI.synth.nodeData2json(n.data);
 	}
 
 	json2data(n: Node, json: any): void {
 		this.synthUI.createNodeData(n, json.type);
-		const data: NodeData = n.data;
-		for (const pname of Object.keys(json.params)) {
-			const pvalue = data.anode[pname];
-			const jv = json.params[pname];
-			if (data.nodeDef.params[pname].handler)
-				this.synthUI.synth
-					.paramHandlers[data.nodeDef.params[pname].handler]
-					.json2param(data.anode, jv);
-			else if (pvalue instanceof AudioParam) {
-				pvalue.value = jv;
-				pvalue['_value'] = jv;
-			}
-			else data.anode[pname] = jv;
-		}
+		this.synthUI.synth.json2NodeData(json, n.data);
 	}
 
 	graphLoaded() {

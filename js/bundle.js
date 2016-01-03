@@ -94,7 +94,7 @@
 	        //TODO avoid using hardcoded position
 	        var out = new graph_1.Node(500, 210, 'Out');
 	        out.data = new GraphNodeData(out);
-	        this.synth.initOutputNodeData(out.data);
+	        this.synth.initOutputNodeData(out.data, this.synth.ac.destination);
 	        this.outNode = out.data.anode;
 	        this.gr.addNode(out, 'node-out');
 	        this.initNodeDimensions(out);
@@ -124,7 +124,7 @@
 	    SynthUI.prototype.createNodeData = function (n, type) {
 	        n.data = new GraphNodeData(n);
 	        if (type == 'out') {
-	            this.synth.initOutputNodeData(n.data);
+	            this.synth.initOutputNodeData(n.data, this.synth.ac.destination);
 	            this.outNode = n.data.anode;
 	        }
 	        else
@@ -238,27 +238,11 @@
 	        return dstData.anode.numberOfInputs > 0;
 	    };
 	    SynthGraphHandler.prototype.connected = function (src, dst) {
-	        var srcData = src.data;
-	        var dstData = dst.data;
-	        if (srcData.nodeDef.control && !dstData.nodeDef.control) {
-	            srcData.controlParams = Object.keys(dstData.nodeDef.params)
-	                .filter(function (pname) { return dstData.anode[pname] instanceof AudioParam; });
-	            srcData.controlParam = srcData.controlParams[0];
-	            srcData.controlTarget = dstData.anode;
-	            srcData.anode.connect(dstData.anode[srcData.controlParam]);
-	        }
-	        else
-	            srcData.anode.connect(dstData.anode);
+	        this.synthUI.synth.connectNodes(src.data, dst.data);
+	        //TODO update paramsUI in case selected node is src
 	    };
 	    SynthGraphHandler.prototype.disconnected = function (src, dst) {
-	        var srcData = src.data;
-	        var dstData = dst.data;
-	        if (srcData.nodeDef.control && !dstData.nodeDef.control) {
-	            srcData.controlParams = null;
-	            srcData.anode.disconnect(dstData.anode[srcData.controlParam]);
-	        }
-	        else
-	            srcData.anode.disconnect(dstData.anode);
+	        this.synthUI.synth.disconnectNodes(src.data, dst.data);
 	    };
 	    SynthGraphHandler.prototype.nodeSelected = function (n) {
 	        var data = n.data;
@@ -272,48 +256,11 @@
 	        return srcData.nodeDef.control ? this.ctrlArrowColor : this.arrowColor;
 	    };
 	    SynthGraphHandler.prototype.data2json = function (n) {
-	        var data = n.data;
-	        var params = {};
-	        for (var _i = 0, _a = Object.keys(data.nodeDef.params); _i < _a.length; _i++) {
-	            var pname = _a[_i];
-	            var pvalue = data.anode[pname];
-	            if (data.nodeDef.params[pname].handler)
-	                params[pname] = this.synthUI.synth
-	                    .paramHandlers[data.nodeDef.params[pname].handler]
-	                    .param2json(data.anode);
-	            else if (pvalue instanceof AudioParam)
-	                if (pvalue['_value'] === undefined)
-	                    params[pname] = pvalue.value;
-	                else
-	                    params[pname] = pvalue['_value'];
-	            else
-	                params[pname] = pvalue;
-	        }
-	        return {
-	            type: data.type,
-	            params: params,
-	            controlParam: data.controlParam,
-	            controlParams: data.controlParams
-	        };
+	        return this.synthUI.synth.nodeData2json(n.data);
 	    };
 	    SynthGraphHandler.prototype.json2data = function (n, json) {
 	        this.synthUI.createNodeData(n, json.type);
-	        var data = n.data;
-	        for (var _i = 0, _a = Object.keys(json.params); _i < _a.length; _i++) {
-	            var pname = _a[_i];
-	            var pvalue = data.anode[pname];
-	            var jv = json.params[pname];
-	            if (data.nodeDef.params[pname].handler)
-	                this.synthUI.synth
-	                    .paramHandlers[data.nodeDef.params[pname].handler]
-	                    .json2param(data.anode, jv);
-	            else if (pvalue instanceof AudioParam) {
-	                pvalue.value = jv;
-	                pvalue['_value'] = jv;
-	            }
-	            else
-	                data.anode[pname] = jv;
-	        }
+	        this.synthUI.synth.json2NodeData(json, n.data);
 	    };
 	    SynthGraphHandler.prototype.graphLoaded = function () {
 	        this.analyzer.analyze(this.synthUI.outNode);
@@ -752,7 +699,7 @@
 	exports.NodeData = NodeData;
 	/**
 	 * Performs global operations on all AudioNodes:
-	 * - Manages AudioNode creation and initialization from the palette
+	 * - Manages AudioNode creation, initialization and connection
 	 * - Distributes MIDI keyboard events to NoteHandlers
 	 */
 	var Synth = (function () {
@@ -796,18 +743,70 @@
 	        else if (ndata.anode['start'])
 	            ndata.anode['start']();
 	    };
-	    Synth.prototype.initOutputNodeData = function (data) {
+	    Synth.prototype.initOutputNodeData = function (data, dst) {
 	        data.type = 'out';
 	        data.anode = this.ac.createGain();
-	        data.anode.connect(this.ac.destination);
+	        data.anode.connect(dst);
 	        data.nodeDef = this.palette['Speaker'];
 	        data.isOut = true;
 	    };
-	    Synth.prototype.play = function () {
-	        this.ac.resume();
+	    Synth.prototype.connectNodes = function (srcData, dstData) {
+	        if (srcData.nodeDef.control && !dstData.nodeDef.control) {
+	            srcData.controlParams = Object.keys(dstData.nodeDef.params)
+	                .filter(function (pname) { return dstData.anode[pname] instanceof AudioParam; });
+	            srcData.controlParam = srcData.controlParams[0];
+	            srcData.controlTarget = dstData.anode;
+	            srcData.anode.connect(dstData.anode[srcData.controlParam]);
+	        }
+	        else
+	            srcData.anode.connect(dstData.anode);
 	    };
-	    Synth.prototype.stop = function () {
-	        this.ac.suspend();
+	    Synth.prototype.disconnectNodes = function (srcData, dstData) {
+	        if (srcData.nodeDef.control && !dstData.nodeDef.control) {
+	            srcData.controlParams = null;
+	            srcData.anode.disconnect(dstData.anode[srcData.controlParam]);
+	        }
+	        else
+	            srcData.anode.disconnect(dstData.anode);
+	    };
+	    Synth.prototype.json2NodeData = function (json, data) {
+	        for (var _i = 0, _a = Object.keys(json.params); _i < _a.length; _i++) {
+	            var pname = _a[_i];
+	            var pvalue = data.anode[pname];
+	            var jv = json.params[pname];
+	            if (data.nodeDef.params[pname].handler)
+	                this.paramHandlers[data.nodeDef.params[pname].handler]
+	                    .json2param(data.anode, jv);
+	            else if (pvalue instanceof AudioParam) {
+	                pvalue.value = jv;
+	                pvalue['_value'] = jv;
+	            }
+	            else
+	                data.anode[pname] = jv;
+	        }
+	    };
+	    Synth.prototype.nodeData2json = function (data) {
+	        var params = {};
+	        for (var _i = 0, _a = Object.keys(data.nodeDef.params); _i < _a.length; _i++) {
+	            var pname = _a[_i];
+	            var pvalue = data.anode[pname];
+	            if (data.nodeDef.params[pname].handler)
+	                params[pname] = this.paramHandlers[data.nodeDef.params[pname].handler]
+	                    .param2json(data.anode);
+	            else if (pvalue instanceof AudioParam)
+	                if (pvalue['_value'] === undefined)
+	                    params[pname] = pvalue.value;
+	                else
+	                    params[pname] = pvalue['_value'];
+	            else
+	                params[pname] = pvalue;
+	        }
+	        return {
+	            type: data.type,
+	            params: params,
+	            controlParam: data.controlParam,
+	            controlParams: data.controlParams
+	        };
 	    };
 	    Synth.prototype.noteOn = function (midi, gain, ratio) {
 	        for (var _i = 0, _a = this.noteHandlers; _i < _a.length; _i++) {
