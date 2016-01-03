@@ -2273,12 +2273,6 @@
 	            this.voices.push(new Voice(ac, json, dest));
 	        this.voiceNum = 0;
 	    }
-	    Instrument.prototype.close = function () {
-	        for (var _i = 0, _a = this.voices; _i < _a.length; _i++) {
-	            var voice = _a[_i];
-	            voice.close();
-	        }
-	    };
 	    Instrument.prototype.noteOn = function (midi, velocity, ratio) {
 	        var voice = this.voices[this.voiceNum];
 	        voice.noteOn(midi, velocity, ratio);
@@ -2293,6 +2287,12 @@
 	            }
 	        }
 	    };
+	    Instrument.prototype.close = function () {
+	        for (var _i = 0, _a = this.voices; _i < _a.length; _i++) {
+	            var voice = _a[_i];
+	            voice.close();
+	        }
+	    };
 	    return Instrument;
 	})();
 	exports.Instrument = Instrument;
@@ -2301,9 +2301,6 @@
 	 */
 	var Voice = (function () {
 	    function Voice(ac, json, dest) {
-	        //TODO make an "invisible" voice, decoupled form SynthUI, canvas, and Graph editor
-	        var jqCanvas = $('<canvas width="100" height="100" style="display: none">');
-	        var dummyCanvas = jqCanvas[0];
 	        this.loader = new SynthLoader();
 	        this.synth = this.loader.load(ac, json, dest || ac.destination);
 	        this.lastNote = 0;
@@ -2312,15 +2309,15 @@
 	        this.synth.noteOn(midi, velocity, ratio);
 	        this.lastNote = midi;
 	    };
-	    Voice.prototype.close = function () {
-	        //TODO very important to avoid memory leaks
-	        if (this.lastNote)
-	            this.noteOff(this.lastNote, 1);
-	        this.loader.close();
-	    };
 	    Voice.prototype.noteOff = function (midi, velocity) {
 	        this.synth.noteOff(midi, velocity);
 	        this.lastNote = 0;
+	    };
+	    Voice.prototype.close = function () {
+	        // This method must be called to avoid memory leaks at the Web Audio level
+	        if (this.lastNote)
+	            this.noteOff(this.lastNote, 1);
+	        this.loader.close();
 	    };
 	    return Voice;
 	})();
