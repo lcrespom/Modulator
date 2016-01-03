@@ -103,7 +103,12 @@ class OscNoteHandler extends BaseNoteHandler {
 		this.disconnect(this.oscClone);
 		this.oscClone = null;
 	}
+}
 
+class LFONoteHandler extends OscNoteHandler {
+	noteOn(midi: number, gain: number, ratio: number):void {
+		super.noteOn(midi, gain, 1);
+	}
 }
 
 /**
@@ -240,6 +245,7 @@ export const NoteHandlers = {
 	'osc': OscNoteHandler,
 	'buffer': BufferNoteHandler,
 	'ADSR': ADSRNoteHandler,
+	'LFO': LFONoteHandler,
 	'restartable': RestartableNoteHandler
 };
 

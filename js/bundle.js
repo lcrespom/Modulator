@@ -1028,6 +1028,16 @@
 	    };
 	    return OscNoteHandler;
 	})(BaseNoteHandler);
+	var LFONoteHandler = (function (_super) {
+	    __extends(LFONoteHandler, _super);
+	    function LFONoteHandler() {
+	        _super.apply(this, arguments);
+	    }
+	    LFONoteHandler.prototype.noteOn = function (midi, gain, ratio) {
+	        _super.prototype.noteOn.call(this, midi, gain, 1);
+	    };
+	    return LFONoteHandler;
+	})(OscNoteHandler);
 	/**
 	 * Handles note events for an AudioBufferSourceNode
 	 */
@@ -1176,6 +1186,7 @@
 	    'osc': OscNoteHandler,
 	    'buffer': BufferNoteHandler,
 	    'ADSR': ADSRNoteHandler,
+	    'LFO': LFONoteHandler,
 	    'restartable': RestartableNoteHandler
 	};
 	/**
@@ -1345,7 +1356,7 @@
 	    // Controllers
 	    LFO: {
 	        constructor: 'createOscillator',
-	        noteHandler: 'osc',
+	        noteHandler: 'LFO',
 	        control: true,
 	        params: {
 	            frequency: { initial: 5, min: 0.01, max: 200 },
