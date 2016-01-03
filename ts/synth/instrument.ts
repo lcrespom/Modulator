@@ -1,6 +1,5 @@
 import { ModernAudioContext } from './modern';
-import { Node } from '../synthUI/graph';
-import { SynthUI } from '../synthUI/synthUI';
+import { Synth, NodeData } from './synth';
 
 
 /**
@@ -10,16 +9,15 @@ export class Instrument {
 	voices: Voice[];
 	voiceNum: number;
 
-	constructor(ac: ModernAudioContext, json: any, numVoices: number) {
+	constructor(ac: ModernAudioContext, json: any, numVoices: number, dest?: AudioNode) {
 		this.voices = [];
 		for (let i = 0; i < numVoices; i++)
-			this.voices.push(new Voice(ac, json));
+			this.voices.push(new Voice(ac, json, dest));
 		this.voiceNum = 0;
 	}
 
 	close() {
-		for (const voice of this.voices)
-			voice.close();
+		for (const voice of this.voices) voice.close();
 	}
 
 	noteOn(midi: number, velocity: number, ratio: number): void {
@@ -44,32 +42,80 @@ export class Instrument {
  * An independent monophonic synth
  */
 export class Voice {
-	synthUI: SynthUI;
+	synth: Synth;
 	lastNote: number;
+	loader: SynthLoader;
 
-	constructor(ac: ModernAudioContext, json: any) {
+	constructor(ac: ModernAudioContext, json: any, dest?: AudioNode) {
 		//TODO make an "invisible" voice, decoupled form SynthUI, canvas, and Graph editor
 		const jqCanvas = $('<canvas width="100" height="100" style="display: none">');
 		const dummyCanvas: HTMLCanvasElement = <HTMLCanvasElement>jqCanvas[0];
-		this.synthUI = new SynthUI(ac, dummyCanvas, null, jqCanvas, jqCanvas);
-		this.synthUI.gr.fromJSON(json);
+		this.loader = new SynthLoader();
+		this.synth = this.loader.load(ac, json, dest || ac.destination);
 		this.lastNote = 0;
 	}
 
 	noteOn(midi: number, velocity: number, ratio: number): void {
-		this.synthUI.synth.noteOn(midi, velocity, ratio);
+		this.synth.noteOn(midi, velocity, ratio);
 		this.lastNote = midi;
 	}
 
 	close() {
+		//TODO very important to avoid memory leaks
 		if (this.lastNote) this.noteOff(this.lastNote, 1);
-		const nodes: Node[] = this.synthUI.gr.nodes.slice();
-		for (const node of nodes)
-			this.synthUI.removeNode(node);
+		this.loader.close();
 	}
 
 	noteOff(midi: number, velocity: number): void {
-		this.synthUI.synth.noteOff(midi, velocity);
+		this.synth.noteOff(midi, velocity);
 		this.lastNote = 0;
+	}
+}
+
+
+//-------------------- Private --------------------
+
+class VoiceNodeData extends NodeData {
+	inputs: NodeData[] = [];
+	getInputs(): NodeData[] {
+		return this.inputs;
+	}
+}
+
+class SynthLoader {
+	nodes: VoiceNodeData[] = [];
+	synth: Synth;
+
+	load(ac: ModernAudioContext, json: any, dest: AudioNode): Synth {
+		const synth = new Synth(ac);
+		// Add nodes into id-based table
+		for (const jn of json.nodes)
+			this.nodes[jn.id] = new VoiceNodeData();
+		// Then set their list of inputs
+		for (const jn of json.nodes)
+			for (const inum of jn.inputs)
+				this.nodes[jn.id].inputs.push(this.nodes[inum]);
+		// Then set their data
+		for (let i = 0; i < json.nodes.length; i++) {
+			const type = json.nodeData[i].type;
+			if (type == 'out')
+				synth.initOutputNodeData(this.nodes[i], dest);
+			else
+				synth.initNodeData(this.nodes[i], type);
+			synth.json2NodeData(json.nodeData[i], this.nodes[i]);
+		}
+		// Then notify connections to handler
+		for (const dst of this.nodes)
+			for (const src of dst.inputs)
+				synth.connectNodes(src, dst);
+		// Finally, return the newly created synth
+		this.synth = synth;
+		return synth;
+	}
+
+	close() {
+		for (const node of this.nodes)
+			for (const input of node.inputs)
+				this.synth.disconnectNodes(input, node);
 	}
 }
