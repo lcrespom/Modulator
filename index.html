@@ -152,7 +152,7 @@
 		<div class="graph-box">
 			<h5 class="bg-primary box-header">Piano Keyboard</h5>
 			<div id="piano" class="piano-box"></div>
-			<div id="piano-buttons">
+			<div id="piano-buttons" style="position: relative">
 				<span style="float:left">
 					<button id="prev-octave-but" class="btn btn-primary btn-sm">
 						-
@@ -162,13 +162,14 @@
 						+
 					</button>
 				</span>
-				<!--
-				<div style="display: inline-block">
-  					<input value="0" type="range" style="top: 3px; position: relative;">
-					<span style="font-size: 90%; line-height:0px">Portamento</span>
+				<div class="porta-slider" style="display: inline-block; position: relative; right: 50px">
+  					<input value="0" min="0" max="1" step="0.001" type="range" style="width: 128px;">
+					<span style="font-size: 90%; position: absolute; top: 15px; right: 25px">
+						Portamento
+					</span>
 				</div>
-				-->
-				<button id="poly-but" class="btn btn-primary btn-sm" style="float:right">
+				<button id="poly-but" class="btn btn-primary btn-sm"
+					style="position: absolute; right: 10px">
 					Poly
 				</button>
 			</div>

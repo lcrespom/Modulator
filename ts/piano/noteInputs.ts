@@ -18,12 +18,14 @@ export class NoteInputs {
 	poly: boolean;
 	instrument: Instrument;
 	lastNote: number;
+	piano: PianoKeyboard;
 
 	constructor(synthUI: SynthUI) {
 		this.synthUI = synthUI;
 		this.poly = false;
 		// Setup piano panel
 		var piano = new PianoKeyboard($('#piano'));
+		this.piano = piano;
 		piano.noteOn = (midi, ratio) => this.noteOn(midi, 1, ratio);
 		piano.noteOff = (midi) => this.noteOff(midi, 1);
 		// Register poly on/off handlers
@@ -68,7 +70,8 @@ export class NoteInputs {
 		if (this.poly)
 			this.instrument.noteOn(midi, velocity, ratio);
 		else
-			this.synthUI.synth.noteOn(midi, velocity, ratio);
+			this.synthUI.synth.noteOn(
+				midi, velocity, ratio, this.piano.getPortamento());
 	}
 
 	noteOff(midi: number, velocity: number): void {

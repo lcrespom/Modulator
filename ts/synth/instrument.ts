@@ -51,8 +51,8 @@ export class Voice {
 		this.lastNote = 0;
 	}
 
-	noteOn(midi: number, velocity: number, ratio: number): void {
-		this.synth.noteOn(midi, velocity, ratio);
+	noteOn(midi: number, velocity: number, ratio: number, portamento?: number): void {
+		this.synth.noteOn(midi, velocity, ratio, portamento);
 		this.lastNote = midi;
 	}
 

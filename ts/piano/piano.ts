@@ -19,6 +19,7 @@ export class PianoKeyboard {
 	poly: boolean;
 	lastKey: JQuery;
 	envelope: { attack: number; release: number };
+	portaSlider: JQuery;
 
 	constructor(panel: JQuery) {
 		this.baseNote = BASE_NOTE;
@@ -29,6 +30,7 @@ export class PianoKeyboard {
 		for (let i = 0; i < this.keys.length; i++)
 			this.registerKey(this.keys[i], i);
 		this.registerButtons();
+		this.portaSlider = panel.parent().find('.porta-slider input');
 	}
 
 	createKeys(panel: JQuery) {
@@ -139,14 +141,20 @@ export class PianoKeyboard {
 			$('body').append(cover);
 			$('#poly-but').text('Back to mono');
 			popups.isOpen = true;
+			this.portaSlider.parent().hide();
 			this.polyOn();
 		}
 		else {
 			$('.editor-cover').remove();
 			$('#poly-but').text('Poly');
 			popups.isOpen = false;
+			this.portaSlider.parent().show();
 			this.polyOff();
 		}
+	}
+
+	getPortamento(): number {
+		return parseFloat(this.portaSlider.val());
 	}
 
 	// Simple event handlers

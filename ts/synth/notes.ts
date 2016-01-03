@@ -8,7 +8,7 @@ import { ModernAudioNode, removeArrayElement } from './modern';
  * updating the node status accordingly.
  */
 export interface NoteHandler {
-	noteOn(midi: number, gain: number, ratio: number):void;
+	noteOn(midi: number, gain: number, ratio: number, portamento: number):void;
 	noteOff(midi: number, gain: number): void;
 	noteEnd(midi: number): void;
 	kbTrigger: boolean;
@@ -31,7 +31,7 @@ class BaseNoteHandler implements NoteHandler {
 		this.outTracker = new OutputTracker(ndata.anode);
 	}
 
-	noteOn(midi: number, gain: number, ratio: number):void {}
+	noteOn(midi: number, gain: number, ratio: number, portamento: number):void {}
 	noteOff(midi: number, gain: number): void {}
 	noteEnd(midi: number): void {}
 
@@ -79,14 +79,23 @@ class OscNoteHandler extends BaseNoteHandler {
 	oscClone: OscillatorNode;
 	lastNote: number;
 	playing = false;
+	oldfreq = 0;
 
-	noteOn(midi: number, gain: number, ratio: number):void {
+	noteOn(midi: number, gain: number, ratio: number, portamento: number):void {
 		if (this.playing) this.noteEnd(midi);	// Because this is monophonic
 		this.playing = true;
 		this.oscClone = <OscillatorNode>this.clone();
-		//TODO should also listen to value changes on original osc and apply them to clone
-		this.oscClone.frequency.value = this.oscClone.frequency.value * ratio;
+		const fparam = this.oscClone.frequency;
+		const newFreq = fparam.value * ratio;
+		if (portamento > 0 && this.oldfreq > 0) {
+			const now = this.oscClone.context.currentTime;
+			fparam.cancelScheduledValues(now);
+			fparam.linearRampToValueAtTime(this.oldfreq, now);
+			fparam.exponentialRampToValueAtTime(newFreq, now + portamento);
+		}
+		else fparam.value = newFreq;
 		this.oscClone.start();
+		this.oldfreq = newFreq;
 		this.lastNote = midi;
 	}
 
@@ -105,9 +114,13 @@ class OscNoteHandler extends BaseNoteHandler {
 	}
 }
 
+/**
+ * Handles note events for an LFO node. This is identical to a regular
+ * oscillator node, but the note does not affect the oscillator frequency
+ */
 class LFONoteHandler extends OscNoteHandler {
 	noteOn(midi: number, gain: number, ratio: number):void {
-		super.noteOn(midi, gain, 1);
+		super.noteOn(midi, gain, 1, 0);
 	}
 }
 

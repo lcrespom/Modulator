@@ -150,10 +150,11 @@ export class Synth {
 		}
 	}
 
-	noteOn(midi: number, gain: number, ratio: number): void {
+	noteOn(midi: number, gain: number, ratio: number, portamento?: number): void {
+		if (portamento == undefined) portamento = 0;
 		for (const nh of this.noteHandlers) {
 			if (nh.kbTrigger) nh.handlers = this.noteHandlers;
-			nh.noteOn(midi, gain, ratio);
+			nh.noteOn(midi, gain, ratio, portamento);
 		}
 	}
 

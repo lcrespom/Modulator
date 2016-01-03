@@ -808,12 +808,14 @@
 	            controlParams: data.controlParams
 	        };
 	    };
-	    Synth.prototype.noteOn = function (midi, gain, ratio) {
+	    Synth.prototype.noteOn = function (midi, gain, ratio, portamento) {
+	        if (portamento == undefined)
+	            portamento = 0;
 	        for (var _i = 0, _a = this.noteHandlers; _i < _a.length; _i++) {
 	            var nh = _a[_i];
 	            if (nh.kbTrigger)
 	                nh.handlers = this.noteHandlers;
-	            nh.noteOn(midi, gain, ratio);
+	            nh.noteOn(midi, gain, ratio, portamento);
 	        }
 	    };
 	    Synth.prototype.noteOff = function (midi, gain) {
@@ -946,7 +948,7 @@
 	        this.ndata = ndata;
 	        this.outTracker = new OutputTracker(ndata.anode);
 	    }
-	    BaseNoteHandler.prototype.noteOn = function (midi, gain, ratio) { };
+	    BaseNoteHandler.prototype.noteOn = function (midi, gain, ratio, portamento) { };
 	    BaseNoteHandler.prototype.noteOff = function (midi, gain) { };
 	    BaseNoteHandler.prototype.noteEnd = function (midi) { };
 	    BaseNoteHandler.prototype.clone = function () {
@@ -1000,15 +1002,25 @@
 	    function OscNoteHandler() {
 	        _super.apply(this, arguments);
 	        this.playing = false;
+	        this.oldfreq = 0;
 	    }
-	    OscNoteHandler.prototype.noteOn = function (midi, gain, ratio) {
+	    OscNoteHandler.prototype.noteOn = function (midi, gain, ratio, portamento) {
 	        if (this.playing)
 	            this.noteEnd(midi); // Because this is monophonic
 	        this.playing = true;
 	        this.oscClone = this.clone();
-	        //TODO should also listen to value changes on original osc and apply them to clone
-	        this.oscClone.frequency.value = this.oscClone.frequency.value * ratio;
+	        var fparam = this.oscClone.frequency;
+	        var newFreq = fparam.value * ratio;
+	        if (portamento > 0 && this.oldfreq > 0) {
+	            var now = this.oscClone.context.currentTime;
+	            fparam.cancelScheduledValues(now);
+	            fparam.linearRampToValueAtTime(this.oldfreq, now);
+	            fparam.exponentialRampToValueAtTime(newFreq, now + portamento);
+	        }
+	        else
+	            fparam.value = newFreq;
 	        this.oscClone.start();
+	        this.oldfreq = newFreq;
 	        this.lastNote = midi;
 	    };
 	    OscNoteHandler.prototype.noteOff = function (midi, gain) {
@@ -1028,13 +1040,17 @@
 	    };
 	    return OscNoteHandler;
 	})(BaseNoteHandler);
+	/**
+	 * Handles note events for an LFO node. This is identical to a regular
+	 * oscillator node, but the note does not affect the oscillator frequency
+	 */
 	var LFONoteHandler = (function (_super) {
 	    __extends(LFONoteHandler, _super);
 	    function LFONoteHandler() {
 	        _super.apply(this, arguments);
 	    }
 	    LFONoteHandler.prototype.noteOn = function (midi, gain, ratio) {
-	        _super.prototype.noteOn.call(this, midi, gain, 1);
+	        _super.prototype.noteOn.call(this, midi, gain, 1, 0);
 	    };
 	    return LFONoteHandler;
 	})(OscNoteHandler);
@@ -1984,6 +2000,7 @@
 	        this.poly = false;
 	        // Setup piano panel
 	        var piano = new piano_1.PianoKeyboard($('#piano'));
+	        this.piano = piano;
 	        piano.noteOn = function (midi, ratio) { return _this.noteOn(midi, 1, ratio); };
 	        piano.noteOff = function (midi) { return _this.noteOff(midi, 1); };
 	        // Register poly on/off handlers
@@ -2028,7 +2045,7 @@
 	        if (this.poly)
 	            this.instrument.noteOn(midi, velocity, ratio);
 	        else
-	            this.synthUI.synth.noteOn(midi, velocity, ratio);
+	            this.synthUI.synth.noteOn(midi, velocity, ratio, this.piano.getPortamento());
 	    };
 	    NoteInputs.prototype.noteOff = function (midi, velocity) {
 	        this.lastNote = 0;
@@ -2135,6 +2152,7 @@
 	        for (var i = 0; i < this.keys.length; i++)
 	            this.registerKey(this.keys[i], i);
 	        this.registerButtons();
+	        this.portaSlider = panel.parent().find('.porta-slider input');
 	    }
 	    PianoKeyboard.prototype.createKeys = function (panel) {
 	        this.keys = [];
@@ -2244,14 +2262,19 @@
 	            $('body').append(cover);
 	            $('#poly-but').text('Back to mono');
 	            popups.isOpen = true;
+	            this.portaSlider.parent().hide();
 	            this.polyOn();
 	        }
 	        else {
 	            $('.editor-cover').remove();
 	            $('#poly-but').text('Poly');
 	            popups.isOpen = false;
+	            this.portaSlider.parent().show();
 	            this.polyOff();
 	        }
+	    };
+	    PianoKeyboard.prototype.getPortamento = function () {
+	        return parseFloat(this.portaSlider.val());
 	    };
 	    // Simple event handlers
 	    PianoKeyboard.prototype.noteOn = function (midi, ratio) { };
@@ -2316,8 +2339,8 @@
 	        this.synth = this.loader.load(ac, json, dest || ac.destination);
 	        this.lastNote = 0;
 	    }
-	    Voice.prototype.noteOn = function (midi, velocity, ratio) {
-	        this.synth.noteOn(midi, velocity, ratio);
+	    Voice.prototype.noteOn = function (midi, velocity, ratio, portamento) {
+	        this.synth.noteOn(midi, velocity, ratio, portamento);
 	        this.lastNote = midi;
 	    };
 	    Voice.prototype.noteOff = function (midi, velocity) {
