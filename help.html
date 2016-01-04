@@ -13,6 +13,13 @@
 			font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 			font-size: 155%;
 		}
+		h2 {
+			clear: both;
+		}
+		img.figure {
+			float: right;
+			margin-left: 10px;
+		}
 	</style>
 </head>
 
@@ -33,7 +40,8 @@
 	The application displays several areas, each of which provides a specific
 	functionality. These are the following:
 
- 	<h2>Audio routing graph editor</h2>
+	<h2>Audio routing graph editor</h2>
+	<img src="img/graph.png" width="354" class="figure">
 	<p>The graph editor lets you create an audio routing graph, interconnecting
 		a set of audio nodes, from sound sources, to effects and finally to the
 		synthesizer output.</p>
@@ -58,6 +66,7 @@
 	</p>
 
 	<h2>Audio node palette</h2>
+	<img src="img/palette.png" width="49" class="figure">
 	<p>The palette at the right of the graph editor provides all available audio nodes
 		so they can be added to the graph. Just click on a given node and it will be
 		added to the graph editor, so it can be connected.
@@ -71,22 +80,25 @@
 	</p>
 
  	<h2>Audio node parameter editor</h2>
+	<img src="img/params.png" width="305" class="figure">
 	<p>The node parameter editor lets you modify the parameters of the currently selected
 		audio node. To select an audio node, just click on it on the graph editor, and
 		its parameters will become available in the parameter editor.
 	</p>
 
  	<h2>Preset selector</h2>
+	<img src="img/presets.png" width="98.5" class="figure">
 	<p>A set of preset instruments are available by default, and the user can create
 		new ones, save them and load them on a later session.
 	</p>
 
  	<h2>Piano keyboard</h2>
+	<img src="img/piano.png" width="278.5" class="figure">
 	<p>The piano keyboard can be clicked with the mouse, or the PC keyboard
 		can be used to send notes to the synthesizer. Key <code>A</code> corresponds
-		with the lowest pitch C key of the piano, and grows to <code>M</code>, then
-		continues on the upper row so <code>Q</code> corresponds with the middle C key
-		of the piano and grows to <code>P</code>.
+		with the lowest pitch <b>C</b> key of the piano, and grows to <code>M</code>, then
+		continues on the upper row so <code>Q</code> corresponds with the middle <b>C</b>
+		key of the piano and grows to <code>P</code>.
 	</p>
 	<p>The synthesizer is monophonic by default, but can be played in polyphonic mode.
 		The number of polyphonic voices is set to 5. Synth editing is disabled in
@@ -95,6 +107,7 @@
 	</p>
 
  	<h2>Audio analyzers</h2>
+	<img src="img/analyzers.png" width="124.5" class="figure">
 	The top analyzer displays the frequency spectrum of the output sound.
 	The bottom analyzer displays an oscilloscope of the output sound.
 
