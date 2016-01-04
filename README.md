@@ -82,9 +82,9 @@ on Twitter, or directly within GitHub.
 			e.g. by showing a drop down list
 
 - UI
-	- Take a look at http://nexusosc.com/
-		- Consider using it as the general UI
-		- However, mind its size and impact on download time
+	- Review the following audio front-end libraries:
+		- http://nexusosc.com/
+		- https://github.com/g200kg/webaudio-controls
 	- Parameters panel
 		- Use cool knobs for parameters instead of default browser sliders
 	- Help
