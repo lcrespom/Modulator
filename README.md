@@ -82,6 +82,9 @@ on Twitter, or directly within GitHub.
 			e.g. by showing a drop down list
 
 - UI
+	- Take a look at http://nexusosc.com/
+		- Consider using it as the general UI
+		- However, mind its size and impact on download time
 	- Parameters panel
 		- Use cool knobs for parameters instead of default browser sliders
 	- Help
@@ -101,6 +104,9 @@ on Twitter, or directly within GitHub.
 - Long term:
 	- Tracker
 		- Review [this article](http://www.html5rocks.com/en/tutorials/audio/scheduling/)
+	- Review this:
+		- https://en.wikipedia.org/wiki/Open_Sound_Control
+		- http://opensoundcontrol.org/ (was not responding when last checked)
 	- Custom nodes with WebWorker... when available
 	- Record & save audio
 	- Server-side part, supporting:
