@@ -20,8 +20,8 @@ export class Keyboard {
 		const pressedKeys = {};
 		$('body')
 		.on('keydown', evt => {
-			if (pressedKeys[evt.keyCode]) return;	// Skip repetitions
-			if (evt.metaKey || evt.altKey) return;	// Skip browser shortcuts
+			if (pressedKeys[evt.keyCode]) return;					// Skip repetitions
+			if (evt.metaKey || evt.altKey || evt.ctrlKey) return;	// Skip browser shortcuts
 			pressedKeys[evt.keyCode] = true;
 			const midi = this.key2midi(evt.keyCode);
 			if (midi < 0) return;

@@ -86,6 +86,9 @@ on Twitter, or directly within GitHub.
 		- Or else, modify the UI to support multiple destination nodes
 
 - UI
+	- Review the following audio front-end libraries:
+		- http://nexusosc.com/
+		- https://github.com/g200kg/webaudio-controls
 	- Parameters panel
 		- Use cool knobs for parameters instead of default browser sliders
 	- Help
@@ -108,6 +111,9 @@ on Twitter, or directly within GitHub.
 	- Tracker
 		- Probably as an independent app that can load synth presets
 		- Review [this article](http://www.html5rocks.com/en/tutorials/audio/scheduling/)
+	- Review this:
+		- https://en.wikipedia.org/wiki/Open_Sound_Control
+		- http://opensoundcontrol.org/ (was not responding when last checked)
 	- Custom nodes with WebWorker... when available
 	- Record & save audio
 	- Server-side part, supporting:
