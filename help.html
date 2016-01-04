@@ -7,13 +7,10 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="css/bootstrap/bootstrap.min.css">
 	<link rel="stylesheet" href="css/bootstrap/bootstrap-theme.min.css">
+	<link rel="stylesheet" type="text/css" href="css/main.css">
 	<style>
-		.main {
-			max-width: 810px;
-			margin: auto;
-		}
 		body {
-			margin: 10px;
+			font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 		}
 	</style>
 </head>
@@ -26,11 +23,67 @@
 		<img src="img/modulator.png" style="width: 500px">
 	</div>
 
-	<h2 style="margin-top: 1em">Help</h2>
-	Lorem ipsum dolor sit amet
+	<h2 style="margin-top: 1em">About Modulator</h2>
+	Modulator lets you graphically build a modular sound synthesizer.
+	The <a href="https://webaudio.github.io/web-audio-api/">Web Audio API</a>
+	is used for generating the sound.
 
-	<h2>Foo</h2>
-	Consectetur adisplicit
+	<h2>Modulator components</h2>
+	The application displays several areas, each of which provides a specific
+	functionality. These are the following:
+
+ 	<h3>Audio routing graph editor</h3>
+	<p>The graph editor lets you create an audio routing graph, interconnecting
+		a set of audio nodes, from sound sources, to effects and finally to the
+		synthesizer output.</p>
+	<p>Audio nodes are added by clicking on a specific node type from the
+		palette. They can be moved around the editor area by dragging them,
+		and deleted using the <code>del</code> key (or <code>cmd+backspace</code>
+		on the mac).
+	</p>
+	<p>In order to connect two nodes, use the <code>shift</code> key:
+		<ul>
+			<li>Place the mouse pointer over the source node</li>
+			<li>Press the shift key</li>
+			<li>Move the mouse pointer to the destination node
+				(but don't press the mouse button or you will start
+				dragging the node)
+			</li>
+			<li>Release the shift key to make the connection</li>
+		</ul>
+	</p>
+	<p>To disconnect two nodes, use the same approach as when connecting them:
+		if a connection already exists, it will be removed.
+	</p>
+
+	<h3>Audio node palette</h3>
+	<p>The palette at the right of the graph editor provides all available audio nodes
+		so they can be added to the graph. Just click on a given node and it will be
+		added to the graph editor, so it can be connected.
+	</p>
+	<p>There are three types of audio nodes available from the palette:
+		<ul>
+			<li><b>Source nodes</b>: nodes that generate a sound</li>
+			<li><b>Effect nodes</b>: nodes that modify a sound</li>
+			<li><b>Control nodes</b>: nodes that modify a parameter of another module</li>
+		</ul>
+	</p>
+
+ 	<h3>Audio node parameter editor</h3>
+	 The node parameter editor lets you modify the parameters of the currently selected
+	 audio node. To select an audio node, just click on it on the graph editor, and
+	 its parameters will become available in the parameter editor.
+
+ 	<h3>Preset selector</h3>
+	A set of preset instruments are available by default, and the user can create
+	new ones, save them and load them on a later session.
+
+ 	<h3>Piano keyboard</h3>
+	Lorem ipsum
+
+ 	<h3>Audio analyzers</h3>
+	Lorem ipsum
+
 
 </div><!-- end of main -->
 
