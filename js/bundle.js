@@ -2472,11 +2472,8 @@
 	    };
 	    Presets.prototype.registerListeners = function () {
 	        var _this = this;
-	        $('#save-but').click(function (_) {
-	            var json = _this.synthUI.gr.toJSON();
-	            json.name = $('#preset-name').val();
-	            popups.prompt('Copy the text below to the clipboard and save it to a local text file', 'Save preset', JSON.stringify(json), null);
-	        });
+	        var saveBut = $('#save-but');
+	        saveBut.click(function (_) { return _this.savePreset(saveBut); });
 	        $('#load-but').click(function (_) {
 	            popups.prompt('Paste below the contents of a previously saved synth', 'Load preset', null, function (json) {
 	                if (!json)
@@ -2516,6 +2513,23 @@
 	        $('#preset-name').val(preset.name);
 	        $('#node-params').empty();
 	        this.synthUI.gr.fromJSON(preset);
+	    };
+	    Presets.prototype.savePreset = function (a) {
+	        var json = this.synthUI.gr.toJSON();
+	        json.name = $('#preset-name').val().trim();
+	        var jsonData = JSON.stringify(json);
+	        if (this.browserSupportsDownload()) {
+	            if (json.name.length == 0)
+	                json.name = '' + this.presetNum;
+	            a.attr('download', json.name + '.json');
+	            a.attr('href', 'data:application/octet-stream;base64,' + btoa(jsonData));
+	        }
+	        else {
+	            popups.prompt('Copy the text below to the clipboard and save it to a local text file', 'Save preset', jsonData, null);
+	        }
+	    };
+	    Presets.prototype.browserSupportsDownload = function () {
+	        return !window.externalHost && 'download' in $('<a>')[0];
 	    };
 	    return Presets;
 	})();

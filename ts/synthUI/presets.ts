@@ -45,13 +45,8 @@ export class Presets {
 	}
 
 	registerListeners() {
-		$('#save-but').click(_ => {
-			const json = this.synthUI.gr.toJSON();
-			json.name = $('#preset-name').val();
-			popups.prompt(
-				'Copy the text below to the clipboard and save it to a local text file',
-				'Save preset', JSON.stringify(json), null);
-		});
+		const saveBut = $('#save-but');
+		saveBut.click(_ => this.savePreset(saveBut));
 		$('#load-but').click(_ => {
 			popups.prompt(
 				'Paste below the contents of a previously saved synth',
@@ -93,5 +88,25 @@ export class Presets {
 		this.synthUI.gr.fromJSON(preset);
 	}
 
+	savePreset(a: JQuery) {
+		const json = this.synthUI.gr.toJSON();
+		json.name = $('#preset-name').val().trim();
+		const jsonData = JSON.stringify(json);
+		if (this.browserSupportsDownload()) {
+			if (json.name.length == 0) json.name = '' + this.presetNum;
+			a.attr('download', json.name + '.json');
+			a.attr('href',
+				'data:application/octet-stream;base64,' + btoa(jsonData));
+		}
+		else {
+			popups.prompt(
+				'Copy the text below to the clipboard and save it to a local text file',
+				'Save preset', jsonData, null);
+		}
+	}
+
+	browserSupportsDownload(): boolean {
+		return !(<any>window).externalHost && 'download' in $('<a>')[0];
+	}
 }
 
