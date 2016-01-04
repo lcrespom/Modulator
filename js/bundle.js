@@ -2263,7 +2263,8 @@
 	        this.poly = !this.poly;
 	        if (this.poly) {
 	            var cover = $('<div>').addClass('editor-cover');
-	            cover.append('<p>Synth editing is disabled in polyphonic mode</p>');
+	            cover.append('<p>You can use the PC keyboard to play notes<br><br>' +
+	                'Synth editing is disabled in polyphonic mode</p>');
 	            $('body').append(cover);
 	            $('#poly-but').text('Back to mono');
 	            popups.isOpen = true;
@@ -2469,10 +2470,6 @@
 	            ]
 	        };
 	    };
-	    Presets.prototype.checkButtons = function () {
-	        $('#prev-preset-but').prop('disabled', this.presetNum <= 0);
-	        $('#next-preset-but').prop('disabled', this.presetNum >= MAX_PRESETS - 1);
-	    };
 	    Presets.prototype.registerListeners = function () {
 	        var _this = this;
 	        $('#save-but').click(function (_) {
@@ -2501,8 +2498,10 @@
 	    };
 	    Presets.prototype.changePreset = function (increment) {
 	        var newNum = this.presetNum + increment;
-	        if (newNum < 0 || newNum >= MAX_PRESETS)
-	            return;
+	        if (newNum < 0)
+	            newNum = MAX_PRESETS - 1;
+	        else if (newNum >= MAX_PRESETS)
+	            newNum = 0;
 	        this.synth2preset();
 	        this.presetNum = newNum;
 	        this.preset2synth();
@@ -2516,7 +2515,6 @@
 	        $('#preset-num').text(this.presetNum + 1);
 	        $('#preset-name').val(preset.name);
 	        $('#node-params').empty();
-	        this.checkButtons();
 	        this.synthUI.gr.fromJSON(preset);
 	    };
 	    return Presets;

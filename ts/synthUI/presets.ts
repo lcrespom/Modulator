@@ -44,11 +44,6 @@ export class Presets {
 		};
 	}
 
-	checkButtons() {
-		$('#prev-preset-but').prop('disabled', this.presetNum <= 0);
-		$('#next-preset-but').prop('disabled', this.presetNum >= MAX_PRESETS - 1);
-	}
-
 	registerListeners() {
 		$('#save-but').click(_ => {
 			const json = this.synthUI.gr.toJSON();
@@ -77,8 +72,9 @@ export class Presets {
 	}
 
 	changePreset(increment: number) {
-		const newNum = this.presetNum + increment;
-		if (newNum < 0 || newNum >= MAX_PRESETS) return;
+		let newNum = this.presetNum + increment;
+		if (newNum < 0) newNum = MAX_PRESETS - 1;
+		else if (newNum >= MAX_PRESETS) newNum = 0;
 		this.synth2preset();
 		this.presetNum = newNum;
 		this.preset2synth();
@@ -94,7 +90,6 @@ export class Presets {
 		$('#preset-num').text(this.presetNum + 1);
 		$('#preset-name').val(preset.name);
 		$('#node-params').empty();
-		this.checkButtons();
 		this.synthUI.gr.fromJSON(preset);
 	}
 

@@ -137,7 +137,8 @@ export class PianoKeyboard {
 		this.poly = !this.poly;
 		if (this.poly) {
 			const cover = $('<div>').addClass('editor-cover');
-			cover.append('<p>Synth editing is disabled in polyphonic mode</p>');
+			cover.append('<p>You can use the PC keyboard to play notes<br><br>' +
+				'Synth editing is disabled in polyphonic mode</p>');
 			$('body').append(cover);
 			$('#poly-but').text('Back to mono');
 			popups.isOpen = true;

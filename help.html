@@ -21,19 +21,19 @@
 
 <div class="main">
 	<div style="width:500px; margin:auto;">
-		<img src="img/modulator.png" style="width: 500px">
+		<img src="img/logo.png" style="width: 500px">
 	</div>
 
-	<h2 style="margin-top: 1em">About Modulator</h2>
+	<h1 style="margin-top: 1em">About Modulator</h1>
 	Modulator lets you graphically build a modular sound synthesizer.
 	The <a href="https://webaudio.github.io/web-audio-api/">Web Audio API</a>
 	is used for generating the sound.
 
-	<h2>Modulator components</h2>
+	<h1>Modulator components</h1>
 	The application displays several areas, each of which provides a specific
 	functionality. These are the following:
 
- 	<h3>Audio routing graph editor</h3>
+ 	<h2>Audio routing graph editor</h2>
 	<p>The graph editor lets you create an audio routing graph, interconnecting
 		a set of audio nodes, from sound sources, to effects and finally to the
 		synthesizer output.</p>
@@ -57,7 +57,7 @@
 		if a connection already exists, it will be removed.
 	</p>
 
-	<h3>Audio node palette</h3>
+	<h2>Audio node palette</h2>
 	<p>The palette at the right of the graph editor provides all available audio nodes
 		so they can be added to the graph. Just click on a given node and it will be
 		added to the graph editor, so it can be connected.
@@ -70,20 +70,33 @@
 		</ul>
 	</p>
 
- 	<h3>Audio node parameter editor</h3>
-	 The node parameter editor lets you modify the parameters of the currently selected
-	 audio node. To select an audio node, just click on it on the graph editor, and
-	 its parameters will become available in the parameter editor.
+ 	<h2>Audio node parameter editor</h2>
+	<p>The node parameter editor lets you modify the parameters of the currently selected
+		audio node. To select an audio node, just click on it on the graph editor, and
+		its parameters will become available in the parameter editor.
+	</p>
 
- 	<h3>Preset selector</h3>
-	A set of preset instruments are available by default, and the user can create
-	new ones, save them and load them on a later session.
+ 	<h2>Preset selector</h2>
+	<p>A set of preset instruments are available by default, and the user can create
+		new ones, save them and load them on a later session.
+	</p>
 
- 	<h3>Piano keyboard</h3>
-	Lorem ipsum
+ 	<h2>Piano keyboard</h2>
+	<p>The piano keyboard can be clicked with the mouse, or the PC keyboard
+		can be used to send notes to the synthesizer. Key <code>A</code> corresponds
+		with the lowest pitch C key of the piano, and grows to <code>M</code>, then
+		continues on the upper row so <code>Q</code> corresponds with the middle C key
+		of the piano and grows to <code>P</code>.
+	</p>
+	<p>The synthesizer is monophonic by default, but can be played in polyphonic mode.
+		The number of polyphonic voices is set to 5. Synth editing is disabled in
+		polyphonic mode, because of the inherent complexity of modifying the
+		connections and parameters of all voices on the fly.
+	</p>
 
- 	<h3>Audio analyzers</h3>
-	Lorem ipsum
+ 	<h2>Audio analyzers</h2>
+	The top analyzer displays the frequency spectrum of the output sound.
+	The bottom analyzer displays an oscilloscope of the output sound.
 
 
 </div><!-- end of main -->
