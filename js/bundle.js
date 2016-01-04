@@ -2099,7 +2099,7 @@
 	            .on('keydown', function (evt) {
 	            if (pressedKeys[evt.keyCode])
 	                return; // Skip repetitions
-	            if (evt.metaKey || evt.altKey)
+	            if (evt.metaKey || evt.altKey || evt.ctrlKey)
 	                return; // Skip browser shortcuts
 	            pressedKeys[evt.keyCode] = true;
 	            var midi = _this.key2midi(evt.keyCode);
