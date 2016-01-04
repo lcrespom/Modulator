@@ -75,6 +75,9 @@ on Twitter, or directly within GitHub.
 	- Use Web Midi API to gather events from external midi Keyboard
 		- Play notes
 		- Associate external controls with selected node parameters
+		- Make source nodes use the MIDI velocity parameter, which is currently ignored.
+			This will require implementing custom nodes for most source nodes,
+			so they are internally connected to a gain node.
 	- Use the HTML5 file API to load instruments
 		- See http://www.html5rocks.com/en/tutorials/file/dndfiles/
 		- See this jsbin for the CSS: http://jsbin.com/dixuzu/1/edit?html,css,output
