@@ -39,7 +39,6 @@ on Twitter, or directly within GitHub.
 - Bugs
 	- ADSR needs more testing & refining
 	- Popping sound at note on/off (improved after adding adsr depth parameter)
-	- Refine rules to determine whether nodes can connect
 	- Analyzer should detect when no sound is playing and clean osc and fft graphs
 	- Review TODO items inside code
 	- In FireFox, when app window is scrolled down, node connection
@@ -79,10 +78,14 @@ on Twitter, or directly within GitHub.
 			This will require implementing custom nodes for most source nodes,
 			so they are internally connected to a gain node.
 	- Use the HTML5 file API to load instruments
-		- Use it also to load audio buffers
-		- Open popup to ask for file name before saving
-			- Check this out for pushing a click event to a link:
-				http://jsbin.com/quyabiwosu/edit?html,js,output
+		- Done, with fallback to copy+paste in Safari.
+		- Consider opening popup to ask for file name before saving preset
+			- Chrome downloads immediately, so a prompt would be helpful
+			- Firefox prompts the user, which would result in a double prompt
+		- Would be nice to use file upload to load audio buffers, but
+			it would only work when the user manually loads the file. When
+			loading a preset, buffer nodes could not automatically load
+			any buffer file.
 	- Limitation: a control node can only control a single node
 		- Prevent from connecting a control node to more than one destination
 		- Or else, modify the UI to support multiple destination nodes

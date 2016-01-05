@@ -169,16 +169,23 @@ class SynthGraphHandler implements GraphHandler {
 		return null;
 	}
 
+	hasAudioParams(ndata: NodeData) {
+		const aparams = Object.keys(ndata.nodeDef.params)
+			.filter(pname => ndata.anode[pname] instanceof AudioParam);
+		return aparams.length > 0;
+	}
+
+	//-------------------- Implementation of the GraphHandler interface -------------------- 
 	canBeSource(n: Node): boolean {
 		const data: NodeData = n.data;
-		return data.anode.numberOfOutputs > 0;
+		return data.anode != this.synthUI.outNode;
 	}
 
 	canConnect(src: Node, dst: Node): boolean {
 		const srcData: NodeData = src.data;
 		const dstData: NodeData = dst.data;
-		//TODO even if src node is control, should not connect to Speaker output
-		if (srcData.nodeDef.control) return true;
+		if (srcData.nodeDef.control)
+			return this.hasAudioParams(dstData);
 		return dstData.anode.numberOfInputs > 0;
 	}
 

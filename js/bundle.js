@@ -223,16 +223,21 @@
 	        }
 	        return null;
 	    };
+	    SynthGraphHandler.prototype.hasAudioParams = function (ndata) {
+	        var aparams = Object.keys(ndata.nodeDef.params)
+	            .filter(function (pname) { return ndata.anode[pname] instanceof AudioParam; });
+	        return aparams.length > 0;
+	    };
+	    //-------------------- Implementation of the GraphHandler interface -------------------- 
 	    SynthGraphHandler.prototype.canBeSource = function (n) {
 	        var data = n.data;
-	        return data.anode.numberOfOutputs > 0;
+	        return data.anode != this.synthUI.outNode;
 	    };
 	    SynthGraphHandler.prototype.canConnect = function (src, dst) {
 	        var srcData = src.data;
 	        var dstData = dst.data;
-	        //TODO even if src node is control, should not connect to Speaker output
 	        if (srcData.nodeDef.control)
-	            return true;
+	            return this.hasAudioParams(dstData);
 	        return dstData.anode.numberOfInputs > 0;
 	    };
 	    SynthGraphHandler.prototype.connected = function (src, dst) {
