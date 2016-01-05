@@ -82,7 +82,7 @@ on Twitter, or directly within GitHub.
 		- Use it also to load audio buffers
 		- Open popup to ask for file name before saving
 			- Check this out for pushing a click event to a link:
-				http://jsbin.com/dixuzu/3/edit?html,css,js,output
+				http://jsbin.com/quyabiwosu/edit?html,js,output
 	- Limitation: a control node can only control a single node
 		- Prevent from connecting a control node to more than one destination
 		- Or else, modify the UI to support multiple destination nodes

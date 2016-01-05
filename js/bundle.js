@@ -2472,8 +2472,7 @@
 	    };
 	    Presets.prototype.registerListeners = function () {
 	        var _this = this;
-	        var saveBut = $('#save-but');
-	        saveBut.click(function (_) { return _this.savePreset(saveBut); });
+	        $('#save-but').click(function (_) { return _this.savePreset(); });
 	        $('#load-file').on('change', function (evt) { return _this.loadPreset(evt); });
 	        $('#prev-preset-but').click(function (_) { return _this.changePreset(-1); });
 	        $('#next-preset-but').click(function (_) { return _this.changePreset(+1); });
@@ -2519,7 +2518,7 @@
 	        };
 	        reader.readAsText(file);
 	    };
-	    Presets.prototype.savePreset = function (a) {
+	    Presets.prototype.savePreset = function () {
 	        var json = this.synthUI.gr.toJSON();
 	        json.name = $('#preset-name').val().trim();
 	        var jsonData = JSON.stringify(json);
@@ -2527,8 +2526,11 @@
 	            //TODO: open popup to ask for file name before saving
 	            if (json.name.length == 0)
 	                json.name = '' + this.presetNum;
+	            var a = $('<a>');
 	            a.attr('download', json.name + '.json');
 	            a.attr('href', 'data:application/octet-stream;base64,' + btoa(jsonData));
+	            var clickEvent = new MouseEvent('click', { view: window, bubbles: true, cancelable: false });
+	            a[0].dispatchEvent(clickEvent);
 	        }
 	        else {
 	            popups.prompt('Copy the text below to the clipboard and save it to a local text file', 'Save preset', jsonData, null);

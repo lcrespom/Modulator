@@ -45,8 +45,7 @@ export class Presets {
 	}
 
 	registerListeners() {
-		const saveBut = $('#save-but');
-		saveBut.click(_ => this.savePreset(saveBut));
+		$('#save-but').click(_ => this.savePreset());
 		$('#load-file').on('change', evt  => this.loadPreset(evt));
 		$('#prev-preset-but').click(_ => this.changePreset(-1));
 		$('#next-preset-but').click(_ => this.changePreset(+1));
@@ -90,16 +89,20 @@ export class Presets {
 		reader.readAsText(file);
 	}
 
-	savePreset(a: JQuery) {
+	savePreset() {
 		const json = this.synthUI.gr.toJSON();
 		json.name = $('#preset-name').val().trim();
 		const jsonData = JSON.stringify(json);
 		if (this.browserSupportsDownload()) {
 			//TODO: open popup to ask for file name before saving
 			if (json.name.length == 0) json.name = '' + this.presetNum;
+			const a = $('<a>');
 			a.attr('download', json.name + '.json');
 			a.attr('href',
 				'data:application/octet-stream;base64,' + btoa(jsonData));
+			var clickEvent = new MouseEvent('click',
+				{ view: window, bubbles: true, cancelable: false });
+			a[0].dispatchEvent(clickEvent);					
 		}
 		else {
 			popups.prompt(
