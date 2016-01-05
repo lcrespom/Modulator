@@ -72,16 +72,14 @@ class BaseNoteHandler implements NoteHandler {
 	}
 
 	rampParam(param: AudioParam, ratio: number): void {
-		const synthParams = this.ndata.synth.synthParams;
-		const time = synthParams.portamento.time;
-		const oldRatio = synthParams.portamento.ratio;
-		const oldv = param.value * oldRatio;
+		const portamento = this.ndata.synth.portamento;
 		const newv = param.value * ratio;
-		if (time > 0 && oldRatio > 0) {
+		if (portamento.time > 0 && portamento.ratio > 0) {
+			const oldv = param.value * portamento.ratio;
 			const now = this.ndata.anode.context.currentTime;
 			param.cancelScheduledValues(now);
 			param.linearRampToValueAtTime(oldv, now);
-			param.exponentialRampToValueAtTime(newv, now + time);
+			param.exponentialRampToValueAtTime(newv, now + portamento.time);
 		}
 		else param.value = newv;
 	}

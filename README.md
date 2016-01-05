@@ -62,7 +62,6 @@ on Twitter, or directly within GitHub.
 		- When clicking on preset number, let user directly navigate to preset,
 			e.g. by showing a drop down list
 	- Piano keyboard improvements
-		- Portamento in polyphonic mode
 		- Arpeggio
 			- Off / Up / Down / Up&Down
 			- Octaves: 1/2/3

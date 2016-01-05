@@ -69,11 +69,11 @@ export class NoteInputs {
 		this.lastNote = midi;
 		const portamento = this.piano.getPortamento();
 		if (this.poly) {
-			this.instrument.synthParams.portamento.time = portamento;
+			this.instrument.portamento.time = portamento;
 			this.instrument.noteOn(midi, velocity, ratio);
 		}
 		else {
-			this.synthUI.synth.synthParams.portamento.time = portamento;
+			this.synthUI.synth.portamento.time = portamento;
 			this.synthUI.synth.noteOn(midi, velocity, ratio);
 		}
 	}

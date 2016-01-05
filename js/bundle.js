@@ -703,16 +703,14 @@
 	/**
 	 * Global paramters that apply to the whole monophonic synthesizer.
 	 */
-	var SynthParams = (function () {
-	    function SynthParams() {
-	        this.portamento = {
-	            time: 0,
-	            ratio: 0
-	        };
+	var Portamento = (function () {
+	    function Portamento() {
+	        this.time = 0;
+	        this.ratio = 0;
 	    }
-	    return SynthParams;
+	    return Portamento;
 	})();
-	exports.SynthParams = SynthParams;
+	exports.Portamento = Portamento;
 	/**
 	 * Performs global operations on all AudioNodes:
 	 * - Manages AudioNode creation, initialization and connection
@@ -723,7 +721,7 @@
 	        this.customNodes = {};
 	        this.paramHandlers = {};
 	        this.noteHandlers = [];
-	        this.synthParams = new SynthParams();
+	        this.portamento = new Portamento();
 	        this.ac = ac;
 	        this.palette = palette_1.palette;
 	        this.registerCustomNode('createADSR', custom.ADSR);
@@ -836,7 +834,7 @@
 	                nh.handlers = this.noteHandlers;
 	            nh.noteOn(midi, gain, ratio);
 	        }
-	        this.synthParams.portamento.ratio = ratio;
+	        this.portamento.ratio = ratio;
 	    };
 	    Synth.prototype.noteOff = function (midi, gain) {
 	        for (var _i = 0, _a = this.noteHandlers; _i < _a.length; _i++) {
@@ -1013,16 +1011,14 @@
 	        }
 	    };
 	    BaseNoteHandler.prototype.rampParam = function (param, ratio) {
-	        var synthParams = this.ndata.synth.synthParams;
-	        var time = synthParams.portamento.time;
-	        var oldRatio = synthParams.portamento.ratio;
-	        var oldv = param.value * oldRatio;
+	        var portamento = this.ndata.synth.portamento;
 	        var newv = param.value * ratio;
-	        if (time > 0 && oldRatio > 0) {
+	        if (portamento.time > 0 && portamento.ratio > 0) {
+	            var oldv = param.value * portamento.ratio;
 	            var now = this.ndata.anode.context.currentTime;
 	            param.cancelScheduledValues(now);
 	            param.linearRampToValueAtTime(oldv, now);
-	            param.exponentialRampToValueAtTime(newv, now + time);
+	            param.exponentialRampToValueAtTime(newv, now + portamento.time);
 	        }
 	        else
 	            param.value = newv;
@@ -2074,11 +2070,11 @@
 	        this.lastNote = midi;
 	        var portamento = this.piano.getPortamento();
 	        if (this.poly) {
-	            this.instrument.synthParams.portamento.time = portamento;
+	            this.instrument.portamento.time = portamento;
 	            this.instrument.noteOn(midi, velocity, ratio);
 	        }
 	        else {
-	            this.synthUI.synth.synthParams.portamento.time = portamento;
+	            this.synthUI.synth.portamento.time = portamento;
 	            this.synthUI.synth.noteOn(midi, velocity, ratio);
 	        }
 	    };
@@ -2344,9 +2340,9 @@
 	            this.voices.push(new Voice(ac, json, dest));
 	        this.voiceNum = 0;
 	        // Setup synth params by having a common instance for all voices
-	        this.synthParams = this.voices[0].synth.synthParams;
+	        this.portamento = this.voices[0].synth.portamento;
 	        for (var i = 1; i < numVoices; i++)
-	            this.voices[i].synth.synthParams = this.synthParams;
+	            this.voices[i].synth.portamento = this.portamento;
 	    }
 	    Instrument.prototype.noteOn = function (midi, velocity, ratio) {
 	        var voice = this.voices[this.voiceNum];

@@ -31,11 +31,9 @@ export class NodeData {
 /**
  * Global paramters that apply to the whole monophonic synthesizer.
  */
-export class SynthParams {
-	portamento = {
-		time: 0,
-		ratio: 0
-	}
+export class Portamento {
+	time = 0;
+	ratio = 0;
 }
 
 //TODO *** refactor & decouple from UI
@@ -58,7 +56,7 @@ export class Synth {
 	paramHandlers: { [key: string]: ParamHandler } = {};
 	palette: NodePalette;
 	noteHandlers: NoteHandler[] = [];
-	synthParams = new SynthParams();
+	portamento = new Portamento();
 
 	constructor(ac: ModernAudioContext) {
 		this.ac = ac;
@@ -170,7 +168,7 @@ export class Synth {
 			if (nh.kbTrigger) nh.handlers = this.noteHandlers;
 			nh.noteOn(midi, gain, ratio);
 		}
-		this.synthParams.portamento.ratio = ratio;
+		this.portamento.ratio = ratio;
 	}
 
 	noteOff(midi: number, gain: number): void {
