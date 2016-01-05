@@ -115,4 +115,3 @@ export class Presets {
 		return !(<any>window).externalHost && 'download' in $('<a>')[0];
 	}
 }
-
