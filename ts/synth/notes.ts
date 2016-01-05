@@ -8,7 +8,7 @@ import { ModernAudioNode, removeArrayElement } from './modern';
  * updating the node status accordingly.
  */
 export interface NoteHandler {
-	noteOn(midi: number, gain: number, ratio: number, portamento: number):void;
+	noteOn(midi: number, gain: number, ratio: number):void;
 	noteOff(midi: number, gain: number): void;
 	noteEnd(midi: number): void;
 	kbTrigger: boolean;
@@ -25,14 +25,13 @@ class BaseNoteHandler implements NoteHandler {
 	kbTrigger = false;
 	playAfterNoteOff = false;
 	handlers = null;
-	oldv = 0;
 
 	constructor(ndata: NodeData) {
 		this.ndata = ndata;
 		this.outTracker = new OutputTracker(ndata.anode);
 	}
 
-	noteOn(midi: number, gain: number, ratio: number, portamento: number):void {}
+	noteOn(midi: number, gain: number, ratio: number):void {}
 	noteOff(midi: number, gain: number): void {}
 	noteEnd(midi: number): void {}
 
@@ -72,15 +71,19 @@ class BaseNoteHandler implements NoteHandler {
 		}
 	}
 
-	rampParam(param: AudioParam, time: number, newv: number): void {
-		if (time > 0 && this.oldv > 0) {
+	rampParam(param: AudioParam, ratio: number): void {
+		const synthParams = this.ndata.synth.synthParams;
+		const time = synthParams.portamento.time;
+		const oldRatio = synthParams.portamento.ratio;
+		const oldv = param.value * oldRatio;
+		const newv = param.value * ratio;
+		if (time > 0 && oldRatio > 0) {
 			const now = this.ndata.anode.context.currentTime;
 			param.cancelScheduledValues(now);
-			param.linearRampToValueAtTime(this.oldv, now);
+			param.linearRampToValueAtTime(oldv, now);
 			param.exponentialRampToValueAtTime(newv, now + time);
 		}
 		else param.value = newv;
-		this.oldv = newv;
 	}
 }
 
@@ -92,13 +95,11 @@ class OscNoteHandler extends BaseNoteHandler {
 	lastNote: number;
 	playing = false;
 
-	noteOn(midi: number, gain: number, ratio: number, portamento: number):void {
+	noteOn(midi: number, gain: number, ratio: number):void {
 		if (this.playing) this.noteEnd(midi);	// Because this is monophonic
 		this.playing = true;
 		this.oscClone = <OscillatorNode>this.clone();
-		const fparam = this.oscClone.frequency;
-		const newFreq = fparam.value * ratio;
-		this.rampParam(fparam, portamento, fparam.value * ratio);
+		this.rampParam(this.oscClone.frequency, ratio);
 		this.oscClone.start();
 		this.lastNote = midi;
 	}
@@ -123,8 +124,12 @@ class OscNoteHandler extends BaseNoteHandler {
  * oscillator node, but the note does not affect the oscillator frequency
  */
 class LFONoteHandler extends OscNoteHandler {
-	noteOn(midi: number, gain: number, ratio: number):void {
-		super.noteOn(midi, gain, 1, 0);
+	noteOn(midi: number, gain: number, ratio: number): void {
+		super.noteOn(midi, gain, 1);
+	}
+	rampParam(param: AudioParam, ratio: number) {
+		// Disable portamento for LFO
+		param.value = param.value * ratio;
 	}
 }
 
@@ -136,7 +141,7 @@ class BufferNoteHandler extends BaseNoteHandler {
 	lastNote: number;
 	playing = false;
 
-	noteOn(midi: number, gain: number, ratio: number, portamento: number):void {
+	noteOn(midi: number, gain: number, ratio: number):void {
 		if (this.playing) this.noteEnd(midi);
 		const buf = this.ndata.anode['_buffer'];
 		if (!buf) return;	// Buffer still loading or failed
@@ -145,7 +150,7 @@ class BufferNoteHandler extends BaseNoteHandler {
 		this.absn.buffer = buf;
 		const pbr = this.absn.playbackRate;
 		const newRate = pbr.value * ratio;
-		this.rampParam(pbr, portamento, pbr.value * ratio);
+		this.rampParam(pbr, pbr.value * ratio);
 		this.absn.start();
 		this.lastNote = midi;
 	}

@@ -1,5 +1,5 @@
 import { ModernAudioContext } from './modern';
-import { Synth, NodeData } from './synth';
+import { Synth, NodeData, SynthParams } from './synth';
 
 
 /**
@@ -8,12 +8,18 @@ import { Synth, NodeData } from './synth';
 export class Instrument {
 	voices: Voice[];
 	voiceNum: number;
+	synthParams: SynthParams;
 
 	constructor(ac: ModernAudioContext, json: any, numVoices: number, dest?: AudioNode) {
+		// Setup voices
 		this.voices = [];
 		for (let i = 0; i < numVoices; i++)
 			this.voices.push(new Voice(ac, json, dest));
 		this.voiceNum = 0;
+		// Setup synth params by having a common instance for all voices
+		this.synthParams = this.voices[0].synth.synthParams;
+		for (let i = 1; i < numVoices; i++)
+			this.voices[i].synth.synthParams = this.synthParams;
 	}
 
 	noteOn(midi: number, velocity: number, ratio: number): void {
@@ -51,8 +57,8 @@ export class Voice {
 		this.lastNote = 0;
 	}
 
-	noteOn(midi: number, velocity: number, ratio: number, portamento?: number): void {
-		this.synth.noteOn(midi, velocity, ratio, portamento);
+	noteOn(midi: number, velocity: number, ratio: number): void {
+		this.synth.noteOn(midi, velocity, ratio);
 		this.lastNote = midi;
 	}
 

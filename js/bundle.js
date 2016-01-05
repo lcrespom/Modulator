@@ -701,6 +701,19 @@
 	})();
 	exports.NodeData = NodeData;
 	/**
+	 * Global paramters that apply to the whole monophonic synthesizer.
+	 */
+	var SynthParams = (function () {
+	    function SynthParams() {
+	        this.portamento = {
+	            time: 0,
+	            ratio: 0
+	        };
+	    }
+	    return SynthParams;
+	})();
+	exports.SynthParams = SynthParams;
+	/**
 	 * Performs global operations on all AudioNodes:
 	 * - Manages AudioNode creation, initialization and connection
 	 * - Distributes MIDI keyboard events to NoteHandlers
@@ -710,6 +723,7 @@
 	        this.customNodes = {};
 	        this.paramHandlers = {};
 	        this.noteHandlers = [];
+	        this.synthParams = new SynthParams();
 	        this.ac = ac;
 	        this.palette = palette_1.palette;
 	        this.registerCustomNode('createADSR', custom.ADSR);
@@ -733,6 +747,7 @@
 	        return anode;
 	    };
 	    Synth.prototype.initNodeData = function (ndata, type) {
+	        ndata.synth = this;
 	        ndata.type = type;
 	        ndata.anode = this.createAudioNode(type);
 	        if (!ndata.anode)
@@ -744,12 +759,13 @@
 	            this.addNoteHandler(ndata.noteHandler);
 	        }
 	    };
-	    Synth.prototype.initOutputNodeData = function (data, dst) {
-	        data.type = 'out';
-	        data.anode = this.ac.createGain();
-	        data.anode.connect(dst);
-	        data.nodeDef = this.palette['Speaker'];
-	        data.isOut = true;
+	    Synth.prototype.initOutputNodeData = function (ndata, dst) {
+	        ndata.synth = this;
+	        ndata.type = 'out';
+	        ndata.anode = this.ac.createGain();
+	        ndata.anode.connect(dst);
+	        ndata.nodeDef = this.palette['Speaker'];
+	        ndata.isOut = true;
 	    };
 	    Synth.prototype.removeNodeData = function (data) {
 	        if (data.noteHandler)
@@ -813,15 +829,14 @@
 	            controlParams: data.controlParams
 	        };
 	    };
-	    Synth.prototype.noteOn = function (midi, gain, ratio, portamento) {
-	        if (portamento == undefined)
-	            portamento = 0;
+	    Synth.prototype.noteOn = function (midi, gain, ratio) {
 	        for (var _i = 0, _a = this.noteHandlers; _i < _a.length; _i++) {
 	            var nh = _a[_i];
 	            if (nh.kbTrigger)
 	                nh.handlers = this.noteHandlers;
-	            nh.noteOn(midi, gain, ratio, portamento);
+	            nh.noteOn(midi, gain, ratio);
 	        }
+	        this.synthParams.portamento.ratio = ratio;
 	    };
 	    Synth.prototype.noteOff = function (midi, gain) {
 	        for (var _i = 0, _a = this.noteHandlers; _i < _a.length; _i++) {
@@ -950,11 +965,10 @@
 	        this.kbTrigger = false;
 	        this.playAfterNoteOff = false;
 	        this.handlers = null;
-	        this.oldv = 0;
 	        this.ndata = ndata;
 	        this.outTracker = new OutputTracker(ndata.anode);
 	    }
-	    BaseNoteHandler.prototype.noteOn = function (midi, gain, ratio, portamento) { };
+	    BaseNoteHandler.prototype.noteOn = function (midi, gain, ratio) { };
 	    BaseNoteHandler.prototype.noteOff = function (midi, gain) { };
 	    BaseNoteHandler.prototype.noteEnd = function (midi) { };
 	    BaseNoteHandler.prototype.clone = function () {
@@ -998,16 +1012,20 @@
 	            inData.anode.disconnect(anode[inData.controlParam]);
 	        }
 	    };
-	    BaseNoteHandler.prototype.rampParam = function (param, time, newv) {
-	        if (time > 0 && this.oldv > 0) {
+	    BaseNoteHandler.prototype.rampParam = function (param, ratio) {
+	        var synthParams = this.ndata.synth.synthParams;
+	        var time = synthParams.portamento.time;
+	        var oldRatio = synthParams.portamento.ratio;
+	        var oldv = param.value * oldRatio;
+	        var newv = param.value * ratio;
+	        if (time > 0 && oldRatio > 0) {
 	            var now = this.ndata.anode.context.currentTime;
 	            param.cancelScheduledValues(now);
-	            param.linearRampToValueAtTime(this.oldv, now);
+	            param.linearRampToValueAtTime(oldv, now);
 	            param.exponentialRampToValueAtTime(newv, now + time);
 	        }
 	        else
 	            param.value = newv;
-	        this.oldv = newv;
 	    };
 	    return BaseNoteHandler;
 	})();
@@ -1020,14 +1038,12 @@
 	        _super.apply(this, arguments);
 	        this.playing = false;
 	    }
-	    OscNoteHandler.prototype.noteOn = function (midi, gain, ratio, portamento) {
+	    OscNoteHandler.prototype.noteOn = function (midi, gain, ratio) {
 	        if (this.playing)
 	            this.noteEnd(midi); // Because this is monophonic
 	        this.playing = true;
 	        this.oscClone = this.clone();
-	        var fparam = this.oscClone.frequency;
-	        var newFreq = fparam.value * ratio;
-	        this.rampParam(fparam, portamento, fparam.value * ratio);
+	        this.rampParam(this.oscClone.frequency, ratio);
 	        this.oscClone.start();
 	        this.lastNote = midi;
 	    };
@@ -1058,7 +1074,11 @@
 	        _super.apply(this, arguments);
 	    }
 	    LFONoteHandler.prototype.noteOn = function (midi, gain, ratio) {
-	        _super.prototype.noteOn.call(this, midi, gain, 1, 0);
+	        _super.prototype.noteOn.call(this, midi, gain, 1);
+	    };
+	    LFONoteHandler.prototype.rampParam = function (param, ratio) {
+	        // Disable portamento for LFO
+	        param.value = param.value * ratio;
 	    };
 	    return LFONoteHandler;
 	})(OscNoteHandler);
@@ -1071,7 +1091,7 @@
 	        _super.apply(this, arguments);
 	        this.playing = false;
 	    }
-	    BufferNoteHandler.prototype.noteOn = function (midi, gain, ratio, portamento) {
+	    BufferNoteHandler.prototype.noteOn = function (midi, gain, ratio) {
 	        if (this.playing)
 	            this.noteEnd(midi);
 	        var buf = this.ndata.anode['_buffer'];
@@ -1082,7 +1102,7 @@
 	        this.absn.buffer = buf;
 	        var pbr = this.absn.playbackRate;
 	        var newRate = pbr.value * ratio;
-	        this.rampParam(pbr, portamento, pbr.value * ratio);
+	        this.rampParam(pbr, pbr.value * ratio);
 	        this.absn.start();
 	        this.lastNote = midi;
 	    };
@@ -2052,10 +2072,15 @@
 	    };
 	    NoteInputs.prototype.noteOn = function (midi, velocity, ratio) {
 	        this.lastNote = midi;
-	        if (this.poly)
+	        var portamento = this.piano.getPortamento();
+	        if (this.poly) {
+	            this.instrument.synthParams.portamento.time = portamento;
 	            this.instrument.noteOn(midi, velocity, ratio);
-	        else
-	            this.synthUI.synth.noteOn(midi, velocity, ratio, this.piano.getPortamento());
+	        }
+	        else {
+	            this.synthUI.synth.synthParams.portamento.time = portamento;
+	            this.synthUI.synth.noteOn(midi, velocity, ratio);
+	        }
 	    };
 	    NoteInputs.prototype.noteOff = function (midi, velocity) {
 	        this.lastNote = 0;
@@ -2313,10 +2338,15 @@
 	 */
 	var Instrument = (function () {
 	    function Instrument(ac, json, numVoices, dest) {
+	        // Setup voices
 	        this.voices = [];
 	        for (var i = 0; i < numVoices; i++)
 	            this.voices.push(new Voice(ac, json, dest));
 	        this.voiceNum = 0;
+	        // Setup synth params by having a common instance for all voices
+	        this.synthParams = this.voices[0].synth.synthParams;
+	        for (var i = 1; i < numVoices; i++)
+	            this.voices[i].synth.synthParams = this.synthParams;
 	    }
 	    Instrument.prototype.noteOn = function (midi, velocity, ratio) {
 	        var voice = this.voices[this.voiceNum];
@@ -2350,8 +2380,8 @@
 	        this.synth = this.loader.load(ac, json, dest || ac.destination);
 	        this.lastNote = 0;
 	    }
-	    Voice.prototype.noteOn = function (midi, velocity, ratio, portamento) {
-	        this.synth.noteOn(midi, velocity, ratio, portamento);
+	    Voice.prototype.noteOn = function (midi, velocity, ratio) {
+	        this.synth.noteOn(midi, velocity, ratio);
 	        this.lastNote = midi;
 	    };
 	    Voice.prototype.noteOff = function (midi, velocity) {

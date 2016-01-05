@@ -20,9 +20,21 @@ export class NodeData {
 	noteHandler: NoteHandler;
 	// Flag to avoid deleting output node
 	isOut: boolean = false;
+	// Reference to owner synth
+	synth: Synth;
 	// To be implemented by user code
 	getInputs(): NodeData[] {
 		throw 'Error: getInputs() function should be implemented by user';
+	}
+}
+
+/**
+ * Global paramters that apply to the whole monophonic synthesizer.
+ */
+export class SynthParams {
+	portamento = {
+		time: 0,
+		ratio: 0
 	}
 }
 
@@ -46,6 +58,7 @@ export class Synth {
 	paramHandlers: { [key: string]: ParamHandler } = {};
 	palette: NodePalette;
 	noteHandlers: NoteHandler[] = [];
+	synthParams = new SynthParams();
 
 	constructor(ac: ModernAudioContext) {
 		this.ac = ac;
@@ -70,6 +83,7 @@ export class Synth {
 	}
 
 	initNodeData(ndata: NodeData, type: string): void {
+		ndata.synth = this;
 		ndata.type = type;
 		ndata.anode = this.createAudioNode(type);
 		if (!ndata.anode)
@@ -82,12 +96,13 @@ export class Synth {
 		}
 	}
 
-	initOutputNodeData(data: NodeData, dst: AudioNode): void {
-		data.type = 'out';
-		data.anode = this.ac.createGain();
-		data.anode.connect(dst);
-		data.nodeDef = this.palette['Speaker'];
-		data.isOut = true;
+	initOutputNodeData(ndata: NodeData, dst: AudioNode): void {
+		ndata.synth = this;
+		ndata.type = 'out';
+		ndata.anode = this.ac.createGain();
+		ndata.anode.connect(dst);
+		ndata.nodeDef = this.palette['Speaker'];
+		ndata.isOut = true;
 	}
 
 	removeNodeData(data: NodeData) {
@@ -150,12 +165,12 @@ export class Synth {
 		}
 	}
 
-	noteOn(midi: number, gain: number, ratio: number, portamento?: number): void {
-		if (portamento == undefined) portamento = 0;
+	noteOn(midi: number, gain: number, ratio: number): void {
 		for (const nh of this.noteHandlers) {
 			if (nh.kbTrigger) nh.handlers = this.noteHandlers;
-			nh.noteOn(midi, gain, ratio, portamento);
+			nh.noteOn(midi, gain, ratio);
 		}
+		this.synthParams.portamento.ratio = ratio;
 	}
 
 	noteOff(midi: number, gain: number): void {

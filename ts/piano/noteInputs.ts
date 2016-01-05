@@ -67,11 +67,15 @@ export class NoteInputs {
 
 	noteOn(midi: number, velocity: number, ratio: number): void {
 		this.lastNote = midi;
-		if (this.poly)
+		const portamento = this.piano.getPortamento();
+		if (this.poly) {
+			this.instrument.synthParams.portamento.time = portamento;
 			this.instrument.noteOn(midi, velocity, ratio);
-		else
-			this.synthUI.synth.noteOn(
-				midi, velocity, ratio, this.piano.getPortamento());
+		}
+		else {
+			this.synthUI.synth.synthParams.portamento.time = portamento;
+			this.synthUI.synth.noteOn(midi, velocity, ratio);
+		}
 	}
 
 	noteOff(midi: number, velocity: number): void {
