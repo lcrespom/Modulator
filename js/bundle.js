@@ -2474,7 +2474,7 @@
 	        var _this = this;
 	        var saveBut = $('#save-but');
 	        saveBut.click(function (_) { return _this.savePreset(saveBut); });
-	        $('#load-but').click(function (_) { return _this.loadPreset(); });
+	        $('#load-file').on('change', function (evt) { return _this.loadPreset(evt); });
 	        $('#prev-preset-but').click(function (_) { return _this.changePreset(-1); });
 	        $('#next-preset-but').click(function (_) { return _this.changePreset(+1); });
 	        $('body').keydown(function (evt) {
@@ -2507,14 +2507,17 @@
 	        $('#node-params').empty();
 	        this.synthUI.gr.fromJSON(preset);
 	    };
-	    Presets.prototype.loadPreset = function () {
+	    Presets.prototype.loadPreset = function (evt) {
 	        var _this = this;
-	        popups.prompt('Paste below the contents of a previously saved synth', 'Load preset', null, function (json) {
-	            if (!json)
-	                return;
-	            _this.presets[_this.presetNum] = JSON.parse(json);
+	        if (!evt.target.files || evt.target.files.length <= 0)
+	            return;
+	        var file = evt.target.files[0];
+	        var reader = new FileReader();
+	        reader.onload = function (loadEvt) {
+	            _this.presets[_this.presetNum] = JSON.parse(loadEvt.target.result);
 	            _this.preset2synth();
-	        });
+	        };
+	        reader.readAsText(file);
 	    };
 	    Presets.prototype.savePreset = function (a) {
 	        var json = this.synthUI.gr.toJSON();

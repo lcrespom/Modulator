@@ -47,7 +47,7 @@ export class Presets {
 	registerListeners() {
 		const saveBut = $('#save-but');
 		saveBut.click(_ => this.savePreset(saveBut));
-		$('#load-but').click(_ => this.loadPreset());
+		$('#load-file').on('change', evt  => this.loadPreset(evt));
 		$('#prev-preset-but').click(_ => this.changePreset(-1));
 		$('#next-preset-but').click(_ => this.changePreset(+1));
 		$('body').keydown(evt => {
@@ -79,15 +79,15 @@ export class Presets {
 		this.synthUI.gr.fromJSON(preset);
 	}
 
-	loadPreset() {
-		popups.prompt(
-			'Paste below the contents of a previously saved synth',
-			'Load preset', null, json => {
-				if (!json) return;
-				this.presets[this.presetNum] = JSON.parse(json);
-				this.preset2synth();
-			}
-		);
+	loadPreset(evt) {
+		if (!evt.target.files || evt.target.files.length <= 0) return;
+		const file = evt.target.files[0];
+		const reader = new FileReader();
+		reader.onload = (loadEvt: any)  => {
+			this.presets[this.presetNum] = JSON.parse(loadEvt.target.result);
+			this.preset2synth();
+		};
+		reader.readAsText(file);
 	}
 
 	savePreset(a: JQuery) {
