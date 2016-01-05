@@ -2524,6 +2524,7 @@
 	        json.name = $('#preset-name').val().trim();
 	        var jsonData = JSON.stringify(json);
 	        if (this.browserSupportsDownload()) {
+	            //TODO: open popup to ask for file name before saving
 	            if (json.name.length == 0)
 	                json.name = '' + this.presetNum;
 	            a.attr('download', json.name + '.json');

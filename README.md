@@ -79,12 +79,8 @@ on Twitter, or directly within GitHub.
 			This will require implementing custom nodes for most source nodes,
 			so they are internally connected to a gain node.
 	- Use the HTML5 file API to load instruments
-		- See http://www.html5rocks.com/en/tutorials/file/dndfiles/
-		- See this jsbin for the CSS: http://jsbin.com/dixuzu/1/edit?html,css,output
-		- To save instruments, check this Stack Overflow reply:
-			http://stackoverflow.com/questions/4309958/can-i-write-files-with-html5-js/14544910#14544910
-		- Get rid of JSON copy+paste when this is fully implemented
 		- Use it also to load audio buffers
+		- Open popup to ask for file name before saving
 	- Limitation: a control node can only control a single node
 		- Prevent from connecting a control node to more than one destination
 		- Or else, modify the UI to support multiple destination nodes
