@@ -2474,14 +2474,7 @@
 	        var _this = this;
 	        var saveBut = $('#save-but');
 	        saveBut.click(function (_) { return _this.savePreset(saveBut); });
-	        $('#load-but').click(function (_) {
-	            popups.prompt('Paste below the contents of a previously saved synth', 'Load preset', null, function (json) {
-	                if (!json)
-	                    return;
-	                _this.presets[_this.presetNum] = JSON.parse(json);
-	                _this.preset2synth();
-	            });
-	        });
+	        $('#load-but').click(function (_) { return _this.loadPreset(); });
 	        $('#prev-preset-but').click(function (_) { return _this.changePreset(-1); });
 	        $('#next-preset-but').click(function (_) { return _this.changePreset(+1); });
 	        $('body').keydown(function (evt) {
@@ -2513,6 +2506,15 @@
 	        $('#preset-name').val(preset.name);
 	        $('#node-params').empty();
 	        this.synthUI.gr.fromJSON(preset);
+	    };
+	    Presets.prototype.loadPreset = function () {
+	        var _this = this;
+	        popups.prompt('Paste below the contents of a previously saved synth', 'Load preset', null, function (json) {
+	            if (!json)
+	                return;
+	            _this.presets[_this.presetNum] = JSON.parse(json);
+	            _this.preset2synth();
+	        });
 	    };
 	    Presets.prototype.savePreset = function (a) {
 	        var json = this.synthUI.gr.toJSON();

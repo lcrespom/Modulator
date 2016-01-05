@@ -47,16 +47,7 @@ export class Presets {
 	registerListeners() {
 		const saveBut = $('#save-but');
 		saveBut.click(_ => this.savePreset(saveBut));
-		$('#load-but').click(_ => {
-			popups.prompt(
-				'Paste below the contents of a previously saved synth',
-				'Load preset', null, json => {
-					if (!json) return;
-					this.presets[this.presetNum] = JSON.parse(json);
-					this.preset2synth();
-				}
-			);
-		});
+		$('#load-but').click(_ => this.loadPreset());
 		$('#prev-preset-but').click(_ => this.changePreset(-1));
 		$('#next-preset-but').click(_ => this.changePreset(+1));
 		$('body').keydown(evt => {
@@ -86,6 +77,17 @@ export class Presets {
 		$('#preset-name').val(preset.name);
 		$('#node-params').empty();
 		this.synthUI.gr.fromJSON(preset);
+	}
+
+	loadPreset() {
+		popups.prompt(
+			'Paste below the contents of a previously saved synth',
+			'Load preset', null, json => {
+				if (!json) return;
+				this.presets[this.presetNum] = JSON.parse(json);
+				this.preset2synth();
+			}
+		);
 	}
 
 	savePreset(a: JQuery) {
