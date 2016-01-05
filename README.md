@@ -55,10 +55,6 @@ on Twitter, or directly within GitHub.
 	- Review list of pending audio nodes
 		- WaveShaper
 		- Etc?
-	- Navbar with:
-		- Left: "Code" button linking to GitHub
-		- Center: Logo
-		- Right: Help button, linking to documentation (help.md in GitHub)
 	- Improve ADSR
 		- Linear/exponential switch
 	- Provide more preset instruments
@@ -91,15 +87,13 @@ on Twitter, or directly within GitHub.
 		- Or else, modify the UI to support multiple destination nodes
 
 - UI
-	- Review the following audio front-end libraries:
+	- Polish logo
+	- Review the following audio front-end libraries, especially for the
+		node parameters area:
 		- http://nexusosc.com/
 		- https://github.com/g200kg/webaudio-controls
-	- Parameters panel
-		- Use cool knobs for parameters instead of default browser sliders
 	- Help
-		- General help button explaining how to connect etc.
-		- Description of each node
-		- Description of each node parameters
+		- Provide description of each node and each of its parameters.
 	- Usability / UX
 		- Consider a better way to add nodes from the palette into the canvas
 		- Consider a more user-friendly way to connect and disconnect nodes
@@ -116,6 +110,8 @@ on Twitter, or directly within GitHub.
 	- Tracker
 		- Probably as an independent app that can load synth presets
 		- Review [this article](http://www.html5rocks.com/en/tutorials/audio/scheduling/)
+		- Apart from controlling Modulator instruments,
+			also emit MIDI events to external devices
 	- Review this:
 		- https://en.wikipedia.org/wiki/Open_Sound_Control
 		- http://opensoundcontrol.org/ (was not responding when last checked)
