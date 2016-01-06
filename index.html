@@ -148,20 +148,30 @@
 					<button id="prev-octave-but" class="btn btn-primary btn-sm">
 						-
 					</button>
-					<div id="octave-label" style="display: inline-block; width: 30px; text-align: center">C3</div>
+					<div id="octave-label" style="display: inline-block; width: 20px; text-align: center">C3</div>
 					<button id="next-octave-but" class="btn btn-primary btn-sm">
 						+
 					</button>
 				</span>
-				<div class="porta-slider" style="display: inline-block; position: relative; right: 50px">
-  					<input value="0" min="0" max="1" step="0.001" type="range" style="width: 128px;">
+				<div class="portamento-box">
+  					<input value="0" min="0" max="1" step="0.001" type="range" style="width: 120px;">
 					<span style="font-size: 90%; position: absolute; top: 15px; right: 25px">
 						Portamento
 					</span>
 				</div>
+				<div class="arpeggio-box">
+  					<input value="0.5" min="0" max="1" step="0.001" type="range" style="width: 120px;">
+					<span style="font-size: 90%; position: absolute; top: 15px; right: 33px">
+						Arpeggio
+					</span>
+					<button class="btn btn-primary btn-xs"
+						style="position: absolute; left: 125px; top: 5px; width: 22px">-</button>
+					<button class="btn btn-primary btn-xs"
+						style="position: absolute; left: 154px; top: 5px; width: 22px">1</button>
+				</div>
 				<button id="poly-but" class="btn btn-primary btn-sm"
-					style="position: absolute; right: 10px">
-					Poly
+					style="position: absolute; right: 10px; width: 45px; padding-left: 5px; padding-right: 5px">
+					Mono
 				</button>
 			</div>
 		</div><!--

@@ -45,6 +45,7 @@ on Twitter, or directly within GitHub.
 		draws arrows incorrectly
 
 - Functionality
+	- Save and load portamento as part of an instrument's JSON
 	- Custom nodes
 		- Keyboard control node
 			- To control other parameters based on the note being pressed

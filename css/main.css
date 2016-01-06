@@ -283,3 +283,15 @@ input[type=range][orient=vertical] {
 	text-align: center;
 	vertical-align: middle;
 }
+
+.portamento-box {
+	display: inline-block;
+	position: absolute;
+	left: 120px;
+}
+
+.arpeggio-box {
+	display: inline-block;
+	position: absolute;
+	left: 275px;
+}

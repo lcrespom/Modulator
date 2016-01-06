@@ -2183,7 +2183,7 @@
 	        for (var i = 0; i < this.keys.length; i++)
 	            this.registerKey(this.keys[i], i);
 	        this.registerButtons();
-	        this.portaSlider = panel.parent().find('.porta-slider input');
+	        this.portaSlider = panel.parent().find('.portamento-box input');
 	    }
 	    PianoKeyboard.prototype.createKeys = function (panel) {
 	        this.keys = [];
@@ -2292,16 +2292,14 @@
 	            cover.append('<p>You can use the PC keyboard to play notes<br><br>' +
 	                'Synth editing is disabled in polyphonic mode</p>');
 	            $('body').append(cover);
-	            $('#poly-but').text('Back to mono');
+	            $('#poly-but').text('Poly');
 	            popups.isOpen = true;
-	            this.portaSlider.parent().hide();
 	            this.polyOn();
 	        }
 	        else {
 	            $('.editor-cover').remove();
-	            $('#poly-but').text('Poly');
+	            $('#poly-but').text('Mono');
 	            popups.isOpen = false;
-	            this.portaSlider.parent().show();
 	            this.polyOff();
 	        }
 	    };
