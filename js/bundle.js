@@ -2633,6 +2633,7 @@
 
 	var Arpeggiator = (function () {
 	    function Arpeggiator() {
+	        this.backward = false;
 	        this.mode = '';
 	        this.octaves = 1;
 	        this.time = 2;
@@ -2658,11 +2659,15 @@
 	        var ndata = this.notes.get(this.notect);
 	        this.noteOn(ndata.midi, ndata.velocity, ndata.ratio);
 	        this.lastNote = ndata;
-	        // if (this.mode == 'u')
-	        // 	this.notect++;
-	        // else if (this.mode == 'd')
-	        // 	this.notect--;
-	        this.notect++;
+	        if (this.mode == 'u')
+	            this.notect++;
+	        else if (this.mode == 'd')
+	            this.notect--;
+	        // else if (this.mode == 'ud') {
+	        // 	if (this.backward) this.notect--;
+	        // 	else this.notect++;
+	        // }
+	        //this.notect++;
 	    };
 	    Arpeggiator.prototype.sendNoteOn = function (midi, velocity, ratio) {
 	        if (this.mode.length == 0)
@@ -2706,7 +2711,7 @@
 	    };
 	    NoteTable.prototype.remove = function (midi, velocity) {
 	        for (var i = 0; i < this.notes.length; i++) {
-	            if (this.notes[i].midi = midi) {
+	            if (this.notes[i].midi == midi) {
 	                this.notes.splice(i, 1);
 	                return;
 	            }

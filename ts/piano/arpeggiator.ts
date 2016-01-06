@@ -5,6 +5,7 @@ export class Arpeggiator {
 	notes: NoteTable;
 	notect: number;
 	lastNote: NoteData;
+	backward = false;
 
 	constructor() {
 		this.mode = '';
@@ -29,11 +30,15 @@ export class Arpeggiator {
 		const ndata = this.notes.get(this.notect);
 		this.noteOn(ndata.midi, ndata.velocity, ndata.ratio);
 		this.lastNote = ndata;
-		// if (this.mode == 'u')
-		// 	this.notect++;
-		// else if (this.mode == 'd')
-		// 	this.notect--;
-		this.notect++;
+		if (this.mode == 'u')
+			this.notect++;
+		else if (this.mode == 'd')
+			this.notect--;
+		// else if (this.mode == 'ud') {
+		// 	if (this.backward) this.notect--;
+		// 	else this.notect++;
+		// }
+		//this.notect++;
 	}
 
 	sendNoteOn(midi: number, velocity: number, ratio: number): void {
@@ -77,7 +82,7 @@ class NoteTable {
 
 	remove(midi, velocity): void {
 		for (let i = 0; i < this.notes.length; i++) {
-			if (this.notes[i].midi = midi) {
+			if (this.notes[i].midi == midi) {
 				this.notes.splice(i, 1);
 				return;
 			}
