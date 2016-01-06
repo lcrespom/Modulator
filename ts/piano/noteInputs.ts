@@ -1,5 +1,7 @@
 import { Keyboard } from './keyboard';
 import { PianoKeyboard } from './piano';
+import { Arpeggiator } from './arpeggiator';
+
 import { NodeData } from '../synth/synth';
 import { SynthUI } from '../synthUI/synthUI';
 import { Instrument } from '../synth/instrument';
@@ -19,6 +21,7 @@ export class NoteInputs {
 	instrument: Instrument;
 	lastNote: number;
 	piano: PianoKeyboard;
+	arpeggiator: Arpeggiator;
 
 	constructor(synthUI: SynthUI) {
 		this.synthUI = synthUI;
@@ -26,8 +29,8 @@ export class NoteInputs {
 		// Setup piano panel
 		var piano = new PianoKeyboard($('#piano'));
 		this.piano = piano;
-		piano.noteOn = (midi, ratio) => this.noteOn(midi, 1, ratio);
-		piano.noteOff = (midi) => this.noteOff(midi, 1);
+		piano.noteOn = (midi, ratio) => this.arpeggiator.sendNoteOn(midi, 1, ratio);
+		piano.noteOff = (midi) => this.arpeggiator.sendNoteOff(midi, 1);
 		// Register poly on/off handlers
 		piano.polyOn = () => this.polyOn();
 		piano.polyOff = () => this.polyOff();
@@ -36,17 +39,19 @@ export class NoteInputs {
 		kb.noteOn = (midi, ratio) => {
 			if (document.activeElement.nodeName == 'INPUT' &&
 				document.activeElement.getAttribute('type') != 'range') return;
-			this.noteOn(midi, 1, ratio);
+			this.arpeggiator.sendNoteOn(midi, 1, ratio);
 			piano.displayKeyDown(midi);
 		};
 		kb.noteOff = (midi) => {
-			this.noteOff(midi, 1);
+			this.arpeggiator.sendNoteOff(midi, 1);
 			piano.displayKeyUp(midi);
 		};
 		// Bind piano octave with PC keyboard
 		kb.baseNote = piano.baseNote;
 		piano.octaveChanged = baseNote => kb.baseNote = baseNote;
 		this.setupEnvelopeAnimation(piano);
+		// Setup arpeggiator
+		this.setupArpeggiator(piano);
 	}
 
 	setupEnvelopeAnimation(piano: PianoKeyboard) {
@@ -64,6 +69,20 @@ export class NoteInputs {
 			piano.setEnvelope(adsr || { attack: 0, release: 0 });
 		}
 	}
+
+	setupArpeggiator(piano: PianoKeyboard) {
+		this.arpeggiator = new Arpeggiator();
+		piano.arpeggioChanged = (time, mode, octaves) => {
+			this.arpeggiator.mode = mode;
+			this.arpeggiator.octaves = octaves;
+			this.arpeggiator.time = time;
+		}
+		this.arpeggiator.noteOn =
+			(midi, velocity, ratio) => this.noteOn(midi, velocity, ratio);
+		this.arpeggiator.noteOff =
+			(midi, velocity) => this.noteOff(midi, velocity);
+	}
+
 
 	noteOn(midi: number, velocity: number, ratio: number): void {
 		this.lastNote = midi;

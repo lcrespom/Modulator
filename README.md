@@ -45,7 +45,11 @@ on Twitter, or directly within GitHub.
 		draws arrows incorrectly
 
 - Functionality
+	- Polyphonic mode: in instrument.ts, implement a better algorithm for
+		finding an empty voice instead of the blind round-robin.
 	- Save and load portamento as part of an instrument's JSON
+	- When loading a preset, pre-select a relevant node, e.g. based on the number of
+		parameters.
 	- Custom nodes
 		- Keyboard control node
 			- To control other parameters based on the note being pressed
@@ -125,8 +129,18 @@ on Twitter, or directly within GitHub.
 	- Mobile app
 
 - Code
-	- synth.ts contains BufferURL ParamHandler,
-		which has UI code that should be moved elsewhere
+	- Move note ratio calculation out of keyboard.ts and into notes.ts where
+		it should belong
+	- Provide an interface that predefines the very common noteOn / noteOff methods
+	- Decoupling
+		- synth.ts contains BufferURL ParamHandler,
+			which has UI code that should be moved elsewhere
+		- The *piano* module group should not contain UI code. Therefore,
+			module piano.ts should be moved out of it, and the dependency
+			should be reversed so that the *piano* module group is
+			fully decoupled from any UI.
+		- Also, noteinputs.ts has a dependency with synthUI that should be
+			removed
 	- Avoid hardcoded DOM id's in code, e.g. $('#my-button'), except
 		for specifying containers at top level.
 		Just do a global search for `$('#` and review all matches not in main.ts.

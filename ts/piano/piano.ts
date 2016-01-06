@@ -109,7 +109,7 @@ export class PianoKeyboard {
 		});
 		// Arpeggio
 		const arpeggioSlider = panel.find('.arpeggio-box input');
-		arpeggioSlider.change(_ => {
+		arpeggioSlider.on('input',_ => {
 			this.arpeggio.time = parseFloat(arpeggioSlider.val());
 			this.triggerArpeggioChange();
 		});
@@ -181,6 +181,7 @@ export class PianoKeyboard {
 		if (this.arpeggio.mode >= ARPEGGIO_MODES.length)
 			this.arpeggio.mode = 0;
 		button.html(ARPEGGIO_LABELS[this.arpeggio.mode]);
+		this.triggerArpeggioChange();
 	}
 
 	changeArpeggioOctave(button: JQuery) {
@@ -188,6 +189,7 @@ export class PianoKeyboard {
 		if (this.arpeggio.octave > MAX_ARPEGGIO_OCT)
 			this.arpeggio.octave = 1;
 		button.text(this.arpeggio.octave);
+		this.triggerArpeggioChange();
 	}
 
 	triggerArpeggioChange() {

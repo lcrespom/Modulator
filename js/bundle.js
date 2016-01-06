@@ -2010,6 +2010,7 @@
 
 	var keyboard_1 = __webpack_require__(12);
 	var piano_1 = __webpack_require__(13);
+	var arpeggiator_1 = __webpack_require__(16);
 	var instrument_1 = __webpack_require__(14);
 	var NUM_VOICES = 5;
 	/**
@@ -2027,8 +2028,8 @@
 	        // Setup piano panel
 	        var piano = new piano_1.PianoKeyboard($('#piano'));
 	        this.piano = piano;
-	        piano.noteOn = function (midi, ratio) { return _this.noteOn(midi, 1, ratio); };
-	        piano.noteOff = function (midi) { return _this.noteOff(midi, 1); };
+	        piano.noteOn = function (midi, ratio) { return _this.arpeggiator.sendNoteOn(midi, 1, ratio); };
+	        piano.noteOff = function (midi) { return _this.arpeggiator.sendNoteOff(midi, 1); };
 	        // Register poly on/off handlers
 	        piano.polyOn = function () { return _this.polyOn(); };
 	        piano.polyOff = function () { return _this.polyOff(); };
@@ -2038,17 +2039,19 @@
 	            if (document.activeElement.nodeName == 'INPUT' &&
 	                document.activeElement.getAttribute('type') != 'range')
 	                return;
-	            _this.noteOn(midi, 1, ratio);
+	            _this.arpeggiator.sendNoteOn(midi, 1, ratio);
 	            piano.displayKeyDown(midi);
 	        };
 	        kb.noteOff = function (midi) {
-	            _this.noteOff(midi, 1);
+	            _this.arpeggiator.sendNoteOff(midi, 1);
 	            piano.displayKeyUp(midi);
 	        };
 	        // Bind piano octave with PC keyboard
 	        kb.baseNote = piano.baseNote;
 	        piano.octaveChanged = function (baseNote) { return kb.baseNote = baseNote; };
 	        this.setupEnvelopeAnimation(piano);
+	        // Setup arpeggiator
+	        this.setupArpeggiator(piano);
 	    }
 	    NoteInputs.prototype.setupEnvelopeAnimation = function (piano) {
 	        var loaded = this.synthUI.gr.handler.graphLoaded;
@@ -2065,6 +2068,19 @@
 	            }
 	            piano.setEnvelope(adsr || { attack: 0, release: 0 });
 	        };
+	    };
+	    NoteInputs.prototype.setupArpeggiator = function (piano) {
+	        var _this = this;
+	        this.arpeggiator = new arpeggiator_1.Arpeggiator();
+	        piano.arpeggioChanged = function (time, mode, octaves) {
+	            _this.arpeggiator.mode = mode;
+	            _this.arpeggiator.octaves = octaves;
+	            _this.arpeggiator.time = time;
+	        };
+	        this.arpeggiator.noteOn =
+	            function (midi, velocity, ratio) { return _this.noteOn(midi, velocity, ratio); };
+	        this.arpeggiator.noteOff =
+	            function (midi, velocity) { return _this.noteOff(midi, velocity); };
 	    };
 	    NoteInputs.prototype.noteOn = function (midi, velocity, ratio) {
 	        this.lastNote = midi;
@@ -2262,7 +2278,7 @@
 	        });
 	        // Arpeggio
 	        var arpeggioSlider = panel.find('.arpeggio-box input');
-	        arpeggioSlider.change(function (_) {
+	        arpeggioSlider.on('input', function (_) {
 	            _this.arpeggio.time = parseFloat(arpeggioSlider.val());
 	            _this.triggerArpeggioChange();
 	        });
@@ -2331,12 +2347,14 @@
 	        if (this.arpeggio.mode >= ARPEGGIO_MODES.length)
 	            this.arpeggio.mode = 0;
 	        button.html(ARPEGGIO_LABELS[this.arpeggio.mode]);
+	        this.triggerArpeggioChange();
 	    };
 	    PianoKeyboard.prototype.changeArpeggioOctave = function (button) {
 	        this.arpeggio.octave++;
 	        if (this.arpeggio.octave > MAX_ARPEGGIO_OCT)
 	            this.arpeggio.octave = 1;
 	        button.text(this.arpeggio.octave);
+	        this.triggerArpeggioChange();
 	    };
 	    PianoKeyboard.prototype.triggerArpeggioChange = function () {
 	        this.arpeggioChanged(this.arpeggio.time, ARPEGGIO_MODES[this.arpeggio.mode], this.arpeggio.octave);
@@ -2607,6 +2625,85 @@
 	    return Presets;
 	})();
 	exports.Presets = Presets;
+
+
+/***/ },
+/* 16 */
+/***/ function(module, exports) {
+
+	var Arpeggiator = (function () {
+	    function Arpeggiator() {
+	        this.mode = '';
+	        this.octaves = 1;
+	        this.time = 2;
+	        this.notect = 0;
+	        this.notes = new NoteTable();
+	        this.timer();
+	    }
+	    Arpeggiator.prototype.timer = function () {
+	        //TODO improve accuracy, read article
+	        setTimeout(this.timer.bind(this), this.time * 1000);
+	        if (this.lastNote) {
+	            this.noteOff(this.lastNote.midi, this.lastNote.velocity);
+	            this.lastNote = null;
+	        }
+	        if (this.mode.length == 0)
+	            return;
+	        if (this.notes.length() == 0)
+	            return;
+	        var ndata = this.notes.get(this.notect);
+	        if (!ndata)
+	            return;
+	        this.noteOn(ndata.midi, ndata.velocity, ndata.ratio);
+	        this.lastNote = ndata;
+	        this.notect++;
+	        if (this.notect >= this.notes.length())
+	            this.notect = 0;
+	    };
+	    Arpeggiator.prototype.sendNoteOn = function (midi, velocity, ratio) {
+	        if (this.mode.length == 0)
+	            return this.noteOn(midi, velocity, ratio);
+	        this.notes.add(midi, velocity, ratio);
+	    };
+	    Arpeggiator.prototype.sendNoteOff = function (midi, velocity) {
+	        if (this.mode.length == 0)
+	            this.noteOff(midi, velocity);
+	        this.notes.remove(midi, velocity);
+	    };
+	    // Event handlers
+	    Arpeggiator.prototype.noteOn = function (midi, velocity, ratio) { };
+	    Arpeggiator.prototype.noteOff = function (midi, velocity) { };
+	    return Arpeggiator;
+	})();
+	exports.Arpeggiator = Arpeggiator;
+	var NoteData = (function () {
+	    function NoteData(midi, velocity, ratio) {
+	        this.midi = midi;
+	        this.velocity = velocity;
+	        this.ratio = ratio;
+	    }
+	    return NoteData;
+	})();
+	var NoteTable = (function () {
+	    function NoteTable() {
+	        this.notes = [];
+	    }
+	    NoteTable.prototype.length = function () { return this.notes.length; };
+	    NoteTable.prototype.get = function (i) { return this.notes[i]; };
+	    NoteTable.prototype.add = function (midi, velocity, ratio) {
+	        //TODO sort
+	        this.notes.push(new NoteData(midi, velocity, ratio));
+	    };
+	    NoteTable.prototype.remove = function (midi, velocity) {
+	        for (var i = 0; i < this.notes.length; i++) {
+	            if (this.notes[i].midi = midi) {
+	                this.notes.splice(i, 1);
+	                return;
+	            }
+	        }
+	    };
+	    return NoteTable;
+	})();
 
 
 /***/ }
