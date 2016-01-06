@@ -287,13 +287,13 @@ input[type=range][orient=vertical] {
 .portamento-box {
 	display: inline-block;
 	position: absolute;
-/*	left: 120px;*/
-	left: 130px;
+	left: 120px;
+/*	left: 130px;*/
 }
 
 .arpeggio-box {
 	display: inline-block;
 	position: absolute;
-/*	left: 275px;*/
-	left: 310px;
+	left: 275px;
+/*	left: 310px;*/
 }

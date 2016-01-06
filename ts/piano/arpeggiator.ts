@@ -21,7 +21,7 @@ export class Arpeggiator {
 		setTimeout(this.timer.bind(this), this.time * 1000);
 		// Release previous note
 		if (this.lastNote) {
-			this.noteOff(this.lastNote.midi, this.lastNote.velocity);
+			this.noteOff(this.lastNote.noteToPlay, this.lastNote.velocity);
 			this.lastNote = null;
 		}
 		// Return if disabled or no notes
@@ -29,6 +29,23 @@ export class Arpeggiator {
 		const len = this.notes.length();
 		if (len == 0) return;
 		// Check note counter
+		this.wrapCounter(len);
+		// Get current note and play it
+		const ndata = this.notes.get(this.notect);
+		this.noteOn(ndata.noteToPlay, ndata.velocity);
+		this.lastNote = ndata;
+		// Update note counter
+		if (this.mode == 'u')
+			this.notect++;
+		else if (this.mode == 'd')
+			this.notect--;
+		else if (this.mode == 'ud') {
+			if (this.backward) this.notect--;
+			else this.notect++;
+		}
+	}
+
+	wrapCounter(len: number) {
 		if (this.notect >= len) {
 			if (this.mode != 'ud')
 				this.notect = 0;
@@ -45,30 +62,22 @@ export class Arpeggiator {
 				this.notect = len < 2 ? 0 : 1;
 			}
 		}
-		// Get current note and play it
-		const ndata = this.notes.get(this.notect);
-		this.noteOn(ndata.midi, ndata.velocity);
-		this.lastNote = ndata;
-		// Update note counter
-		if (this.mode == 'u')
-			this.notect++;
-		else if (this.mode == 'd')
-			this.notect--;
-		else if (this.mode == 'ud') {
-			if (this.backward) this.notect--;
-			else this.notect++;
-		}
 	}
 
 	sendNoteOn(midi: number, velocity: number): void {
 		if (this.mode.length == 0)
 			return this.noteOn(midi, velocity);
-		this.notes.add(midi, velocity);
+		this.notes.add(midi, midi, velocity);
+		if (this.octaves > 1)
+			this.notes.add(midi, midi + 12, velocity);
+		if (this.octaves > 2)
+			this.notes.add(midi, midi + 24, velocity);
 	}
+
 	sendNoteOff(midi: number, velocity: number): void {
 		if (this.mode.length == 0)
 			this.noteOff(midi, velocity);
-		this.notes.remove(midi, velocity);
+		this.notes.remove(midi);
 	}
 
 	// Event handlers
@@ -78,7 +87,7 @@ export class Arpeggiator {
 
 
 class NoteData {
-	constructor(public midi, public velocity) {}
+	constructor(public note, public noteToPlay, public velocity) {}
 }
 
 class NoteTable {
@@ -88,10 +97,10 @@ class NoteTable {
 
 	get(i: number): NoteData { return this.notes[i]; }
 
-	add(midi: number, velocity: number): void {
-		const ndata = new NoteData(midi, velocity);
+	add(note: number, noteToPlay: number, velocity: number): void {
+		const ndata = new NoteData(note, noteToPlay, velocity);
 		for (let i = 0; i < this.notes.length; i++) {
-			if (midi < this.notes[i].midi) {
+			if (noteToPlay < this.notes[i].noteToPlay) {
 				this.notes.splice(i, 0, ndata);
 				return;
 			}
@@ -99,12 +108,7 @@ class NoteTable {
 		this.notes.push(ndata);
 	}
 
-	remove(midi, velocity): void {
-		for (let i = 0; i < this.notes.length; i++) {
-			if (this.notes[i].midi == midi) {
-				this.notes.splice(i, 1);
-				return;
-			}
-		}
+	remove(note: number): void {
+		this.notes = this.notes.filter(ndata => ndata.note != note);
 	}
 }

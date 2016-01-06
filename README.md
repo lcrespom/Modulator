@@ -47,7 +47,9 @@ on Twitter, or directly within GitHub.
 - Functionality
 	- Polyphonic mode: in instrument.ts, implement a better algorithm for
 		finding an empty voice instead of the blind round-robin.
+	- Use a logarithmic scale for portamento and arpeggio sliders
 	- Save and load portamento as part of an instrument's JSON
+		- And also arpeggio parameters
 	- When loading a preset, pre-select a relevant node, e.g. based on the number of
 		parameters.
 	- Custom nodes
@@ -62,30 +64,20 @@ on Twitter, or directly within GitHub.
 		- Etc?
 	- Improve ADSR
 		- Linear/exponential switch
+		- Incorrect behavior when key is released before reaching the sustain level
 	- Provide more preset instruments
 	- Improve presets panel
 		- When clicking on preset number, let user directly navigate to preset,
 			e.g. by showing a drop down list
 	- Piano keyboard improvements
 		- Arpeggio
-			- Off / Up / Down / Up&Down
 			- Octaves: 1/2/3
-			- Time slider
 	- Use Web Midi API to gather events from external midi Keyboard
 		- Play notes
 		- Associate external controls with selected node parameters
 		- Make source nodes use the MIDI velocity parameter, which is currently ignored.
 			This will require implementing custom nodes for most source nodes,
 			so they are internally connected to a gain node.
-	- Use the HTML5 file API to load instruments
-		- Done, with fallback to copy+paste in Safari.
-		- Consider opening popup to ask for file name before saving preset
-			- Chrome downloads immediately, so a prompt would be helpful
-			- Firefox prompts the user, which would result in a double prompt
-		- Would be nice to use file upload to load audio buffers, but
-			it would only work when the user manually loads the file. When
-			loading a preset, buffer nodes could not automatically load
-			any buffer file.
 	- Limitation: a control node can only control a single node
 		- Prevent from connecting a control node to more than one destination
 		- Or else, modify the UI to support multiple destination nodes
