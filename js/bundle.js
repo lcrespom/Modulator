@@ -2695,8 +2695,14 @@
 	    NoteTable.prototype.length = function () { return this.notes.length; };
 	    NoteTable.prototype.get = function (i) { return this.notes[i]; };
 	    NoteTable.prototype.add = function (midi, velocity, ratio) {
-	        //TODO sort
-	        this.notes.push(new NoteData(midi, velocity, ratio));
+	        var ndata = new NoteData(midi, velocity, ratio);
+	        for (var i = 0; i < this.notes.length; i++) {
+	            if (midi < this.notes[i].midi) {
+	                this.notes.splice(i, 0, ndata);
+	                return;
+	            }
+	        }
+	        this.notes.push(ndata);
 	    };
 	    NoteTable.prototype.remove = function (midi, velocity) {
 	        for (var i = 0; i < this.notes.length; i++) {

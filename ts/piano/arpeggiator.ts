@@ -65,8 +65,14 @@ class NoteTable {
 	get(i: number): NoteData { return this.notes[i]; }
 
 	add(midi, velocity, ratio): void {
-		//TODO sort
-		this.notes.push(new NoteData(midi, velocity, ratio));
+		const ndata = new NoteData(midi, velocity, ratio);
+		for (let i = 0; i < this.notes.length; i++) {
+			if (midi < this.notes[i].midi) {
+				this.notes.splice(i, 0, ndata);
+				return;
+			}
+		}
+		this.notes.push(ndata);
 	}
 
 	remove(midi, velocity): void {
