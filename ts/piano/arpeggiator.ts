@@ -25,9 +25,14 @@ export class Arpeggiator {
 		if (this.mode.length == 0) return;
 		if (this.notes.length() == 0) return;
 		if (this.notect >= this.notes.length()) this.notect = 0;
+		else if (this.notect < 0) this.notect = this.notes.length() - 1;
 		const ndata = this.notes.get(this.notect);
 		this.noteOn(ndata.midi, ndata.velocity, ndata.ratio);
 		this.lastNote = ndata;
+		// if (this.mode == 'u')
+		// 	this.notect++;
+		// else if (this.mode == 'd')
+		// 	this.notect--;
 		this.notect++;
 	}
 
