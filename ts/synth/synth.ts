@@ -4,6 +4,9 @@ import { ModernAudioContext, ModernAudioNode, removeArrayElement } from './moder
 import * as custom from './customNodes';
 
 
+const SEMITONE = Math.pow(2, 1/12);
+const A4 = 57;
+
 /**
  * Holds all data associated with an AudioNode
  */
@@ -163,7 +166,12 @@ export class Synth {
 		}
 	}
 
-	noteOn(midi: number, gain: number, ratio: number): void {
+	midi2freqRatio(midi: number): number {
+		return Math.pow(SEMITONE, midi - A4);
+	}
+
+	noteOn(midi: number, gain: number): void {
+		const ratio = this.midi2freqRatio(midi);
 		for (const nh of this.noteHandlers) {
 			if (nh.kbTrigger) nh.handlers = this.noteHandlers;
 			nh.noteOn(midi, gain, ratio);

@@ -129,8 +129,6 @@ on Twitter, or directly within GitHub.
 	- Mobile app
 
 - Code
-	- Move note ratio calculation out of keyboard.ts and into notes.ts where
-		it should belong
 	- Provide an interface that predefines the very common noteOn / noteOff methods
 	- Decoupling
 		- synth.ts contains BufferURL ParamHandler,

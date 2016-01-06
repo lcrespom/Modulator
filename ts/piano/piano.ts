@@ -1,4 +1,3 @@
-import { midi2freqRatio } from './keyboard';
 import * as popups from '../popups';
 
 const NUM_WHITES = 17;
@@ -86,7 +85,7 @@ export class PianoKeyboard {
 		key.mousedown(_ => {
 			const midi = knum + this.baseNote;
 			this.displayKeyDown(key);
-			this.noteOn(midi, midi2freqRatio(midi));
+			this.noteOn(midi);
 		});
 		key.mouseup(_ => {
 			const midi = knum + this.baseNote;
@@ -198,7 +197,7 @@ export class PianoKeyboard {
 	}
 
 	// Simple event handlers
-	noteOn(midi: number, ratio: number): void {}
+	noteOn(midi: number): void {}
 	noteOff(midi: number): void {}
 	polyOn() {}
 	polyOff() {}

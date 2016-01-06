@@ -47,7 +47,7 @@ export class Arpeggiator {
 		}
 		// Get current note and play it
 		const ndata = this.notes.get(this.notect);
-		this.noteOn(ndata.midi, ndata.velocity, ndata.ratio);
+		this.noteOn(ndata.midi, ndata.velocity);
 		this.lastNote = ndata;
 		// Update note counter
 		if (this.mode == 'u')
@@ -60,10 +60,10 @@ export class Arpeggiator {
 		}
 	}
 
-	sendNoteOn(midi: number, velocity: number, ratio: number): void {
+	sendNoteOn(midi: number, velocity: number): void {
 		if (this.mode.length == 0)
-			return this.noteOn(midi, velocity, ratio);
-		this.notes.add(midi, velocity, ratio);
+			return this.noteOn(midi, velocity);
+		this.notes.add(midi, velocity);
 	}
 	sendNoteOff(midi: number, velocity: number): void {
 		if (this.mode.length == 0)
@@ -72,13 +72,13 @@ export class Arpeggiator {
 	}
 
 	// Event handlers
-	noteOn(midi: number, velocity: number, ratio: number): void {}
+	noteOn(midi: number, velocity: number): void {}
 	noteOff(midi: number, velocity: number): void {}
 }
 
 
 class NoteData {
-	constructor(public midi, public velocity, public ratio) {}
+	constructor(public midi, public velocity) {}
 }
 
 class NoteTable {
@@ -88,8 +88,8 @@ class NoteTable {
 
 	get(i: number): NoteData { return this.notes[i]; }
 
-	add(midi, velocity, ratio): void {
-		const ndata = new NoteData(midi, velocity, ratio);
+	add(midi: number, velocity: number): void {
+		const ndata = new NoteData(midi, velocity);
 		for (let i = 0; i < this.notes.length; i++) {
 			if (midi < this.notes[i].midi) {
 				this.notes.splice(i, 0, ndata);

@@ -22,9 +22,9 @@ export class Instrument {
 			this.voices[i].synth.portamento = this.portamento;
 	}
 
-	noteOn(midi: number, velocity: number, ratio: number): void {
+	noteOn(midi: number, velocity: number): void {
 		const voice = this.voices[this.voiceNum];
-		voice.noteOn(midi, velocity, ratio);
+		voice.noteOn(midi, velocity);
 		this.voiceNum = (this.voiceNum + 1) % this.voices.length;
 	}
 
@@ -57,8 +57,8 @@ export class Voice {
 		this.lastNote = 0;
 	}
 
-	noteOn(midi: number, velocity: number, ratio: number): void {
-		this.synth.noteOn(midi, velocity, ratio);
+	noteOn(midi: number, velocity: number): void {
+		this.synth.noteOn(midi, velocity);
 		this.lastNote = midi;
 	}
 

@@ -29,17 +29,17 @@ export class NoteInputs {
 		// Setup piano panel
 		var piano = new PianoKeyboard($('#piano'));
 		this.piano = piano;
-		piano.noteOn = (midi, ratio) => this.arpeggiator.sendNoteOn(midi, 1, ratio);
+		piano.noteOn = (midi) => this.arpeggiator.sendNoteOn(midi, 1);
 		piano.noteOff = (midi) => this.arpeggiator.sendNoteOff(midi, 1);
 		// Register poly on/off handlers
 		piano.polyOn = () => this.polyOn();
 		piano.polyOff = () => this.polyOff();
 		// Setup PC keyboard
 		var kb = new Keyboard();
-		kb.noteOn = (midi, ratio) => {
+		kb.noteOn = (midi) => {
 			if (document.activeElement.nodeName == 'INPUT' &&
 				document.activeElement.getAttribute('type') != 'range') return;
-			this.arpeggiator.sendNoteOn(midi, 1, ratio);
+			this.arpeggiator.sendNoteOn(midi, 1);
 			piano.displayKeyDown(midi);
 		};
 		kb.noteOff = (midi) => {
@@ -78,22 +78,22 @@ export class NoteInputs {
 			this.arpeggiator.time = time;
 		}
 		this.arpeggiator.noteOn =
-			(midi, velocity, ratio) => this.noteOn(midi, velocity, ratio);
+			(midi, velocity) => this.noteOn(midi, velocity);
 		this.arpeggiator.noteOff =
 			(midi, velocity) => this.noteOff(midi, velocity);
 	}
 
 
-	noteOn(midi: number, velocity: number, ratio: number): void {
+	noteOn(midi: number, velocity: number): void {
 		this.lastNote = midi;
 		const portamento = this.piano.getPortamento();
 		if (this.poly) {
 			this.instrument.portamento.time = portamento;
-			this.instrument.noteOn(midi, velocity, ratio);
+			this.instrument.noteOn(midi, velocity);
 		}
 		else {
 			this.synthUI.synth.portamento.time = portamento;
-			this.synthUI.synth.noteOn(midi, velocity, ratio);
+			this.synthUI.synth.noteOn(midi, velocity);
 		}
 	}
 
