@@ -293,5 +293,6 @@ input[type=range][orient=vertical] {
 .arpeggio-box {
 	display: inline-block;
 	position: absolute;
-	left: 275px;
+/*	left: 275px;*/
+	left: 315px;
 }

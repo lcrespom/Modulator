@@ -2651,14 +2651,12 @@
 	            return;
 	        if (this.notes.length() == 0)
 	            return;
+	        if (this.notect >= this.notes.length())
+	            this.notect = 0;
 	        var ndata = this.notes.get(this.notect);
-	        if (!ndata)
-	            return;
 	        this.noteOn(ndata.midi, ndata.velocity, ndata.ratio);
 	        this.lastNote = ndata;
 	        this.notect++;
-	        if (this.notect >= this.notes.length())
-	            this.notect = 0;
 	    };
 	    Arpeggiator.prototype.sendNoteOn = function (midi, velocity, ratio) {
 	        if (this.mode.length == 0)
