@@ -2166,6 +2166,9 @@
 	var popups = __webpack_require__(8);
 	var NUM_WHITES = 17;
 	var BASE_NOTE = 36;
+	var ARPEGGIO_MODES = ['', 'u', 'd', 'ud'];
+	var ARPEGGIO_LABELS = ['-', '&uarr;', '&darr;', '&uarr;&darr;'];
+	var MAX_ARPEGGIO_OCT = 3;
 	/**
 	 * A virtual piano keyboard that:
 	 * 	- Captures mouse input and generates corresponding note events
@@ -2175,6 +2178,11 @@
 	 */
 	var PianoKeyboard = (function () {
 	    function PianoKeyboard(panel) {
+	        this.arpeggio = {
+	            mode: 0,
+	            octave: 1,
+	            time: 0.5
+	        };
 	        this.baseNote = BASE_NOTE;
 	        this.octave = 3;
 	        this.poly = false;
@@ -2182,7 +2190,7 @@
 	        this.createKeys(panel);
 	        for (var i = 0; i < this.keys.length; i++)
 	            this.registerKey(this.keys[i], i);
-	        this.registerButtons();
+	        this.registerButtons(panel.parent());
 	        this.portaSlider = panel.parent().find('.portamento-box input');
 	    }
 	    PianoKeyboard.prototype.createKeys = function (panel) {
@@ -2239,9 +2247,9 @@
 	            _this.noteOff(midi);
 	        });
 	    };
-	    PianoKeyboard.prototype.registerButtons = function () {
+	    PianoKeyboard.prototype.registerButtons = function (panel) {
 	        var _this = this;
-	        $('#poly-but').click(function (_) { return _this.togglePoly(); });
+	        // Octave navigation
 	        $('#prev-octave-but').click(function (_) {
 	            _this.octave--;
 	            _this.baseNote -= 12;
@@ -2252,6 +2260,18 @@
 	            _this.baseNote += 12;
 	            _this.updateOctave();
 	        });
+	        // Arpeggio
+	        var arpeggioSlider = panel.find('.arpeggio-box input');
+	        arpeggioSlider.change(function (_) {
+	            _this.arpeggio.time = parseFloat(arpeggioSlider.val());
+	            _this.triggerArpeggioChange();
+	        });
+	        var butArpMode = panel.find('.btn-arpeggio-ud');
+	        butArpMode.click(function (_) { return _this.changeArpeggioMode(butArpMode); });
+	        var butArpOct = panel.find('.btn-arpeggio-oct');
+	        butArpOct.click(function (_) { return _this.changeArpeggioOctave(butArpOct); });
+	        // Monophonic / polyphonic mode
+	        $('#poly-but').click(function (_) { return _this.togglePoly(); });
 	    };
 	    PianoKeyboard.prototype.updateOctave = function () {
 	        $('#prev-octave-but').prop('disabled', this.octave <= 1);
@@ -2306,12 +2326,28 @@
 	    PianoKeyboard.prototype.getPortamento = function () {
 	        return parseFloat(this.portaSlider.val());
 	    };
+	    PianoKeyboard.prototype.changeArpeggioMode = function (button) {
+	        this.arpeggio.mode++;
+	        if (this.arpeggio.mode >= ARPEGGIO_MODES.length)
+	            this.arpeggio.mode = 0;
+	        button.html(ARPEGGIO_LABELS[this.arpeggio.mode]);
+	    };
+	    PianoKeyboard.prototype.changeArpeggioOctave = function (button) {
+	        this.arpeggio.octave++;
+	        if (this.arpeggio.octave > MAX_ARPEGGIO_OCT)
+	            this.arpeggio.octave = 1;
+	        button.text(this.arpeggio.octave);
+	    };
+	    PianoKeyboard.prototype.triggerArpeggioChange = function () {
+	        this.arpeggioChanged(this.arpeggio.time, ARPEGGIO_MODES[this.arpeggio.mode], this.arpeggio.octave);
+	    };
 	    // Simple event handlers
 	    PianoKeyboard.prototype.noteOn = function (midi, ratio) { };
 	    PianoKeyboard.prototype.noteOff = function (midi) { };
 	    PianoKeyboard.prototype.polyOn = function () { };
 	    PianoKeyboard.prototype.polyOff = function () { };
 	    PianoKeyboard.prototype.octaveChanged = function (baseNote) { };
+	    PianoKeyboard.prototype.arpeggioChanged = function (time, mode, octaves) { };
 	    return PianoKeyboard;
 	})();
 	exports.PianoKeyboard = PianoKeyboard;

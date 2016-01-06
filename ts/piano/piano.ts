@@ -4,6 +4,9 @@ import * as popups from '../popups';
 const NUM_WHITES = 17;
 const BASE_NOTE = 36;
 
+const ARPEGGIO_MODES = ['', 'u', 'd', 'ud'];
+const ARPEGGIO_LABELS = ['-', '&uarr;', '&darr;', '&uarr;&darr;'];
+const MAX_ARPEGGIO_OCT = 3;
 /**
  * A virtual piano keyboard that:
  * 	- Captures mouse input and generates corresponding note events
@@ -20,6 +23,11 @@ export class PianoKeyboard {
 	lastKey: JQuery;
 	envelope: { attack: number; release: number };
 	portaSlider: JQuery;
+	arpeggio = {
+		mode: 0,
+		octave: 1,
+		time: 0.5
+	}
 
 	constructor(panel: JQuery) {
 		this.baseNote = BASE_NOTE;
@@ -29,7 +37,7 @@ export class PianoKeyboard {
 		this.createKeys(panel);
 		for (let i = 0; i < this.keys.length; i++)
 			this.registerKey(this.keys[i], i);
-		this.registerButtons();
+		this.registerButtons(panel.parent());
 		this.portaSlider = panel.parent().find('.portamento-box input');
 	}
 
@@ -87,8 +95,8 @@ export class PianoKeyboard {
 		});
 	}
 
-	registerButtons(): void {
-		$('#poly-but').click(_ => this.togglePoly());
+	registerButtons(panel: JQuery): void {
+		// Octave navigation
 		$('#prev-octave-but').click(_ => {
 			this.octave--;
 			this.baseNote -= 12;
@@ -99,6 +107,18 @@ export class PianoKeyboard {
 			this.baseNote += 12;
 			this.updateOctave();
 		});
+		// Arpeggio
+		const arpeggioSlider = panel.find('.arpeggio-box input');
+		arpeggioSlider.change(_ => {
+			this.arpeggio.time = parseFloat(arpeggioSlider.val());
+			this.triggerArpeggioChange();
+		});
+		const butArpMode = panel.find('.btn-arpeggio-ud');
+		butArpMode.click(_ => this.changeArpeggioMode(butArpMode));
+		const butArpOct = panel.find('.btn-arpeggio-oct');
+		butArpOct.click(_ => this.changeArpeggioOctave(butArpOct));
+		// Monophonic / polyphonic mode
+		$('#poly-but').click(_ => this.togglePoly());
 	}
 
 	updateOctave() {
@@ -156,10 +176,30 @@ export class PianoKeyboard {
 		return parseFloat(this.portaSlider.val());
 	}
 
+	changeArpeggioMode(button: JQuery) {
+		this.arpeggio.mode++;
+		if (this.arpeggio.mode >= ARPEGGIO_MODES.length)
+			this.arpeggio.mode = 0;
+		button.html(ARPEGGIO_LABELS[this.arpeggio.mode]);
+	}
+
+	changeArpeggioOctave(button: JQuery) {
+		this.arpeggio.octave++;
+		if (this.arpeggio.octave > MAX_ARPEGGIO_OCT)
+			this.arpeggio.octave = 1;
+		button.text(this.arpeggio.octave);
+	}
+
+	triggerArpeggioChange() {
+		this.arpeggioChanged(this.arpeggio.time,
+			ARPEGGIO_MODES[this.arpeggio.mode], this.arpeggio.octave);
+	}
+
 	// Simple event handlers
 	noteOn(midi: number, ratio: number): void {}
 	noteOff(midi: number): void {}
 	polyOn() {}
 	polyOff() {}
 	octaveChanged(baseNote) {}
+	arpeggioChanged(time: number, mode: string, octaves: number) {}
 }
