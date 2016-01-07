@@ -47,9 +47,13 @@ on Twitter, or directly within GitHub.
 - Functionality
 	- Polyphonic mode: in instrument.ts, implement a better algorithm for
 		finding an empty voice instead of the blind round-robin.
+	- Save and load keyboard settings as part of an instrument's JSON
+		- Octave
+		- Portamento
+		- Arpeggio
 	- Use a logarithmic scale for portamento and arpeggio sliders
-	- Save and load portamento as part of an instrument's JSON
-		- And also arpeggio parameters
+	- Improve arpeggio precision,
+		see http://www.html5rocks.com/en/tutorials/audio/scheduling/
 	- When loading a preset, pre-select a relevant node, e.g. based on the number of
 		parameters.
 	- Custom nodes
@@ -69,9 +73,6 @@ on Twitter, or directly within GitHub.
 	- Improve presets panel
 		- When clicking on preset number, let user directly navigate to preset,
 			e.g. by showing a drop down list
-	- Piano keyboard improvements
-		- Arpeggio
-			- Octaves: 1/2/3
 	- Use Web Midi API to gather events from external midi Keyboard
 		- Play notes
 		- Associate external controls with selected node parameters

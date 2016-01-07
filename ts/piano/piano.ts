@@ -196,6 +196,16 @@ export class PianoKeyboard {
 			ARPEGGIO_MODES[this.arpeggio.mode], this.arpeggio.octave);
 	}
 
+	toJSON(): any {
+		//TODO return object with current keyboard parameters:
+		//	octave, portamento and arpeggio
+		return {}
+	}
+
+	fromJSON(json): void {
+		//TODO apply previously saved keyboard parameters
+	}
+
 	// Simple event handlers
 	noteOn(midi: number): void {}
 	noteOff(midi: number): void {}

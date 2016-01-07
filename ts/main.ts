@@ -7,18 +7,25 @@ import { NoteInputs } from './piano/noteInputs'
 import { Presets } from './synthUI/presets';
 import { ModernWindow, ModernAudioContext } from './synth/modern';
 
-setupPalette();
 const graphCanvas = <HTMLCanvasElement>$('#graph-canvas')[0];
 const synthUI = new SynthUI(createAudioContext(), graphCanvas,
 	$('#node-params'), $('#audio-graph-fft'), $('#audio-graph-osc'));
-new NoteInputs(synthUI);
-new Presets(synthUI);
+setupPanels();
 
 
 function createAudioContext(): ModernAudioContext {
 	const CtxClass: any = window.AudioContext || window.webkitAudioContext;
 	return new CtxClass();
 }
+
+function setupPanels() {
+	setupPalette();
+	const inputs = new NoteInputs(synthUI);
+	const presets = new Presets(synthUI);
+	presets.beforeSave = (json) => $.extend(json, { keyboard: inputs.piano.toJSON() });
+	presets.afterLoad = (json) => inputs.piano.fromJSON(json.keyboard);
+}
+
 
 function setupPalette() {
 	$(function() {

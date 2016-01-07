@@ -50,14 +50,19 @@
 	var synthUI_1 = __webpack_require__(1);
 	var noteInputs_1 = __webpack_require__(11);
 	var presets_1 = __webpack_require__(16);
-	setupPalette();
 	var graphCanvas = $('#graph-canvas')[0];
 	var synthUI = new synthUI_1.SynthUI(createAudioContext(), graphCanvas, $('#node-params'), $('#audio-graph-fft'), $('#audio-graph-osc'));
-	new noteInputs_1.NoteInputs(synthUI);
-	new presets_1.Presets(synthUI);
+	setupPanels();
 	function createAudioContext() {
 	    var CtxClass = window.AudioContext || window.webkitAudioContext;
 	    return new CtxClass();
+	}
+	function setupPanels() {
+	    setupPalette();
+	    var inputs = new noteInputs_1.NoteInputs(synthUI);
+	    var presets = new presets_1.Presets(synthUI);
+	    presets.beforeSave = function (json) { return $.extend(json, { keyboard: inputs.piano.toJSON() }); };
+	    presets.afterLoad = function (json) { return inputs.piano.fromJSON(json.keyboard); };
 	}
 	function setupPalette() {
 	    $(function () {
@@ -2358,6 +2363,14 @@
 	    PianoKeyboard.prototype.triggerArpeggioChange = function () {
 	        this.arpeggioChanged(this.arpeggio.time, ARPEGGIO_MODES[this.arpeggio.mode], this.arpeggio.octave);
 	    };
+	    PianoKeyboard.prototype.toJSON = function () {
+	        //TODO return object with current keyboard parameters:
+	        //	octave, portamento and arpeggio
+	        return {};
+	    };
+	    PianoKeyboard.prototype.fromJSON = function (json) {
+	        //TODO apply previously saved keyboard parameters
+	    };
 	    // Simple event handlers
 	    PianoKeyboard.prototype.noteOn = function (midi) { };
 	    PianoKeyboard.prototype.noteOff = function (midi) { };
@@ -2710,13 +2723,16 @@
 	        var file = evt.target.files[0];
 	        var reader = new FileReader();
 	        reader.onload = function (loadEvt) {
-	            _this.presets[_this.presetNum] = JSON.parse(loadEvt.target.result);
+	            var json = JSON.parse(loadEvt.target.result);
+	            _this.afterLoad(json);
+	            _this.presets[_this.presetNum] = json;
 	            _this.preset2synth();
 	        };
 	        reader.readAsText(file);
 	    };
 	    Presets.prototype.savePreset = function () {
 	        var json = this.synthUI.gr.toJSON();
+	        this.beforeSave(json);
 	        json.name = $('#preset-name').val().trim();
 	        var jsonData = JSON.stringify(json);
 	        if (this.browserSupportsDownload()) {
@@ -2736,6 +2752,10 @@
 	    Presets.prototype.browserSupportsDownload = function () {
 	        return !window.externalHost && 'download' in $('<a>')[0];
 	    };
+	    // Extension point to specify additional data to save, e.g. keyboard settings
+	    Presets.prototype.beforeSave = function (json) { };
+	    // Extension point to handle previously saved additional data
+	    Presets.prototype.afterLoad = function (json) { };
 	    return Presets;
 	})();
 	exports.Presets = Presets;

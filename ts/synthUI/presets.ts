@@ -83,7 +83,9 @@ export class Presets {
 		const file = evt.target.files[0];
 		const reader = new FileReader();
 		reader.onload = (loadEvt: any)  => {
-			this.presets[this.presetNum] = JSON.parse(loadEvt.target.result);
+			const json = JSON.parse(loadEvt.target.result);
+			this.afterLoad(json);
+			this.presets[this.presetNum] = json;
 			this.preset2synth();
 		};
 		reader.readAsText(file);
@@ -91,6 +93,7 @@ export class Presets {
 
 	savePreset() {
 		const json = this.synthUI.gr.toJSON();
+		this.beforeSave(json);
 		json.name = $('#preset-name').val().trim();
 		const jsonData = JSON.stringify(json);
 		if (this.browserSupportsDownload()) {
@@ -102,7 +105,7 @@ export class Presets {
 				'data:application/octet-stream;base64,' + btoa(jsonData));
 			var clickEvent = new MouseEvent('click',
 				{ view: window, bubbles: true, cancelable: false });
-			a[0].dispatchEvent(clickEvent);					
+			a[0].dispatchEvent(clickEvent);
 		}
 		else {
 			popups.prompt(
@@ -114,4 +117,9 @@ export class Presets {
 	browserSupportsDownload(): boolean {
 		return !(<any>window).externalHost && 'download' in $('<a>')[0];
 	}
+
+	// Extension point to specify additional data to save, e.g. keyboard settings
+	beforeSave(json: any): void {}
+	// Extension point to handle previously saved additional data
+	afterLoad(json: any): void {}
 }
