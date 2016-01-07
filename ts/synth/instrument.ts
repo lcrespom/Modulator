@@ -18,6 +18,8 @@ export class Instrument {
 		this.voiceNum = 0;
 		// Setup synth params by having a common instance for all voices
 		this.portamento = this.voices[0].synth.portamento;
+		if (json.keyboard.portamento)
+			this.portamento.time = json.keyboard.portamento;
 		for (let i = 1; i < numVoices; i++)
 			this.voices[i].synth.portamento = this.portamento;
 	}

@@ -1054,6 +1054,8 @@
 	        this.voiceNum = 0;
 	        // Setup synth params by having a common instance for all voices
 	        this.portamento = this.voices[0].synth.portamento;
+	        if (json.keyboard.portamento)
+	            this.portamento.time = json.keyboard.portamento;
 	        for (var i = 1; i < numVoices; i++)
 	            this.voices[i].synth.portamento = this.portamento;
 	    }

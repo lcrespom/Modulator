@@ -2375,6 +2375,8 @@
 	        };
 	    };
 	    PianoKeyboard.prototype.fromJSON = function (json) {
+	        if (!json)
+	            return;
 	        if (json.portamento) {
 	            this.portaSlider.val(json.portamento);
 	        }
@@ -2382,7 +2384,7 @@
 	            this.octave = json.octave;
 	            this.updateOctave();
 	        }
-	        if (this.arpeggio) {
+	        if (json.arpeggio) {
 	            this.arpeggio.time = json.arpeggio.time;
 	            this.arpeggio.mode = json.arpeggio.mode;
 	            this.arpeggio.octave = json.arpeggio.octave;
@@ -2541,6 +2543,8 @@
 	        this.voiceNum = 0;
 	        // Setup synth params by having a common instance for all voices
 	        this.portamento = this.voices[0].synth.portamento;
+	        if (json.keyboard.portamento)
+	            this.portamento.time = json.keyboard.portamento;
 	        for (var i = 1; i < numVoices; i++)
 	            this.voices[i].synth.portamento = this.portamento;
 	    }

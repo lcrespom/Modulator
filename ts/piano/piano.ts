@@ -210,14 +210,15 @@ export class PianoKeyboard {
 	}
 
 	fromJSON(json): void {
-		if (json.portamento) {			
+		if (!json) return;
+		if (json.portamento) {
 			this.portaSlider.val(json.portamento);
 		}
 		if (json.octave) {
 			this.octave = json.octave;
 			this.updateOctave();
 		}
-		if (this.arpeggio) {
+		if (json.arpeggio) {
 			this.arpeggio.time = json.arpeggio.time;
 			this.arpeggio.mode = json.arpeggio.mode;
 			this.arpeggio.octave = json.arpeggio.octave;
