@@ -47,10 +47,7 @@ on Twitter, or directly within GitHub.
 - Functionality
 	- Polyphonic mode: in instrument.ts, implement a better algorithm for
 		finding an empty voice instead of the blind round-robin.
-	- Save and load keyboard settings as part of an instrument's JSON
-		- Octave
-		- Portamento
-		- Arpeggio
+	- Update presets so keyboard params are inside the JSON (just load & save them again)
 	- Use a logarithmic scale for portamento and arpeggio sliders
 	- Improve arpeggio precision,
 		see http://www.html5rocks.com/en/tutorials/audio/scheduling/

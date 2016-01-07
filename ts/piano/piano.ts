@@ -22,11 +22,12 @@ export class PianoKeyboard {
 	lastKey: JQuery;
 	envelope: { attack: number; release: number };
 	portaSlider: JQuery;
+	controls: JQuery;
 	arpeggio = {
 		mode: 0,
 		octave: 1,
 		time: 0.5
-	}
+	};
 
 	constructor(panel: JQuery) {
 		this.baseNote = BASE_NOTE;
@@ -36,8 +37,9 @@ export class PianoKeyboard {
 		this.createKeys(panel);
 		for (let i = 0; i < this.keys.length; i++)
 			this.registerKey(this.keys[i], i);
-		this.registerButtons(panel.parent());
-		this.portaSlider = panel.parent().find('.portamento-box input');
+		this.controls = panel.parent();
+		this.registerButtons(this.controls);
+		this.portaSlider = this.controls.find('.portamento-box input');
 	}
 
 	createKeys(panel: JQuery) {
@@ -98,12 +100,10 @@ export class PianoKeyboard {
 		// Octave navigation
 		$('#prev-octave-but').click(_ => {
 			this.octave--;
-			this.baseNote -= 12;
 			this.updateOctave();
 		});
 		$('#next-octave-but').click(_ => {
 			this.octave++;
-			this.baseNote += 12;
 			this.updateOctave();
 		});
 		// Arpeggio
@@ -124,6 +124,7 @@ export class PianoKeyboard {
 		$('#prev-octave-but').prop('disabled', this.octave <= 1);
 		$('#next-octave-but').prop('disabled', this.octave >= 8);
 		$('#octave-label').text('C' + this.octave);
+		this.baseNote = BASE_NOTE + 12 * (this.octave - 3);
 		this.octaveChanged(this.baseNote);
 	}
 
@@ -197,13 +198,34 @@ export class PianoKeyboard {
 	}
 
 	toJSON(): any {
-		//TODO return object with current keyboard parameters:
-		//	octave, portamento and arpeggio
-		return {}
+		return {
+			portamento: this.getPortamento(),
+			octave: this.octave,
+			arpeggio: {
+				time: this.arpeggio.time,
+				mode: this.arpeggio.mode,
+				octave: this.arpeggio.octave
+			}
+		}
 	}
 
 	fromJSON(json): void {
-		//TODO apply previously saved keyboard parameters
+		if (json.portamento) {			
+			this.portaSlider.val(json.portamento);
+		}
+		if (json.octave) {
+			this.octave = json.octave;
+			this.updateOctave();
+		}
+		if (this.arpeggio) {
+			this.arpeggio.time = json.arpeggio.time;
+			this.arpeggio.mode = json.arpeggio.mode;
+			this.arpeggio.octave = json.arpeggio.octave;
+			this.controls.find('.arpeggio-box input').val(this.arpeggio.time);
+			this.controls.find('.btn-arpeggio-ud').html(ARPEGGIO_LABELS[this.arpeggio.mode]);
+			this.controls.find('.btn-arpeggio-oct').text(this.arpeggio.octave);
+			this.triggerArpeggioChange();
+		}
 	}
 
 	// Simple event handlers
