@@ -49,7 +49,7 @@
 	 */
 	var synthUI_1 = __webpack_require__(1);
 	var noteInputs_1 = __webpack_require__(11);
-	var presets_1 = __webpack_require__(15);
+	var presets_1 = __webpack_require__(16);
 	var graphCanvas = $('#graph-canvas')[0];
 	var synthUI = new synthUI_1.SynthUI(createAudioContext(), graphCanvas, $('#node-params'), $('#audio-graph-fft'), $('#audio-graph-osc'));
 	setupPanels();
@@ -2021,8 +2021,8 @@
 
 	var keyboard_1 = __webpack_require__(12);
 	var piano_1 = __webpack_require__(13);
-	var arpeggiator_1 = __webpack_require__(16);
-	var instrument_1 = __webpack_require__(14);
+	var arpeggiator_1 = __webpack_require__(14);
+	var instrument_1 = __webpack_require__(15);
 	var NUM_VOICES = 5;
 	/**
 	 * Manages all note-generation inputs:
@@ -2406,6 +2406,121 @@
 
 /***/ },
 /* 14 */
+/***/ function(module, exports) {
+
+	var Arpeggiator = (function () {
+	    function Arpeggiator() {
+	        this.backward = false;
+	        this.mode = '';
+	        this.octaves = 1;
+	        this.time = 0.25;
+	        this.notect = 0;
+	        this.notes = new NoteTable();
+	        this.timer();
+	    }
+	    Arpeggiator.prototype.timer = function () {
+	        //TODO improve accuracy, read article
+	        setTimeout(this.timer.bind(this), this.time * 1000);
+	        // Release previous note
+	        if (this.lastNote) {
+	            this.noteOff(this.lastNote.noteToPlay, this.lastNote.velocity);
+	            this.lastNote = null;
+	        }
+	        // Return if disabled or no notes
+	        if (this.mode.length == 0)
+	            return;
+	        var len = this.notes.length();
+	        if (len == 0)
+	            return;
+	        // Check note counter
+	        this.wrapCounter(len);
+	        // Get current note and play it
+	        var ndata = this.notes.get(this.notect);
+	        this.noteOn(ndata.noteToPlay, ndata.velocity);
+	        this.lastNote = ndata;
+	        // Update note counter
+	        if (this.mode == 'u')
+	            this.notect++;
+	        else if (this.mode == 'd')
+	            this.notect--;
+	        else if (this.mode == 'ud') {
+	            if (this.backward)
+	                this.notect--;
+	            else
+	                this.notect++;
+	        }
+	    };
+	    Arpeggiator.prototype.wrapCounter = function (len) {
+	        if (this.notect >= len) {
+	            if (this.mode != 'ud')
+	                this.notect = 0;
+	            else {
+	                this.backward = true;
+	                this.notect = len < 2 ? 0 : len - 2;
+	            }
+	        }
+	        else if (this.notect < 0) {
+	            if (this.mode != 'ud')
+	                this.notect = len - 1;
+	            else {
+	                this.backward = false;
+	                this.notect = len < 2 ? 0 : 1;
+	            }
+	        }
+	    };
+	    Arpeggiator.prototype.sendNoteOn = function (midi, velocity) {
+	        if (this.mode.length == 0)
+	            return this.noteOn(midi, velocity);
+	        this.notes.add(midi, midi, velocity);
+	        if (this.octaves > 1)
+	            this.notes.add(midi, midi + 12, velocity);
+	        if (this.octaves > 2)
+	            this.notes.add(midi, midi + 24, velocity);
+	    };
+	    Arpeggiator.prototype.sendNoteOff = function (midi, velocity) {
+	        if (this.mode.length == 0)
+	            this.noteOff(midi, velocity);
+	        this.notes.remove(midi);
+	    };
+	    // Event handlers
+	    Arpeggiator.prototype.noteOn = function (midi, velocity) { };
+	    Arpeggiator.prototype.noteOff = function (midi, velocity) { };
+	    return Arpeggiator;
+	})();
+	exports.Arpeggiator = Arpeggiator;
+	var NoteData = (function () {
+	    function NoteData(note, noteToPlay, velocity) {
+	        this.note = note;
+	        this.noteToPlay = noteToPlay;
+	        this.velocity = velocity;
+	    }
+	    return NoteData;
+	})();
+	var NoteTable = (function () {
+	    function NoteTable() {
+	        this.notes = [];
+	    }
+	    NoteTable.prototype.length = function () { return this.notes.length; };
+	    NoteTable.prototype.get = function (i) { return this.notes[i]; };
+	    NoteTable.prototype.add = function (note, noteToPlay, velocity) {
+	        var ndata = new NoteData(note, noteToPlay, velocity);
+	        for (var i = 0; i < this.notes.length; i++) {
+	            if (noteToPlay < this.notes[i].noteToPlay) {
+	                this.notes.splice(i, 0, ndata);
+	                return;
+	            }
+	        }
+	        this.notes.push(ndata);
+	    };
+	    NoteTable.prototype.remove = function (note) {
+	        this.notes = this.notes.filter(function (ndata) { return ndata.note != note; });
+	    };
+	    return NoteTable;
+	})();
+
+
+/***/ },
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __extends = (this && this.__extends) || function (d, b) {
@@ -2544,7 +2659,7 @@
 
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var popups = __webpack_require__(8);
@@ -2665,121 +2780,6 @@
 	    return Presets;
 	})();
 	exports.Presets = Presets;
-
-
-/***/ },
-/* 16 */
-/***/ function(module, exports) {
-
-	var Arpeggiator = (function () {
-	    function Arpeggiator() {
-	        this.backward = false;
-	        this.mode = '';
-	        this.octaves = 1;
-	        this.time = 0.25;
-	        this.notect = 0;
-	        this.notes = new NoteTable();
-	        this.timer();
-	    }
-	    Arpeggiator.prototype.timer = function () {
-	        //TODO improve accuracy, read article
-	        setTimeout(this.timer.bind(this), this.time * 1000);
-	        // Release previous note
-	        if (this.lastNote) {
-	            this.noteOff(this.lastNote.noteToPlay, this.lastNote.velocity);
-	            this.lastNote = null;
-	        }
-	        // Return if disabled or no notes
-	        if (this.mode.length == 0)
-	            return;
-	        var len = this.notes.length();
-	        if (len == 0)
-	            return;
-	        // Check note counter
-	        this.wrapCounter(len);
-	        // Get current note and play it
-	        var ndata = this.notes.get(this.notect);
-	        this.noteOn(ndata.noteToPlay, ndata.velocity);
-	        this.lastNote = ndata;
-	        // Update note counter
-	        if (this.mode == 'u')
-	            this.notect++;
-	        else if (this.mode == 'd')
-	            this.notect--;
-	        else if (this.mode == 'ud') {
-	            if (this.backward)
-	                this.notect--;
-	            else
-	                this.notect++;
-	        }
-	    };
-	    Arpeggiator.prototype.wrapCounter = function (len) {
-	        if (this.notect >= len) {
-	            if (this.mode != 'ud')
-	                this.notect = 0;
-	            else {
-	                this.backward = true;
-	                this.notect = len < 2 ? 0 : len - 2;
-	            }
-	        }
-	        else if (this.notect < 0) {
-	            if (this.mode != 'ud')
-	                this.notect = len - 1;
-	            else {
-	                this.backward = false;
-	                this.notect = len < 2 ? 0 : 1;
-	            }
-	        }
-	    };
-	    Arpeggiator.prototype.sendNoteOn = function (midi, velocity) {
-	        if (this.mode.length == 0)
-	            return this.noteOn(midi, velocity);
-	        this.notes.add(midi, midi, velocity);
-	        if (this.octaves > 1)
-	            this.notes.add(midi, midi + 12, velocity);
-	        if (this.octaves > 2)
-	            this.notes.add(midi, midi + 24, velocity);
-	    };
-	    Arpeggiator.prototype.sendNoteOff = function (midi, velocity) {
-	        if (this.mode.length == 0)
-	            this.noteOff(midi, velocity);
-	        this.notes.remove(midi);
-	    };
-	    // Event handlers
-	    Arpeggiator.prototype.noteOn = function (midi, velocity) { };
-	    Arpeggiator.prototype.noteOff = function (midi, velocity) { };
-	    return Arpeggiator;
-	})();
-	exports.Arpeggiator = Arpeggiator;
-	var NoteData = (function () {
-	    function NoteData(note, noteToPlay, velocity) {
-	        this.note = note;
-	        this.noteToPlay = noteToPlay;
-	        this.velocity = velocity;
-	    }
-	    return NoteData;
-	})();
-	var NoteTable = (function () {
-	    function NoteTable() {
-	        this.notes = [];
-	    }
-	    NoteTable.prototype.length = function () { return this.notes.length; };
-	    NoteTable.prototype.get = function (i) { return this.notes[i]; };
-	    NoteTable.prototype.add = function (note, noteToPlay, velocity) {
-	        var ndata = new NoteData(note, noteToPlay, velocity);
-	        for (var i = 0; i < this.notes.length; i++) {
-	            if (noteToPlay < this.notes[i].noteToPlay) {
-	                this.notes.splice(i, 0, ndata);
-	                return;
-	            }
-	        }
-	        this.notes.push(ndata);
-	    };
-	    NoteTable.prototype.remove = function (note) {
-	        this.notes = this.notes.filter(function (ndata) { return ndata.note != note; });
-	    };
-	    return NoteTable;
-	})();
 
 
 /***/ }
