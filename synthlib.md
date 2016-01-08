@@ -5,9 +5,10 @@ Synthlib is small: it takes less than 18 kb minified and less than 5kb gzipped.
 
 Synthlib exposes a global object called "Modulator", containing two classes that
 can be instantiated and used by the application:
-	- Voice: a monophonic synthesizer
-	- Instrument: a polyphonic synthesizer that maintains an array of voices
-		and delegates on them to play individual notes.
+
+- Voice: a monophonic synthesizer
+- Instrument: a polyphonic synthesizer that maintains an array of voices
+	and delegates on them to play individual notes.
 
 ##Voice class
 TODO document
