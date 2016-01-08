@@ -81,7 +81,7 @@ forward the close call to all its voices.
 
 
 ##Example
-```
+```JavaScript
 function playSynthDemo() {
 	// Setup instrument
 	var ac = new AudioContext();
