@@ -69,7 +69,7 @@ export class Voice {
 		this.lastNote = 0;
 	}
 
-	close() {
+	close(): void {
 		// This method must be called to avoid memory leaks at the Web Audio level
 		if (this.lastNote) this.noteOff(this.lastNote, 1);
 		this.loader.close();

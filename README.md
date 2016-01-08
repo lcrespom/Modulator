@@ -39,6 +39,13 @@ on Twitter, or directly within GitHub.
 Check the [ToDo list](https://github.com/lcrespom/Modulator/blob/master/TODO.md)
 	for pending bugs, new features, UI improvements, and more.
 
+##SynthLib
+The sound generation code of the application is also available as a UI-independent
+JavaScript library called 
+[SynthLib](https://github.com/lcrespom/Modulator/blob/master/synthlib.md).
+With it, you can load instruments that have
+been previously designed with Modulator and play notes on them.
+
 
 ##Browser limitations
 1. Modulator has been tested to work in Chrome, FireFox and Safari.
