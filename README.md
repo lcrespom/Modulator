@@ -36,8 +36,14 @@ on Twitter, or directly within GitHub.
 	plain old JavaScript are compatible with it.
 
 ##ToDo
+- Split README.md into:
+	- README.md (main)
+	- TODO.md (todo section)
+	- synthlib.md (instructions on using synthlib)
 - Bugs
 	- ADSR needs more testing & refining
+		- Incorrect behavior when key is released before reaching the sustain level
+		- After adding when parameter, Pew noise no longer follows keyboard
 	- Popping sound at note on/off (improved after adding adsr depth parameter)
 	- Analyzer should detect when no sound is playing and clean osc and fft graphs
 	- Review TODO items inside code
@@ -49,6 +55,7 @@ on Twitter, or directly within GitHub.
 		finding an empty voice instead of the blind round-robin.
 	- Update presets so keyboard params are inside the JSON (just load & save them again)
 	- Use a logarithmic scale for portamento and arpeggio sliders
+	- Change arpeggio slider from time to BPM
 	- Improve arpeggio precision,
 		see http://www.html5rocks.com/en/tutorials/audio/scheduling/
 	- When loading a preset, pre-select a relevant node, e.g. based on the number of
@@ -65,7 +72,6 @@ on Twitter, or directly within GitHub.
 		- Etc?
 	- Improve ADSR
 		- Linear/exponential switch
-		- Incorrect behavior when key is released before reaching the sustain level
 	- Provide more preset instruments
 	- Improve presets panel
 		- When clicking on preset number, let user directly navigate to preset,

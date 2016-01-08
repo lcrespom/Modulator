@@ -8,9 +8,9 @@ import { ModernAudioNode, removeArrayElement } from './modern';
  * updating the node status accordingly.
  */
 export interface NoteHandler {
-	noteOn(midi: number, gain: number, ratio: number):void;
-	noteOff(midi: number, gain: number): void;
-	noteEnd(midi: number): void;
+	noteOn(midi: number, gain: number, ratio: number, when: number):void;
+	noteOff(midi: number, gain: number, when: number): void;
+	noteEnd(midi: number, when: number): void;
 	kbTrigger: boolean;
 	playAfterNoteOff: boolean;
 	handlers: NoteHandler[];
@@ -31,9 +31,9 @@ class BaseNoteHandler implements NoteHandler {
 		this.outTracker = new OutputTracker(ndata.anode);
 	}
 
-	noteOn(midi: number, gain: number, ratio: number):void {}
-	noteOff(midi: number, gain: number): void {}
-	noteEnd(midi: number): void {}
+	noteOn(midi: number, gain: number, ratio: number, when: number):void {}
+	noteOff(midi: number, gain: number, when: number): void {}
+	noteEnd(midi: number, when: number): void {}
 
 	clone(): AudioNode {
 		// Create clone
@@ -71,17 +71,16 @@ class BaseNoteHandler implements NoteHandler {
 		}
 	}
 
-	rampParam(param: AudioParam, ratio: number): void {
+	rampParam(param: AudioParam, ratio: number, when: number): void {
 		const portamento = this.ndata.synth.portamento;
 		const newv = param.value * ratio;
 		if (portamento.time > 0 && portamento.ratio > 0) {
 			const oldv = param.value * portamento.ratio;
-			const now = this.ndata.anode.context.currentTime;
-			param.cancelScheduledValues(now);
-			param.linearRampToValueAtTime(oldv, now);
-			param.exponentialRampToValueAtTime(newv, now + portamento.time);
+			param.cancelScheduledValues(when);
+			param.linearRampToValueAtTime(oldv, when);
+			param.exponentialRampToValueAtTime(newv, when + portamento.time);
 		}
-		else param.value = newv;
+		else param.setValueAtTime(newv, when);
 	}
 }
 
@@ -93,27 +92,28 @@ class OscNoteHandler extends BaseNoteHandler {
 	lastNote: number;
 	playing = false;
 
-	noteOn(midi: number, gain: number, ratio: number):void {
-		if (this.playing) this.noteEnd(midi);	// Because this is monophonic
+	noteOn(midi: number, gain: number, ratio: number, when: number):void {
+		if (this.playing) this.noteEnd(midi, when);	// Because this is monophonic
 		this.playing = true;
 		this.oscClone = <OscillatorNode>this.clone();
-		this.rampParam(this.oscClone.frequency, ratio);
-		this.oscClone.start();
+		this.rampParam(this.oscClone.frequency, ratio, when);
+		this.oscClone.start(when);
 		this.lastNote = midi;
 	}
 
-	noteOff(midi: number, gain: number): void {
+	noteOff(midi: number, gain: number, when: number): void {
 		if (midi != this.lastNote) return;
-		if (!this.playAfterNoteOff) this.noteEnd(midi);
+		if (!this.playAfterNoteOff) this.noteEnd(midi, when);
 	}
 
-	noteEnd(midi: number): void {
+	noteEnd(midi: number, when: number): void {
 		// Stop and disconnect
 		if (!this.playing) return;
 		this.playing = false;
-		this.oscClone.stop();
-		this.disconnect(this.oscClone);
-		this.oscClone = null;
+		this.oscClone.stop(when);
+		//TODO ensure that not disconnecting does not produce memory leaks
+		// this.disconnect(this.oscClone);
+		// this.oscClone = null;
 	}
 }
 
@@ -122,12 +122,9 @@ class OscNoteHandler extends BaseNoteHandler {
  * oscillator node, but the note does not affect the oscillator frequency
  */
 class LFONoteHandler extends OscNoteHandler {
-	noteOn(midi: number, gain: number, ratio: number): void {
-		super.noteOn(midi, gain, 1);
-	}
-	rampParam(param: AudioParam, ratio: number) {
+	rampParam(param: AudioParam, ratio: number, when: number) {
 		// Disable portamento for LFO
-		param.value = param.value * ratio;
+		param.setValueAtTime(param.value, when); 
 	}
 }
 
@@ -139,8 +136,8 @@ class BufferNoteHandler extends BaseNoteHandler {
 	lastNote: number;
 	playing = false;
 
-	noteOn(midi: number, gain: number, ratio: number):void {
-		if (this.playing) this.noteEnd(midi);
+	noteOn(midi: number, gain: number, ratio: number, when: number):void {
+		if (this.playing) this.noteEnd(midi, when);
 		const buf = this.ndata.anode['_buffer'];
 		if (!buf) return;	// Buffer still loading or failed
 		this.playing = true;
@@ -148,23 +145,24 @@ class BufferNoteHandler extends BaseNoteHandler {
 		this.absn.buffer = buf;
 		const pbr = this.absn.playbackRate;
 		const newRate = pbr.value * ratio;
-		this.rampParam(pbr, pbr.value * ratio);
-		this.absn.start();
+		this.rampParam(pbr, pbr.value * ratio, when);
+		this.absn.start(when);
 		this.lastNote = midi;
 	}
 
-	noteOff(midi: number, gain: number): void {
+	noteOff(midi: number, gain: number, when: number): void {
 		if (midi != this.lastNote) return;
-		if (!this.playAfterNoteOff) this.noteEnd(midi);
+		if (!this.playAfterNoteOff) this.noteEnd(midi, when);
 	}
 
-	noteEnd(midi: number): void {
+	noteEnd(midi: number, when: number): void {
 		// Stop and disconnect
 		if (!this.playing) return;
 		this.playing = false;
-		this.absn.stop();
-		this.disconnect(this.absn);
-		this.absn = null;
+		this.absn.stop(when);
+		//TODO ensure that not disconnecting does not produce memory leaks
+		// this.disconnect(this.absn);
+		// this.absn = null;
 	}
 
 }
@@ -177,40 +175,31 @@ class ADSRNoteHandler extends BaseNoteHandler {
 	lastNote: number;
 	kbTrigger = true;
 
-	noteOn(midi: number, gain: number, ratio: number):void {
+	noteOn(midi: number, gain: number, ratio: number, when: number):void {
 		this.setupOtherHandlers();
 		this.lastNote = midi;
 		const adsr: ADSR = <ADSR>this.ndata.anode;
-		const now = adsr.context.currentTime;
 		this.loopParams(out => {
 			const v = this.getParamValue(out);
-			out.cancelScheduledValues(now);
+			out.cancelScheduledValues(when);
 			const initial = (1 - adsr.depth) * v;
-			out.linearRampToValueAtTime(initial, now);
-			out.linearRampToValueAtTime(v, now + adsr.attack);
+			out.linearRampToValueAtTime(initial, when);
+			out.linearRampToValueAtTime(v, when + adsr.attack);
 			const target = v * adsr.sustain + initial * (1 - adsr.sustain);
-			out.linearRampToValueAtTime(target, now + adsr.attack + adsr.decay);
+			out.linearRampToValueAtTime(target, when + adsr.attack + adsr.decay);
 		});
 	}
 
-	noteOff(midi: number, gain: number): void {
+	noteOff(midi: number, gain: number, when: number): void {
 		if (midi != this.lastNote) return;
 		const adsr: ADSR = <ADSR>this.ndata.anode;
-		const now = adsr.context.currentTime;
 		this.loopParams(out => {
 			const v = out.value;	// Get the really current value
 			const finalv = (1 - adsr.depth) * v;
-			out.cancelScheduledValues(now);
-			out.linearRampToValueAtTime(v, now);
-			out.linearRampToValueAtTime(finalv, now + adsr.release);
-			//setTimeout(_ => this.sendNoteEnd(midi), adsr.release * 2000);
+			out.cancelScheduledValues(when);
+			out.linearRampToValueAtTime(v, when);
+			out.linearRampToValueAtTime(finalv, when + adsr.release);
 		});
-	}
-
-	noteEnd(midi: number): void {}
-
-	sendNoteEnd(midi: number): void {
-		for (const nh of this.handlers) nh.noteEnd(midi);
 	}
 
 	setupOtherHandlers() {
@@ -238,25 +227,25 @@ class RestartableNoteHandler extends BaseNoteHandler {
 	lastNote: number;
 	playing = false;
 
-	noteOn(midi: number, gain: number, ratio: number):void {
-		if (this.playing) this.noteEnd(midi);
+	noteOn(midi: number, gain: number, ratio: number, when: number):void {
+		if (this.playing) this.noteEnd(midi, when);
 		this.playing = true;
 		const anode: any = this.ndata.anode;
-		anode.start();
+		anode.start(when);
 		this.lastNote = midi;
 	}
 
-	noteOff(midi: number, gain: number): void {
+	noteOff(midi: number, gain: number, when: number): void {
 		if (midi != this.lastNote) return;
-		if (!this.playAfterNoteOff) this.noteEnd(midi);
+		if (!this.playAfterNoteOff) this.noteEnd(midi, when);
 	}
 
-	noteEnd(midi: number): void {
+	noteEnd(midi: number, when: number): void {
 		// Stop and disconnect
 		if (!this.playing) return;
 		this.playing = false;
 		const anode: any = this.ndata.anode;
-		anode.stop();
+		anode.stop(when);
 	}
 }
 

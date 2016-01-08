@@ -170,18 +170,20 @@ export class Synth {
 		return Math.pow(SEMITONE, midi - A4);
 	}
 
-	noteOn(midi: number, gain: number): void {
+	noteOn(midi: number, gain: number, when?: number): void {
+		if (!when) when = this.ac.currentTime;
 		const ratio = this.midi2freqRatio(midi);
 		for (const nh of this.noteHandlers) {
 			if (nh.kbTrigger) nh.handlers = this.noteHandlers;
-			nh.noteOn(midi, gain, ratio);
+			nh.noteOn(midi, gain, ratio, when);
 		}
 		this.portamento.ratio = ratio;
 	}
 
-	noteOff(midi: number, gain: number): void {
+	noteOff(midi: number, gain: number, when?: number): void {
+		if (!when) when = this.ac.currentTime;
 		for (const nh of this.noteHandlers)
-			nh.noteOff(midi, gain);
+			nh.noteOff(midi, gain, when);
 	}
 
 	addNoteHandler(nh: NoteHandler): void {

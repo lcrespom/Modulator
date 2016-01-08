@@ -211,20 +211,24 @@
 	    Synth.prototype.midi2freqRatio = function (midi) {
 	        return Math.pow(SEMITONE, midi - A4);
 	    };
-	    Synth.prototype.noteOn = function (midi, gain) {
+	    Synth.prototype.noteOn = function (midi, gain, when) {
+	        if (!when)
+	            when = this.ac.currentTime;
 	        var ratio = this.midi2freqRatio(midi);
 	        for (var _i = 0, _a = this.noteHandlers; _i < _a.length; _i++) {
 	            var nh = _a[_i];
 	            if (nh.kbTrigger)
 	                nh.handlers = this.noteHandlers;
-	            nh.noteOn(midi, gain, ratio);
+	            nh.noteOn(midi, gain, ratio, when);
 	        }
 	        this.portamento.ratio = ratio;
 	    };
-	    Synth.prototype.noteOff = function (midi, gain) {
+	    Synth.prototype.noteOff = function (midi, gain, when) {
+	        if (!when)
+	            when = this.ac.currentTime;
 	        for (var _i = 0, _a = this.noteHandlers; _i < _a.length; _i++) {
 	            var nh = _a[_i];
-	            nh.noteOff(midi, gain);
+	            nh.noteOff(midi, gain, when);
 	        }
 	    };
 	    Synth.prototype.addNoteHandler = function (nh) {
@@ -351,9 +355,9 @@
 	        this.ndata = ndata;
 	        this.outTracker = new OutputTracker(ndata.anode);
 	    }
-	    BaseNoteHandler.prototype.noteOn = function (midi, gain, ratio) { };
-	    BaseNoteHandler.prototype.noteOff = function (midi, gain) { };
-	    BaseNoteHandler.prototype.noteEnd = function (midi) { };
+	    BaseNoteHandler.prototype.noteOn = function (midi, gain, ratio, when) { };
+	    BaseNoteHandler.prototype.noteOff = function (midi, gain, when) { };
+	    BaseNoteHandler.prototype.noteEnd = function (midi, when) { };
 	    BaseNoteHandler.prototype.clone = function () {
 	        // Create clone
 	        var anode = this.ndata.anode.context[this.ndata.nodeDef.constructor]();
@@ -395,18 +399,17 @@
 	            inData.anode.disconnect(anode[inData.controlParam]);
 	        }
 	    };
-	    BaseNoteHandler.prototype.rampParam = function (param, ratio) {
+	    BaseNoteHandler.prototype.rampParam = function (param, ratio, when) {
 	        var portamento = this.ndata.synth.portamento;
 	        var newv = param.value * ratio;
 	        if (portamento.time > 0 && portamento.ratio > 0) {
 	            var oldv = param.value * portamento.ratio;
-	            var now = this.ndata.anode.context.currentTime;
-	            param.cancelScheduledValues(now);
-	            param.linearRampToValueAtTime(oldv, now);
-	            param.exponentialRampToValueAtTime(newv, now + portamento.time);
+	            param.cancelScheduledValues(when);
+	            param.linearRampToValueAtTime(oldv, when);
+	            param.exponentialRampToValueAtTime(newv, when + portamento.time);
 	        }
 	        else
-	            param.value = newv;
+	            param.setValueAtTime(newv, when);
 	    };
 	    return BaseNoteHandler;
 	})();
@@ -419,29 +422,30 @@
 	        _super.apply(this, arguments);
 	        this.playing = false;
 	    }
-	    OscNoteHandler.prototype.noteOn = function (midi, gain, ratio) {
+	    OscNoteHandler.prototype.noteOn = function (midi, gain, ratio, when) {
 	        if (this.playing)
-	            this.noteEnd(midi); // Because this is monophonic
+	            this.noteEnd(midi, when); // Because this is monophonic
 	        this.playing = true;
 	        this.oscClone = this.clone();
-	        this.rampParam(this.oscClone.frequency, ratio);
-	        this.oscClone.start();
+	        this.rampParam(this.oscClone.frequency, ratio, when);
+	        this.oscClone.start(when);
 	        this.lastNote = midi;
 	    };
-	    OscNoteHandler.prototype.noteOff = function (midi, gain) {
+	    OscNoteHandler.prototype.noteOff = function (midi, gain, when) {
 	        if (midi != this.lastNote)
 	            return;
 	        if (!this.playAfterNoteOff)
-	            this.noteEnd(midi);
+	            this.noteEnd(midi, when);
 	    };
-	    OscNoteHandler.prototype.noteEnd = function (midi) {
+	    OscNoteHandler.prototype.noteEnd = function (midi, when) {
 	        // Stop and disconnect
 	        if (!this.playing)
 	            return;
 	        this.playing = false;
-	        this.oscClone.stop();
-	        this.disconnect(this.oscClone);
-	        this.oscClone = null;
+	        this.oscClone.stop(when);
+	        //TODO ensure that not disconnecting does not produce memory leaks
+	        // this.disconnect(this.oscClone);
+	        // this.oscClone = null;
 	    };
 	    return OscNoteHandler;
 	})(BaseNoteHandler);
@@ -454,12 +458,9 @@
 	    function LFONoteHandler() {
 	        _super.apply(this, arguments);
 	    }
-	    LFONoteHandler.prototype.noteOn = function (midi, gain, ratio) {
-	        _super.prototype.noteOn.call(this, midi, gain, 1);
-	    };
-	    LFONoteHandler.prototype.rampParam = function (param, ratio) {
+	    LFONoteHandler.prototype.rampParam = function (param, ratio, when) {
 	        // Disable portamento for LFO
-	        param.value = param.value * ratio;
+	        param.setValueAtTime(param.value, when);
 	    };
 	    return LFONoteHandler;
 	})(OscNoteHandler);
@@ -472,9 +473,9 @@
 	        _super.apply(this, arguments);
 	        this.playing = false;
 	    }
-	    BufferNoteHandler.prototype.noteOn = function (midi, gain, ratio) {
+	    BufferNoteHandler.prototype.noteOn = function (midi, gain, ratio, when) {
 	        if (this.playing)
-	            this.noteEnd(midi);
+	            this.noteEnd(midi, when);
 	        var buf = this.ndata.anode['_buffer'];
 	        if (!buf)
 	            return; // Buffer still loading or failed
@@ -483,24 +484,25 @@
 	        this.absn.buffer = buf;
 	        var pbr = this.absn.playbackRate;
 	        var newRate = pbr.value * ratio;
-	        this.rampParam(pbr, pbr.value * ratio);
-	        this.absn.start();
+	        this.rampParam(pbr, pbr.value * ratio, when);
+	        this.absn.start(when);
 	        this.lastNote = midi;
 	    };
-	    BufferNoteHandler.prototype.noteOff = function (midi, gain) {
+	    BufferNoteHandler.prototype.noteOff = function (midi, gain, when) {
 	        if (midi != this.lastNote)
 	            return;
 	        if (!this.playAfterNoteOff)
-	            this.noteEnd(midi);
+	            this.noteEnd(midi, when);
 	    };
-	    BufferNoteHandler.prototype.noteEnd = function (midi) {
+	    BufferNoteHandler.prototype.noteEnd = function (midi, when) {
 	        // Stop and disconnect
 	        if (!this.playing)
 	            return;
 	        this.playing = false;
-	        this.absn.stop();
-	        this.disconnect(this.absn);
-	        this.absn = null;
+	        this.absn.stop(when);
+	        //TODO ensure that not disconnecting does not produce memory leaks
+	        // this.disconnect(this.absn);
+	        // this.absn = null;
 	    };
 	    return BufferNoteHandler;
 	})(BaseNoteHandler);
@@ -513,42 +515,32 @@
 	        _super.apply(this, arguments);
 	        this.kbTrigger = true;
 	    }
-	    ADSRNoteHandler.prototype.noteOn = function (midi, gain, ratio) {
+	    ADSRNoteHandler.prototype.noteOn = function (midi, gain, ratio, when) {
 	        var _this = this;
 	        this.setupOtherHandlers();
 	        this.lastNote = midi;
 	        var adsr = this.ndata.anode;
-	        var now = adsr.context.currentTime;
 	        this.loopParams(function (out) {
 	            var v = _this.getParamValue(out);
-	            out.cancelScheduledValues(now);
+	            out.cancelScheduledValues(when);
 	            var initial = (1 - adsr.depth) * v;
-	            out.linearRampToValueAtTime(initial, now);
-	            out.linearRampToValueAtTime(v, now + adsr.attack);
+	            out.linearRampToValueAtTime(initial, when);
+	            out.linearRampToValueAtTime(v, when + adsr.attack);
 	            var target = v * adsr.sustain + initial * (1 - adsr.sustain);
-	            out.linearRampToValueAtTime(target, now + adsr.attack + adsr.decay);
+	            out.linearRampToValueAtTime(target, when + adsr.attack + adsr.decay);
 	        });
 	    };
-	    ADSRNoteHandler.prototype.noteOff = function (midi, gain) {
+	    ADSRNoteHandler.prototype.noteOff = function (midi, gain, when) {
 	        if (midi != this.lastNote)
 	            return;
 	        var adsr = this.ndata.anode;
-	        var now = adsr.context.currentTime;
 	        this.loopParams(function (out) {
 	            var v = out.value; // Get the really current value
 	            var finalv = (1 - adsr.depth) * v;
-	            out.cancelScheduledValues(now);
-	            out.linearRampToValueAtTime(v, now);
-	            out.linearRampToValueAtTime(finalv, now + adsr.release);
-	            //setTimeout(_ => this.sendNoteEnd(midi), adsr.release * 2000);
+	            out.cancelScheduledValues(when);
+	            out.linearRampToValueAtTime(v, when);
+	            out.linearRampToValueAtTime(finalv, when + adsr.release);
 	        });
-	    };
-	    ADSRNoteHandler.prototype.noteEnd = function (midi) { };
-	    ADSRNoteHandler.prototype.sendNoteEnd = function (midi) {
-	        for (var _i = 0, _a = this.handlers; _i < _a.length; _i++) {
-	            var nh = _a[_i];
-	            nh.noteEnd(midi);
-	        }
 	    };
 	    ADSRNoteHandler.prototype.setupOtherHandlers = function () {
 	        //TODO should set to false when ADSR node is removed
@@ -581,27 +573,27 @@
 	        _super.apply(this, arguments);
 	        this.playing = false;
 	    }
-	    RestartableNoteHandler.prototype.noteOn = function (midi, gain, ratio) {
+	    RestartableNoteHandler.prototype.noteOn = function (midi, gain, ratio, when) {
 	        if (this.playing)
-	            this.noteEnd(midi);
+	            this.noteEnd(midi, when);
 	        this.playing = true;
 	        var anode = this.ndata.anode;
-	        anode.start();
+	        anode.start(when);
 	        this.lastNote = midi;
 	    };
-	    RestartableNoteHandler.prototype.noteOff = function (midi, gain) {
+	    RestartableNoteHandler.prototype.noteOff = function (midi, gain, when) {
 	        if (midi != this.lastNote)
 	            return;
 	        if (!this.playAfterNoteOff)
-	            this.noteEnd(midi);
+	            this.noteEnd(midi, when);
 	    };
-	    RestartableNoteHandler.prototype.noteEnd = function (midi) {
+	    RestartableNoteHandler.prototype.noteEnd = function (midi, when) {
 	        // Stop and disconnect
 	        if (!this.playing)
 	            return;
 	        this.playing = false;
 	        var anode = this.ndata.anode;
-	        anode.stop();
+	        anode.stop(when);
 	    };
 	    return RestartableNoteHandler;
 	})(BaseNoteHandler);
@@ -1054,21 +1046,23 @@
 	        this.voiceNum = 0;
 	        // Setup synth params by having a common instance for all voices
 	        this.portamento = this.voices[0].synth.portamento;
-	        if (json.keyboard.portamento)
+	        if (json.keyboard && json.keyboard.portamento)
 	            this.portamento.time = json.keyboard.portamento;
 	        for (var i = 1; i < numVoices; i++)
 	            this.voices[i].synth.portamento = this.portamento;
 	    }
-	    Instrument.prototype.noteOn = function (midi, velocity) {
+	    Instrument.prototype.noteOn = function (midi, velocity, when) {
+	        if (velocity === void 0) { velocity = 1; }
 	        var voice = this.voices[this.voiceNum];
-	        voice.noteOn(midi, velocity);
+	        voice.noteOn(midi, velocity, when);
 	        this.voiceNum = (this.voiceNum + 1) % this.voices.length;
 	    };
-	    Instrument.prototype.noteOff = function (midi, velocity) {
+	    Instrument.prototype.noteOff = function (midi, velocity, when) {
+	        if (velocity === void 0) { velocity = 1; }
 	        for (var _i = 0, _a = this.voices; _i < _a.length; _i++) {
 	            var voice = _a[_i];
 	            if (voice.lastNote == midi) {
-	                voice.noteOff(midi, velocity);
+	                voice.noteOff(midi, velocity, when);
 	                break;
 	            }
 	        }
@@ -1091,12 +1085,14 @@
 	        this.synth = this.loader.load(ac, json, dest || ac.destination);
 	        this.lastNote = 0;
 	    }
-	    Voice.prototype.noteOn = function (midi, velocity) {
-	        this.synth.noteOn(midi, velocity);
+	    Voice.prototype.noteOn = function (midi, velocity, when) {
+	        if (velocity === void 0) { velocity = 1; }
+	        this.synth.noteOn(midi, velocity, when);
 	        this.lastNote = midi;
 	    };
-	    Voice.prototype.noteOff = function (midi, velocity) {
-	        this.synth.noteOff(midi, velocity);
+	    Voice.prototype.noteOff = function (midi, velocity, when) {
+	        if (velocity === void 0) { velocity = 1; }
+	        this.synth.noteOff(midi, velocity, when);
 	        this.lastNote = 0;
 	    };
 	    Voice.prototype.close = function () {

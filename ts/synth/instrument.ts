@@ -18,22 +18,22 @@ export class Instrument {
 		this.voiceNum = 0;
 		// Setup synth params by having a common instance for all voices
 		this.portamento = this.voices[0].synth.portamento;
-		if (json.keyboard.portamento)
+		if (json.keyboard && json.keyboard.portamento)
 			this.portamento.time = json.keyboard.portamento;
 		for (let i = 1; i < numVoices; i++)
 			this.voices[i].synth.portamento = this.portamento;
 	}
 
-	noteOn(midi: number, velocity: number): void {
+	noteOn(midi: number, velocity: number = 1, when?: number): void {
 		const voice = this.voices[this.voiceNum];
-		voice.noteOn(midi, velocity);
+		voice.noteOn(midi, velocity, when);
 		this.voiceNum = (this.voiceNum + 1) % this.voices.length;
 	}
 
-	noteOff(midi: number, velocity: number): void {
+	noteOff(midi: number, velocity: number = 1, when?: number): void {
 		for (const voice of this.voices) {
 			if (voice.lastNote == midi) {
-				voice.noteOff(midi, velocity);
+				voice.noteOff(midi, velocity, when);
 				break;
 			}
 		}
@@ -59,13 +59,13 @@ export class Voice {
 		this.lastNote = 0;
 	}
 
-	noteOn(midi: number, velocity: number): void {
-		this.synth.noteOn(midi, velocity);
+	noteOn(midi: number, velocity: number = 1, when?: number): void {
+		this.synth.noteOn(midi, velocity, when);
 		this.lastNote = midi;
 	}
 
-	noteOff(midi: number, velocity: number): void {
-		this.synth.noteOff(midi, velocity);
+	noteOff(midi: number, velocity: number = 1, when?: number): void {
+		this.synth.noteOff(midi, velocity, when);
 		this.lastNote = 0;
 	}
 
