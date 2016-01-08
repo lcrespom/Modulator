@@ -66,7 +66,7 @@
 - Naming
 - Logo: svg
 
-##Long term:
+##Long term
 - Tracker
 	- Probably as an independent app that can load synth presets
 	- Review [this article](http://www.html5rocks.com/en/tutorials/audio/scheduling/)
