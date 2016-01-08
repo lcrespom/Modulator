@@ -82,5 +82,31 @@ forward the close call to all its voices.
 
 ##Example
 ```
-	TODO JavaScript example here
+function playSynthDemo() {
+	// Setup instrument
+	var ac = new AudioContext();
+	var json = { /* JSON from a patch saved from Modulator */ };
+	var instrument = new Modulator.Instrument(ac, json, 4);
+
+	// Setup score
+	var ct = -1;
+	var KB_NOTES = 'ZSXDCVGBHNJMQ2W3ER5T6Y7UI9O0P';
+	var score = 'QQTTYYT RREEWWQ';
+	var notes = score.split('').map(function(k) {
+		return k != ' ' ? 36 + KB_NOTES.indexOf(k) : 0;
+	});
+	var lastNote = 0;
+
+	// Timer to play score
+	function tick() {
+		if (lastNote) instrument.noteOff(lastNote);
+		if (++ct > score.length) return;
+		var note = notes[ct % notes.length];
+		if (note > 0) instrument.noteOn(note);
+		lastNote = note;
+		setTimeout(tick, 300);
+	}
+
+	tick();
+}
 ```
