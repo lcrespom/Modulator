@@ -89,22 +89,22 @@ function playSynthDemo() {
 	var instrument = new Modulator.Instrument(ac, json, 4);
 
 	// Setup score
-	var ct = -1;
 	var KB_NOTES = 'ZSXDCVGBHNJMQ2W3ER5T6Y7UI9O0P';
-	var score = 'QQTTYYT RREEWWQ';
+	var score = 'Q   T   REWI   T   REWI   T   RERW';
 	var notes = score.split('').map(function(k) {
 		return k != ' ' ? 36 + KB_NOTES.indexOf(k) : 0;
 	});
 	var lastNote = 0;
+	var ct = 0;
 
 	// Timer to play score
 	function tick() {
 		if (lastNote) instrument.noteOff(lastNote);
+		var note = notes[ct];
 		if (++ct > score.length) return;
-		var note = notes[ct % notes.length];
 		if (note > 0) instrument.noteOn(note);
 		lastNote = note;
-		setTimeout(tick, 300);
+		setTimeout(tick, 150);
 	}
 
 	tick();
