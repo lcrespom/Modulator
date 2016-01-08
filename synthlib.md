@@ -8,13 +8,13 @@ can be instantiated and used by the application:
 
 - Voice: a monophonic synthesizer
 - Instrument: a polyphonic synthesizer that maintains an array of voices
-	and delegates on them to play individual notes.
+	and delegates on them to play individual notes
 
 ##Voice class
 A voice object is responsible for loading a Modulator patch into a
 monophonic synthetizer, and then sending note events to it.
 
-####constructor(ac: AudioContext, json: any, dest?: AudioNode)
+####constructor(ac, json, dest)
 Creates a new Voice instance, loading the synthesizer definition from
 a parsed JSON object, obtained from a previously-saved Modulator patch.
 
@@ -24,7 +24,7 @@ a parsed JSON object, obtained from a previously-saved Modulator patch.
 - **dest**: an optional destination AudioNode. If not specified, the
 	*destination* property of the *ac* parameter will be used.
 
-####noteOn(midi: number, velocity: number = 1, when?: number): void
+####noteOn(midi, velocity, when)
 Sends a noteOn event to the synthesizer, equivalent to pressing a
 key in the synthesizer keyboard.
 
@@ -36,7 +36,7 @@ key in the synthesizer keyboard.
 - **when**: the AudioContext time when the note event should be executed.
 	If not specified, the note will be played immediately. 
 
-####noteOff(midi: number, velocity: number = 1, when?: number): void
+####noteOff(midi, velocity, when)
 Sends a noteOff event to the synthesizer, equivalent to releasing a key
 in the synthesizer keyboard.
 
@@ -48,14 +48,14 @@ in the synthesizer keyboard.
 - **when**: the AudioContext time when the note event should be executed.
 	If not specified, the note will be stopped immediately. 
 
-####close(): void
+####close()
 To be called upon shutdown in order to ensure that all sounds are stopped.
 
 ##Instrument class
 An instrument object is handles an array of voices, and forwards *noteOn* / *noteOff*
 calls to them in order to implement a polyphonic synthesizer.
 
-####constructor(ac: AudioContext, json: any, numVoices: number, dest?: AudioNode)
+####constructor(ac, json, numVoices, dest)
 Creates a new Instrument instance, loading a patch from a parsed JSON
 object into each of its voices.
 
@@ -66,13 +66,13 @@ object into each of its voices.
 - **dest**: an optional destination AudioNode. If not specified, the
 	*destination* property of the *ac* parameter will be used.
 
-####noteOn(midi: number, velocity: number = 1, when?: number): void
+####noteOn(midi, velocity, when)
 Forwards the *noteOn* call to one of the voices. Currently the voice selection criterion
 is based on the least-recently started note. The parameters are the same as with the
 Voice class *noteOn* method.
 
-####noteOff(midi: number, velocity: number = 1, when?: number): void
-Forwards the noteOff call to the voice that was selected for the corresponding 
+####noteOff(midi, velocity, when)
+Forwards the *noteOff* call to the voice that was selected for the corresponding 
 *noteOn* call. The parameters are the same as with the Voice class *noteOff* method.
 
 ####close(): void
