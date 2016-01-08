@@ -36,7 +36,8 @@ on Twitter, or directly within GitHub.
 	plain old JavaScript are compatible with it.
 
 ##ToDo
-Check the (ToDo list)[TODO.md] for pending bugs, new features, UI improvements, and more.
+Check the [ToDo list](https://github.com/lcrespom/Modulator/blob/master/TODO.md)
+	for pending bugs, new features, UI improvements, and more.
 
 
 ##Browser limitations
