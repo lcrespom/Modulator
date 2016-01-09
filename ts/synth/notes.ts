@@ -74,6 +74,7 @@ class BaseNoteHandler implements NoteHandler {
 	rampParam(param: AudioParam, ratio: number, when: number): void {
 		const portamento = this.ndata.synth.portamento;
 		const newv = param.value * ratio;
+		param['_value'] = newv;	// Required for ADSR to capture the correct value
 		if (portamento.time > 0 && portamento.ratio > 0) {
 			const oldv = param.value * portamento.ratio;
 			param.cancelScheduledValues(when);
@@ -124,7 +125,7 @@ class OscNoteHandler extends BaseNoteHandler {
 class LFONoteHandler extends OscNoteHandler {
 	rampParam(param: AudioParam, ratio: number, when: number) {
 		// Disable portamento for LFO
-		param.setValueAtTime(param.value, when); 
+		param.setValueAtTime(param.value, when);
 	}
 }
 

@@ -1028,6 +1028,7 @@
 	    BaseNoteHandler.prototype.rampParam = function (param, ratio, when) {
 	        var portamento = this.ndata.synth.portamento;
 	        var newv = param.value * ratio;
+	        param['_value'] = newv; // Required for ADSR to capture the correct value
 	        if (portamento.time > 0 && portamento.ratio > 0) {
 	            var oldv = param.value * portamento.ratio;
 	            param.cancelScheduledValues(when);
