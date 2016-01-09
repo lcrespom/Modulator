@@ -161,6 +161,5 @@ function playSynthDemo() {
 			lastNote = note;
 		}
 	});
-
 }
 ```
