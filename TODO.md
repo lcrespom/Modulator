@@ -35,15 +35,18 @@
 - Improve presets panel
 	- When clicking on preset number, let user directly navigate to preset,
 		e.g. by showing a drop down list
-- Use Web Midi API to gather events from external midi Keyboard
-	- Play notes
-	- Associate external controls with selected node parameters
-	- Make source nodes use the MIDI velocity parameter, which is currently ignored.
-		This will require implementing custom nodes for most source nodes,
-		so they are internally connected to a gain node.
 - Limitation: a control node can only control a single parameter name
 	- Prevent from connecting a control node to more than one destination
 	- Or else, modify the UI to support multiple destination nodes
+- Use Web Midi API to gather events from external midi Keyboard
+	- Currently already supporting keyboard
+	- Associate external kobs with selected node parameters
+		- Knob distribution seems to be very erratic
+	- See http://www.keithmcmillen.com/blog/making-music-in-the-browser-web-midi-api/
+		for a guide on the MIDI Web API.
+	- Make source nodes use the MIDI velocity parameter, which is currently ignored.
+		This will require implementing custom nodes for most source nodes,
+		so they are internally connected to a gain node.
 
 ##UI
 - Polish logo

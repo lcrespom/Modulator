@@ -131,7 +131,8 @@ export class PianoKeyboard {
 	displayKeyDown(key): void {
 		if (typeof key == 'number') key = this.midi2key(key);
 		if (!key) return;
-		if (!this.poly && this.lastKey) this.displayKeyUp(this.lastKey, true);
+		if (!this.poly && this.arpeggio.mode == 0 && this.lastKey)
+			this.displayKeyUp(this.lastKey, true);
 		key.css('transition', `background-color ${this.envelope.attack}s linear`);
 		key.addClass('piano-key-pressed');
 		this.lastKey = key;

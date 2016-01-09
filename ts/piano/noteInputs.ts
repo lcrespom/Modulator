@@ -1,4 +1,5 @@
 import { Keyboard } from './keyboard';
+import { MidiKeyboard } from './midi';
 import { PianoKeyboard } from './piano';
 import { Arpeggiator } from './arpeggiator';
 
@@ -35,6 +36,18 @@ export class NoteInputs {
 		piano.polyOn = () => this.polyOn();
 		piano.polyOff = () => this.polyOff();
 		// Setup PC keyboard
+		var kb = this.setupPCKeyboard(piano);
+		// Bind piano octave with PC keyboard
+		kb.baseNote = piano.baseNote;
+		piano.octaveChanged = baseNote => kb.baseNote = baseNote;
+		this.setupEnvelopeAnimation(piano);
+		// Setup arpeggiator
+		this.setupArpeggiator(piano, synthUI.synth.ac);
+		// Setup MIDI keyboard
+		this.setupMidiKeyboard(piano);
+	}
+
+	setupPCKeyboard(piano: PianoKeyboard): Keyboard {
 		var kb = new Keyboard();
 		kb.noteOn = (midi) => {
 			if (document.activeElement.nodeName == 'INPUT' &&
@@ -46,12 +59,19 @@ export class NoteInputs {
 			this.arpeggiator.sendNoteOff(midi, 1);
 			piano.displayKeyUp(midi);
 		};
-		// Bind piano octave with PC keyboard
-		kb.baseNote = piano.baseNote;
-		piano.octaveChanged = baseNote => kb.baseNote = baseNote;
-		this.setupEnvelopeAnimation(piano);
-		// Setup arpeggiator
-		this.setupArpeggiator(piano, synthUI.synth.ac);
+		return kb;
+	}
+
+	setupMidiKeyboard(piano: PianoKeyboard) {
+		var midi = new MidiKeyboard();
+		midi.noteOn = (midi: number, velocity: number, channel: number): void => {
+			this.arpeggiator.sendNoteOn(midi, 1);
+			piano.displayKeyDown(midi);
+		};
+		midi.noteOff = (midi: number, velocity: number, channel: number): void => {
+			this.arpeggiator.sendNoteOff(midi, 1);
+			piano.displayKeyUp(midi);
+		};
 	}
 
 	setupEnvelopeAnimation(piano: PianoKeyboard) {

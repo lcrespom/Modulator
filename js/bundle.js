@@ -2013,6 +2013,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var keyboard_1 = __webpack_require__(12);
+	var midi_1 = __webpack_require__(18);
 	var piano_1 = __webpack_require__(13);
 	var arpeggiator_1 = __webpack_require__(14);
 	var instrument_1 = __webpack_require__(15);
@@ -2038,6 +2039,18 @@
 	        piano.polyOn = function () { return _this.polyOn(); };
 	        piano.polyOff = function () { return _this.polyOff(); };
 	        // Setup PC keyboard
+	        var kb = this.setupPCKeyboard(piano);
+	        // Bind piano octave with PC keyboard
+	        kb.baseNote = piano.baseNote;
+	        piano.octaveChanged = function (baseNote) { return kb.baseNote = baseNote; };
+	        this.setupEnvelopeAnimation(piano);
+	        // Setup arpeggiator
+	        this.setupArpeggiator(piano, synthUI.synth.ac);
+	        // Setup MIDI keyboard
+	        this.setupMidiKeyboard(piano);
+	    }
+	    NoteInputs.prototype.setupPCKeyboard = function (piano) {
+	        var _this = this;
 	        var kb = new keyboard_1.Keyboard();
 	        kb.noteOn = function (midi) {
 	            if (document.activeElement.nodeName == 'INPUT' &&
@@ -2050,13 +2063,20 @@
 	            _this.arpeggiator.sendNoteOff(midi, 1);
 	            piano.displayKeyUp(midi);
 	        };
-	        // Bind piano octave with PC keyboard
-	        kb.baseNote = piano.baseNote;
-	        piano.octaveChanged = function (baseNote) { return kb.baseNote = baseNote; };
-	        this.setupEnvelopeAnimation(piano);
-	        // Setup arpeggiator
-	        this.setupArpeggiator(piano, synthUI.synth.ac);
-	    }
+	        return kb;
+	    };
+	    NoteInputs.prototype.setupMidiKeyboard = function (piano) {
+	        var _this = this;
+	        var midi = new midi_1.MidiKeyboard();
+	        midi.noteOn = function (midi, velocity, channel) {
+	            _this.arpeggiator.sendNoteOn(midi, 1);
+	            piano.displayKeyDown(midi);
+	        };
+	        midi.noteOff = function (midi, velocity, channel) {
+	            _this.arpeggiator.sendNoteOff(midi, 1);
+	            piano.displayKeyUp(midi);
+	        };
+	    };
 	    NoteInputs.prototype.setupEnvelopeAnimation = function (piano) {
 	        var loaded = this.synthUI.gr.handler.graphLoaded;
 	        this.synthUI.gr.handler.graphLoaded = function () {
@@ -2297,7 +2317,7 @@
 	            key = this.midi2key(key);
 	        if (!key)
 	            return;
-	        if (!this.poly && this.lastKey)
+	        if (!this.poly && this.arpeggio.mode == 0 && this.lastKey)
 	            this.displayKeyUp(this.lastKey, true);
 	        key.css('transition', "background-color " + this.envelope.attack + "s linear");
 	        key.addClass('piano-key-pressed');
@@ -2859,6 +2879,48 @@
 	    return Timer;
 	})();
 	exports.Timer = Timer;
+
+
+/***/ },
+/* 18 */
+/***/ function(module, exports) {
+
+	var MidiKeyboard = (function () {
+	    function MidiKeyboard() {
+	        var _this = this;
+	        this.connected = false;
+	        if (!navigator.requestMIDIAccess)
+	            return;
+	        navigator.requestMIDIAccess({ sysex: false }).then(function (midiAccess) {
+	            if (midiAccess.inputs.size <= 0)
+	                return;
+	            var input = midiAccess.inputs.values().next().value;
+	            if (!input)
+	                return;
+	            input.onmidimessage = function (msg) { return _this.midiMessage(msg); };
+	            _this.connected = true;
+	        });
+	    }
+	    MidiKeyboard.prototype.midiMessage = function (msg) {
+	        var data = msg.data;
+	        var cmd = data[0] >> 4;
+	        var channel = data[0] & 0xf;
+	        var note = data[1];
+	        var velocity = data[2];
+	        switch (cmd) {
+	            case 9:
+	                this.noteOn(note, velocity, channel);
+	                break;
+	            case 8:
+	                this.noteOff(note, velocity, channel);
+	                break;
+	        }
+	    };
+	    MidiKeyboard.prototype.noteOn = function (midi, velocity, channel) { };
+	    MidiKeyboard.prototype.noteOff = function (midi, velocity, channel) { };
+	    return MidiKeyboard;
+	})();
+	exports.MidiKeyboard = MidiKeyboard;
 
 
 /***/ }
