@@ -136,7 +136,7 @@ function playSynthDemo() {
 	// Setup instrument
 	var json = { /* JSON from a patch saved from Modulator */ };
 	var ac = new AudioContext();
-	var instrument = new Modulator.Instrument(ac, json, 4);
+	var voice = new Modulator.Voice(ac, json);
 
 	// Setup score
 	var KB_NOTES = 'ZSXDCVGBHNJMQ2W3ER5T6Y7UI9O0P';
@@ -152,12 +152,12 @@ function playSynthDemo() {
 	timer.start(time => {
 		var note = notes[ct++];
 		if (ct > score.length) {
-			instrument.noteOff(lastNote, time);
+			voice.noteOff(lastNote, time);
 			timer.stop();
 		}
 		else if (note > 0) {
-			instrument.noteOn(note, time);
-			if (lastNote) instrument.noteOff(lastNote, time);
+			if (lastNote) voice.noteOff(lastNote, time);
+			voice.noteOn(note, time);
 			lastNote = note;
 		}
 	});
