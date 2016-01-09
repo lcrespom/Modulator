@@ -2748,6 +2748,18 @@
 	        $('#preset-name').val(preset.name);
 	        $('#node-params').empty();
 	        this.synthUI.gr.fromJSON(preset);
+	        this.selectBestNode();
+	    };
+	    Presets.prototype.selectBestNode = function () {
+	        var _this = this;
+	        var getFirstNode = function (isGood) { return _this.synthUI.gr.nodes.filter(isGood)[0]; };
+	        var n = getFirstNode(function (n) { return n.data.type == 'Filter'; });
+	        if (!n)
+	            n = getFirstNode(function (n) { return n.data.type == 'ADSR'; });
+	        if (!n)
+	            n = getFirstNode(function (n) { return n.data.anode.numberOfInputs == 0; });
+	        if (n)
+	            this.synthUI.gr.selectNode(n);
 	    };
 	    Presets.prototype.loadPreset = function (evt) {
 	        var _this = this;

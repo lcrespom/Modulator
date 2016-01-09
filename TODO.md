@@ -19,8 +19,6 @@
 	- For demo purposes, enable arpeggio and portamento in some patches,
 		or create new ones if required.
 - Use a logarithmic scale for portamento and arpeggio sliders
-- When loading a preset, pre-select a relevant node, e.g. based on the number of
-	parameters.
 - Custom nodes
 	- Keyboard control node
 		- To control other parameters based on the note being pressed

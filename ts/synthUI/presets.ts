@@ -76,6 +76,15 @@ export class Presets {
 		$('#preset-name').val(preset.name);
 		$('#node-params').empty();
 		this.synthUI.gr.fromJSON(preset);
+		this.selectBestNode();
+	}
+
+	selectBestNode() {
+		const getFirstNode = (isGood) => this.synthUI.gr.nodes.filter(isGood)[0];
+		let n = getFirstNode(n => n.data.type == 'Filter');
+		if (!n) n = getFirstNode(n => n.data.type == 'ADSR');
+		if (!n) n = getFirstNode(n => n.data.anode.numberOfInputs == 0);
+		if (n) this.synthUI.gr.selectNode(n);
 	}
 
 	loadPreset(evt) {
