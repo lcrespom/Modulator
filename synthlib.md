@@ -34,7 +34,7 @@ key in the synthesizer keyboard.
 	If not specified, it defaults to 1, i.e. full force. Currently most
 	audio nodes ignore this parameter, so the default can be used.
 - **when**: the AudioContext time when the note event should be executed.
-	If not specified, the note will be played immediately. 
+	If not specified, the note will be played immediately.
 
 ####noteOff(midi, velocity, when)
 Sends a noteOff event to the synthesizer, equivalent to releasing a key
@@ -46,7 +46,7 @@ in the synthesizer keyboard.
 	*noteOn* method, the parameter is ignored in most if not all cases, so
 	the default can be used.
 - **when**: the AudioContext time when the note event should be executed.
-	If not specified, the note will be stopped immediately. 
+	If not specified, the note will be stopped immediately.
 
 ####close()
 To be called upon shutdown in order to ensure that all sounds are stopped.
@@ -72,7 +72,7 @@ is based on the least-recently started note. The parameters are the same as with
 Voice class *noteOn* method.
 
 ####noteOff(midi, velocity, when)
-Forwards the *noteOff* call to the voice that was selected for the corresponding 
+Forwards the *noteOff* call to the voice that was selected for the corresponding
 *noteOn* call. The parameters are the same as with the Voice class *noteOff* method.
 
 ####close(): void
@@ -90,7 +90,7 @@ function playSynthDemo() {
 
 	// Setup score
 	var KB_NOTES = 'ZSXDCVGBHNJMQ2W3ER5T6Y7UI9O0P';
-	var score = 'Q   T   REWI   T   REWI   T   RERW';
+	var score = 'Q   T   REWI   T   REWI   T   RERW      ';
 	var notes = score.split('').map(function(k) {
 		return k != ' ' ? 36 + KB_NOTES.indexOf(k) : 0;
 	});
@@ -99,11 +99,16 @@ function playSynthDemo() {
 
 	// Timer to play score
 	function tick() {
-		if (lastNote) instrument.noteOff(lastNote);
-		var note = notes[ct];
-		if (++ct > score.length) return;
-		if (note > 0) instrument.noteOn(note);
-		lastNote = note;
+		var note = notes[ct++];
+		if (ct > score.length) {
+			instrument.noteOff(lastNote);
+			return;
+		}
+		if (note > 0) {
+			instrument.noteOn(note);
+			if (lastNote) instrument.noteOff(lastNote);
+			lastNote = note;
+		}
 		setTimeout(tick, 150);
 	}
 
