@@ -2536,10 +2536,23 @@
 	        if (ahead === void 0) { ahead = 0.1; }
 	        this.running = false;
 	        this.ac = ac;
+	        this.dt = 0;
+	        this.nextNoteTime = 0;
 	        this.bpm = bpm;
 	        this.interval = interval;
 	        this.ahead = ahead;
 	    }
+	    Object.defineProperty(Timer.prototype, "bpm", {
+	        get: function () { return this._bpm; },
+	        set: function (v) {
+	            this._bpm = v;
+	            this.nextNoteTime -= this.dt;
+	            this.dt = (1 / 4) * 60 / this._bpm;
+	            this.nextNoteTime += this.dt;
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
 	    Timer.prototype.start = function (cb) {
 	        if (this.running)
 	            return;
@@ -2559,7 +2572,7 @@
 	        while (this.nextNoteTime < this.ac.currentTime + this.ahead) {
 	            if (this.cb)
 	                this.cb(this.nextNoteTime);
-	            this.nextNoteTime += (1 / 4) * 60 / this.bpm;
+	            this.nextNoteTime += this.dt;
 	        }
 	    };
 	    return Timer;

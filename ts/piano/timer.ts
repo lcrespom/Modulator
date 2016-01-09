@@ -6,17 +6,29 @@ export class Timer {
 	running: boolean;
 	ac: AudioContext;
 	cb: TimerCallback;
-	bpm: number;
+	_bpm: number;
 	interval: number;
 	ahead: number;
 	nextNoteTime: number;
+	dt: number;
 
 	constructor(ac: AudioContext, bpm = 60, interval = 0.025, ahead = 0.1) {
 		this.running = false;
 		this.ac = ac;
+		this.dt = 0;
+		this.nextNoteTime = 0;
 		this.bpm = bpm;
 		this.interval = interval;
 		this.ahead = ahead;
+	}
+
+	get bpm() { return this._bpm; }
+
+	set bpm(v) {
+		this._bpm = v;
+		this.nextNoteTime -= this.dt;
+		this.dt = (1/4) * 60 / this._bpm;
+		this.nextNoteTime += this.dt;
 	}
 
 	start(cb?: TimerCallback): void {
@@ -36,7 +48,7 @@ export class Timer {
 		setTimeout(this.tick.bind(this), this.interval * 1000);
 		while (this.nextNoteTime < this.ac.currentTime + this.ahead) {
 			if (this.cb) this.cb(this.nextNoteTime);
-			this.nextNoteTime += (1/4) * 60 / this.bpm;
+			this.nextNoteTime += this.dt;
 		}
 	}
 }
