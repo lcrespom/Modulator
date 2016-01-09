@@ -1110,8 +1110,9 @@
 	//-------------------- Private --------------------
 	var VoiceNodeData = (function (_super) {
 	    __extends(VoiceNodeData, _super);
-	    function VoiceNodeData() {
-	        _super.apply(this, arguments);
+	    function VoiceNodeData(id) {
+	        _super.call(this);
+	        this.id = id;
 	        this.inputs = [];
 	    }
 	    VoiceNodeData.prototype.getInputs = function () {
@@ -1126,38 +1127,45 @@
 	    SynthLoader.prototype.load = function (ac, json, dest) {
 	        var synth = new synth_1.Synth(ac);
 	        // Add nodes into id-based table
+	        var i = 0;
 	        for (var _i = 0, _a = json.nodes; _i < _a.length; _i++) {
 	            var jn = _a[_i];
-	            this.nodes[jn.id] = new VoiceNodeData();
+	            this.nodes[i++] = new VoiceNodeData(jn.id);
 	        }
 	        // Then set their list of inputs
-	        for (var _b = 0, _c = json.nodes; _b < _c.length; _b++) {
-	            var jn = _c[_b];
-	            for (var _d = 0, _e = jn.inputs; _d < _e.length; _d++) {
-	                var inum = _e[_d];
-	                this.nodes[jn.id].inputs.push(this.nodes[inum]);
+	        for (var i_1 = 0; i_1 < json.nodes.length; i_1++)
+	            for (var _b = 0, _c = json.nodes[i_1].inputs; _b < _c.length; _b++) {
+	                var inum = _c[_b];
+	                this.nodes[i_1].inputs.push(this.nodeById(inum));
 	            }
-	        }
 	        // Then set their data
-	        for (var i = 0; i < json.nodes.length; i++) {
-	            var type = json.nodeData[i].type;
+	        for (var i_2 = 0; i_2 < json.nodes.length; i_2++) {
+	            var type = json.nodeData[i_2].type;
 	            if (type == 'out')
-	                synth.initOutputNodeData(this.nodes[i], dest);
+	                synth.initOutputNodeData(this.nodes[i_2], dest);
 	            else
-	                synth.initNodeData(this.nodes[i], type);
-	            synth.json2NodeData(json.nodeData[i], this.nodes[i]);
+	                synth.initNodeData(this.nodes[i_2], type);
+	            synth.json2NodeData(json.nodeData[i_2], this.nodes[i_2]);
 	        }
 	        // Then notify connections to handler
-	        for (var _f = 0, _g = this.nodes; _f < _g.length; _f++) {
-	            var dst = _g[_f];
-	            for (var _h = 0, _j = dst.inputs; _h < _j.length; _h++) {
-	                var src = _j[_h];
+	        for (var _d = 0, _e = this.nodes; _d < _e.length; _d++) {
+	            var dst = _e[_d];
+	            for (var _f = 0, _g = dst.inputs; _f < _g.length; _f++) {
+	                var src = _g[_f];
 	                synth.connectNodes(src, dst);
 	            }
 	        }
 	        // Finally, return the newly created synth
 	        this.synth = synth;
 	        return synth;
+	    };
+	    SynthLoader.prototype.nodeById = function (id) {
+	        for (var _i = 0, _a = this.nodes; _i < _a.length; _i++) {
+	            var node = _a[_i];
+	            if (node.id === id)
+	                return node;
+	        }
+	        return null;
 	    };
 	    SynthLoader.prototype.close = function () {
 	        for (var _i = 0, _a = this.nodes; _i < _a.length; _i++) {

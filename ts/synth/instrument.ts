@@ -81,6 +81,9 @@ export class Voice {
 
 class VoiceNodeData extends NodeData {
 	inputs: NodeData[] = [];
+	constructor(public id: number) {
+		super();
+	}
 	getInputs(): NodeData[] {
 		return this.inputs;
 	}
@@ -93,12 +96,13 @@ class SynthLoader {
 	load(ac: ModernAudioContext, json: any, dest: AudioNode): Synth {
 		const synth = new Synth(ac);
 		// Add nodes into id-based table
+		let i = 0;
 		for (const jn of json.nodes)
-			this.nodes[jn.id] = new VoiceNodeData();
+			this.nodes[i++] = new VoiceNodeData(jn.id);
 		// Then set their list of inputs
-		for (const jn of json.nodes)
-			for (const inum of jn.inputs)
-				this.nodes[jn.id].inputs.push(this.nodes[inum]);
+		for (let i = 0; i < json.nodes.length; i++)
+			for (const inum of json.nodes[i].inputs)
+				this.nodes[i].inputs.push(this.nodeById(inum));
 		// Then set their data
 		for (let i = 0; i < json.nodes.length; i++) {
 			const type = json.nodeData[i].type;
@@ -115,6 +119,12 @@ class SynthLoader {
 		// Finally, return the newly created synth
 		this.synth = synth;
 		return synth;
+	}
+
+	nodeById(id: number): VoiceNodeData {
+		for (const node of this.nodes)
+			if (node.id === id) return node;
+		return null;
 	}
 
 	close() {
