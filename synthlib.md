@@ -154,9 +154,8 @@ function playSynthDemo() {
 		if (ct > score.length) {
 			instrument.noteOff(lastNote, time);
 			timer.stop();
-			return;
 		}
-		if (note > 0) {
+		else if (note > 0) {
 			instrument.noteOn(note, time);
 			if (lastNote) instrument.noteOff(lastNote, time);
 			lastNote = note;
