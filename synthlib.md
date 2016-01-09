@@ -147,7 +147,8 @@ function playSynthDemo() {
 	var lastNote = 0;
 	var ct = 0;
 
-	// Timer to play score
+	// Setup timer to play score
+	var timer = new Modulator.Timer(ac);
 	timer.start(time => {
 		var note = notes[ct++];
 		if (ct > score.length) {
