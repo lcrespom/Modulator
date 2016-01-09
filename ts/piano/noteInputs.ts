@@ -13,7 +13,7 @@ const NUM_VOICES = 5;
  * Manages all note-generation inputs:
  * 	- PC Keyboard
  * 	- Virtual piano keyboard
- *	- Eventually it should also integrate with Web MIDI
+ *	- An external MIDI keyboard
  * Handles switching to polyphonic mode and back to mono
  */
 export class NoteInputs {
