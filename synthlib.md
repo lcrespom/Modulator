@@ -75,7 +75,7 @@ Voice class *noteOn* method.
 Forwards the *noteOff* call to the voice that was selected for the corresponding
 *noteOn* call. The parameters are the same as with the Voice class *noteOff* method.
 
-####close(): void
+####close()
 To be called upon shutdown in order to ensure that all sounds are stopped. It will
 forward the close call to all its voices.
 
