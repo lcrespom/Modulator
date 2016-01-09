@@ -41,6 +41,7 @@
 	- Or else, modify the UI to support multiple destination nodes
 - Use Web Midi API to gather events from external midi Keyboard
 	- Currently already supporting keyboard
+		- External keyboard keys are misaligned with the on-screen piano
 	- Associate external kobs with selected node parameters
 		- Knob distribution seems to be very erratic
 	- See http://www.keithmcmillen.com/blog/making-music-in-the-browser-web-midi-api/

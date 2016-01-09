@@ -1034,7 +1034,7 @@
 			{
 				"type": "ADSR",
 				"params": {
-					"attack": 0.40228525869896803,
+					"attack": 0,
 					"decay": 0.5,
 					"sustain": 1,
 					"release": 2,
