@@ -3,7 +3,6 @@
 ##Bugs
 - ADSR needs more testing & refining
 	- Incorrect behavior when key is released before reaching the sustain level
-- Polyphonic instrument loading fails when "holes" are present in synth
 - Popping sound at note on/off (improved after adding adsr depth parameter)
 - Analyzer should detect when no sound is playing and clean osc and fft graphs
 - Review TODO items inside code
@@ -11,11 +10,6 @@
 	draws arrows incorrectly
 
 ##Functionality
-- Polyphonic mode: in instrument.ts, implement a better algorithm for
-	finding an empty voice instead of the blind round-robin.
-	- Current criterion is "least recently pressed"
-	- A better one should be "least recently released", and if no released key found,
-		then fall back to least recently pressed.
 - Update presets so keyboard params are inside the JSON (just load & save them again)
 	- For demo purposes, enable arpeggio and portamento in some patches,
 		or create new ones if required.

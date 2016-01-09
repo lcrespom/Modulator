@@ -7,15 +7,19 @@ import { Synth, NodeData, Portamento } from './synth';
  */
 export class Instrument {
 	voices: Voice[];
-	voiceNum: number;
+	pressed: number[];
+	released: number[];
 	portamento: Portamento;
 
 	constructor(ac: ModernAudioContext, json: any, numVoices: number, dest?: AudioNode) {
 		// Setup voices
+		this.pressed = [];
+		this.released = [];
 		this.voices = [];
-		for (let i = 0; i < numVoices; i++)
+		for (let i = 0; i < numVoices; i++) {
 			this.voices.push(new Voice(ac, json, dest));
-		this.voiceNum = 0;
+			this.released.push(i);
+		}
 		// Setup synth params by having a common instance for all voices
 		this.portamento = this.voices[0].synth.portamento;
 		if (json.keyboard && json.keyboard.portamento)
@@ -25,18 +29,29 @@ export class Instrument {
 	}
 
 	noteOn(midi: number, velocity: number = 1, when?: number): void {
-		const voice = this.voices[this.voiceNum];
+		const vnum = this.findVoice();
+		const voice = this.voices[vnum];
+		this.pressed.push(vnum);
 		voice.noteOn(midi, velocity, when);
-		this.voiceNum = (this.voiceNum + 1) % this.voices.length;
 	}
 
 	noteOff(midi: number, velocity: number = 1, when?: number): void {
-		for (const voice of this.voices) {
+		for (let i = 0; i < this.voices.length; i++) {
+			const voice = this.voices[i];
 			if (voice.lastNote == midi) {
 				voice.noteOff(midi, velocity, when);
+				this.released.push(i);
 				break;
 			}
 		}
+	}
+
+	findVoice(): number {
+		let voices: number[];
+		if (this.released.length > 0) voices = this.released;
+		else if (this.pressed.length > 0) voices = this.pressed;
+		else throw "This should never happen";
+		return voices.splice(0, 1)[0];
 	}
 
 	close() {
