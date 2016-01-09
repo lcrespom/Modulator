@@ -3,6 +3,7 @@
 ##Bugs
 - ADSR needs more testing & refining
 	- Incorrect behavior when key is released before reaching the sustain level
+- Polyphonic instrument loading fails when "holes" are present in synth
 - Popping sound at note on/off (improved after adding adsr depth parameter)
 - Analyzer should detect when no sound is playing and clean osc and fft graphs
 - Review TODO items inside code
