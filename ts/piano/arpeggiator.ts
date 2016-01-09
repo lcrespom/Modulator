@@ -1,4 +1,4 @@
-import { Timer } from './timer';
+import { Timer } from '../synth/timer';
 
 export class Arpeggiator {
 	mode: string;

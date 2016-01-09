@@ -1,7 +1,7 @@
 #SynthLib
 SynthLib is a standalone, UI-independent library that can load and play instruments
 created with [Modulator](https://github.com/lcrespom/Modulator).
-Synthlib is small: it takes less than 18 kb minified and less than 5kb gzipped.
+Synthlib is small: it takes 19 kb minified and 5kb gzipped.
 
 Synthlib exposes a global object called "Modulator", containing three classes that
 can be instantiated and used by the application:
@@ -93,9 +93,9 @@ tempo.
 Creates a timer object, using a specified AudioContext and tempo. The additional
 timing precision parameters *interval* and *ahead* can be safely left out, and
 the timer will use good defaults. For an understanding of how those timing parameters
-are used, refer to the above article.
+are used, refer to the article mentioned above.
 
-- **ac**: the AudioContext to be used for getting precise time measurements
+- **ac**: the AudioContext to be used for getting precise time measurements.
 - **bpm**: an optional tempo, specified in Beats Per Measure (BPM). If not specified,
 	the default value of 60 BPM will be used.
 	The BPM parameter can be changed later on at any time by accessing the *bpm*
@@ -110,8 +110,8 @@ Starts the timer, which will periodically invoke the provided callback function.
 
 - **callback**: a user function that will be invoked once for every note frame.
 	There are BPM * 4 frames in a minute, so for example a BPM of 120 has
-	will have 8 note frames per second.
-	The callback will receive a *time* parameter which should be passed to the
+	8 note frames per second.
+	The callback receives a *time* parameter which should be passed to the
 	corresponding *when* parameter of the Voice or Instrument noteOn and noteOff
 	methods, in order to accurately time the moment when the note should be
 	played.
@@ -125,8 +125,8 @@ A call to *start()* when the timer is already started has no effect.
 ####stop()
 Stops the timer, so that the callback is no longer invoked periodically. As described
 above, the *start()* and *stop()* methods can be invoked several times, and the timer
-will start / stop / resume / stop again / etc. Calls to *stop()* when the timer is
-already stopped has no effect.
+will start / stop / resume / stop again / etc. accordingly.
+Calls to *stop()* when the timer is already stopped has no effect.
 
 
 
@@ -134,8 +134,8 @@ already stopped has no effect.
 ```JavaScript
 function playSynthDemo() {
 	// Setup instrument
-	var ac = new AudioContext();
 	var json = { /* JSON from a patch saved from Modulator */ };
+	var ac = new AudioContext();
 	var instrument = new Modulator.Instrument(ac, json, 4);
 
 	// Setup score
@@ -148,20 +148,19 @@ function playSynthDemo() {
 	var ct = 0;
 
 	// Timer to play score
-	function tick() {
+	timer.start(time => {
 		var note = notes[ct++];
 		if (ct > score.length) {
-			instrument.noteOff(lastNote);
+			instrument.noteOff(lastNote, time);
+			timer.stop();
 			return;
 		}
 		if (note > 0) {
-			instrument.noteOn(note);
-			if (lastNote) instrument.noteOff(lastNote);
+			instrument.noteOn(note, time);
+			if (lastNote) instrument.noteOff(lastNote, time);
 			lastNote = note;
 		}
-		setTimeout(tick, 150);
-	}
+	});
 
-	tick();
 }
 ```
