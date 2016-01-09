@@ -72,6 +72,7 @@ export class Presets {
 
 	preset2synth() {
 		const preset = this.presets[this.presetNum];
+		this.afterLoad(preset);
 		$('#preset-num').text(this.presetNum + 1);
 		$('#preset-name').val(preset.name);
 		$('#node-params').empty();
@@ -93,7 +94,6 @@ export class Presets {
 		const reader = new FileReader();
 		reader.onload = (loadEvt: any)  => {
 			const json = JSON.parse(loadEvt.target.result);
-			this.afterLoad(json);
 			this.presets[this.presetNum] = json;
 			this.preset2synth();
 		};

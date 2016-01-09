@@ -2772,6 +2772,7 @@
 	    };
 	    Presets.prototype.preset2synth = function () {
 	        var preset = this.presets[this.presetNum];
+	        this.afterLoad(preset);
 	        $('#preset-num').text(this.presetNum + 1);
 	        $('#preset-name').val(preset.name);
 	        $('#node-params').empty();
@@ -2797,7 +2798,6 @@
 	        var reader = new FileReader();
 	        reader.onload = function (loadEvt) {
 	            var json = JSON.parse(loadEvt.target.result);
-	            _this.afterLoad(json);
 	            _this.presets[_this.presetNum] = json;
 	            _this.preset2synth();
 	        };
