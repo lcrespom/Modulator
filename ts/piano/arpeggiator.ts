@@ -1,27 +1,36 @@
+import { Timer } from './timer';
+
 export class Arpeggiator {
 	mode: string;
 	octaves: number;
-	time: number;
+	_bpm: number;
 	notes: NoteTable;
 	notect: number;
 	lastNote: NoteData;
 	backward = false;
+	timer: Timer;
 
-	constructor() {
+	constructor(ac: AudioContext) {
 		this.mode = '';
 		this.octaves = 1;
-		this.time = 0.25;
+		this.bpm = 60;
 		this.notect = 0;
 		this.notes = new NoteTable();
-		this.timer();
+		this.timer = new Timer(ac, this.bpm);
+		this.timer.start(time => this.timerCB(time));
 	}
 
-	timer() {
-		//TODO improve accuracy, read article
-		setTimeout(this.timer.bind(this), this.time * 1000);
+	get bpm() { return this._bpm }
+
+	set bpm(v) {
+		this._bpm = v;
+		if (this.timer) this.timer.bpm = v;
+	}
+
+	timerCB(time: number): void {
 		// Release previous note
 		if (this.lastNote) {
-			this.noteOff(this.lastNote.noteToPlay, this.lastNote.velocity);
+			this.noteOff(this.lastNote.noteToPlay, this.lastNote.velocity, time);
 			this.lastNote = null;
 		}
 		// Return if disabled or no notes
@@ -32,7 +41,7 @@ export class Arpeggiator {
 		this.wrapCounter(len);
 		// Get current note and play it
 		const ndata = this.notes.get(this.notect);
-		this.noteOn(ndata.noteToPlay, ndata.velocity);
+		this.noteOn(ndata.noteToPlay, ndata.velocity, time);
 		this.lastNote = ndata;
 		// Update note counter
 		if (this.mode == 'u')
@@ -81,8 +90,8 @@ export class Arpeggiator {
 	}
 
 	// Event handlers
-	noteOn(midi: number, velocity: number): void {}
-	noteOff(midi: number, velocity: number): void {}
+	noteOn(midi: number, velocity: number, time?: number): void {}
+	noteOff(midi: number, velocity: number, time?: number): void {}
 }
 
 

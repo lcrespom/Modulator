@@ -47,7 +47,7 @@
 	/**
 	 * Library that exports the Instrument and Voice classes
 	 */
-	var instrument_1 = __webpack_require__(15);
+	var instrument_1 = __webpack_require__(16);
 	var global = window;
 	global.Modulator = global.Modulator || {};
 	global.Modulator.Instrument = instrument_1.Instrument;
@@ -1026,7 +1026,8 @@
 /* 12 */,
 /* 13 */,
 /* 14 */,
-/* 15 */
+/* 15 */,
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __extends = (this && this.__extends) || function (d, b) {

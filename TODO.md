@@ -19,9 +19,6 @@
 	- For demo purposes, enable arpeggio and portamento in some patches,
 		or create new ones if required.
 - Use a logarithmic scale for portamento and arpeggio sliders
-- Change arpeggio slider from time to BPM
-- Improve arpeggio precision,
-	see http://www.html5rocks.com/en/tutorials/audio/scheduling/
 - When loading a preset, pre-select a relevant node, e.g. based on the number of
 	parameters.
 - Custom nodes

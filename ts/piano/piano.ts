@@ -26,7 +26,7 @@ export class PianoKeyboard {
 	arpeggio = {
 		mode: 0,
 		octave: 1,
-		time: 0.5
+		bpm: 60
 	};
 
 	constructor(panel: JQuery) {
@@ -109,7 +109,7 @@ export class PianoKeyboard {
 		// Arpeggio
 		const arpeggioSlider = panel.find('.arpeggio-box input');
 		arpeggioSlider.on('input',_ => {
-			this.arpeggio.time = parseFloat(arpeggioSlider.val());
+			this.arpeggio.bpm = parseFloat(arpeggioSlider.val());
 			this.triggerArpeggioChange();
 		});
 		const butArpMode = panel.find('.btn-arpeggio-ud');
@@ -193,7 +193,7 @@ export class PianoKeyboard {
 	}
 
 	triggerArpeggioChange() {
-		this.arpeggioChanged(this.arpeggio.time,
+		this.arpeggioChanged(this.arpeggio.bpm,
 			ARPEGGIO_MODES[this.arpeggio.mode], this.arpeggio.octave);
 	}
 
@@ -202,7 +202,7 @@ export class PianoKeyboard {
 			portamento: this.getPortamento(),
 			octave: this.octave,
 			arpeggio: {
-				time: this.arpeggio.time,
+				bpm: this.arpeggio.bpm,
 				mode: this.arpeggio.mode,
 				octave: this.arpeggio.octave
 			}
@@ -219,10 +219,10 @@ export class PianoKeyboard {
 			this.updateOctave();
 		}
 		if (json.arpeggio) {
-			this.arpeggio.time = json.arpeggio.time;
+			this.arpeggio.bpm = json.arpeggio.bpm;
 			this.arpeggio.mode = json.arpeggio.mode;
 			this.arpeggio.octave = json.arpeggio.octave;
-			this.controls.find('.arpeggio-box input').val(this.arpeggio.time);
+			this.controls.find('.arpeggio-box input').val(this.arpeggio.bpm);
 			this.controls.find('.btn-arpeggio-ud').html(ARPEGGIO_LABELS[this.arpeggio.mode]);
 			this.controls.find('.btn-arpeggio-oct').text(this.arpeggio.octave);
 			this.triggerArpeggioChange();
@@ -235,5 +235,5 @@ export class PianoKeyboard {
 	polyOn() {}
 	polyOff() {}
 	octaveChanged(baseNote) {}
-	arpeggioChanged(time: number, mode: string, octaves: number) {}
+	arpeggioChanged(bpm: number, mode: string, octaves: number) {}
 }

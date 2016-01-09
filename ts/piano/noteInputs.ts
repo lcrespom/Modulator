@@ -51,7 +51,7 @@ export class NoteInputs {
 		piano.octaveChanged = baseNote => kb.baseNote = baseNote;
 		this.setupEnvelopeAnimation(piano);
 		// Setup arpeggiator
-		this.setupArpeggiator(piano);
+		this.setupArpeggiator(piano, synthUI.synth.ac);
 	}
 
 	setupEnvelopeAnimation(piano: PianoKeyboard) {
@@ -70,39 +70,39 @@ export class NoteInputs {
 		}
 	}
 
-	setupArpeggiator(piano: PianoKeyboard) {
-		this.arpeggiator = new Arpeggiator();
-		piano.arpeggioChanged = (time, mode, octaves) => {
+	setupArpeggiator(piano: PianoKeyboard, ac: AudioContext) {
+		this.arpeggiator = new Arpeggiator(ac);
+		piano.arpeggioChanged = (bpm, mode, octaves) => {
 			this.arpeggiator.mode = mode;
 			this.arpeggiator.octaves = octaves;
-			this.arpeggiator.time = time;
+			this.arpeggiator.bpm = bpm;
 		}
 		this.arpeggiator.noteOn =
-			(midi, velocity) => this.noteOn(midi, velocity);
+			(midi, velocity, time) => this.noteOn(midi, velocity, time);
 		this.arpeggiator.noteOff =
-			(midi, velocity) => this.noteOff(midi, velocity);
+			(midi, velocity, time) => this.noteOff(midi, velocity, time);
 	}
 
 
-	noteOn(midi: number, velocity: number): void {
+	noteOn(midi: number, velocity: number, time?: number): void {
 		this.lastNote = midi;
 		const portamento = this.piano.getPortamento();
 		if (this.poly) {
 			this.instrument.portamento.time = portamento;
-			this.instrument.noteOn(midi, velocity);
+			this.instrument.noteOn(midi, velocity, time);
 		}
 		else {
 			this.synthUI.synth.portamento.time = portamento;
-			this.synthUI.synth.noteOn(midi, velocity);
+			this.synthUI.synth.noteOn(midi, velocity, time);
 		}
 	}
 
-	noteOff(midi: number, velocity: number): void {
+	noteOff(midi: number, velocity: number, time?: number): void {
 		this.lastNote = 0;
 		if (this.poly)
-			this.instrument.noteOff(midi, velocity);
+			this.instrument.noteOff(midi, velocity, time);
 		else
-			this.synthUI.synth.noteOff(midi, velocity);
+			this.synthUI.synth.noteOff(midi, velocity, time);
 	}
 
 	polyOn() {
