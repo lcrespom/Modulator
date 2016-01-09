@@ -133,7 +133,7 @@ Calls to *stop()* when the timer is already stopped has no effect.
 ##Example
 ```JavaScript
 function playSynthDemo() {
-	// Setup instrument
+	// Setup voice
 	var json = { /* JSON from a patch saved from Modulator */ };
 	var ac = new AudioContext();
 	var voice = new Modulator.Voice(ac, json);
