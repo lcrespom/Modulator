@@ -92,6 +92,8 @@ export class Arpeggiator {
 		if (this.notes.length() == 0) {
 			this.timerCB(0);
 			this.timer.stop();
+			this.backward = false;
+			this.notect = 0;
 		}
 	}
 

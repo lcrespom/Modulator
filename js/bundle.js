@@ -2527,6 +2527,8 @@
 	        if (this.notes.length() == 0) {
 	            this.timerCB(0);
 	            this.timer.stop();
+	            this.backward = false;
+	            this.notect = 0;
 	        }
 	    };
 	    // Event handlers
