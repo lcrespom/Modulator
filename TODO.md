@@ -13,7 +13,6 @@
 - Update presets so keyboard params are inside the JSON (just load & save them again)
 	- For demo purposes, enable arpeggio and portamento in some patches,
 		or create new ones if required.
-- Use a logarithmic scale for portamento and arpeggio sliders
 - Custom nodes
 	- Keyboard control node
 		- To control other parameters based on the note being pressed
@@ -83,7 +82,6 @@
 - Mobile app
 
 ##Code
-- Document synthlib in synthlib.md & provide code examples.
 - Provide an interface that predefines the very common noteOn / noteOff methods
 - Decoupling
 	- synth.ts contains BufferURL ParamHandler,
@@ -107,8 +105,3 @@
 - Improve code to clean hack that checks for custom nodes when connecting.
 - Consider compile target to ES6, see https://kangax.github.io/compat-table/es6/
 
-##Share
-- Document
-- Create proper website in github pages
-- Present in meetups
-- Invite contributors

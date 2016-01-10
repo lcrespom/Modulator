@@ -1,6 +1,7 @@
 import { Node } from './graph';
 import { NodeData } from '../synth/synth';
 import { NodeDef, NodeParamDef } from '../synth/palette';
+import { log2linear, linear2log } from '../synth/modern';
 
 /**
  * Renders the UI controls associated with the parameters of a given node
@@ -143,30 +144,18 @@ function renderBoolean(panel: JQuery, pdef: NodeParamDef, param: string, anode: 
 }
 
 
-const LOG_BASE = 2;
-
-function logarithm(base: number, x: number): number {
-	return Math.log(x) / Math.log(base);
-}
-
 function param2slider(paramValue: number, pdef: NodeParamDef): number {
-	if (pdef.linear) {
+	if (pdef.linear)
 		return (paramValue - pdef.min) / (pdef.max - pdef.min);
-	}
-	else {
-		const logRange = logarithm(LOG_BASE, pdef.max + 1 - pdef.min);
-		return logarithm(LOG_BASE, paramValue + 1 - pdef.min) / logRange;
-	}
+	else
+		return linear2log(paramValue, pdef.min, pdef.max);
 }
 
 function slider2param(sliderValue: number, pdef: NodeParamDef): number {
-	if (pdef.linear) {
+	if (pdef.linear)
 		return pdef.min + sliderValue * (pdef.max - pdef.min);
-	}
-	else {
-		const logRange = logarithm(LOG_BASE, pdef.max + 1 - pdef.min);
-		return pdef.min + Math.pow(LOG_BASE, sliderValue * logRange) - 1;
-	}
+	else
+		return log2linear(sliderValue, pdef.min, pdef.max);
 }
 
 

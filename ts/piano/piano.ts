@@ -1,4 +1,5 @@
 import * as popups from '../popups';
+import { log2linear, linear2log } from '../synth/modern';
 
 const NUM_WHITES = 17;
 const BASE_NOTE = 36;
@@ -6,6 +7,12 @@ const BASE_NOTE = 36;
 const ARPEGGIO_MODES = ['', 'u', 'd', 'ud'];
 const ARPEGGIO_LABELS = ['-', '&uarr;', '&darr;', '&uarr;&darr;'];
 const MAX_ARPEGGIO_OCT = 3;
+const ARPEGGIO_MIN = 15;
+const ARPEGGIO_MAX = 480;
+
+const PORTAMENTO_MIN = 0;
+const PORTAMENTO_MAX = 1;
+
 /**
  * A virtual piano keyboard that:
  * 	- Captures mouse input and generates corresponding note events
@@ -109,7 +116,9 @@ export class PianoKeyboard {
 		// Arpeggio
 		const arpeggioSlider = panel.find('.arpeggio-box input');
 		arpeggioSlider.on('input',_ => {
-			this.arpeggio.bpm = parseFloat(arpeggioSlider.val());
+			this.arpeggio.bpm =
+				log2linear(parseFloat(arpeggioSlider.val()), ARPEGGIO_MIN, ARPEGGIO_MAX);
+				// ARPEGGIO_MIN + parseFloat(arpeggioSlider.val()) * (ARPEGGIO_MAX - ARPEGGIO_MIN);
 			this.triggerArpeggioChange();
 		});
 		const butArpMode = panel.find('.btn-arpeggio-ud');
@@ -174,7 +183,8 @@ export class PianoKeyboard {
 	}
 
 	getPortamento(): number {
-		return parseFloat(this.portaSlider.val());
+		const sv = parseFloat(this.portaSlider.val());;
+		return log2linear(sv, PORTAMENTO_MIN, PORTAMENTO_MAX);
 	}
 
 	changeArpeggioMode(button: JQuery) {
@@ -213,7 +223,8 @@ export class PianoKeyboard {
 	fromJSON(json): void {
 		if (!json) return;
 		if (json.portamento) {
-			this.portaSlider.val(json.portamento);
+			this.portaSlider.val(
+				linear2log(json.portamento, PORTAMENTO_MIN, PORTAMENTO_MAX);
 		}
 		if (json.octave) {
 			this.octave = json.octave;
@@ -223,7 +234,8 @@ export class PianoKeyboard {
 			this.arpeggio.bpm = json.arpeggio.bpm;
 			this.arpeggio.mode = json.arpeggio.mode;
 			this.arpeggio.octave = json.arpeggio.octave;
-			this.controls.find('.arpeggio-box input').val(this.arpeggio.bpm);
+			this.controls.find('.arpeggio-box input').val(
+				linear2log(this.arpeggio.bpm, ARPEGGIO_MIN, ARPEGGIO_MAX));
 			this.controls.find('.btn-arpeggio-ud').html(ARPEGGIO_LABELS[this.arpeggio.mode]);
 			this.controls.find('.btn-arpeggio-oct').text(this.arpeggio.octave);
 			this.triggerArpeggioChange();

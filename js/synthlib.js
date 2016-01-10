@@ -665,6 +665,20 @@
 	    return true;
 	}
 	exports.removeArrayElement = removeArrayElement;
+	var LOG_BASE = 2;
+	function logarithm(base, x) {
+	    return Math.log(x) / Math.log(base);
+	}
+	function linear2log(value, min, max) {
+	    var logRange = logarithm(LOG_BASE, max + 1 - min);
+	    return logarithm(LOG_BASE, value + 1 - min) / logRange;
+	}
+	exports.linear2log = linear2log;
+	function log2linear(value, min, max) {
+	    var logRange = logarithm(LOG_BASE, max + 1 - min);
+	    return min + Math.pow(LOG_BASE, value * logRange) - 1;
+	}
+	exports.log2linear = log2linear;
 
 
 /***/ },

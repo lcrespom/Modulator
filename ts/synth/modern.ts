@@ -27,3 +27,19 @@ export function removeArrayElement(a: any[], e: any): boolean {
 	a.splice(pos, 1);
 	return true;
 }
+
+const LOG_BASE = 2;
+
+function logarithm(base: number, x: number): number {
+	return Math.log(x) / Math.log(base);
+}
+
+export function linear2log(value: number, min: number, max: number): number {
+	const logRange = logarithm(LOG_BASE, max + 1 - min);
+	return logarithm(LOG_BASE, value + 1 - min) / logRange;
+}
+
+export function log2linear(value: number, min: number, max: number): number {
+	const logRange = logarithm(LOG_BASE, max + 1 - min);
+	return min + Math.pow(LOG_BASE, value * logRange) - 1;
+}

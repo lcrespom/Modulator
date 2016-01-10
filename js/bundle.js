@@ -1289,6 +1289,20 @@
 	    return true;
 	}
 	exports.removeArrayElement = removeArrayElement;
+	var LOG_BASE = 2;
+	function logarithm(base, x) {
+	    return Math.log(x) / Math.log(base);
+	}
+	function linear2log(value, min, max) {
+	    var logRange = logarithm(LOG_BASE, max + 1 - min);
+	    return logarithm(LOG_BASE, value + 1 - min) / logRange;
+	}
+	exports.linear2log = linear2log;
+	function log2linear(value, min, max) {
+	    var logRange = logarithm(LOG_BASE, max + 1 - min);
+	    return min + Math.pow(LOG_BASE, value * logRange) - 1;
+	}
+	exports.log2linear = log2linear;
 
 
 /***/ },
@@ -1734,8 +1748,9 @@
 
 /***/ },
 /* 9 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
+	var modern_1 = __webpack_require__(5);
 	/**
 	 * Renders the UI controls associated with the parameters of a given node
 	 */
@@ -1875,27 +1890,17 @@
 	    });
 	    return box;
 	}
-	var LOG_BASE = 2;
-	function logarithm(base, x) {
-	    return Math.log(x) / Math.log(base);
-	}
 	function param2slider(paramValue, pdef) {
-	    if (pdef.linear) {
+	    if (pdef.linear)
 	        return (paramValue - pdef.min) / (pdef.max - pdef.min);
-	    }
-	    else {
-	        var logRange = logarithm(LOG_BASE, pdef.max + 1 - pdef.min);
-	        return logarithm(LOG_BASE, paramValue + 1 - pdef.min) / logRange;
-	    }
+	    else
+	        return modern_1.linear2log(paramValue, pdef.min, pdef.max);
 	}
 	function slider2param(sliderValue, pdef) {
-	    if (pdef.linear) {
+	    if (pdef.linear)
 	        return pdef.min + sliderValue * (pdef.max - pdef.min);
-	    }
-	    else {
-	        var logRange = logarithm(LOG_BASE, pdef.max + 1 - pdef.min);
-	        return pdef.min + Math.pow(LOG_BASE, sliderValue * logRange) - 1;
-	    }
+	    else
+	        return modern_1.log2linear(sliderValue, pdef.min, pdef.max);
 	}
 	//-------------------- Misc utilities --------------------
 	function ucfirst(str) {
@@ -2197,11 +2202,16 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var popups = __webpack_require__(8);
+	var modern_1 = __webpack_require__(5);
 	var NUM_WHITES = 17;
 	var BASE_NOTE = 36;
 	var ARPEGGIO_MODES = ['', 'u', 'd', 'ud'];
 	var ARPEGGIO_LABELS = ['-', '&uarr;', '&darr;', '&uarr;&darr;'];
 	var MAX_ARPEGGIO_OCT = 3;
+	var ARPEGGIO_MIN = 15;
+	var ARPEGGIO_MAX = 480;
+	var PORTAMENTO_MIN = 0;
+	var PORTAMENTO_MAX = 1;
 	/**
 	 * A virtual piano keyboard that:
 	 * 	- Captures mouse input and generates corresponding note events
@@ -2295,7 +2305,9 @@
 	        // Arpeggio
 	        var arpeggioSlider = panel.find('.arpeggio-box input');
 	        arpeggioSlider.on('input', function (_) {
-	            _this.arpeggio.bpm = parseFloat(arpeggioSlider.val());
+	            _this.arpeggio.bpm =
+	                modern_1.log2linear(parseFloat(arpeggioSlider.val()), ARPEGGIO_MIN, ARPEGGIO_MAX);
+	            // ARPEGGIO_MIN + parseFloat(arpeggioSlider.val()) * (ARPEGGIO_MAX - ARPEGGIO_MIN);
 	            _this.triggerArpeggioChange();
 	        });
 	        var butArpMode = panel.find('.btn-arpeggio-ud');
@@ -2357,7 +2369,9 @@
 	        }
 	    };
 	    PianoKeyboard.prototype.getPortamento = function () {
-	        return parseFloat(this.portaSlider.val());
+	        var sv = parseFloat(this.portaSlider.val());
+	        ;
+	        return modern_1.log2linear(sv, PORTAMENTO_MIN, PORTAMENTO_MAX);
 	    };
 	    PianoKeyboard.prototype.changeArpeggioMode = function (button) {
 	        this.arpeggio.mode++;
@@ -2391,7 +2405,7 @@
 	        if (!json)
 	            return;
 	        if (json.portamento) {
-	            this.portaSlider.val(json.portamento);
+	            this.portaSlider.val(modern_1.linear2log(json.portamento, PORTAMENTO_MIN, PORTAMENTO_MAX));
 	        }
 	        if (json.octave) {
 	            this.octave = json.octave;
@@ -2401,7 +2415,7 @@
 	            this.arpeggio.bpm = json.arpeggio.bpm;
 	            this.arpeggio.mode = json.arpeggio.mode;
 	            this.arpeggio.octave = json.arpeggio.octave;
-	            this.controls.find('.arpeggio-box input').val(this.arpeggio.bpm);
+	            this.controls.find('.arpeggio-box input').val(modern_1.linear2log(this.arpeggio.bpm, ARPEGGIO_MIN, ARPEGGIO_MAX));
 	            this.controls.find('.btn-arpeggio-ud').html(ARPEGGIO_LABELS[this.arpeggio.mode]);
 	            this.controls.find('.btn-arpeggio-oct').text(this.arpeggio.octave);
 	            this.triggerArpeggioChange();
