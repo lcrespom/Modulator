@@ -76,13 +76,13 @@ export class Arpeggiator {
 	sendNoteOn(midi: number, velocity: number): void {
 		if (this.mode.length == 0)
 			return this.noteOn(midi, velocity);
+		const shouldStart = this.notes.length() == 0;
 		this.notes.add(midi, midi, velocity);
 		if (this.octaves > 1)
 			this.notes.add(midi, midi + 12, velocity);
 		if (this.octaves > 2)
 			this.notes.add(midi, midi + 24, velocity);
-		if (this.notes.length() == 1)
-			this.timer.start();
+		if (shouldStart) this.timer.start();
 	}
 
 	sendNoteOff(midi: number, velocity: number): void {

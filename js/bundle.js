@@ -2511,12 +2511,13 @@
 	    Arpeggiator.prototype.sendNoteOn = function (midi, velocity) {
 	        if (this.mode.length == 0)
 	            return this.noteOn(midi, velocity);
+	        var shouldStart = this.notes.length() == 0;
 	        this.notes.add(midi, midi, velocity);
 	        if (this.octaves > 1)
 	            this.notes.add(midi, midi + 12, velocity);
 	        if (this.octaves > 2)
 	            this.notes.add(midi, midi + 24, velocity);
-	        if (this.notes.length() == 1)
+	        if (shouldStart)
 	            this.timer.start();
 	    };
 	    Arpeggiator.prototype.sendNoteOff = function (midi, velocity) {
