@@ -2516,11 +2516,17 @@
 	            this.notes.add(midi, midi + 12, velocity);
 	        if (this.octaves > 2)
 	            this.notes.add(midi, midi + 24, velocity);
+	        if (this.notes.length() == 1)
+	            this.timer.start();
 	    };
 	    Arpeggiator.prototype.sendNoteOff = function (midi, velocity) {
 	        if (this.mode.length == 0)
 	            this.noteOff(midi, velocity);
 	        this.notes.remove(midi);
+	        if (this.notes.length() == 0) {
+	            this.timerCB(0);
+	            this.timer.stop();
+	        }
 	    };
 	    // Event handlers
 	    Arpeggiator.prototype.noteOn = function (midi, velocity, time) { };
