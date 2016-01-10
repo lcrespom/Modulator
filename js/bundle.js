@@ -49,7 +49,7 @@
 	 */
 	var synthUI_1 = __webpack_require__(1);
 	var noteInputs_1 = __webpack_require__(11);
-	var presets_1 = __webpack_require__(16);
+	var presets_1 = __webpack_require__(18);
 	var graphCanvas = $('#graph-canvas')[0];
 	var synthUI = new synthUI_1.SynthUI(createAudioContext(), graphCanvas, $('#node-params'), $('#audio-graph-fft'), $('#audio-graph-osc'));
 	setupPanels();
@@ -2018,10 +2018,10 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var keyboard_1 = __webpack_require__(12);
-	var midi_1 = __webpack_require__(18);
-	var piano_1 = __webpack_require__(13);
-	var arpeggiator_1 = __webpack_require__(14);
-	var instrument_1 = __webpack_require__(15);
+	var midi_1 = __webpack_require__(13);
+	var piano_1 = __webpack_require__(14);
+	var arpeggiator_1 = __webpack_require__(15);
+	var instrument_1 = __webpack_require__(17);
 	var NUM_VOICES = 5;
 	/**
 	 * Manages all note-generation inputs:
@@ -2199,6 +2199,48 @@
 
 /***/ },
 /* 13 */
+/***/ function(module, exports) {
+
+	var MidiKeyboard = (function () {
+	    function MidiKeyboard() {
+	        var _this = this;
+	        this.connected = false;
+	        if (!navigator.requestMIDIAccess)
+	            return;
+	        navigator.requestMIDIAccess({ sysex: false }).then(function (midiAccess) {
+	            if (midiAccess.inputs.size <= 0)
+	                return;
+	            var input = midiAccess.inputs.values().next().value;
+	            if (!input)
+	                return;
+	            input.onmidimessage = function (msg) { return _this.midiMessage(msg); };
+	            _this.connected = true;
+	        });
+	    }
+	    MidiKeyboard.prototype.midiMessage = function (msg) {
+	        var data = msg.data;
+	        var cmd = data[0] >> 4;
+	        var channel = data[0] & 0xf;
+	        var note = data[1];
+	        var velocity = data[2];
+	        switch (cmd) {
+	            case 9:
+	                this.noteOn(note, velocity, channel);
+	                break;
+	            case 8:
+	                this.noteOff(note, velocity, channel);
+	                break;
+	        }
+	    };
+	    MidiKeyboard.prototype.noteOn = function (midi, velocity, channel) { };
+	    MidiKeyboard.prototype.noteOff = function (midi, velocity, channel) { };
+	    return MidiKeyboard;
+	})();
+	exports.MidiKeyboard = MidiKeyboard;
+
+
+/***/ },
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var popups = __webpack_require__(8);
@@ -2434,10 +2476,10 @@
 
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var timer_1 = __webpack_require__(17);
+	var timer_1 = __webpack_require__(16);
 	var Arpeggiator = (function () {
 	    function Arpeggiator(ac) {
 	        var _this = this;
@@ -2569,7 +2611,62 @@
 
 
 /***/ },
-/* 15 */
+/* 16 */
+/***/ function(module, exports) {
+
+	var Timer = (function () {
+	    function Timer(ac, bpm, interval, ahead) {
+	        if (bpm === void 0) { bpm = 60; }
+	        if (interval === void 0) { interval = 0.025; }
+	        if (ahead === void 0) { ahead = 0.1; }
+	        this.running = false;
+	        this.ac = ac;
+	        this.dt = 0;
+	        this.nextNoteTime = 0;
+	        this.bpm = bpm;
+	        this.interval = interval;
+	        this.ahead = ahead;
+	    }
+	    Object.defineProperty(Timer.prototype, "bpm", {
+	        get: function () { return this._bpm; },
+	        set: function (v) {
+	            this._bpm = v;
+	            this.nextNoteTime -= this.dt;
+	            this.dt = (1 / 4) * 60 / this._bpm;
+	            this.nextNoteTime += this.dt;
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    Timer.prototype.start = function (cb) {
+	        if (this.running)
+	            return;
+	        this.running = true;
+	        if (cb)
+	            this.cb = cb;
+	        this.nextNoteTime = this.ac.currentTime;
+	        this.tick();
+	    };
+	    Timer.prototype.stop = function () {
+	        this.running = false;
+	    };
+	    Timer.prototype.tick = function () {
+	        if (!this.running)
+	            return;
+	        setTimeout(this.tick.bind(this), this.interval * 1000);
+	        while (this.nextNoteTime < this.ac.currentTime + this.ahead) {
+	            if (this.cb)
+	                this.cb(this.nextNoteTime);
+	            this.nextNoteTime += this.dt;
+	        }
+	    };
+	    return Timer;
+	})();
+	exports.Timer = Timer;
+
+
+/***/ },
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __extends = (this && this.__extends) || function (d, b) {
@@ -2737,7 +2834,7 @@
 
 
 /***/ },
-/* 16 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var popups = __webpack_require__(8);
@@ -2893,103 +2990,6 @@
 	    return Presets;
 	})();
 	exports.Presets = Presets;
-
-
-/***/ },
-/* 17 */
-/***/ function(module, exports) {
-
-	var Timer = (function () {
-	    function Timer(ac, bpm, interval, ahead) {
-	        if (bpm === void 0) { bpm = 60; }
-	        if (interval === void 0) { interval = 0.025; }
-	        if (ahead === void 0) { ahead = 0.1; }
-	        this.running = false;
-	        this.ac = ac;
-	        this.dt = 0;
-	        this.nextNoteTime = 0;
-	        this.bpm = bpm;
-	        this.interval = interval;
-	        this.ahead = ahead;
-	    }
-	    Object.defineProperty(Timer.prototype, "bpm", {
-	        get: function () { return this._bpm; },
-	        set: function (v) {
-	            this._bpm = v;
-	            this.nextNoteTime -= this.dt;
-	            this.dt = (1 / 4) * 60 / this._bpm;
-	            this.nextNoteTime += this.dt;
-	        },
-	        enumerable: true,
-	        configurable: true
-	    });
-	    Timer.prototype.start = function (cb) {
-	        if (this.running)
-	            return;
-	        this.running = true;
-	        if (cb)
-	            this.cb = cb;
-	        this.nextNoteTime = this.ac.currentTime;
-	        this.tick();
-	    };
-	    Timer.prototype.stop = function () {
-	        this.running = false;
-	    };
-	    Timer.prototype.tick = function () {
-	        if (!this.running)
-	            return;
-	        setTimeout(this.tick.bind(this), this.interval * 1000);
-	        while (this.nextNoteTime < this.ac.currentTime + this.ahead) {
-	            if (this.cb)
-	                this.cb(this.nextNoteTime);
-	            this.nextNoteTime += this.dt;
-	        }
-	    };
-	    return Timer;
-	})();
-	exports.Timer = Timer;
-
-
-/***/ },
-/* 18 */
-/***/ function(module, exports) {
-
-	var MidiKeyboard = (function () {
-	    function MidiKeyboard() {
-	        var _this = this;
-	        this.connected = false;
-	        if (!navigator.requestMIDIAccess)
-	            return;
-	        navigator.requestMIDIAccess({ sysex: false }).then(function (midiAccess) {
-	            if (midiAccess.inputs.size <= 0)
-	                return;
-	            var input = midiAccess.inputs.values().next().value;
-	            if (!input)
-	                return;
-	            input.onmidimessage = function (msg) { return _this.midiMessage(msg); };
-	            _this.connected = true;
-	        });
-	    }
-	    MidiKeyboard.prototype.midiMessage = function (msg) {
-	        var data = msg.data;
-	        var cmd = data[0] >> 4;
-	        var channel = data[0] & 0xf;
-	        var note = data[1];
-	        var velocity = data[2];
-	        switch (cmd) {
-	            case 9:
-	                this.noteOn(note, velocity, channel);
-	                break;
-	            case 8:
-	                this.noteOff(note, velocity, channel);
-	                break;
-	        }
-	    };
-	    MidiKeyboard.prototype.noteOn = function (midi, velocity, channel) { };
-	    MidiKeyboard.prototype.noteOff = function (midi, velocity, channel) { };
-	    return MidiKeyboard;
-	})();
-	exports.MidiKeyboard = MidiKeyboard;
 
 
 /***/ }
