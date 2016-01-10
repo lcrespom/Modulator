@@ -28,10 +28,9 @@
 	- Etc?
 - Improve ADSR
 	- Linear/exponential switch
+- Navigate selection of audio notes in the graph using the keyboard,
+	e.g. page up / page down, or alt+left / alt+right
 - Provide more preset instruments
-- Improve presets panel
-	- When clicking on preset number, let user directly navigate to preset,
-		e.g. by showing a drop down list
 - Limitation: a control node can only control a single parameter name
 	- Prevent from connecting a control node to more than one destination
 	- Or else, modify the UI to support multiple destination nodes
