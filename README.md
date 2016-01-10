@@ -16,7 +16,7 @@ FireFox or Safari, but has no server-side code.
 	- Release the shift key to make the connection
 - To disconnect two nodes, simply make the same connection again,
 	and this time it will be removed
-- Use the keyboard to play notes: note C3 is in 'z', note C4 is in 'a'.
+- Use the keyboard to play notes: note **C3** is in `Z`, note **C4** is in `Q`.
 
 You can directly try it out [here](//lcrespom.github.io/synth).
 
@@ -41,7 +41,7 @@ Check the [ToDo list](https://github.com/lcrespom/Modulator/blob/master/TODO.md)
 
 ##SynthLib
 The sound generation code of the application is also available as a UI-independent
-JavaScript library called 
+JavaScript library called
 [SynthLib](https://github.com/lcrespom/Modulator/blob/master/synthlib.md).
 With it, you can load instruments that have
 been previously designed with Modulator and play notes on them.
@@ -62,7 +62,7 @@ a consequence of how Web Audio is implemented in FF.
 
 ##References
 - Chris Lowis (@chrislowis)
-	- His [blog](http://blog.chrislowis.co.uk/) and web audio weekly newsletter.
+	- His [blog](http://blog.chrislowis.co.uk/) and web audio weekly newsletter
 	- His talk about [synth history and web audio](http://blog.chrislowis.co.uk/2015/06/26/a-brief-history-of-synthesis.html)
 	- His github [repo](https://github.com/chrislo)
 	- [Synthesising Drum Sounds with the Web Audio API](https://dev.opera.com/articles/drum-sounds-webaudio/)
