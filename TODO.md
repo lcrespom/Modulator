@@ -3,6 +3,7 @@
 ##Bugs
 - ADSR needs more testing & refining
 	- Incorrect behavior when key is released before reaching the sustain level
+	- After an ADSR node is added and then removed, notes don't stop sounding
 - Incorrect notes detected in arpeggio+poly mode
 	- Traces show correct notes are sent to instrument
 - Popping sound at note on/off (improved after adding adsr depth parameter)
