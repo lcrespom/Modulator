@@ -224,7 +224,7 @@ export class PianoKeyboard {
 		if (!json) return;
 		if (json.portamento) {
 			this.portaSlider.val(
-				linear2log(json.portamento, PORTAMENTO_MIN, PORTAMENTO_MAX);
+				linear2log(json.portamento, PORTAMENTO_MIN, PORTAMENTO_MAX));
 		}
 		if (json.octave) {
 			this.octave = json.octave;
