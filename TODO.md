@@ -3,7 +3,8 @@
 ##Bugs
 - ADSR needs more testing & refining
 	- Incorrect behavior when key is released before reaching the sustain level
-- Arpeggio sends incorrect notes - detectable only in polyphonic mode
+- Incorrect notes detected in arpeggio+poly mode
+	- Traces show correct notes are sent to instrument
 - Popping sound at note on/off (improved after adding adsr depth parameter)
 - Analyzer should detect when no sound is playing and clean osc and fft graphs
 - Review TODO items inside code

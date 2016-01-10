@@ -70,8 +70,7 @@ object into each of its voices.
 	*destination* property of the *ac* parameter will be used.
 
 ####noteOn(midi, velocity, when)
-Forwards the *noteOn* call to one of the voices. Currently the voice selection criterion
-is based on the least-recently started note. The parameters are the same as with the
+Forwards the *noteOn* call to one of the voices. The parameters are the same as with the
 Voice class *noteOn* method.
 
 ####noteOff(midi, velocity, when)

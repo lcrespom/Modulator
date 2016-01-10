@@ -1002,8 +1002,8 @@
 			{
 				"type": "Filter",
 				"params": {
-					"frequency": 3804.415245453969,
-					"Q": 9.284478953499399,
+					"frequency": 3500,
+					"Q": 7.5,
 					"detune": 0,
 					"gain": 0,
 					"type": "lowpass"
