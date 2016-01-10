@@ -66,7 +66,7 @@
 	}
 	function setupPalette() {
 	    $(function () {
-	        $('.nano')['nanoScroller']();
+	        $('.nano')['nanoScroller']({ preventPageScrolling: true });
 	    });
 	}
 
@@ -2783,19 +2783,42 @@
 	        var _this = this;
 	        $('#save-but').click(function (_) { return _this.savePreset(); });
 	        $('#load-file').on('change', function (evt) { return _this.loadPreset(evt); });
-	        $('#prev-preset-but').click(function (_) { return _this.changePreset(-1); });
-	        $('#next-preset-but').click(function (_) { return _this.changePreset(+1); });
+	        $('#prev-preset-but').click(function (_) { return _this.changePreset(_this.presetNum - 1); });
+	        $('#next-preset-but').click(function (_) { return _this.changePreset(_this.presetNum + 1); });
 	        $('body').keydown(function (evt) {
 	            if (evt.target.nodeName == 'INPUT' || popups.isOpen)
 	                return;
 	            if (evt.keyCode == 37)
-	                _this.changePreset(-1);
+	                _this.changePreset(_this.presetNum - 1);
 	            if (evt.keyCode == 39)
-	                _this.changePreset(+1);
+	                _this.changePreset(_this.presetNum + 1);
+	        });
+	        $('#preset-num').click(function (_) { return _this.togglePresetSelector(); });
+	        var preSel = $('.preset-selector select');
+	        preSel.change(function (_) {
+	            var sel = preSel.val().split(':')[0];
+	            _this.changePreset(sel - 1);
 	        });
 	    };
-	    Presets.prototype.changePreset = function (increment) {
-	        var newNum = this.presetNum + increment;
+	    Presets.prototype.togglePresetSelector = function () {
+	        var seldiv = $('.preset-selector');
+	        seldiv.toggle();
+	        if (!seldiv.is(':visible'))
+	            return;
+	        // Fill select contents
+	        var sel = seldiv.find('select');
+	        sel.empty();
+	        sel.focus();
+	        var i = 0;
+	        for (var _i = 0, _a = this.presets; _i < _a.length; _i++) {
+	            var preset = _a[_i];
+	            var selected = i == this.presetNum ? ' selected' : '';
+	            i++;
+	            if (preset.nodes.length > 1)
+	                sel.append("<option" + selected + ">" + i + ": " + preset.name + "</option>");
+	        }
+	    };
+	    Presets.prototype.changePreset = function (newNum) {
 	        if (newNum < 0)
 	            newNum = MAX_PRESETS - 1;
 	        else if (newNum >= MAX_PRESETS)

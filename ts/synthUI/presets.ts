@@ -47,17 +47,39 @@ export class Presets {
 	registerListeners() {
 		$('#save-but').click(_ => this.savePreset());
 		$('#load-file').on('change', evt  => this.loadPreset(evt));
-		$('#prev-preset-but').click(_ => this.changePreset(-1));
-		$('#next-preset-but').click(_ => this.changePreset(+1));
+		$('#prev-preset-but').click(_ => this.changePreset(this.presetNum - 1));
+		$('#next-preset-but').click(_ => this.changePreset(this.presetNum + 1));
 		$('body').keydown(evt => {
 			if (evt.target.nodeName == 'INPUT' || popups.isOpen) return;
-			if (evt.keyCode == 37) this.changePreset(-1);
-			if (evt.keyCode == 39) this.changePreset(+1);
+			if (evt.keyCode == 37) this.changePreset(this.presetNum - 1);
+			if (evt.keyCode == 39) this.changePreset(this.presetNum + 1);
+		});
+		$('#preset-num').click(_ => this.togglePresetSelector());
+		const preSel = $('.preset-selector select');
+		preSel.change(_ => {
+			const sel = preSel.val().split(':')[0];
+			this.changePreset(sel - 1);
 		});
 	}
 
-	changePreset(increment: number) {
-		let newNum = this.presetNum + increment;
+	togglePresetSelector() {
+		const seldiv = $('.preset-selector');
+		seldiv.toggle();
+		if (!seldiv.is(':visible')) return;
+		// Fill select contents
+		const sel = seldiv.find('select');
+		sel.empty();
+		sel.focus();
+		let i = 0;
+		for (const preset of this.presets) {
+			const selected = i == this.presetNum ? ' selected' : '';
+			i++;
+			if (preset.nodes.length > 1)
+				sel.append(`<option${selected}>${i}: ${preset.name}</option>`);
+		}
+	}
+
+	changePreset(newNum: number) {
 		if (newNum < 0) newNum = MAX_PRESETS - 1;
 		else if (newNum >= MAX_PRESETS) newNum = 0;
 		this.synth2preset();

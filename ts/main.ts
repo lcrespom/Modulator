@@ -29,7 +29,7 @@ function setupPanels() {
 
 function setupPalette() {
 	$(function() {
-		$('.nano')['nanoScroller']();
+		$('.nano')['nanoScroller']({ preventPageScrolling: true });
 	});
 }
 

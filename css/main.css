@@ -199,10 +199,28 @@ input[type=range][orient=vertical] {
 }
 
 #preset-num {
-	display: inline-block;
 	width: 40px;
+	height: 34px;
 	font-size: 130%;
-	text-align: center
+	padding: 3px;
+}
+
+.preset-selector {
+	display: none;
+    width: 168px;
+    height: 122px;
+    z-index: 1000;
+    position: absolute;
+    background: white;
+    margin: 5px 0;
+	margin-left: -20px;
+}
+.preset-selector select {
+    width: 168px;
+    height: 116px;
+    border: 1px solid #999;
+    border-radius: 5px;
+	padding: 5px;
 }
 
 #preset-name {
@@ -288,12 +306,10 @@ input[type=range][orient=vertical] {
 	display: inline-block;
 	position: absolute;
 	left: 120px;
-/*	left: 130px;*/
 }
 
 .arpeggio-box {
 	display: inline-block;
 	position: absolute;
 	left: 275px;
-/*	left: 310px;*/
 }
