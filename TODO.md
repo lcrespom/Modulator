@@ -30,6 +30,7 @@
 	- Linear/exponential switch
 - Navigate selection of audio notes in the graph using the keyboard,
 	e.g. page up / page down, or alt+left / alt+right
+- Preset selector: update preset combo when navigating with keys or < and > buttons
 - Provide more preset instruments
 - Limitation: a control node can only control a single parameter name
 	- Prevent from connecting a control node to more than one destination

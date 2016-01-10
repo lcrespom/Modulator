@@ -2903,6 +2903,7 @@
 	        if (!seldiv.is(':visible'))
 	            return;
 	        // Fill select contents
+	        this.synth2preset();
 	        var sel = seldiv.find('select');
 	        sel.empty();
 	        sel.focus();

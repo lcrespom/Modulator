@@ -67,6 +67,7 @@ export class Presets {
 		seldiv.toggle();
 		if (!seldiv.is(':visible')) return;
 		// Fill select contents
+		this.synth2preset();
 		const sel = seldiv.find('select');
 		sel.empty();
 		sel.focus();
