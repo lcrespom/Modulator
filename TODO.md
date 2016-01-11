@@ -2,10 +2,11 @@
 
 ##Bugs
 - ADSR needs more testing & refining
+	- Incorrect notes in arpeggio when an ADSR module is present. This bug
+		probably appeared after adding the `when` parameter to the noteOn / noteOff
+		methods.
 	- Incorrect behavior when key is released before reaching the sustain level
 	- After an ADSR node is added and then removed, notes don't stop sounding
-- Incorrect notes detected in arpeggio+poly mode
-	- Traces show correct notes are sent to instrument
 - Popping sound at note on/off (improved after adding adsr depth parameter)
 - Analyzer should detect when no sound is playing and clean osc and fft graphs
 - Review TODO items inside code
@@ -28,10 +29,10 @@
 	- Etc?
 - Improve ADSR
 	- Linear/exponential switch
+- Navigate selection of audio notes in the graph using the keyboard,
+	e.g. page up / page down, or alt+left / alt+right
+- Preset selector: update preset combo when navigating with keys or < and > buttons
 - Provide more preset instruments
-- Improve presets panel
-	- When clicking on preset number, let user directly navigate to preset,
-		e.g. by showing a drop down list
 - Limitation: a control node can only control a single parameter name
 	- Prevent from connecting a control node to more than one destination
 	- Or else, modify the UI to support multiple destination nodes

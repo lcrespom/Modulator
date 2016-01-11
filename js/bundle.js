@@ -2484,6 +2484,7 @@
 	    function Arpeggiator(ac) {
 	        var _this = this;
 	        this.backward = false;
+	        this.noteOnTime = 0.75;
 	        this.mode = '';
 	        this.octaves = 1;
 	        this.bpm = 60;
@@ -2503,11 +2504,6 @@
 	        configurable: true
 	    });
 	    Arpeggiator.prototype.timerCB = function (time) {
-	        // Release previous note
-	        if (this.lastNote) {
-	            this.noteOff(this.lastNote.noteToPlay, this.lastNote.velocity, time);
-	            this.lastNote = null;
-	        }
 	        // Return if disabled or no notes
 	        if (this.mode.length == 0)
 	            return;
@@ -2519,7 +2515,7 @@
 	        // Get current note and play it
 	        var ndata = this.notes.get(this.notect);
 	        this.noteOn(ndata.noteToPlay, ndata.velocity, time);
-	        this.lastNote = ndata;
+	        this.noteOff(ndata.noteToPlay, ndata.velocity, time + this.timer.noteDuration * this.noteOnTime);
 	        // Update note counter
 	        if (this.mode == 'u')
 	            this.notect++;
@@ -2621,7 +2617,7 @@
 	        if (ahead === void 0) { ahead = 0.1; }
 	        this.running = false;
 	        this.ac = ac;
-	        this.dt = 0;
+	        this.noteDuration = 0;
 	        this.nextNoteTime = 0;
 	        this.bpm = bpm;
 	        this.interval = interval;
@@ -2631,9 +2627,9 @@
 	        get: function () { return this._bpm; },
 	        set: function (v) {
 	            this._bpm = v;
-	            this.nextNoteTime -= this.dt;
-	            this.dt = (1 / 4) * 60 / this._bpm;
-	            this.nextNoteTime += this.dt;
+	            this.nextNoteTime -= this.noteDuration;
+	            this.noteDuration = (1 / 4) * 60 / this._bpm;
+	            this.nextNoteTime += this.noteDuration;
 	        },
 	        enumerable: true,
 	        configurable: true
@@ -2657,7 +2653,7 @@
 	        while (this.nextNoteTime < this.ac.currentTime + this.ahead) {
 	            if (this.cb)
 	                this.cb(this.nextNoteTime);
-	            this.nextNoteTime += this.dt;
+	            this.nextNoteTime += this.noteDuration;
 	        }
 	    };
 	    return Timer;
@@ -2903,6 +2899,7 @@
 	        if (!seldiv.is(':visible'))
 	            return;
 	        // Fill select contents
+	        this.synth2preset();
 	        var sel = seldiv.find('select');
 	        sel.empty();
 	        sel.focus();
