@@ -31,6 +31,11 @@ on Twitter, or directly within GitHub.
 	much as you like. The app is especially in need of a dark theme. I will
 	eventually add a theme selector option so the user can switch among a set of
 	available themes.
+- **Mobile version**: Modulator works only partially in mobile, and is
+	designed and tested for the desktop browser only. For example, there is no way
+	to connect, disconnect or remove modules on a mobile or tablet.
+	A mobile-specific component layout and UX could be designed indepently, and
+	I would take charge of fitting the current components in it.
 - **Code**: There are plenty of ways to improve and expand this application,
 	just check out the ToDo list below. The code is in TypeScript, but ES6/ES2015 and
 	plain old JavaScript are compatible with it.
