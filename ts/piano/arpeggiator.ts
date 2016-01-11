@@ -6,9 +6,9 @@ export class Arpeggiator {
 	_bpm: number;
 	notes: NoteTable;
 	notect: number;
-	lastNote: NoteData;
 	backward = false;
 	timer: Timer;
+	noteOnTime = 0.75;
 
 	constructor(ac: AudioContext) {
 		this.mode = '';
@@ -28,11 +28,6 @@ export class Arpeggiator {
 	}
 
 	timerCB(time: number): void {
-		// Release previous note
-		if (this.lastNote) {
-			this.noteOff(this.lastNote.noteToPlay, this.lastNote.velocity, time);
-			this.lastNote = null;
-		}
 		// Return if disabled or no notes
 		if (this.mode.length == 0) return;
 		const len = this.notes.length();
@@ -42,7 +37,8 @@ export class Arpeggiator {
 		// Get current note and play it
 		const ndata = this.notes.get(this.notect);
 		this.noteOn(ndata.noteToPlay, ndata.velocity, time);
-		this.lastNote = ndata;
+		this.noteOff(ndata.noteToPlay, ndata.velocity,
+			time + this.timer.noteDuration * this.noteOnTime);
 		// Update note counter
 		if (this.mode == 'u')
 			this.notect++;
