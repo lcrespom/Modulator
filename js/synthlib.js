@@ -352,7 +352,7 @@
 	var BaseNoteHandler = (function () {
 	    function BaseNoteHandler(ndata) {
 	        this.kbTrigger = false;
-	        this.playAfterNoteOff = false;
+	        this.releaseTime = 0;
 	        this.handlers = null;
 	        this.ndata = ndata;
 	        this.outTracker = new OutputTracker(ndata.anode);
@@ -426,8 +426,11 @@
 	        this.playing = false;
 	    }
 	    OscNoteHandler.prototype.noteOn = function (midi, gain, ratio, when) {
-	        if (this.playing)
-	            this.noteEnd(midi, when); // Because this is monophonic
+	        console.log("> noteOn: midi=" + midi + ", when=" + when);
+	        // if (this.playing)
+	        // 	this.noteEnd(midi, when);
+	        if (this.oscClone)
+	            this.oscClone.stop(when);
 	        this.playing = true;
 	        this.oscClone = this.clone();
 	        this.rampParam(this.oscClone.frequency, ratio, when);
@@ -435,12 +438,13 @@
 	        this.lastNote = midi;
 	    };
 	    OscNoteHandler.prototype.noteOff = function (midi, gain, when) {
+	        console.log("> noteOff: midi=" + midi + ", when=" + when);
 	        if (midi != this.lastNote)
 	            return;
-	        if (!this.playAfterNoteOff)
-	            this.noteEnd(midi, when);
+	        this.noteEnd(midi, when + this.releaseTime);
 	    };
 	    OscNoteHandler.prototype.noteEnd = function (midi, when) {
+	        console.log("> noteEnd: midi=" + midi + ", when=" + when);
 	        // Stop and disconnect
 	        if (!this.playing)
 	            return;
@@ -494,8 +498,7 @@
 	    BufferNoteHandler.prototype.noteOff = function (midi, gain, when) {
 	        if (midi != this.lastNote)
 	            return;
-	        if (!this.playAfterNoteOff)
-	            this.noteEnd(midi, when);
+	        this.noteEnd(midi, when + this.releaseTime);
 	    };
 	    BufferNoteHandler.prototype.noteEnd = function (midi, when) {
 	        // Stop and disconnect
@@ -520,9 +523,9 @@
 	    }
 	    ADSRNoteHandler.prototype.noteOn = function (midi, gain, ratio, when) {
 	        var _this = this;
-	        this.setupOtherHandlers();
 	        this.lastNote = midi;
 	        var adsr = this.ndata.anode;
+	        this.setupOtherHandlers(adsr);
 	        this.loopParams(function (out) {
 	            var v = _this.getParamValue(out);
 	            out.cancelScheduledValues(when);
@@ -545,11 +548,15 @@
 	            out.linearRampToValueAtTime(finalv, when + adsr.release);
 	        });
 	    };
-	    ADSRNoteHandler.prototype.setupOtherHandlers = function () {
-	        //TODO should set to false when ADSR node is removed
+	    ADSRNoteHandler.prototype.setupOtherHandlers = function (adsr) {
+	        //TODO should be set to 0 when ADSR node is removed
+	        //	or more in general, to the longest release time of all
+	        //	remaining ADSR nodes in the graph 
+	        //TODO this code should be moved up to the synth level, which
+	        //	should keep track of the ADSR node with the longest release time, etc.
 	        for (var _i = 0, _a = this.handlers; _i < _a.length; _i++) {
 	            var nh = _a[_i];
-	            nh.playAfterNoteOff = true;
+	            nh.releaseTime = adsr.release;
 	        }
 	    };
 	    ADSRNoteHandler.prototype.loopParams = function (cb) {
@@ -587,11 +594,9 @@
 	    RestartableNoteHandler.prototype.noteOff = function (midi, gain, when) {
 	        if (midi != this.lastNote)
 	            return;
-	        if (!this.playAfterNoteOff)
-	            this.noteEnd(midi, when);
+	        this.noteEnd(midi, when + this.releaseTime);
 	    };
 	    RestartableNoteHandler.prototype.noteEnd = function (midi, when) {
-	        // Stop and disconnect
 	        if (!this.playing)
 	            return;
 	        this.playing = false;

@@ -12,7 +12,7 @@ export interface NoteHandler {
 	noteOff(midi: number, gain: number, when: number): void;
 	noteEnd(midi: number, when: number): void;
 	kbTrigger: boolean;
-	playAfterNoteOff: boolean;
+	releaseTime: number;
 	handlers: NoteHandler[];
 }
 
@@ -23,8 +23,8 @@ class BaseNoteHandler implements NoteHandler {
 	ndata: NodeData;
 	outTracker: OutputTracker;
 	kbTrigger = false;
-	playAfterNoteOff = false;
-	handlers = null;
+	releaseTime = 0;
+	handlers: NoteHandler[] = null;
 
 	constructor(ndata: NodeData) {
 		this.ndata = ndata;
@@ -94,7 +94,10 @@ class OscNoteHandler extends BaseNoteHandler {
 	playing = false;
 
 	noteOn(midi: number, gain: number, ratio: number, when: number):void {
-		if (this.playing) this.noteEnd(midi, when);	// Because this is monophonic
+		console.log(`> noteOn: midi=${midi}, when=${when}`);
+		// if (this.playing)
+		// 	this.noteEnd(midi, when);
+		if (this.oscClone) this.oscClone.stop(when);
 		this.playing = true;
 		this.oscClone = <OscillatorNode>this.clone();
 		this.rampParam(this.oscClone.frequency, ratio, when);
@@ -103,11 +106,13 @@ class OscNoteHandler extends BaseNoteHandler {
 	}
 
 	noteOff(midi: number, gain: number, when: number): void {
+		console.log(`> noteOff: midi=${midi}, when=${when}`);
 		if (midi != this.lastNote) return;
-		if (!this.playAfterNoteOff) this.noteEnd(midi, when);
+		this.noteEnd(midi, when + this.releaseTime);
 	}
 
 	noteEnd(midi: number, when: number): void {
+		console.log(`> noteEnd: midi=${midi}, when=${when}`);
 		// Stop and disconnect
 		if (!this.playing) return;
 		this.playing = false;
@@ -138,7 +143,8 @@ class BufferNoteHandler extends BaseNoteHandler {
 	playing = false;
 
 	noteOn(midi: number, gain: number, ratio: number, when: number):void {
-		if (this.playing) this.noteEnd(midi, when);
+		if (this.playing)
+			this.noteEnd(midi, when);
 		const buf = this.ndata.anode['_buffer'];
 		if (!buf) return;	// Buffer still loading or failed
 		this.playing = true;
@@ -153,7 +159,7 @@ class BufferNoteHandler extends BaseNoteHandler {
 
 	noteOff(midi: number, gain: number, when: number): void {
 		if (midi != this.lastNote) return;
-		if (!this.playAfterNoteOff) this.noteEnd(midi, when);
+		this.noteEnd(midi, when + this.releaseTime);
 	}
 
 	noteEnd(midi: number, when: number): void {
@@ -177,9 +183,9 @@ class ADSRNoteHandler extends BaseNoteHandler {
 	kbTrigger = true;
 
 	noteOn(midi: number, gain: number, ratio: number, when: number):void {
-		this.setupOtherHandlers();
 		this.lastNote = midi;
 		const adsr: ADSR = <ADSR>this.ndata.anode;
+		this.setupOtherHandlers(adsr);
 		this.loopParams(out => {
 			const v = this.getParamValue(out);
 			out.cancelScheduledValues(when);
@@ -203,9 +209,13 @@ class ADSRNoteHandler extends BaseNoteHandler {
 		});
 	}
 
-	setupOtherHandlers() {
-		//TODO should set to false when ADSR node is removed
-		for (const nh of this.handlers) nh.playAfterNoteOff = true;
+	setupOtherHandlers(adsr: ADSR) {
+		//TODO should be set to 0 when ADSR node is removed
+		//	or more in general, to the longest release time of all
+		//	remaining ADSR nodes in the graph 
+		//TODO this code should be moved up to the synth level, which
+		//	should keep track of the ADSR node with the longest release time, etc.
+		for (const nh of this.handlers) nh.releaseTime = adsr.release;
 	}
 
 	loopParams(cb: (out: AudioParam) => void): void {
@@ -229,7 +239,8 @@ class RestartableNoteHandler extends BaseNoteHandler {
 	playing = false;
 
 	noteOn(midi: number, gain: number, ratio: number, when: number):void {
-		if (this.playing) this.noteEnd(midi, when);
+		if (this.playing)
+			this.noteEnd(midi, when);
 		this.playing = true;
 		const anode: any = this.ndata.anode;
 		anode.start(when);
@@ -238,11 +249,10 @@ class RestartableNoteHandler extends BaseNoteHandler {
 
 	noteOff(midi: number, gain: number, when: number): void {
 		if (midi != this.lastNote) return;
-		if (!this.playAfterNoteOff) this.noteEnd(midi, when);
+		this.noteEnd(midi, when + this.releaseTime);
 	}
 
 	noteEnd(midi: number, when: number): void {
-		// Stop and disconnect
 		if (!this.playing) return;
 		this.playing = false;
 		const anode: any = this.ndata.anode;
