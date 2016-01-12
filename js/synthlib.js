@@ -416,6 +416,7 @@
 	    };
 	    return BaseNoteHandler;
 	})();
+	var firstWhen = -1;
 	/**
 	 * Handles note events for an OscillatorNode
 	 */
@@ -426,9 +427,11 @@
 	        this.playing = false;
 	    }
 	    OscNoteHandler.prototype.noteOn = function (midi, gain, ratio, when) {
-	        console.log("> noteOn: midi=" + midi + ", when=" + when);
-	        // if (this.playing)
-	        // 	this.noteEnd(midi, when);
+	        if (firstWhen < 0)
+	            firstWhen = when;
+	        console.log("> noteOn: midi=" + midi + ", when=" + (when - firstWhen));
+	        //  if (this.playing)
+	        //  	this.noteEnd(midi, when - 0.01);
 	        if (this.oscClone)
 	            this.oscClone.stop(when);
 	        this.playing = true;
@@ -438,13 +441,13 @@
 	        this.lastNote = midi;
 	    };
 	    OscNoteHandler.prototype.noteOff = function (midi, gain, when) {
-	        console.log("> noteOff: midi=" + midi + ", when=" + when);
+	        console.log("> noteOff: midi=" + midi + ", when=" + (when - firstWhen));
 	        if (midi != this.lastNote)
 	            return;
 	        this.noteEnd(midi, when + this.releaseTime);
 	    };
 	    OscNoteHandler.prototype.noteEnd = function (midi, when) {
-	        console.log("> noteEnd: midi=" + midi + ", when=" + when);
+	        console.log("> noteEnd: midi=" + midi + ", when=" + (when - firstWhen));
 	        // Stop and disconnect
 	        if (!this.playing)
 	            return;

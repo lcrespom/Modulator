@@ -85,6 +85,7 @@ class BaseNoteHandler implements NoteHandler {
 	}
 }
 
+var firstWhen = -1;
 /**
  * Handles note events for an OscillatorNode
  */
@@ -94,9 +95,10 @@ class OscNoteHandler extends BaseNoteHandler {
 	playing = false;
 
 	noteOn(midi: number, gain: number, ratio: number, when: number):void {
-		console.log(`> noteOn: midi=${midi}, when=${when}`);
-		// if (this.playing)
-		// 	this.noteEnd(midi, when);
+		if (firstWhen < 0) firstWhen = when;
+		console.log(`> noteOn: midi=${midi}, when=${when - firstWhen}`);
+		//  if (this.playing)
+		//  	this.noteEnd(midi, when - 0.01);
 		if (this.oscClone) this.oscClone.stop(when);
 		this.playing = true;
 		this.oscClone = <OscillatorNode>this.clone();
@@ -106,13 +108,13 @@ class OscNoteHandler extends BaseNoteHandler {
 	}
 
 	noteOff(midi: number, gain: number, when: number): void {
-		console.log(`> noteOff: midi=${midi}, when=${when}`);
+		console.log(`> noteOff: midi=${midi}, when=${when - firstWhen}`);
 		if (midi != this.lastNote) return;
 		this.noteEnd(midi, when + this.releaseTime);
 	}
 
 	noteEnd(midi: number, when: number): void {
-		console.log(`> noteEnd: midi=${midi}, when=${when}`);
+		console.log(`> noteEnd: midi=${midi}, when=${when - firstWhen}`);
 		// Stop and disconnect
 		if (!this.playing) return;
 		this.playing = false;
