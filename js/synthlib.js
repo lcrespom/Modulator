@@ -533,7 +533,8 @@
 	            var v = _this.getParamValue(out);
 	            out.cancelScheduledValues(when);
 	            var initial = (1 - adsr.depth) * v;
-	            out.linearRampToValueAtTime(initial, when);
+	            out.setValueAtTime(initial, when);
+	            //out.linearRampToValueAtTime(initial, when);
 	            out.linearRampToValueAtTime(v, when + adsr.attack);
 	            var target = v * adsr.sustain + initial * (1 - adsr.sustain);
 	            out.linearRampToValueAtTime(target, when + adsr.attack + adsr.decay);

@@ -1,8 +1,8 @@
 {
-	"name": "graph",
+	"name": "Modulator",
 	"version": "1.0.0",
-	"description": "Grap Editor",
-	"main": "start.js",
+	"description": "Modular Synth using Web Audio",
+	"main": "index.html",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"tsc": "tsc",
@@ -17,7 +17,10 @@
 		"publish": "npm run publish:html && npm run publish:css && npm run publish:js && npm run publish:img"
 	},
 	"keywords": [
-		"graph"
+		"web audio",
+		"synthesizer",
+		"synth",
+		"modular synth"
 	],
 	"author": "Luis Crespo",
 	"license": "ISC",

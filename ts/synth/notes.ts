@@ -192,7 +192,8 @@ class ADSRNoteHandler extends BaseNoteHandler {
 			const v = this.getParamValue(out);
 			out.cancelScheduledValues(when);
 			const initial = (1 - adsr.depth) * v;
-			out.linearRampToValueAtTime(initial, when);
+			out.setValueAtTime(initial, when);
+			//out.linearRampToValueAtTime(initial, when);
 			out.linearRampToValueAtTime(v, when + adsr.attack);
 			const target = v * adsr.sustain + initial * (1 - adsr.sustain);
 			out.linearRampToValueAtTime(target, when + adsr.attack + adsr.decay);

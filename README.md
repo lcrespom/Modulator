@@ -85,3 +85,7 @@ a consequence of how Web Audio is implemented in FF.
 		play again
 - Soledad Penades
 	- [Hands On Web Audio](http://soledadpenades.com/files/t/2015_howa/#0) presentation
+
+##Acknowledgements
+The *Modulator* logo and application favicon are a design by
+[Marta Quer Bach](mailto:querbach.marta@gmail.com) 
