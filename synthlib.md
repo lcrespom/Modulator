@@ -151,11 +151,11 @@ function playSynthDemo() {
 	timer.start(time => {
 		var note = notes[ct++];
 		if (ct > score.length) {
-			voice.noteOff(lastNote, time);
+			voice.noteOff(lastNote, 1, time);
 			timer.stop();
 		}
 		else if (note > 0) {
-			if (lastNote) voice.noteOff(lastNote, time);
+			if (lastNote) voice.noteOff(lastNote, 1, time);
 			voice.noteOn(note, time);
 			lastNote = note;
 		}
