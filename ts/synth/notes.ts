@@ -94,10 +94,6 @@ class OscNoteHandler extends BaseNoteHandler {
 
 	noteOn(midi: number, gain: number, ratio: number, when: number):void {
 		if (firstWhen < 0) firstWhen = when;
-		console.log('> advance:', when - this.ndata.anode.context.currentTime);
-		console.log(`> noteOn: midi=${midi}, when=${when - firstWhen}`);
-		//  if (this.playing)
-		//  	this.noteEnd(midi, when - 0.01);
 		if (this.oscClone) this.oscClone.stop(when);
 		this.oscClone = <OscillatorNode>this.clone();
 		this.rampParam(this.oscClone.frequency, ratio, when);
@@ -105,13 +101,11 @@ class OscNoteHandler extends BaseNoteHandler {
 	}
 
 	noteOff(midi: number, gain: number, when: number): void {
-		console.log(`> noteOff: midi=${midi}, when=${when - firstWhen}`);
+		//TODO maybe get rid of noteEnd
 		this.noteEnd(midi, when + this.releaseTime);
 	}
 
 	noteEnd(midi: number, when: number): void {
-		console.log(`> noteEnd: midi=${midi}, when=${when - firstWhen}`);
-		console.log('---');
 		// Stop and disconnect
 		this.oscClone.stop(when);
 		//TODO ensure that not disconnecting does not produce memory leaks

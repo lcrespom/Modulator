@@ -1052,10 +1052,6 @@
 	    OscNoteHandler.prototype.noteOn = function (midi, gain, ratio, when) {
 	        if (firstWhen < 0)
 	            firstWhen = when;
-	        console.log('> advance:', when - this.ndata.anode.context.currentTime);
-	        console.log("> noteOn: midi=" + midi + ", when=" + (when - firstWhen));
-	        //  if (this.playing)
-	        //  	this.noteEnd(midi, when - 0.01);
 	        if (this.oscClone)
 	            this.oscClone.stop(when);
 	        this.oscClone = this.clone();
@@ -1063,12 +1059,10 @@
 	        this.oscClone.start(when);
 	    };
 	    OscNoteHandler.prototype.noteOff = function (midi, gain, when) {
-	        console.log("> noteOff: midi=" + midi + ", when=" + (when - firstWhen));
+	        //TODO maybe get rid of noteEnd
 	        this.noteEnd(midi, when + this.releaseTime);
 	    };
 	    OscNoteHandler.prototype.noteEnd = function (midi, when) {
-	        console.log("> noteEnd: midi=" + midi + ", when=" + (when - firstWhen));
-	        console.log('---');
 	        // Stop and disconnect
 	        this.oscClone.stop(when);
 	        //TODO ensure that not disconnecting does not produce memory leaks
