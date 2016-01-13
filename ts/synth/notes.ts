@@ -85,7 +85,6 @@ class BaseNoteHandler implements NoteHandler {
 	}
 }
 
-var firstWhen = -1;
 /**
  * Handles note events for an OscillatorNode
  */
@@ -93,7 +92,6 @@ class OscNoteHandler extends BaseNoteHandler {
 	oscClone: OscillatorNode;
 
 	noteOn(midi: number, gain: number, ratio: number, when: number):void {
-		if (firstWhen < 0) firstWhen = when;
 		if (this.oscClone) this.oscClone.stop(when);
 		this.oscClone = <OscillatorNode>this.clone();
 		this.rampParam(this.oscClone.frequency, ratio, when);

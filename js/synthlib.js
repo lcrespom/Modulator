@@ -416,7 +416,6 @@
 	    };
 	    return BaseNoteHandler;
 	})();
-	var firstWhen = -1;
 	/**
 	 * Handles note events for an OscillatorNode
 	 */
@@ -426,8 +425,6 @@
 	        _super.apply(this, arguments);
 	    }
 	    OscNoteHandler.prototype.noteOn = function (midi, gain, ratio, when) {
-	        if (firstWhen < 0)
-	            firstWhen = when;
 	        if (this.oscClone)
 	            this.oscClone.stop(when);
 	        this.oscClone = this.clone();
