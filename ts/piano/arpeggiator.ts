@@ -17,7 +17,6 @@ export class Arpeggiator {
 		this.notect = 0;
 		this.notes = new NoteTable();
 		this.timer = new Timer(ac, this.bpm);
-		this.timer.start(time => this.timerCB(time));
 	}
 
 	get bpm() { return this._bpm }
@@ -78,7 +77,8 @@ export class Arpeggiator {
 			this.notes.add(midi, midi + 12, velocity);
 		if (this.octaves > 2)
 			this.notes.add(midi, midi + 24, velocity);
-		if (shouldStart) this.timer.start();
+		if (shouldStart)
+			this.timer.start(time => this.timerCB(time));
 	}
 
 	sendNoteOff(midi: number, velocity: number): void {

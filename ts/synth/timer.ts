@@ -12,7 +12,7 @@ export class Timer {
 	nextNoteTime: number;
 	noteDuration: number;
 
-	constructor(ac: AudioContext, bpm = 60, interval = 0.025, ahead = 0.1) {
+	constructor(ac: AudioContext, bpm = 60, interval = 0.02, ahead = 0.3) {
 		this.running = false;
 		this.ac = ac;
 		this.noteDuration = 0;

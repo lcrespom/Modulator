@@ -424,34 +424,28 @@
 	    __extends(OscNoteHandler, _super);
 	    function OscNoteHandler() {
 	        _super.apply(this, arguments);
-	        this.playing = false;
 	    }
 	    OscNoteHandler.prototype.noteOn = function (midi, gain, ratio, when) {
 	        if (firstWhen < 0)
 	            firstWhen = when;
+	        console.log('> advance:', when - this.ndata.anode.context.currentTime);
 	        console.log("> noteOn: midi=" + midi + ", when=" + (when - firstWhen));
 	        //  if (this.playing)
 	        //  	this.noteEnd(midi, when - 0.01);
 	        if (this.oscClone)
 	            this.oscClone.stop(when);
-	        this.playing = true;
 	        this.oscClone = this.clone();
 	        this.rampParam(this.oscClone.frequency, ratio, when);
 	        this.oscClone.start(when);
-	        this.lastNote = midi;
 	    };
 	    OscNoteHandler.prototype.noteOff = function (midi, gain, when) {
 	        console.log("> noteOff: midi=" + midi + ", when=" + (when - firstWhen));
-	        if (midi != this.lastNote)
-	            return;
 	        this.noteEnd(midi, when + this.releaseTime);
 	    };
 	    OscNoteHandler.prototype.noteEnd = function (midi, when) {
 	        console.log("> noteEnd: midi=" + midi + ", when=" + (when - firstWhen));
+	        console.log('---');
 	        // Stop and disconnect
-	        if (!this.playing)
-	            return;
-	        this.playing = false;
 	        this.oscClone.stop(when);
 	        //TODO ensure that not disconnecting does not produce memory leaks
 	        // this.disconnect(this.oscClone);
@@ -533,11 +527,17 @@
 	            var v = _this.getParamValue(out);
 	            out.cancelScheduledValues(when);
 	            var initial = (1 - adsr.depth) * v;
-	            out.setValueAtTime(initial, when);
-	            //out.linearRampToValueAtTime(initial, when);
-	            out.linearRampToValueAtTime(v, when + adsr.attack);
+	            if (adsr.attack > 0) {
+	                out.setValueAtTime(initial, when);
+	                out.linearRampToValueAtTime(v, when + adsr.attack);
+	            }
+	            else
+	                out.setValueAtTime(v, when);
 	            var target = v * adsr.sustain + initial * (1 - adsr.sustain);
-	            out.linearRampToValueAtTime(target, when + adsr.attack + adsr.decay);
+	            if (adsr.decay > 0)
+	                out.linearRampToValueAtTime(target, when + adsr.attack + adsr.decay);
+	            else
+	                out.setValueAtTime(target, when + adsr.attack + adsr.decay);
 	        });
 	    };
 	    ADSRNoteHandler.prototype.noteOff = function (midi, gain, when) {
@@ -545,17 +545,21 @@
 	            return;
 	        var adsr = this.ndata.anode;
 	        this.loopParams(function (out) {
-	            var v = out.value; // Get the really current value
+	            var v = out.value; //this.getParamValue(out);	// Get the really current value
 	            var finalv = (1 - adsr.depth) * v;
 	            out.cancelScheduledValues(when);
-	            out.linearRampToValueAtTime(v, when);
-	            out.linearRampToValueAtTime(finalv, when + adsr.release);
+	            if (adsr.release > 0) {
+	                out.setValueAtTime(v, when);
+	                out.linearRampToValueAtTime(finalv, when + adsr.release);
+	            }
+	            else
+	                out.setValueAtTime(finalv, when);
 	        });
 	    };
 	    ADSRNoteHandler.prototype.setupOtherHandlers = function (adsr) {
 	        //TODO should be set to 0 when ADSR node is removed
 	        //	or more in general, to the longest release time of all
-	        //	remaining ADSR nodes in the graph 
+	        //	remaining ADSR nodes in the graph
 	        //TODO this code should be moved up to the synth level, which
 	        //	should keep track of the ADSR node with the longest release time, etc.
 	        for (var _i = 0, _a = this.handlers; _i < _a.length; _i++) {
@@ -1058,8 +1062,8 @@
 	var Timer = (function () {
 	    function Timer(ac, bpm, interval, ahead) {
 	        if (bpm === void 0) { bpm = 60; }
-	        if (interval === void 0) { interval = 0.025; }
-	        if (ahead === void 0) { ahead = 0.1; }
+	        if (interval === void 0) { interval = 0.02; }
+	        if (ahead === void 0) { ahead = 0.3; }
 	        this.running = false;
 	        this.ac = ac;
 	        this.noteDuration = 0;

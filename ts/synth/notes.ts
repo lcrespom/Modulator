@@ -91,33 +91,28 @@ var firstWhen = -1;
  */
 class OscNoteHandler extends BaseNoteHandler {
 	oscClone: OscillatorNode;
-	lastNote: number;
-	playing = false;
 
 	noteOn(midi: number, gain: number, ratio: number, when: number):void {
 		if (firstWhen < 0) firstWhen = when;
+		console.log('> advance:', when - this.ndata.anode.context.currentTime);
 		console.log(`> noteOn: midi=${midi}, when=${when - firstWhen}`);
 		//  if (this.playing)
 		//  	this.noteEnd(midi, when - 0.01);
 		if (this.oscClone) this.oscClone.stop(when);
-		this.playing = true;
 		this.oscClone = <OscillatorNode>this.clone();
 		this.rampParam(this.oscClone.frequency, ratio, when);
 		this.oscClone.start(when);
-		this.lastNote = midi;
 	}
 
 	noteOff(midi: number, gain: number, when: number): void {
 		console.log(`> noteOff: midi=${midi}, when=${when - firstWhen}`);
-		if (midi != this.lastNote) return;
 		this.noteEnd(midi, when + this.releaseTime);
 	}
 
 	noteEnd(midi: number, when: number): void {
 		console.log(`> noteEnd: midi=${midi}, when=${when - firstWhen}`);
+		console.log('---');
 		// Stop and disconnect
-		if (!this.playing) return;
-		this.playing = false;
 		this.oscClone.stop(when);
 		//TODO ensure that not disconnecting does not produce memory leaks
 		// this.disconnect(this.oscClone);
@@ -192,11 +187,17 @@ class ADSRNoteHandler extends BaseNoteHandler {
 			const v = this.getParamValue(out);
 			out.cancelScheduledValues(when);
 			const initial = (1 - adsr.depth) * v;
-			out.setValueAtTime(initial, when);
-			//out.linearRampToValueAtTime(initial, when);
-			out.linearRampToValueAtTime(v, when + adsr.attack);
+			if (adsr.attack > 0) {
+				out.setValueAtTime(initial, when);
+				out.linearRampToValueAtTime(v, when + adsr.attack);
+			}
+			else
+				out.setValueAtTime(v, when);
 			const target = v * adsr.sustain + initial * (1 - adsr.sustain);
-			out.linearRampToValueAtTime(target, when + adsr.attack + adsr.decay);
+			if (adsr.decay > 0)
+				out.linearRampToValueAtTime(target, when + adsr.attack + adsr.decay);
+			else
+				out.setValueAtTime(target, when + adsr.attack + adsr.decay);
 		});
 	}
 
@@ -204,18 +205,22 @@ class ADSRNoteHandler extends BaseNoteHandler {
 		if (midi != this.lastNote) return;
 		const adsr: ADSR = <ADSR>this.ndata.anode;
 		this.loopParams(out => {
-			const v = out.value;	// Get the really current value
+			const v = out.value;//this.getParamValue(out);	// Get the really current value
 			const finalv = (1 - adsr.depth) * v;
 			out.cancelScheduledValues(when);
-			out.linearRampToValueAtTime(v, when);
-			out.linearRampToValueAtTime(finalv, when + adsr.release);
+			if (adsr.release > 0) {
+				out.setValueAtTime(v, when);
+				out.linearRampToValueAtTime(finalv, when + adsr.release);
+			}
+			else
+				out.setValueAtTime(finalv, when);
 		});
 	}
 
 	setupOtherHandlers(adsr: ADSR) {
 		//TODO should be set to 0 when ADSR node is removed
 		//	or more in general, to the longest release time of all
-		//	remaining ADSR nodes in the graph 
+		//	remaining ADSR nodes in the graph
 		//TODO this code should be moved up to the synth level, which
 		//	should keep track of the ADSR node with the longest release time, etc.
 		for (const nh of this.handlers) nh.releaseTime = adsr.release;
