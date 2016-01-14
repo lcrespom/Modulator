@@ -26,7 +26,7 @@ it will be much better if you follow the standard ES6 class style. Yes,
 JS `class` keyword has lots of detractors, so the current code avoids abusing
 subclasses, as that is the major risk of using classes.
 
-Classes fit pretty well in TypeScript, and that is why it makes sense to use them,
+Classes fit pretty well in TypeScript, that is why it makes sense to use them...
 with the proper caution.
 
 ## Development environment
@@ -37,3 +37,11 @@ with the proper caution.
 	file in synch with any changes to *.ts files.
 3. Run `npm run serve` to launch a small & convenient local server in order to
 	test the app.
+
+
+## Help wanted
+
+Other than the specific features described in the ToDo list, it would be great
+to have a mobile version of Modulator. If anyone is interested, please
+open an issue and let's discuss it in the comments.
+
