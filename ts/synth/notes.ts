@@ -95,6 +95,7 @@ class OscNoteHandler extends BaseNoteHandler {
 		if (this.oscClone) this.oscClone.stop(when);
 		this.oscClone = <OscillatorNode>this.clone();
 		this.rampParam(this.oscClone.frequency, ratio, when);
+		console.log(`> osc start(${when})`);
 		this.oscClone.start(when);
 	}
 
@@ -105,6 +106,7 @@ class OscNoteHandler extends BaseNoteHandler {
 
 	noteEnd(midi: number, when: number): void {
 		// Stop and disconnect
+		console.log(`> osc stop(${when})`);
 		this.oscClone.stop(when);
 		//TODO ensure that not disconnecting does not produce memory leaks
 		// this.disconnect(this.oscClone);
@@ -177,19 +179,28 @@ class ADSRNoteHandler extends BaseNoteHandler {
 		this.setupOtherHandlers(adsr);
 		this.loopParams(out => {
 			const v = this.getParamValue(out);
+			console.log(`> noteOn: cancelScheduledValues(${when})`);
 			out.cancelScheduledValues(when);
 			const initial = (1 - adsr.depth) * v;
 			if (adsr.attack > 0) {
+				console.log(`> attack: setValueAtTime(${initial}, ${when})`);
 				out.setValueAtTime(initial, when);
+				console.log(`> attack: linearRampToValueAtTime(${v}, ${when + adsr.attack})`);
 				out.linearRampToValueAtTime(v, when + adsr.attack);
 			}
-			else
+			else {
+				console.log(`> attack: setValueAtTime(${v}, ${when})`);
 				out.setValueAtTime(v, when);
+			}
 			const target = v * adsr.sustain + initial * (1 - adsr.sustain);
-			if (adsr.decay > 0)
+			if (adsr.decay > 0) {
+				console.log(`> decay: linearRampToValueAtTime(${target}, ${when + adsr.attack + adsr.decay})`);
 				out.linearRampToValueAtTime(target, when + adsr.attack + adsr.decay);
-			else
+			}
+			else {
+				console.log(`> decay: setValueAtTime(${target}, ${when + adsr.attack + adsr.decay})`);
 				out.setValueAtTime(target, when + adsr.attack + adsr.decay);
+			}
 		});
 	}
 
@@ -199,13 +210,19 @@ class ADSRNoteHandler extends BaseNoteHandler {
 		this.loopParams(out => {
 			const v = out.value;//this.getParamValue(out);	// Get the really current value
 			const finalv = (1 - adsr.depth) * v;
+			console.log(`> noteOff: cancelScheduledValues(${when})`);
 			out.cancelScheduledValues(when);
 			if (adsr.release > 0) {
+				console.log(`> release: setValueAtTime(${v}, ${when})`);
 				out.setValueAtTime(v, when);
+				console.log(`> release: linearRampToValueAtTime(${finalv}, ${when + adsr.release})`);
 				out.linearRampToValueAtTime(finalv, when + adsr.release);
 			}
-			else
+			else {
+				console.log(`> release: setValueAtTime(${finalv}, ${when})`);
 				out.setValueAtTime(finalv, when);
+			}
+			console.log('---');
 		});
 	}
 
