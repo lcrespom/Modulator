@@ -1060,9 +1060,11 @@
 	        this.noteEnd(midi, when + this.releaseTime);
 	    };
 	    OscNoteHandler.prototype.noteEnd = function (midi, when) {
+	        // Currently doing nothing because it will be stopped on next noteOn
 	        // Stop and disconnect
-	        this.oscClone.stop(when);
-	        //TODO ensure that not disconnecting does not produce memory leaks
+	        //this.oscClone.stop(when);
+	        //TODO ensure that not disconnecting does not produce memory leaks,
+	        //	especially when ADSR controls frequency
 	        // this.disconnect(this.oscClone);
 	        // this.oscClone = null;
 	    };
@@ -1140,35 +1142,46 @@
 	        this.setupOtherHandlers(adsr);
 	        this.loopParams(function (out) {
 	            var v = _this.getParamValue(out);
-	            out.cancelScheduledValues(when);
 	            var initial = (1 - adsr.depth) * v;
+	            //TODO calculate current value and value at "when", then re-ramp
+	            //Workaround: at least set value back to initial - but this results in
+	            //	an audible stop
+	            out.cancelScheduledValues(0);
+	            out.setValueAtTime(initial, 0);
 	            if (adsr.attack > 0) {
 	                out.setValueAtTime(initial, when);
 	                out.linearRampToValueAtTime(v, when + adsr.attack);
 	            }
-	            else
+	            else {
 	                out.setValueAtTime(v, when);
+	            }
 	            var target = v * adsr.sustain + initial * (1 - adsr.sustain);
-	            if (adsr.decay > 0)
+	            if (adsr.decay > 0) {
 	                out.linearRampToValueAtTime(target, when + adsr.attack + adsr.decay);
-	            else
+	            }
+	            else {
 	                out.setValueAtTime(target, when + adsr.attack + adsr.decay);
+	            }
 	        });
 	    };
 	    ADSRNoteHandler.prototype.noteOff = function (midi, gain, when) {
+	        var _this = this;
 	        if (midi != this.lastNote)
 	            return;
 	        var adsr = this.ndata.anode;
 	        this.loopParams(function (out) {
-	            var v = out.value; //this.getParamValue(out);	// Get the really current value
+	            //TODO calculate value at "when" from previous ramps
+	            var v = when > adsr.context.currentTime ?
+	                _this.getParamValue(out) * adsr.sustain : out.value;
 	            var finalv = (1 - adsr.depth) * v;
 	            out.cancelScheduledValues(when);
 	            if (adsr.release > 0) {
 	                out.setValueAtTime(v, when);
 	                out.linearRampToValueAtTime(finalv, when + adsr.release);
 	            }
-	            else
+	            else {
 	                out.setValueAtTime(finalv, when);
+	            }
 	        });
 	    };
 	    ADSRNoteHandler.prototype.setupOtherHandlers = function (adsr) {
@@ -2026,7 +2039,7 @@
 	var piano_1 = __webpack_require__(14);
 	var arpeggiator_1 = __webpack_require__(15);
 	var instrument_1 = __webpack_require__(17);
-	var NUM_VOICES = 5;
+	var NUM_VOICES = 8;
 	/**
 	 * Manages all note-generation inputs:
 	 * 	- PC Keyboard
@@ -2616,8 +2629,8 @@
 	var Timer = (function () {
 	    function Timer(ac, bpm, interval, ahead) {
 	        if (bpm === void 0) { bpm = 60; }
-	        if (interval === void 0) { interval = 0.02; }
-	        if (ahead === void 0) { ahead = 0.3; }
+	        if (interval === void 0) { interval = 0.025; }
+	        if (ahead === void 0) { ahead = 0.1; }
 	        this.running = false;
 	        this.ac = ac;
 	        this.noteDuration = 0;

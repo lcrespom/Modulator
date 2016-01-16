@@ -7,7 +7,7 @@ import { NodeData } from '../synth/synth';
 import { SynthUI } from '../synthUI/synthUI';
 import { Instrument } from '../synth/instrument';
 
-const NUM_VOICES = 5;
+const NUM_VOICES = 8;
 
 /**
  * Manages all note-generation inputs:

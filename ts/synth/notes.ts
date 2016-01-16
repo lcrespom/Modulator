@@ -104,9 +104,11 @@ class OscNoteHandler extends BaseNoteHandler {
 	}
 
 	noteEnd(midi: number, when: number): void {
+		// Currently doing nothing because it will be stopped on next noteOn
 		// Stop and disconnect
-		this.oscClone.stop(when);
-		//TODO ensure that not disconnecting does not produce memory leaks
+		//this.oscClone.stop(when);
+		//TODO ensure that not disconnecting does not produce memory leaks,
+		//	especially when ADSR controls frequency
 		// this.disconnect(this.oscClone);
 		// this.oscClone = null;
 	}
@@ -163,7 +165,6 @@ class BufferNoteHandler extends BaseNoteHandler {
 
 }
 
-
 /**
  * Handles note events for a custom ADSR node
  */
@@ -177,19 +178,26 @@ class ADSRNoteHandler extends BaseNoteHandler {
 		this.setupOtherHandlers(adsr);
 		this.loopParams(out => {
 			const v = this.getParamValue(out);
-			out.cancelScheduledValues(when);
 			const initial = (1 - adsr.depth) * v;
+			//TODO calculate current value and value at "when", then re-ramp
+			//Workaround: at least set value back to initial - but this results in
+			//	an audible stop
+			out.cancelScheduledValues(0);
+			out.setValueAtTime(initial, 0);
 			if (adsr.attack > 0) {
 				out.setValueAtTime(initial, when);
 				out.linearRampToValueAtTime(v, when + adsr.attack);
 			}
-			else
+			else {
 				out.setValueAtTime(v, when);
+			}
 			const target = v * adsr.sustain + initial * (1 - adsr.sustain);
-			if (adsr.decay > 0)
+			if (adsr.decay > 0) {
 				out.linearRampToValueAtTime(target, when + adsr.attack + adsr.decay);
-			else
+			}
+			else {
 				out.setValueAtTime(target, when + adsr.attack + adsr.decay);
+			}
 		});
 	}
 
@@ -197,15 +205,18 @@ class ADSRNoteHandler extends BaseNoteHandler {
 		if (midi != this.lastNote) return;
 		const adsr: ADSR = <ADSR>this.ndata.anode;
 		this.loopParams(out => {
-			const v = out.value;//this.getParamValue(out);	// Get the really current value
+			//TODO calculate value at "when" from previous ramps
+			const v = when > adsr.context.currentTime ?
+				this.getParamValue(out) * adsr.sustain : out.value;
 			const finalv = (1 - adsr.depth) * v;
 			out.cancelScheduledValues(when);
 			if (adsr.release > 0) {
 				out.setValueAtTime(v, when);
 				out.linearRampToValueAtTime(finalv, when + adsr.release);
 			}
-			else
+			else {
 				out.setValueAtTime(finalv, when);
+			}
 		});
 	}
 
