@@ -429,7 +429,6 @@
 	            this.oscClone.stop(when);
 	        this.oscClone = this.clone();
 	        this.rampParam(this.oscClone.frequency, ratio, when);
-	        console.log("> osc start(" + when + ")");
 	        this.oscClone.start(when);
 	    };
 	    OscNoteHandler.prototype.noteOff = function (midi, gain, when) {
@@ -437,10 +436,11 @@
 	        this.noteEnd(midi, when + this.releaseTime);
 	    };
 	    OscNoteHandler.prototype.noteEnd = function (midi, when) {
+	        // Currently doing nothing because it will be stopped on next noteOn
 	        // Stop and disconnect
-	        console.log("> osc stop(" + when + ")");
-	        this.oscClone.stop(when);
-	        //TODO ensure that not disconnecting does not produce memory leaks
+	        //this.oscClone.stop(when);
+	        //TODO ensure that not disconnecting does not produce memory leaks,
+	        //	especially when ADSR controls frequency
 	        // this.disconnect(this.oscClone);
 	        // this.oscClone = null;
 	    };
@@ -518,50 +518,46 @@
 	        this.setupOtherHandlers(adsr);
 	        this.loopParams(function (out) {
 	            var v = _this.getParamValue(out);
-	            console.log("> noteOn: cancelScheduledValues(" + when + ")");
-	            out.cancelScheduledValues(when);
 	            var initial = (1 - adsr.depth) * v;
+	            //TODO calculate current value and value at "when", then re-ramp
+	            //Workaround: at least set value back to initial - but this results in
+	            //	an audible stop
+	            out.cancelScheduledValues(0);
+	            out.setValueAtTime(initial, 0);
 	            if (adsr.attack > 0) {
-	                console.log("> attack: setValueAtTime(" + initial + ", " + when + ")");
 	                out.setValueAtTime(initial, when);
-	                console.log("> attack: linearRampToValueAtTime(" + v + ", " + (when + adsr.attack) + ")");
 	                out.linearRampToValueAtTime(v, when + adsr.attack);
 	            }
 	            else {
-	                console.log("> attack: setValueAtTime(" + v + ", " + when + ")");
 	                out.setValueAtTime(v, when);
 	            }
 	            var target = v * adsr.sustain + initial * (1 - adsr.sustain);
 	            if (adsr.decay > 0) {
-	                console.log("> decay: linearRampToValueAtTime(" + target + ", " + (when + adsr.attack + adsr.decay) + ")");
 	                out.linearRampToValueAtTime(target, when + adsr.attack + adsr.decay);
 	            }
 	            else {
-	                console.log("> decay: setValueAtTime(" + target + ", " + (when + adsr.attack + adsr.decay) + ")");
 	                out.setValueAtTime(target, when + adsr.attack + adsr.decay);
 	            }
 	        });
 	    };
 	    ADSRNoteHandler.prototype.noteOff = function (midi, gain, when) {
+	        var _this = this;
 	        if (midi != this.lastNote)
 	            return;
 	        var adsr = this.ndata.anode;
 	        this.loopParams(function (out) {
-	            var v = out.value; //this.getParamValue(out);	// Get the really current value
+	            //TODO calculate value at "when" from previous ramps
+	            var v = when > adsr.context.currentTime ?
+	                _this.getParamValue(out) * adsr.sustain : out.value;
 	            var finalv = (1 - adsr.depth) * v;
-	            console.log("> noteOff: cancelScheduledValues(" + when + ")");
 	            out.cancelScheduledValues(when);
 	            if (adsr.release > 0) {
-	                console.log("> release: setValueAtTime(" + v + ", " + when + ")");
 	                out.setValueAtTime(v, when);
-	                console.log("> release: linearRampToValueAtTime(" + finalv + ", " + (when + adsr.release) + ")");
 	                out.linearRampToValueAtTime(finalv, when + adsr.release);
 	            }
 	            else {
-	                console.log("> release: setValueAtTime(" + finalv + ", " + when + ")");
 	                out.setValueAtTime(finalv, when);
 	            }
-	            console.log('---');
 	        });
 	    };
 	    ADSRNoteHandler.prototype.setupOtherHandlers = function (adsr) {
@@ -1070,8 +1066,8 @@
 	var Timer = (function () {
 	    function Timer(ac, bpm, interval, ahead) {
 	        if (bpm === void 0) { bpm = 60; }
-	        if (interval === void 0) { interval = 0.02; }
-	        if (ahead === void 0) { ahead = 0.3; }
+	        if (interval === void 0) { interval = 0.025; }
+	        if (ahead === void 0) { ahead = 0.1; }
 	        this.running = false;
 	        this.ac = ac;
 	        this.noteDuration = 0;
