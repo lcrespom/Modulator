@@ -182,8 +182,9 @@ class ADSRNoteHandler extends BaseNoteHandler {
 			//TODO calculate current value and value at "when", then re-ramp
 			//Workaround: at least set value back to initial - but this results in
 			//	an audible stop
-			out.cancelScheduledValues(0);
-			out.setValueAtTime(initial, 0);
+			const now = adsr.context.currentTime;
+			out.cancelScheduledValues(now);
+			out.setValueAtTime(initial, now);
 			if (adsr.attack > 0) {
 				out.setValueAtTime(initial, when);
 				out.linearRampToValueAtTime(v, when + adsr.attack);
