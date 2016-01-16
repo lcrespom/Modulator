@@ -1134,7 +1134,7 @@
 	        this.t2 = t2;
 	    }
 	    Ramp.prototype.inside = function (t) {
-	        return this.t1 <= t && t <= this.t2;
+	        return this.t1 < this.t2 && this.t1 <= t && t <= this.t2;
 	    };
 	    Ramp.prototype.cut = function (t) {
 	        var newv = this.v1 + (this.v2 - this.v1) * (t - this.t1) / (this.t2 - this.t1);
@@ -1194,7 +1194,10 @@
 	                v = _this.getParamValue(param) * adsr.sustain;
 	            var finalv = (1 - adsr.depth) * v;
 	            param.cancelScheduledValues(when);
-	            //TODO if when > now, properly reschecule ramp from now to when
+	            var now = adsr.context.currentTime;
+	            if (when > now)
+	                _this.rescheduleRamp(param, param._attack, now) ||
+	                    _this.rescheduleRamp(param, param._decay, now);
 	            param._release = new Ramp(v, finalv, when, when + adsr.release);
 	            param._release.run(param);
 	        });

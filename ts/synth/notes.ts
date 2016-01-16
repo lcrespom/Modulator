@@ -168,7 +168,7 @@ class BufferNoteHandler extends BaseNoteHandler {
 class Ramp {
 	constructor(public v1: number, public v2: number, public t1: number, public t2: number) {}
 	inside(t: number) {
-		return this.t1 <= t && t <= this.t2;
+		return this.t1 < this.t2 && this.t1 <= t && t <= this.t2;
 	}
 	cut(t: number) {
 		const newv = this.v1 + (this.v2 - this.v1) * (t - this.t1) / (this.t2 - this.t1);
@@ -228,7 +228,10 @@ class ADSRNoteHandler extends BaseNoteHandler {
 				v = this.getParamValue(param) * adsr.sustain;
 			const finalv = (1 - adsr.depth) * v;
 			param.cancelScheduledValues(when);
-			//TODO if when > now, properly reschecule ramp from now to when
+			const now = adsr.context.currentTime;
+			if (when > now)
+				this.rescheduleRamp(param, param._attack, now) ||
+				this.rescheduleRamp(param, param._decay, now);
 			param._release = new Ramp(v, finalv, when, when + adsr.release);
 			param._release.run(param);
 		});
