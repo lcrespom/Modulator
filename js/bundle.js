@@ -1175,7 +1175,7 @@
 	            var now = adsr.context.currentTime;
 	            param.cancelScheduledValues(now);
 	            if (when > now)
-	                _this.cutRamp(param, param._release, now);
+	                _this.rescheduleRamp(param, param._release, now);
 	            param._attack = new Ramp(initial, v, when, when + adsr.attack);
 	            param._decay = new Ramp(v, sustain, when + adsr.attack, when + adsr.attack + adsr.decay);
 	            param._attack.run(param);
@@ -1185,22 +1185,34 @@
 	    ADSRNoteHandler.prototype.noteOff = function (midi, gain, when) {
 	        var _this = this;
 	        if (midi != this.lastNote)
-	            return console.warn("Invalid note number: expecting " + this.lastNote + ", but got " + midi);
+	            return; // That note was already closed
 	        var adsr = this.ndata.anode;
 	        this.loopParams(function (out) {
-	            //TODO calculate value at "when" from previous ramps
 	            var param = out;
-	            var v = when > adsr.context.currentTime ?
-	                _this.getParamValue(param) * adsr.sustain : param.value;
+	            var v = _this.getRampValueAtTime(param, when);
+	            if (v === null)
+	                v = _this.getParamValue(param) * adsr.sustain;
 	            var finalv = (1 - adsr.depth) * v;
 	            param.cancelScheduledValues(when);
+	            //TODO if when > now, properly reschecule ramp from now to when
 	            param._release = new Ramp(v, finalv, when, when + adsr.release);
 	            param._release.run(param);
 	        });
 	    };
-	    ADSRNoteHandler.prototype.cutRamp = function (param, ramp, now) {
-	        if (ramp && ramp.inside(now))
+	    ADSRNoteHandler.prototype.rescheduleRamp = function (param, ramp, now) {
+	        if (ramp && ramp.inside(now)) {
 	            ramp.cut(now).run(param);
+	            return true;
+	        }
+	        return false;
+	    };
+	    ADSRNoteHandler.prototype.getRampValueAtTime = function (param, t) {
+	        var ramp;
+	        if (param._attack && param._attack.inside(t))
+	            return param._attack.cut(t).v2;
+	        if (param._decay && param._decay.inside(t))
+	            return param._decay.cut(t).v2;
+	        return null;
 	    };
 	    ADSRNoteHandler.prototype.setupOtherHandlers = function (adsr) {
 	        //TODO should be set to 0 when ADSR node is removed

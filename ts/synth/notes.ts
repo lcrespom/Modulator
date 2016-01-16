@@ -210,7 +210,7 @@ class ADSRNoteHandler extends BaseNoteHandler {
 			const now = adsr.context.currentTime;
 			param.cancelScheduledValues(now);
 			if (when > now)
-				this.cutRamp(param, param._release, now);
+				this.rescheduleRamp(param, param._release, now);
 			param._attack = new Ramp(initial, v, when, when + adsr.attack);
 			param._decay = new Ramp(v, sustain, when + adsr.attack, when + adsr.attack + adsr.decay);
 			param._attack.run(param);
@@ -219,25 +219,36 @@ class ADSRNoteHandler extends BaseNoteHandler {
 	}
 
 	noteOff(midi: number, gain: number, when: number): void {
-		if (midi != this.lastNote)
-			return console.warn(
-				`Invalid note number: expecting ${this.lastNote}, but got ${midi}`);
+		if (midi != this.lastNote) return;	// That note was already closed
 		const adsr: ADSR = <ADSR>this.ndata.anode;
 		this.loopParams(out => {
-			//TODO calculate value at "when" from previous ramps
 			const param: MAudioParam = <MAudioParam>out;
-			const v = when > adsr.context.currentTime ?
-				this.getParamValue(param) * adsr.sustain : param.value;
+			let v = this.getRampValueAtTime(param, when);
+			if (v === null)
+				v = this.getParamValue(param) * adsr.sustain;
 			const finalv = (1 - adsr.depth) * v;
 			param.cancelScheduledValues(when);
+			//TODO if when > now, properly reschecule ramp from now to when
 			param._release = new Ramp(v, finalv, when, when + adsr.release);
 			param._release.run(param);
 		});
 	}
 
-	cutRamp(param: MAudioParam, ramp: Ramp, now: number) {
-		if (ramp && ramp.inside(now))
+	rescheduleRamp(param: MAudioParam, ramp: Ramp, now: number): boolean {
+		if (ramp && ramp.inside(now)) {
 			ramp.cut(now).run(param);
+			return true;
+		}
+		return false;
+	}
+
+	getRampValueAtTime(param: MAudioParam, t: number): number {
+		let ramp;
+		if (param._attack && param._attack.inside(t))
+			return param._attack.cut(t).v2;
+		if (param._decay && param._decay.inside(t))
+			return param._decay.cut(t).v2;
+		return null;
 	}
 
 	setupOtherHandlers(adsr: ADSR) {
