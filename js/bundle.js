@@ -1126,6 +1126,32 @@
 	    };
 	    return BufferNoteHandler;
 	})(BaseNoteHandler);
+	var Ramp = (function () {
+	    function Ramp(v1, v2, t1, t2) {
+	        var _this = this;
+	        this.v1 = v1;
+	        this.v2 = v2;
+	        this.t1 = t1;
+	        this.t2 = t2;
+	        this.inside = function (t) { return _this.t1 <= t && t <= _this.t2; };
+	    }
+	    Ramp.prototype.cut = function (t) {
+	        var newv = this.v1 + (this.v2 - this.v1) * (t - this.t1) / (this.t2 - this.t1);
+	        return new Ramp(this.v1, newv, this.t1, t);
+	    };
+	    Ramp.prototype.run = function (p, follow) {
+	        if (follow === void 0) { follow = false; }
+	        if (this.t2 - this.t1 <= 0) {
+	            p.setValueAtTime(this.v2, this.t2);
+	        }
+	        else {
+	            if (!follow)
+	                p.setValueAtTime(this.v1, this.t1);
+	            p.linearRampToValueAtTime(this.v2, this.t2);
+	        }
+	    };
+	    return Ramp;
+	})();
 	/**
 	 * Handles note events for a custom ADSR node
 	 */
@@ -1141,48 +1167,37 @@
 	        var adsr = this.ndata.anode;
 	        this.setupOtherHandlers(adsr);
 	        this.loopParams(function (out) {
-	            var v = _this.getParamValue(out);
+	            var param = out;
+	            var v = _this.getParamValue(param);
 	            var initial = (1 - adsr.depth) * v;
+	            var sustain = v * adsr.sustain + initial * (1 - adsr.sustain);
 	            //TODO calculate current value and value at "when", then re-ramp
-	            //Workaround: at least set value back to initial - but this results in
-	            //	an audible stop
+	            //Meanwhile, at least set value back to initial - but this results in an audible stop
+	            //--- Workaround start
 	            var now = adsr.context.currentTime;
-	            out.cancelScheduledValues(now);
-	            out.setValueAtTime(initial, now);
-	            if (adsr.attack > 0) {
-	                out.setValueAtTime(initial, when);
-	                out.linearRampToValueAtTime(v, when + adsr.attack);
-	            }
-	            else {
-	                out.setValueAtTime(v, when);
-	            }
-	            var target = v * adsr.sustain + initial * (1 - adsr.sustain);
-	            if (adsr.decay > 0) {
-	                out.linearRampToValueAtTime(target, when + adsr.attack + adsr.decay);
-	            }
-	            else {
-	                out.setValueAtTime(target, when + adsr.attack + adsr.decay);
-	            }
+	            param.cancelScheduledValues(now);
+	            param.setValueAtTime(initial, now);
+	            //--- Workaround end
+	            param._attack = new Ramp(initial, v, when, when + adsr.attack);
+	            param._decay = new Ramp(v, sustain, when + adsr.attack, when + adsr.attack + adsr.decay);
+	            param._attack.run(param);
+	            param._decay.run(param, true);
 	        });
 	    };
 	    ADSRNoteHandler.prototype.noteOff = function (midi, gain, when) {
 	        var _this = this;
 	        if (midi != this.lastNote)
-	            return;
+	            return console.warn("Invalid note number: expecting " + this.lastNote + ", but got " + midi);
 	        var adsr = this.ndata.anode;
 	        this.loopParams(function (out) {
 	            //TODO calculate value at "when" from previous ramps
+	            var param = out;
 	            var v = when > adsr.context.currentTime ?
-	                _this.getParamValue(out) * adsr.sustain : out.value;
+	                _this.getParamValue(param) * adsr.sustain : param.value;
 	            var finalv = (1 - adsr.depth) * v;
-	            out.cancelScheduledValues(when);
-	            if (adsr.release > 0) {
-	                out.setValueAtTime(v, when);
-	                out.linearRampToValueAtTime(finalv, when + adsr.release);
-	            }
-	            else {
-	                out.setValueAtTime(finalv, when);
-	            }
+	            param.cancelScheduledValues(when);
+	            param._release = new Ramp(v, finalv, when, when + adsr.release);
+	            param._release.run(param);
 	        });
 	    };
 	    ADSRNoteHandler.prototype.setupOtherHandlers = function (adsr) {
@@ -1204,9 +1219,9 @@
 	        }
 	    };
 	    ADSRNoteHandler.prototype.getParamValue = function (p) {
-	        if (p['_value'] === undefined)
-	            p['_value'] = p.value;
-	        return p['_value'];
+	        if (p._value === undefined)
+	            p._value = p.value;
+	        return p._value;
 	    };
 	    return ADSRNoteHandler;
 	})(BaseNoteHandler);

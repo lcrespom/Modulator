@@ -165,6 +165,30 @@ class BufferNoteHandler extends BaseNoteHandler {
 
 }
 
+class Ramp {
+	constructor(public v1: number, public v2: number, public t1: number, public t2: number) {}
+	inside = (t: number) => this.t1 <= t && t <= this.t2;
+	cut(t: number) {
+		const newv = this.v1 + (this.v2 - this.v1) * (t - this.t1) / (this.t2 - this.t1);
+		return new Ramp(this.v1, newv, this.t1, t);
+	}
+	run(p: AudioParam, follow: boolean = false) {
+		if (this.t2 - this.t1 <= 0) {
+			p.setValueAtTime(this.v2, this.t2);
+		}
+		else {
+			if (!follow) p.setValueAtTime(this.v1, this.t1);
+			p.linearRampToValueAtTime(this.v2, this.t2);
+		}
+	}
+}
+
+interface MAudioParam extends AudioParam {
+	_attack: Ramp;
+	_decay: Ramp;
+	_release: Ramp;
+	_value: number;
+}
 /**
  * Handles note events for a custom ADSR node
  */
@@ -177,47 +201,38 @@ class ADSRNoteHandler extends BaseNoteHandler {
 		const adsr: ADSR = <ADSR>this.ndata.anode;
 		this.setupOtherHandlers(adsr);
 		this.loopParams(out => {
-			const v = this.getParamValue(out);
+			const param: MAudioParam = <MAudioParam>out;
+			const v = this.getParamValue(param);
 			const initial = (1 - adsr.depth) * v;
+			const sustain = v * adsr.sustain + initial * (1 - adsr.sustain);
 			//TODO calculate current value and value at "when", then re-ramp
-			//Workaround: at least set value back to initial - but this results in
-			//	an audible stop
+			//Meanwhile, at least set value back to initial - but this results in an audible stop
+			//--- Workaround start
 			const now = adsr.context.currentTime;
-			out.cancelScheduledValues(now);
-			out.setValueAtTime(initial, now);
-			if (adsr.attack > 0) {
-				out.setValueAtTime(initial, when);
-				out.linearRampToValueAtTime(v, when + adsr.attack);
-			}
-			else {
-				out.setValueAtTime(v, when);
-			}
-			const target = v * adsr.sustain + initial * (1 - adsr.sustain);
-			if (adsr.decay > 0) {
-				out.linearRampToValueAtTime(target, when + adsr.attack + adsr.decay);
-			}
-			else {
-				out.setValueAtTime(target, when + adsr.attack + adsr.decay);
-			}
+			param.cancelScheduledValues(now);
+			param.setValueAtTime(initial, now);
+			//--- Workaround end
+			param._attack = new Ramp(initial, v, when, when + adsr.attack);
+			param._decay = new Ramp(v, sustain, when + adsr.attack, when + adsr.attack + adsr.decay);
+			param._attack.run(param);
+			param._decay.run(param, true);
 		});
 	}
 
 	noteOff(midi: number, gain: number, when: number): void {
-		if (midi != this.lastNote) return;
+		if (midi != this.lastNote)
+			return console.warn(
+				`Invalid note number: expecting ${this.lastNote}, but got ${midi}`);
 		const adsr: ADSR = <ADSR>this.ndata.anode;
 		this.loopParams(out => {
 			//TODO calculate value at "when" from previous ramps
+			const param: MAudioParam = <MAudioParam>out;
 			const v = when > adsr.context.currentTime ?
-				this.getParamValue(out) * adsr.sustain : out.value;
+				this.getParamValue(param) * adsr.sustain : param.value;
 			const finalv = (1 - adsr.depth) * v;
-			out.cancelScheduledValues(when);
-			if (adsr.release > 0) {
-				out.setValueAtTime(v, when);
-				out.linearRampToValueAtTime(finalv, when + adsr.release);
-			}
-			else {
-				out.setValueAtTime(finalv, when);
-			}
+			param.cancelScheduledValues(when);
+			param._release = new Ramp(v, finalv, when, when + adsr.release);
+			param._release.run(param);
 		});
 	}
 
@@ -236,9 +251,9 @@ class ADSRNoteHandler extends BaseNoteHandler {
 				cb(out);
 	}
 
-	getParamValue(p: AudioParam): number {
-		if (p['_value'] === undefined) p['_value'] = p.value;
-		return p['_value'];
+	getParamValue(p: MAudioParam): number {
+		if (p._value === undefined) p._value = p.value;
+		return p._value;
 	}
 }
 

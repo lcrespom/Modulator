@@ -7,6 +7,7 @@
 		methods.
 	- Incorrect behavior when key is released before reaching the sustain level
 	- After an ADSR node is added and then removed, notes don't stop sounding
+	- Probable memory leaks in Pew! instrument
 - Popping sound at note on/off (improved after adding adsr depth parameter)
 - Analyzer should detect when no sound is playing and clean osc and fft graphs
 - Review TODO items inside code
