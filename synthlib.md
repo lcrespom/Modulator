@@ -132,33 +132,31 @@ Calls to *stop()* when the timer is already stopped has no effect.
 ##Example
 ```JavaScript
 function playSynthDemo() {
-	// Setup voice
+	// Setup a instrument made of 4 voices
 	var json = { /* JSON from a patch saved from Modulator */ };
-	var ac = new AudioContext();
-	var voice = new Modulator.Voice(ac, json);
+    var ac = new AudioContext();
+    var instrument = new Modulator.Instrument(ac, json, 4);
 
-	// Setup score
-	var KB_NOTES = 'ZSXDCVGBHNJMQ2W3ER5T6Y7UI9O0P';
-	var score = 'Q   T   REWI   T   REWI   T   RERW      ';
-	var notes = score.split('').map(function(k) {
-		return k != ' ' ? 36 + KB_NOTES.indexOf(k) : 0;
-	});
-	var lastNote = 0;
-	var ct = 0;
+    // Setup score
+    var KB_NOTES = 'ZSXDCVGBHNJMQ2W3ER5T6Y7UI9O0P';
+    var score = 'Q   T   REWI   T   REWI   T   RERW      ';
+    var notes = score.split('').map(function(k) {
+        return k != ' ' ? 36 + KB_NOTES.indexOf(k) : 0;
+    });
+    var ct = 0;
 
-	// Setup timer to play score
-	var timer = new Modulator.Timer(ac);
-	timer.start(time => {
-		var note = notes[ct++];
-		if (ct > score.length) {
-			voice.noteOff(lastNote, 1, time);
-			timer.stop();
-		}
-		else if (note > 0) {
-			if (lastNote) voice.noteOff(lastNote, 1, time);
-			voice.noteOn(note, time);
-			lastNote = note;
-		}
-	});
+    // Setup timer to play score
+    var timer = new Modulator.Timer(ac);
+    timer.start(time => {
+        var note = notes[ct++];
+        if (ct > score.length) {
+            timer.stop();
+            return;
+        }
+        else if (note > 0) {
+            instrument.noteOn(note, time);
+            instrument.noteOff(note, 1, time + timer.noteDuration);
+        }
+    });
 }
 ```
