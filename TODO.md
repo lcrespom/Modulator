@@ -2,10 +2,6 @@
 
 ##Bugs
 - ADSR needs more testing & refining
-	- Incorrect notes in arpeggio when an ADSR module is present. This bug
-		probably appeared after adding the `when` parameter to the noteOn / noteOff
-		methods.
-	- Incorrect behavior when key is released before reaching the sustain level
 	- After an ADSR node is added and then removed, notes don't stop sounding
 	- Probable memory leaks in Pew! instrument
 - Popping sound at note on/off (improved after adding adsr depth parameter)
@@ -30,6 +26,8 @@
 	- Etc?
 - Improve ADSR
 	- Linear/exponential switch
+	- Much harder now with ramp rescheduling
+- Make analyzer work also in polyphonic mode
 - Navigate selection of audio notes in the graph using the keyboard,
 	e.g. page up / page down, or alt+left / alt+right
 - Preset selector: update preset combo when navigating with keys or < and > buttons

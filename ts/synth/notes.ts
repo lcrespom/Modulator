@@ -71,10 +71,10 @@ class BaseNoteHandler implements NoteHandler {
 		}
 	}
 
-	rampParam(param: AudioParam, ratio: number, when: number): void {
+	rampParam(param: MAudioParam, ratio: number, when: number): void {
 		const portamento = this.ndata.synth.portamento;
 		const newv = param.value * ratio;
-		param['_value'] = newv;	// Required for ADSR to capture the correct value
+		param._value = newv;	// Required for ADSR to capture the correct value
 		if (portamento.time > 0 && portamento.ratio > 0) {
 			const oldv = param.value * portamento.ratio;
 			param.cancelScheduledValues(when);
@@ -90,23 +90,24 @@ class BaseNoteHandler implements NoteHandler {
  */
 class OscNoteHandler extends BaseNoteHandler {
 	oscClone: OscillatorNode;
+	lastNote: number;
 
 	noteOn(midi: number, gain: number, ratio: number, when: number):void {
 		if (this.oscClone) this.oscClone.stop(when);
 		this.oscClone = <OscillatorNode>this.clone();
-		this.rampParam(this.oscClone.frequency, ratio, when);
+		this.rampParam(<MAudioParam>this.oscClone.frequency, ratio, when);
 		this.oscClone.start(when);
+		this.lastNote = midi;
 	}
 
 	noteOff(midi: number, gain: number, when: number): void {
 		//TODO maybe get rid of noteEnd
+		if (midi != this.lastNote) return;	// Avoid multple keys artifacts in mono mode
 		this.noteEnd(midi, when + this.releaseTime);
 	}
 
 	noteEnd(midi: number, when: number): void {
-		// Currently doing nothing because it will be stopped on next noteOn
-		// Stop and disconnect
-		//this.oscClone.stop(when);
+		this.oscClone.stop(when);
 		//TODO ensure that not disconnecting does not produce memory leaks,
 		//	especially when ADSR controls frequency
 		// this.disconnect(this.oscClone);
@@ -143,7 +144,7 @@ class BufferNoteHandler extends BaseNoteHandler {
 		this.absn.buffer = buf;
 		const pbr = this.absn.playbackRate;
 		const newRate = pbr.value * ratio;
-		this.rampParam(pbr, pbr.value * ratio, when);
+		this.rampParam(<MAudioParam>pbr, pbr.value * ratio, when);
 		this.absn.start(when);
 		this.lastNote = midi;
 	}
@@ -165,6 +166,9 @@ class BufferNoteHandler extends BaseNoteHandler {
 
 }
 
+/**
+ * Performs computations about ramps so they can be easily rescheduled
+ */
 class Ramp {
 	constructor(public v1: number, public v2: number, public t1: number, public t2: number) {}
 	inside(t: number) {
@@ -219,7 +223,7 @@ class ADSRNoteHandler extends BaseNoteHandler {
 	}
 
 	noteOff(midi: number, gain: number, when: number): void {
-		if (midi != this.lastNote) return;	// That note was already closed
+		if (midi != this.lastNote) return;	// Avoid multple keys artifacts in mono mode
 		const adsr: ADSR = <ADSR>this.ndata.anode;
 		this.loopParams(out => {
 			const param: MAudioParam = <MAudioParam>out;

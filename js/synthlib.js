@@ -404,7 +404,7 @@
 	    BaseNoteHandler.prototype.rampParam = function (param, ratio, when) {
 	        var portamento = this.ndata.synth.portamento;
 	        var newv = param.value * ratio;
-	        param['_value'] = newv; // Required for ADSR to capture the correct value
+	        param._value = newv; // Required for ADSR to capture the correct value
 	        if (portamento.time > 0 && portamento.ratio > 0) {
 	            var oldv = param.value * portamento.ratio;
 	            param.cancelScheduledValues(when);
@@ -430,15 +430,16 @@
 	        this.oscClone = this.clone();
 	        this.rampParam(this.oscClone.frequency, ratio, when);
 	        this.oscClone.start(when);
+	        this.lastNote = midi;
 	    };
 	    OscNoteHandler.prototype.noteOff = function (midi, gain, when) {
 	        //TODO maybe get rid of noteEnd
+	        if (midi != this.lastNote)
+	            return; // Avoid multple keys artifacts in mono mode
 	        this.noteEnd(midi, when + this.releaseTime);
 	    };
 	    OscNoteHandler.prototype.noteEnd = function (midi, when) {
-	        // Currently doing nothing because it will be stopped on next noteOn
-	        // Stop and disconnect
-	        //this.oscClone.stop(when);
+	        this.oscClone.stop(when);
 	        //TODO ensure that not disconnecting does not produce memory leaks,
 	        //	especially when ADSR controls frequency
 	        // this.disconnect(this.oscClone);
@@ -502,6 +503,9 @@
 	    };
 	    return BufferNoteHandler;
 	})(BaseNoteHandler);
+	/**
+	 * Performs computations about ramps so they can be easily rescheduled
+	 */
 	var Ramp = (function () {
 	    function Ramp(v1, v2, t1, t2) {
 	        this.v1 = v1;
@@ -561,7 +565,7 @@
 	    ADSRNoteHandler.prototype.noteOff = function (midi, gain, when) {
 	        var _this = this;
 	        if (midi != this.lastNote)
-	            return; // That note was already closed
+	            return; // Avoid multple keys artifacts in mono mode
 	        var adsr = this.ndata.anode;
 	        this.loopParams(function (out) {
 	            var param = out;
