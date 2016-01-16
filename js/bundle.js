@@ -1128,13 +1128,14 @@
 	})(BaseNoteHandler);
 	var Ramp = (function () {
 	    function Ramp(v1, v2, t1, t2) {
-	        var _this = this;
 	        this.v1 = v1;
 	        this.v2 = v2;
 	        this.t1 = t1;
 	        this.t2 = t2;
-	        this.inside = function (t) { return _this.t1 <= t && t <= _this.t2; };
 	    }
+	    Ramp.prototype.inside = function (t) {
+	        return this.t1 <= t && t <= this.t2;
+	    };
 	    Ramp.prototype.cut = function (t) {
 	        var newv = this.v1 + (this.v2 - this.v1) * (t - this.t1) / (this.t2 - this.t1);
 	        return new Ramp(this.v1, newv, this.t1, t);
@@ -1171,13 +1172,7 @@
 	            var v = _this.getParamValue(param);
 	            var initial = (1 - adsr.depth) * v;
 	            var sustain = v * adsr.sustain + initial * (1 - adsr.sustain);
-	            //TODO calculate current value and value at "when", then re-ramp
-	            //Meanwhile, at least set value back to initial - but this results in an audible stop
-	            //--- Workaround start
-	            var now = adsr.context.currentTime;
-	            param.cancelScheduledValues(now);
-	            param.setValueAtTime(initial, now);
-	            //--- Workaround end
+	            _this.cutRamp(param, param._release, adsr);
 	            param._attack = new Ramp(initial, v, when, when + adsr.attack);
 	            param._decay = new Ramp(v, sustain, when + adsr.attack, when + adsr.attack + adsr.decay);
 	            param._attack.run(param);
@@ -1199,6 +1194,12 @@
 	            param._release = new Ramp(v, finalv, when, when + adsr.release);
 	            param._release.run(param);
 	        });
+	    };
+	    ADSRNoteHandler.prototype.cutRamp = function (param, ramp, adsr) {
+	        var now = adsr.context.currentTime;
+	        param.cancelScheduledValues(now);
+	        if (ramp && ramp.inside(now))
+	            ramp.cut(now).run(param);
 	    };
 	    ADSRNoteHandler.prototype.setupOtherHandlers = function (adsr) {
 	        //TODO should be set to 0 when ADSR node is removed

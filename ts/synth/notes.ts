@@ -167,7 +167,9 @@ class BufferNoteHandler extends BaseNoteHandler {
 
 class Ramp {
 	constructor(public v1: number, public v2: number, public t1: number, public t2: number) {}
-	inside = (t: number) => this.t1 <= t && t <= this.t2;
+	inside(t: number) {
+		return this.t1 <= t && t <= this.t2;
+	}
 	cut(t: number) {
 		const newv = this.v1 + (this.v2 - this.v1) * (t - this.t1) / (this.t2 - this.t1);
 		return new Ramp(this.v1, newv, this.t1, t);
@@ -205,13 +207,7 @@ class ADSRNoteHandler extends BaseNoteHandler {
 			const v = this.getParamValue(param);
 			const initial = (1 - adsr.depth) * v;
 			const sustain = v * adsr.sustain + initial * (1 - adsr.sustain);
-			//TODO calculate current value and value at "when", then re-ramp
-			//Meanwhile, at least set value back to initial - but this results in an audible stop
-			//--- Workaround start
-			const now = adsr.context.currentTime;
-			param.cancelScheduledValues(now);
-			param.setValueAtTime(initial, now);
-			//--- Workaround end
+			this.cutRamp(param, param._release, adsr);
 			param._attack = new Ramp(initial, v, when, when + adsr.attack);
 			param._decay = new Ramp(v, sustain, when + adsr.attack, when + adsr.attack + adsr.decay);
 			param._attack.run(param);
@@ -234,6 +230,13 @@ class ADSRNoteHandler extends BaseNoteHandler {
 			param._release = new Ramp(v, finalv, when, when + adsr.release);
 			param._release.run(param);
 		});
+	}
+
+	cutRamp(param: MAudioParam, ramp: Ramp, adsr: ADSR) {
+		const now = adsr.context.currentTime;
+		param.cancelScheduledValues(now);
+		if (ramp && ramp.inside(now))
+			ramp.cut(now).run(param);
 	}
 
 	setupOtherHandlers(adsr: ADSR) {
