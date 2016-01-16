@@ -207,7 +207,10 @@ class ADSRNoteHandler extends BaseNoteHandler {
 			const v = this.getParamValue(param);
 			const initial = (1 - adsr.depth) * v;
 			const sustain = v * adsr.sustain + initial * (1 - adsr.sustain);
-			this.cutRamp(param, param._release, adsr);
+			const now = adsr.context.currentTime;
+			param.cancelScheduledValues(now);
+			if (when > now)
+				this.cutRamp(param, param._release, now);
 			param._attack = new Ramp(initial, v, when, when + adsr.attack);
 			param._decay = new Ramp(v, sustain, when + adsr.attack, when + adsr.attack + adsr.decay);
 			param._attack.run(param);
@@ -232,9 +235,7 @@ class ADSRNoteHandler extends BaseNoteHandler {
 		});
 	}
 
-	cutRamp(param: MAudioParam, ramp: Ramp, adsr: ADSR) {
-		const now = adsr.context.currentTime;
-		param.cancelScheduledValues(now);
+	cutRamp(param: MAudioParam, ramp: Ramp, now: number) {
 		if (ramp && ramp.inside(now))
 			ramp.cut(now).run(param);
 	}

@@ -1172,7 +1172,10 @@
 	            var v = _this.getParamValue(param);
 	            var initial = (1 - adsr.depth) * v;
 	            var sustain = v * adsr.sustain + initial * (1 - adsr.sustain);
-	            _this.cutRamp(param, param._release, adsr);
+	            var now = adsr.context.currentTime;
+	            param.cancelScheduledValues(now);
+	            if (when > now)
+	                _this.cutRamp(param, param._release, now);
 	            param._attack = new Ramp(initial, v, when, when + adsr.attack);
 	            param._decay = new Ramp(v, sustain, when + adsr.attack, when + adsr.attack + adsr.decay);
 	            param._attack.run(param);
@@ -1195,9 +1198,7 @@
 	            param._release.run(param);
 	        });
 	    };
-	    ADSRNoteHandler.prototype.cutRamp = function (param, ramp, adsr) {
-	        var now = adsr.context.currentTime;
-	        param.cancelScheduledValues(now);
+	    ADSRNoteHandler.prototype.cutRamp = function (param, ramp, now) {
 	        if (ramp && ramp.inside(now))
 	            ramp.cut(now).run(param);
 	    };
