@@ -47,7 +47,6 @@
 		so they are internally connected to a gain node.
 
 ##UI
-- Polish logo
 - Review the following audio front-end libraries, especially for the
 	node parameters area:
 	- http://nexusosc.com/
@@ -61,10 +60,9 @@
 	- More flexible layout
 	- Remove hardcoded dimensions from canvas
 - Option to enable/disable snap to grid - automatically align misaligned nodes
-- Cool design
+- Cool design -> themes & theme selector
 - Branding
 - Naming
-- Logo: svg
 
 ##Long term
 - Tracker
@@ -83,6 +81,8 @@
 	- Public sample library
 - 100% responsive & mobile / tablet friendly
 - Mobile app
+- Use drag&drop folder in order to load multiple presets, especially with samples
+- Atom wrapper to allow a more natural integration with file system
 
 ##Code
 - Provide an interface that predefines the very common noteOn / noteOff methods
@@ -106,5 +106,4 @@
 	- graph.ts
 	- An npm module with all code in the synth folder
 - Improve code to clean hack that checks for custom nodes when connecting.
-- Consider compile target to ES6, see https://kangax.github.io/compat-table/es6/
 
