@@ -2,7 +2,6 @@
 
 ##Bugs
 - ADSR needs more testing & refining
-	- After an ADSR node is added and then removed, notes don't stop sounding
 	- Probable memory leaks in Pew! instrument
 - Popping sound at note on/off (improved after adding adsr depth parameter)
 - Analyzer should detect when no sound is playing and clean osc and fft graphs
@@ -18,15 +17,16 @@
 	- Keyboard control node
 		- To control other parameters based on the note being pressed
 		- With depth parameter
-		- Based on ScriptProcessor... no other way to generically control parameters
+		- Similar to ADSR, but without ramps
 	- Full synth as a reusable module (long term)
 	- Soundbank: multiple samples, one sample per note, ideal for rythm tracks
+		- Consider drag&drop of samples folder
+		- Modify current buffer node to use local files from samples folder
 - Review list of pending audio nodes
 	- WaveShaper
 	- Etc?
 - Improve ADSR
-	- Linear/exponential switch
-	- Much harder now with ramp rescheduling
+	- Linear/exponential switch: much harder now with ramp rescheduling
 - Make analyzer work also in polyphonic mode
 - Navigate selection of audio notes in the graph using the keyboard,
 	e.g. page up / page down, or alt+left / alt+right

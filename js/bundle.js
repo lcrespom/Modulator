@@ -841,10 +841,9 @@
 	        if (!when)
 	            when = this.ac.currentTime;
 	        var ratio = this.midi2freqRatio(midi);
+	        this.setupNoteHandlers();
 	        for (var _i = 0, _a = this.noteHandlers; _i < _a.length; _i++) {
 	            var nh = _a[_i];
-	            if (nh.kbTrigger)
-	                nh.handlers = this.noteHandlers;
 	            nh.noteOn(midi, gain, ratio, when);
 	        }
 	        this.portamento.ratio = ratio;
@@ -862,6 +861,19 @@
 	    };
 	    Synth.prototype.removeNoteHandler = function (nh) {
 	        modern_1.removeArrayElement(this.noteHandlers, nh);
+	    };
+	    Synth.prototype.setupNoteHandlers = function () {
+	        var maxRelease = 0;
+	        for (var _i = 0, _a = this.noteHandlers; _i < _a.length; _i++) {
+	            var nh = _a[_i];
+	            if (nh.kbTrigger && nh.releaseTime > maxRelease)
+	                maxRelease = nh.releaseTime;
+	        }
+	        for (var _b = 0, _c = this.noteHandlers; _b < _c.length; _b++) {
+	            var nh = _c[_b];
+	            if (!nh.kbTrigger)
+	                nh.releaseTime = maxRelease;
+	        }
 	    };
 	    Synth.prototype.initNodeParams = function (anode, def, type) {
 	        for (var _i = 0, _a = Object.keys(def.params || {}); _i < _a.length; _i++) {
@@ -977,7 +989,6 @@
 	    function BaseNoteHandler(ndata) {
 	        this.kbTrigger = false;
 	        this.releaseTime = 0;
-	        this.handlers = null;
 	        this.ndata = ndata;
 	        this.outTracker = new OutputTracker(ndata.anode);
 	    }
@@ -1162,17 +1173,33 @@
 	 */
 	var ADSRNoteHandler = (function (_super) {
 	    __extends(ADSRNoteHandler, _super);
-	    function ADSRNoteHandler() {
-	        _super.apply(this, arguments);
+	    function ADSRNoteHandler(ndata) {
+	        var _this = this;
+	        _super.call(this, ndata);
 	        this.kbTrigger = true;
+	        var adsr = ndata.anode;
+	        var oldMethod = adsr.disconnect;
+	        adsr.disconnect = function (dest) {
+	            _this.loopParams(function (param) {
+	                if (param == dest)
+	                    param.setValueAtTime(param._value, adsr.context.currentTime);
+	            });
+	            oldMethod(dest);
+	        };
 	    }
+	    Object.defineProperty(ADSRNoteHandler.prototype, "releaseTime", {
+	        get: function () {
+	            var adsr = this.ndata.anode;
+	            return adsr.release;
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
 	    ADSRNoteHandler.prototype.noteOn = function (midi, gain, ratio, when) {
 	        var _this = this;
 	        this.lastNote = midi;
 	        var adsr = this.ndata.anode;
-	        this.setupOtherHandlers(adsr);
-	        this.loopParams(function (out) {
-	            var param = out;
+	        this.loopParams(function (param) {
 	            var v = _this.getParamValue(param);
 	            var initial = (1 - adsr.depth) * v;
 	            var sustain = v * adsr.sustain + initial * (1 - adsr.sustain);
@@ -1191,8 +1218,7 @@
 	        if (midi != this.lastNote)
 	            return; // Avoid multple keys artifacts in mono mode
 	        var adsr = this.ndata.anode;
-	        this.loopParams(function (out) {
-	            var param = out;
+	        this.loopParams(function (param) {
 	            var v = _this.getRampValueAtTime(param, when);
 	            if (v === null)
 	                v = _this.getParamValue(param) * adsr.sustain;
@@ -1220,17 +1246,6 @@
 	        if (param._decay && param._decay.inside(t))
 	            return param._decay.cut(t).v2;
 	        return null;
-	    };
-	    ADSRNoteHandler.prototype.setupOtherHandlers = function (adsr) {
-	        //TODO should be set to 0 when ADSR node is removed
-	        //	or more in general, to the longest release time of all
-	        //	remaining ADSR nodes in the graph
-	        //TODO this code should be moved up to the synth level, which
-	        //	should keep track of the ADSR node with the longest release time, etc.
-	        for (var _i = 0, _a = this.handlers; _i < _a.length; _i++) {
-	            var nh = _a[_i];
-	            nh.releaseTime = adsr.release;
-	        }
 	    };
 	    ADSRNoteHandler.prototype.loopParams = function (cb) {
 	        for (var _i = 0, _a = this.outTracker.outputs; _i < _a.length; _i++) {
@@ -1540,7 +1555,7 @@
 	        this.numberOfOutputs = 1;
 	    }
 	    CustomNodeBase.prototype.connect = function (param) { };
-	    CustomNodeBase.prototype.disconnect = function () { };
+	    CustomNodeBase.prototype.disconnect = function (dest) { };
 	    // Required for extending EventTarget
 	    CustomNodeBase.prototype.addEventListener = function () { };
 	    CustomNodeBase.prototype.dispatchEvent = function (evt) { return false; };

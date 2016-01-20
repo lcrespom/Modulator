@@ -101,7 +101,7 @@
 					"decay": 0.5,
 					"sustain": 0.5,
 					"release": 1,
-					"depth": 0.999
+					"depth": 0.99
 				},
 				"controlParam": "frequency",
 				"controlParams": [
@@ -348,7 +348,7 @@
 					"decay": 0.5,
 					"sustain": 1,
 					"release": 1,
-					"depth": 0.999
+					"depth": 0.99
 				},
 				"controlParam": "frequency",
 				"controlParams": [

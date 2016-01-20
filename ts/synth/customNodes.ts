@@ -3,7 +3,7 @@ import { ModernAudioContext, ModernAudioNode } from './modern';
 /**
  * Base class to derive all custom nodes from it
  */
-class CustomNodeBase implements AudioNode {
+class CustomNodeBase implements ModernAudioNode {
 	custom = true;
 	channelCount = 2;
 	channelCountMode = 'max';
@@ -12,7 +12,7 @@ class CustomNodeBase implements AudioNode {
 	numberOfInputs = 0;
 	numberOfOutputs = 1;
 	connect(param: AudioParam | AudioNode) {}
-	disconnect() {}
+	disconnect(dest: AudioNode | AudioParam) {}
 	// Required for extending EventTarget
 	addEventListener(){}
 	dispatchEvent(evt: Event): boolean { return false; }

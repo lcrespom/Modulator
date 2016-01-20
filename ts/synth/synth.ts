@@ -173,10 +173,9 @@ export class Synth {
 	noteOn(midi: number, gain: number, when?: number): void {
 		if (!when) when = this.ac.currentTime;
 		const ratio = this.midi2freqRatio(midi);
-		for (const nh of this.noteHandlers) {
-			if (nh.kbTrigger) nh.handlers = this.noteHandlers;
+		this.setupNoteHandlers();
+		for (const nh of this.noteHandlers)
 			nh.noteOn(midi, gain, ratio, when);
-		}
 		this.portamento.ratio = ratio;
 	}
 
@@ -192,6 +191,18 @@ export class Synth {
 
 	removeNoteHandler(nh: NoteHandler): void {
 		removeArrayElement(this.noteHandlers, nh)
+	}
+
+	setupNoteHandlers() {
+		let maxRelease = 0;
+		for (const nh of this.noteHandlers) {
+			if (nh.kbTrigger && nh.releaseTime > maxRelease)
+				maxRelease = nh.releaseTime;
+		}
+		for (const nh of this.noteHandlers) {
+			if (!nh.kbTrigger)
+				nh.releaseTime = maxRelease;
+		}
 	}
 
 	initNodeParams(anode: AudioNode, def: NodeDef, type: string): void {

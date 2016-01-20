@@ -13,7 +13,6 @@ export interface NoteHandler {
 	noteEnd(midi: number, when: number): void;
 	kbTrigger: boolean;
 	releaseTime: number;
-	handlers: NoteHandler[];
 }
 
 /**
@@ -24,7 +23,6 @@ class BaseNoteHandler implements NoteHandler {
 	outTracker: OutputTracker;
 	kbTrigger = false;
 	releaseTime = 0;
-	handlers: NoteHandler[] = null;
 
 	constructor(ndata: NodeData) {
 		this.ndata = ndata;
@@ -202,12 +200,28 @@ class ADSRNoteHandler extends BaseNoteHandler {
 	lastNote: number;
 	kbTrigger = true;
 
+	constructor(ndata: NodeData) {
+		super(ndata);
+		const adsr: ADSR = <ADSR>ndata.anode;
+		const oldMethod = adsr.disconnect;
+		adsr.disconnect = (dest: AudioParam) => {
+			this.loopParams(param => {
+				if (param == dest)
+					param.setValueAtTime(param._value, adsr.context.currentTime);
+			});
+			oldMethod(dest);
+		}
+	}
+
+	get releaseTime() {
+		const adsr: ADSR = <ADSR>this.ndata.anode;
+		return adsr.release;
+	}
+
 	noteOn(midi: number, gain: number, ratio: number, when: number):void {
 		this.lastNote = midi;
 		const adsr: ADSR = <ADSR>this.ndata.anode;
-		this.setupOtherHandlers(adsr);
-		this.loopParams(out => {
-			const param: MAudioParam = <MAudioParam>out;
+		this.loopParams(param => {
 			const v = this.getParamValue(param);
 			const initial = (1 - adsr.depth) * v;
 			const sustain = v * adsr.sustain + initial * (1 - adsr.sustain);
@@ -225,8 +239,7 @@ class ADSRNoteHandler extends BaseNoteHandler {
 	noteOff(midi: number, gain: number, when: number): void {
 		if (midi != this.lastNote) return;	// Avoid multple keys artifacts in mono mode
 		const adsr: ADSR = <ADSR>this.ndata.anode;
-		this.loopParams(out => {
-			const param: MAudioParam = <MAudioParam>out;
+		this.loopParams(param => {
 			let v = this.getRampValueAtTime(param, when);
 			if (v === null)
 				v = this.getParamValue(param) * adsr.sustain;
@@ -258,19 +271,10 @@ class ADSRNoteHandler extends BaseNoteHandler {
 		return null;
 	}
 
-	setupOtherHandlers(adsr: ADSR) {
-		//TODO should be set to 0 when ADSR node is removed
-		//	or more in general, to the longest release time of all
-		//	remaining ADSR nodes in the graph
-		//TODO this code should be moved up to the synth level, which
-		//	should keep track of the ADSR node with the longest release time, etc.
-		for (const nh of this.handlers) nh.releaseTime = adsr.release;
-	}
-
-	loopParams(cb: (out: AudioParam) => void): void {
+	loopParams(cb: (out: MAudioParam) => void): void {
 		for (const out of this.outTracker.outputs)
 			if (out instanceof AudioParam)
-				cb(out);
+				cb(<MAudioParam>out);
 	}
 
 	getParamValue(p: MAudioParam): number {
