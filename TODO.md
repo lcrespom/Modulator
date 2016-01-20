@@ -25,6 +25,14 @@
 - Review list of pending audio nodes
 	- WaveShaper
 	- Etc?
+- Rethink control nodes:
+	- It's not about control nodes, it's about control connections
+	- Any node output can be connected either to another node input or
+		another node parameter.
+	- Thus, there are no control nodes (other than custom ones such as ADSR),
+		but *control connections*, or simply, connections to parameters
+	- A different way to create a connection is required, where the user
+		can explicitly specify whether it is an audio or control connection
 - Improve ADSR
 	- Linear/exponential switch: much harder now with ramp rescheduling
 - Make analyzer work also in polyphonic mode
