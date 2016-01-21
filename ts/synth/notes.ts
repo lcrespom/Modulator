@@ -10,7 +10,6 @@ import { ModernAudioNode, removeArrayElement } from './modern';
 export interface NoteHandler {
 	noteOn(midi: number, gain: number, ratio: number, when: number):void;
 	noteOff(midi: number, gain: number, when: number): void;
-	noteEnd(midi: number, when: number): void;
 	kbTrigger: boolean;
 	releaseTime: number;
 }
@@ -31,7 +30,6 @@ class BaseNoteHandler implements NoteHandler {
 
 	noteOn(midi: number, gain: number, ratio: number, when: number):void {}
 	noteOff(midi: number, gain: number, when: number): void {}
-	noteEnd(midi: number, when: number): void {}
 
 	clone(): AudioNode {
 		// Create clone
@@ -99,17 +97,8 @@ class OscNoteHandler extends BaseNoteHandler {
 	}
 
 	noteOff(midi: number, gain: number, when: number): void {
-		//TODO maybe get rid of noteEnd
 		if (midi != this.lastNote) return;	// Avoid multple keys artifacts in mono mode
-		this.noteEnd(midi, when + this.releaseTime);
-	}
-
-	noteEnd(midi: number, when: number): void {
-		this.oscClone.stop(when);
-		//TODO ensure that not disconnecting does not produce memory leaks,
-		//	especially when ADSR controls frequency
-		// this.disconnect(this.oscClone);
-		// this.oscClone = null;
+		this.oscClone.stop(when + this.releaseTime);
 	}
 }
 
@@ -130,14 +119,12 @@ class LFONoteHandler extends OscNoteHandler {
 class BufferNoteHandler extends BaseNoteHandler {
 	absn: AudioBufferSourceNode;
 	lastNote: number;
-	playing = false;
 
 	noteOn(midi: number, gain: number, ratio: number, when: number):void {
-		if (this.playing)
-			this.noteEnd(midi, when);
+		if (this.absn)
+			this.absn.stop(when);
 		const buf = this.ndata.anode['_buffer'];
 		if (!buf) return;	// Buffer still loading or failed
-		this.playing = true;
 		this.absn = <AudioBufferSourceNode>this.clone();
 		this.absn.buffer = buf;
 		const pbr = this.absn.playbackRate;
@@ -149,19 +136,8 @@ class BufferNoteHandler extends BaseNoteHandler {
 
 	noteOff(midi: number, gain: number, when: number): void {
 		if (midi != this.lastNote) return;
-		this.noteEnd(midi, when + this.releaseTime);
+		this.absn.stop(when + this.releaseTime);
 	}
-
-	noteEnd(midi: number, when: number): void {
-		// Stop and disconnect
-		if (!this.playing) return;
-		this.playing = false;
-		this.absn.stop(when);
-		//TODO ensure that not disconnecting does not produce memory leaks
-		// this.disconnect(this.absn);
-		// this.absn = null;
-	}
-
 }
 
 /**
@@ -292,24 +268,19 @@ class RestartableNoteHandler extends BaseNoteHandler {
 	playing = false;
 
 	noteOn(midi: number, gain: number, ratio: number, when: number):void {
-		if (this.playing)
-			this.noteEnd(midi, when);
-		this.playing = true;
 		const anode: any = this.ndata.anode;
+		if (this.playing)
+			anode.stop(when);
+		this.playing = true;
 		anode.start(when);
 		this.lastNote = midi;
 	}
 
 	noteOff(midi: number, gain: number, when: number): void {
 		if (midi != this.lastNote) return;
-		this.noteEnd(midi, when + this.releaseTime);
-	}
-
-	noteEnd(midi: number, when: number): void {
-		if (!this.playing) return;
 		this.playing = false;
 		const anode: any = this.ndata.anode;
-		anode.stop(when);
+		anode.stop(when + this.releaseTime);
 	}
 }
 

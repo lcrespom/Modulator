@@ -370,7 +370,6 @@
 	    }
 	    BaseNoteHandler.prototype.noteOn = function (midi, gain, ratio, when) { };
 	    BaseNoteHandler.prototype.noteOff = function (midi, gain, when) { };
-	    BaseNoteHandler.prototype.noteEnd = function (midi, when) { };
 	    BaseNoteHandler.prototype.clone = function () {
 	        // Create clone
 	        var anode = this.ndata.anode.context[this.ndata.nodeDef.constructor]();
@@ -444,17 +443,9 @@
 	        this.lastNote = midi;
 	    };
 	    OscNoteHandler.prototype.noteOff = function (midi, gain, when) {
-	        //TODO maybe get rid of noteEnd
 	        if (midi != this.lastNote)
 	            return; // Avoid multple keys artifacts in mono mode
-	        this.noteEnd(midi, when + this.releaseTime);
-	    };
-	    OscNoteHandler.prototype.noteEnd = function (midi, when) {
-	        this.oscClone.stop(when);
-	        //TODO ensure that not disconnecting does not produce memory leaks,
-	        //	especially when ADSR controls frequency
-	        // this.disconnect(this.oscClone);
-	        // this.oscClone = null;
+	        this.oscClone.stop(when + this.releaseTime);
 	    };
 	    return OscNoteHandler;
 	})(BaseNoteHandler);
@@ -480,15 +471,13 @@
 	    __extends(BufferNoteHandler, _super);
 	    function BufferNoteHandler() {
 	        _super.apply(this, arguments);
-	        this.playing = false;
 	    }
 	    BufferNoteHandler.prototype.noteOn = function (midi, gain, ratio, when) {
-	        if (this.playing)
-	            this.noteEnd(midi, when);
+	        if (this.absn)
+	            this.absn.stop(when);
 	        var buf = this.ndata.anode['_buffer'];
 	        if (!buf)
 	            return; // Buffer still loading or failed
-	        this.playing = true;
 	        this.absn = this.clone();
 	        this.absn.buffer = buf;
 	        var pbr = this.absn.playbackRate;
@@ -500,17 +489,7 @@
 	    BufferNoteHandler.prototype.noteOff = function (midi, gain, when) {
 	        if (midi != this.lastNote)
 	            return;
-	        this.noteEnd(midi, when + this.releaseTime);
-	    };
-	    BufferNoteHandler.prototype.noteEnd = function (midi, when) {
-	        // Stop and disconnect
-	        if (!this.playing)
-	            return;
-	        this.playing = false;
-	        this.absn.stop(when);
-	        //TODO ensure that not disconnecting does not produce memory leaks
-	        // this.disconnect(this.absn);
-	        // this.absn = null;
+	        this.absn.stop(when + this.releaseTime);
 	    };
 	    return BufferNoteHandler;
 	})(BaseNoteHandler);
@@ -648,24 +627,19 @@
 	        this.playing = false;
 	    }
 	    RestartableNoteHandler.prototype.noteOn = function (midi, gain, ratio, when) {
-	        if (this.playing)
-	            this.noteEnd(midi, when);
-	        this.playing = true;
 	        var anode = this.ndata.anode;
+	        if (this.playing)
+	            anode.stop(when);
+	        this.playing = true;
 	        anode.start(when);
 	        this.lastNote = midi;
 	    };
 	    RestartableNoteHandler.prototype.noteOff = function (midi, gain, when) {
 	        if (midi != this.lastNote)
 	            return;
-	        this.noteEnd(midi, when + this.releaseTime);
-	    };
-	    RestartableNoteHandler.prototype.noteEnd = function (midi, when) {
-	        if (!this.playing)
-	            return;
 	        this.playing = false;
 	        var anode = this.ndata.anode;
-	        anode.stop(when);
+	        anode.stop(when + this.releaseTime);
 	    };
 	    return RestartableNoteHandler;
 	})(BaseNoteHandler);
