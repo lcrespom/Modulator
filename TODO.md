@@ -23,13 +23,15 @@
 	- Soundbank: multiple samples, one sample per note, ideal for rythm tracks
 		- Consider drag&drop of samples folder
 		- Modify current buffer node to use local files from samples folder
+	- A proper implementation of a pitch sihfter
+		- See https://github.com/echo66/time-stretch-wac-article/blob/master/ts-ps-wac.pdf
 - Review list of pending audio nodes
 	- WaveShaper
 	- Etc?
 - Improve ADSR
 	- Linear/exponential switch: much harder now with ramp rescheduling
 - Make analyzer work also in polyphonic mode
-- Navigate selection of audio notes in the graph using the keyboard,
+- Navigate selection of audio nodes in the graph using the keyboard,
 	e.g. page up / page down, or alt+left / alt+right
 - Preset selector: update preset combo when navigating with keys or < and > buttons
 - Provide more preset instruments
