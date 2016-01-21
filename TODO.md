@@ -5,6 +5,7 @@
 	- Probable memory leaks in Pew! instrument
 - Popping sound at note on/off (improved after adding adsr depth parameter)
 - Analyzer should detect when no sound is playing and clean osc and fft graphs
+	- Only visible in synths without ADSR
 - Review TODO items inside code
 - In FireFox, when app window is scrolled down, node connection
 	draws arrows incorrectly
@@ -25,14 +26,6 @@
 - Review list of pending audio nodes
 	- WaveShaper
 	- Etc?
-- Rethink control nodes:
-	- It's not about control nodes, it's about control connections
-	- Any node output can be connected either to another node input or
-		another node parameter.
-	- Thus, there are no control nodes (other than custom ones such as ADSR),
-		but *control connections*, or simply, connections to parameters
-	- A different way to create a connection is required, where the user
-		can explicitly specify whether it is an audio or control connection
 - Improve ADSR
 	- Linear/exponential switch: much harder now with ramp rescheduling
 - Make analyzer work also in polyphonic mode
@@ -78,6 +71,21 @@
 	- Review [this article](http://www.html5rocks.com/en/tutorials/audio/scheduling/)
 	- Apart from controlling Modulator instruments,
 		also emit MIDI events to external devices
+- Rethink control nodes:
+	- It's not about control nodes, it's about control connections
+	- Any node output can be connected either to another node input or
+		another node parameter.
+	- Thus, there are no control nodes (other than custom ones such as ADSR),
+		but *control connections*, or simply, connections to parameters
+	- A different way to create a connection is required, where the user
+		can explicitly specify whether it is an audio or control connection
+	- Pros:
+		- More versatile: any node can be used for audio or parameter control
+	- Cons:
+		- Less intuitive: no way to know whether the main purpose of a given node
+			is to be used for audio or controlling other node's parameters.
+			But colors could still be used as a guideline, and there will still be some
+			*pure* control nodes such as the ADSR.
 - Review this:
 	- https://en.wikipedia.org/wiki/Open_Sound_Control
 	- http://opensoundcontrol.org/ (was not responding when last checked)
