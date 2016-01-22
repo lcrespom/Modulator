@@ -30,6 +30,8 @@
 	- Soundbank: multiple samples, one sample per note, ideal for rythm tracks
 		- Consider drag&drop of samples folder
 		- Modify current buffer node to use local files from samples folder
+	- A proper implementation of a pitch sihfter
+		- See https://github.com/echo66/time-stretch-wac-article/blob/master/ts-ps-wac.pdf
 - Review list of pending audio nodes
 	- WaveShaper
 	- Etc?
