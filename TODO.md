@@ -67,6 +67,9 @@
 	- If folder:
 		- Collect list of samples so user can later select one
 			for a Buffer node (or future soundbank node).
+- Modify Buffer node:
+	- To use sample via drag & drop instead of URL
+	- To save (and load) the audio file data as a base64 string
 
 - Limitation: a control node can only control a single parameter name
 	- Prevent from connecting a control node to more than one destination
@@ -76,9 +79,13 @@
 	- Currently already supporting keyboard
 		- External keyboard keys are misaligned with the on-screen piano
 	- Associate external kobs with selected node parameters
-		- Knob distribution seems to be very erratic
+		- Knob distribution is non-standard
+		- So knobs should be learned by turning them in order
+	- Associate other kb controls to navigate through patches
 	- See http://www.keithmcmillen.com/blog/making-music-in-the-browser-web-midi-api/
 		for a guide on the MIDI Web API.
+	- See https://www.midi.org/specifications/item/table-1-summary-of-midi-message
+		for a reference on MIDI messages.
 	- Make source nodes use the MIDI velocity parameter, which is currently ignored.
 		This will require implementing custom nodes for most source nodes,
 		so they are internally connected to a gain node.
