@@ -10,16 +10,23 @@
 - In FireFox, when app window is scrolled down, node connection
 	draws arrows incorrectly
 
+
 ##Functionality
+
 - Update presets so keyboard params are inside the JSON (just load & save them again)
 	- For demo purposes, enable arpeggio and portamento in some patches,
 		or create new ones if required.
+
 - Custom nodes
 	- Keyboard control node
 		- To control other parameters based on the note being pressed
 		- With depth parameter
 		- Similar to ADSR, but without ramps
-	- Full synth as a reusable module (long term)
+	- Full synth as a reusable node (long term)
+		- Node parameters:
+			- Param 1: select synth from patch list
+			- Param 2: output volume
+		- Add new "Effect In" node in the palette, to allow pure effect patches
 	- Soundbank: multiple samples, one sample per note, ideal for rythm tracks
 		- Consider drag&drop of samples folder
 		- Modify current buffer node to use local files from samples folder
@@ -27,15 +34,42 @@
 	- WaveShaper
 	- Etc?
 - Improve ADSR
-	- Linear/exponential switch: much harder now with ramp rescheduling
+	- Linear/exponential switch
+	- Harder now with ramp rescheduling: requires knowing the exact formula
+		used by Web Audio for exponential ramps
+
 - Make analyzer work also in polyphonic mode
+
 - Navigate selection of audio notes in the graph using the keyboard,
 	e.g. page up / page down, or alt+left / alt+right
+
 - Preset selector: update preset combo when navigating with keys or < and > buttons
+- Load all & save all: support loading and saving the whole preset collection
 - Provide more preset instruments
+	- Accept contributions
+	- Organize presets in groups according to their type
+
+- Node comments
+	- Double click on node to show popup to let the user edit node comments
+	- Display node comments as simple tooltip (plain HTML or bootstrap)
+- Use tooltips to describe nodes in palette
+- Synth patch comments
+	- Double click on a free spot in canvas to show popup to let the user edit
+		synth comments
+	- Display synth comments on bottom left corner of canvas
+
+- Drag & drop files anywhere into synth to:
+	- If file: detect format
+		- If synth, load it as a preset
+		- If list of patches, replace full list of presets
+	- If folder:
+		- Collect list of samples so user can later select one
+			for a Buffer node (or future soundbank node).
+
 - Limitation: a control node can only control a single parameter name
 	- Prevent from connecting a control node to more than one destination
 	- Or else, modify the UI to support multiple destination nodes
+
 - Use Web Midi API to gather events from external midi Keyboard
 	- Currently already supporting keyboard
 		- External keyboard keys are misaligned with the on-screen piano
@@ -46,6 +80,7 @@
 	- Make source nodes use the MIDI velocity parameter, which is currently ignored.
 		This will require implementing custom nodes for most source nodes,
 		so they are internally connected to a gain node.
+
 
 ##UI
 - Review the following audio front-end libraries, especially for the
@@ -92,12 +127,11 @@
 - Custom nodes with WebWorker... when available
 - Record & save audio
 - Server-side part, supporting:
-	- Loading & saving of resources: synth modules, songs, samples, etc.
+	- Loading & saving of resources: synth patches, songs, samples, etc.
 	- User area storing user's synths, current work, etc.
 	- Public sample library
 - 100% responsive & mobile / tablet friendly
 - Mobile app
-- Use drag&drop folder in order to load multiple presets, especially with samples
 - Atom wrapper to allow a more natural integration with file system
 
 ##Code

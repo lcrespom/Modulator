@@ -75,7 +75,7 @@ class ScriptProcessor extends CustomNodeBase {
 export class NoiseGenerator extends ScriptProcessor {
 	processAudio(evt: AudioProcessingEvent) {
 		for (let channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
-			let out = evt.outputBuffer.getChannelData(channel);
+			const out = evt.outputBuffer.getChannelData(channel);
 			for (let sample = 0; sample < out.length; sample++)
 				out[sample] = this.playing ? this.gain * (Math.random() * 2 - 1) : 0;
 		}
