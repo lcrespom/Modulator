@@ -310,33 +310,47 @@
 	        });
 	        return box;
 	    };
+	    BufferURL.prototype.ab2b64 = function (buffer) {
+	        var binary = '';
+	        var bytes = new Uint8Array(buffer);
+	        var len = bytes.byteLength;
+	        for (var i = 0; i < len; i++) {
+	            binary += String.fromCharCode(bytes[i]);
+	        }
+	        return window.btoa(binary);
+	    };
+	    BufferURL.prototype.b642ab = function (base64) {
+	        var binary_string = window.atob(base64);
+	        var len = binary_string.length;
+	        var bytes = new Uint8Array(len);
+	        for (var i = 0; i < len; i++) {
+	            bytes[i] = binary_string.charCodeAt(i);
+	        }
+	        return bytes.buffer;
+	    };
 	    BufferURL.prototype.param2json = function (anode) {
-	        return anode['_url'];
+	        return this.ab2b64(anode['_encoded']);
 	    };
 	    BufferURL.prototype.json2param = function (anode, json) {
-	        this.loadBufferParam(anode, json);
+	        var encoded = this.b642ab(json);
+	        anode['_encoded'] = encoded;
+	        anode.context.decodeAudioData(encoded, function (buffer) { return anode['_buffer'] = buffer; });
 	    };
 	    BufferURL.prototype.loadBufferParam = function (absn, url) {
-	        this.loadBuffer(absn.context, url, function (buffer) {
+	        this.loadBuffer(absn.context, url, function (buffer, encoded) {
+	            absn['_encoded'] = encoded;
 	            absn['_buffer'] = buffer;
 	            absn['_url'] = url;
 	        });
 	    };
 	    BufferURL.prototype.loadBuffer = function (ac, url, cb) {
 	        var _this = this;
-	        var w = window;
-	        w.audioBufferCache = w.audioBufferCache || {};
-	        if (w.audioBufferCache[url])
-	            return cb(w.audioBufferCache[url]);
 	        var xhr = new XMLHttpRequest();
 	        xhr.open('GET', url, true);
 	        xhr.responseType = 'arraybuffer';
 	        xhr.onload = function (_) {
 	            _this.popups.close();
-	            ac.decodeAudioData(xhr.response, function (buffer) {
-	                w.audioBufferCache[url] = buffer;
-	                cb(buffer);
-	            });
+	            ac.decodeAudioData(xhr.response, function (buffer) { return cb(buffer, xhr.response); });
 	        };
 	        xhr.send();
 	        setTimeout(function (_) {

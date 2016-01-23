@@ -265,35 +265,52 @@ class BufferURL implements ParamHandler {
 		return box;
 	}
 
+	ab2b64(buffer) {
+		var binary = '';
+		var bytes = new Uint8Array( buffer );
+		var len = bytes.byteLength;
+		for (var i = 0; i < len; i++) {
+			binary += String.fromCharCode( bytes[ i ] );
+		}
+		return window.btoa( binary );
+	}
+
+	b642ab(base64) {
+		var binary_string =  window.atob(base64);
+		var len = binary_string.length;
+		var bytes = new Uint8Array(len);
+		for (var i = 0; i < len; i++)        {
+			bytes[i] = binary_string.charCodeAt(i);
+		}
+		return bytes.buffer;
+	}
+
 	param2json(anode: AudioNode): any {
-		return anode['_url'];
+		return this.ab2b64(anode['_encoded']);
 	}
 
 	json2param(anode: AudioNode, json: any) {
-		this.loadBufferParam(<AudioBufferSourceNode>anode, json);
+		const encoded = this.b642ab(json);
+		anode['_encoded'] = encoded;
+		anode.context.decodeAudioData(encoded, buffer => anode['_buffer'] = buffer);
 	}
 
 	loadBufferParam(absn: AudioBufferSourceNode, url: string): void {
-		this.loadBuffer(absn.context, url, buffer => {
+		this.loadBuffer(absn.context, url, (buffer, encoded) => {
+			absn['_encoded'] = encoded;
 			absn['_buffer'] = buffer;
 			absn['_url'] = url;
 		});
 	}
 
-	loadBuffer(ac: AudioContext, url: string, cb: (buffer: AudioBuffer) => void): void {
-		const w: any = window;
-		w.audioBufferCache = w.audioBufferCache || {};
-		if (w.audioBufferCache[url])
-			return cb(w.audioBufferCache[url]);
+	loadBuffer(ac: AudioContext, url: string,
+		cb: (buffer: AudioBuffer, encoded: ArrayBuffer) => void): void {
 		const xhr = new XMLHttpRequest();
 		xhr.open('GET', url, true);
 		xhr.responseType = 'arraybuffer';
 		xhr.onload = _ => {
 			this.popups.close();
-			ac.decodeAudioData(xhr.response, buffer => {
-				w.audioBufferCache[url] = buffer;
-				cb(buffer);
-			});
+			ac.decodeAudioData(xhr.response, buffer => cb(buffer, xhr.response));
 		};
 		xhr.send();
 		setTimeout(_ => {

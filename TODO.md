@@ -13,6 +13,11 @@
 
 ##Functionality
 
+- Start using semver
+	- Breaking, feature, fix
+		- Breaking if Synthlib API change or file format change
+	- Add change log to CHANGELOG.md
+
 - Update presets so keyboard params are inside the JSON (just load & save them again)
 	- For demo purposes, enable arpeggio and portamento in some patches,
 		or create new ones if required.
@@ -28,8 +33,8 @@
 			- Param 2: output volume
 		- Add new "Effect In" node in the palette, to allow pure effect patches
 	- Soundbank: multiple samples, one sample per note, ideal for rythm tracks
-		- Consider drag&drop of samples folder
-		- Modify current buffer node to use local files from samples folder
+		- Consider multi-file upload
+		- Save samples to JSON just like buffer
 	- A proper implementation of a pitch sihfter
 		- See https://github.com/echo66/time-stretch-wac-article/blob/master/ts-ps-wac.pdf
 - Review list of pending audio nodes
@@ -60,16 +65,13 @@
 		synth comments
 	- Display synth comments on bottom left corner of canvas
 
-- Drag & drop files anywhere into synth to:
-	- If file: detect format
-		- If synth, load it as a preset
-		- If list of patches, replace full list of presets
-	- If folder:
-		- Collect list of samples so user can later select one
-			for a Buffer node (or future soundbank node).
 - Modify Buffer node:
-	- To use sample via drag & drop instead of URL
-	- To save (and load) the audio file data as a base64 string
+	- To use sample via file upload instead of URL
+- Update JSON format: add "modulatorType" top-level JSON property
+	- "synth": single patch
+	- "synths": list of patches => but how to save a list of patches?
+	- Extensible for future files such as songs, etc.
+
 
 - Limitation: a control node can only control a single parameter name
 	- Prevent from connecting a control node to more than one destination
