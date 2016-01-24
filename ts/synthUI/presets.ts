@@ -1,5 +1,6 @@
 import { SynthUI } from './synthUI';
-import * as popups from '../popups';
+import * as popups from '../utils/popups';
+import * as file from '../utils/file';
 
 const MAX_PRESETS = 20;
 
@@ -112,15 +113,11 @@ export class Presets {
 	}
 
 	loadPreset(evt) {
-		if (!evt.target.files || evt.target.files.length <= 0) return;
-		const file = evt.target.files[0];
-		const reader = new FileReader();
-		reader.onload = (loadEvt: any)  => {
-			const json = JSON.parse(loadEvt.target.result);
+		file.upload(evt, data => {
+			const json = JSON.parse(data);
 			this.presets[this.presetNum] = json;
 			this.preset2synth();
-		};
-		reader.readAsText(file);
+		});
 	}
 
 	savePreset() {
@@ -128,25 +125,15 @@ export class Presets {
 		this.beforeSave(json);
 		json.name = $('#preset-name').val().trim();
 		const jsonData = JSON.stringify(json);
-		if (this.browserSupportsDownload()) {
+		if (file.browserSupportsDownload()) {
 			if (json.name.length == 0) json.name = '' + this.presetNum;
-			const a = $('<a>');
-			a.attr('download', json.name + '.json');
-			a.attr('href',
-				'data:application/octet-stream;base64,' + btoa(jsonData));
-			var clickEvent = new MouseEvent('click',
-				{ view: window, bubbles: true, cancelable: false });
-			a[0].dispatchEvent(clickEvent);
+			file.download(json.name + '.json', jsonData);
 		}
 		else {
 			popups.prompt(
 				'Copy the text below to the clipboard and save it to a local text file',
 				'Save preset', jsonData, null);
 		}
-	}
-
-	browserSupportsDownload(): boolean {
-		return !(<any>window).externalHost && 'download' in $('<a>')[0];
 	}
 
 	// Extension point to specify additional data to save, e.g. keyboard settings

@@ -1,4 +1,4 @@
-import { ModernAudioContext } from './modern';
+import { ModernAudioContext } from '../utils/modern';
 import { Synth, NodeData, Portamento } from './synth';
 
 

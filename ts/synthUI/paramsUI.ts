@@ -1,7 +1,7 @@
 import { Node } from './graph';
 import { NodeData } from '../synth/synth';
 import { NodeDef, NodeParamDef } from '../synth/palette';
-import { log2linear, linear2log } from '../synth/modern';
+import { log2linear, linear2log } from '../utils/modern';
 
 /**
  * Renders the UI controls associated with the parameters of a given node

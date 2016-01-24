@@ -5,7 +5,7 @@
 import { SynthUI } from './synthUI/synthUI';
 import { NoteInputs } from './piano/noteInputs'
 import { Presets } from './synthUI/presets';
-import { ModernWindow, ModernAudioContext } from './synth/modern';
+import { ModernWindow, ModernAudioContext } from './utils/modern';
 
 const graphCanvas = <HTMLCanvasElement>$('#graph-canvas')[0];
 const synthUI = new SynthUI(createAudioContext(), graphCanvas,

@@ -1,4 +1,4 @@
-import { ModernAudioContext, ModernAudioNode } from './modern';
+import { ModernAudioContext, ModernAudioNode } from '../utils/modern';
 
 /**
  * Base class to derive all custom nodes from it

@@ -1,7 +1,8 @@
 import { NoteHandler, NoteHandlers } from './notes';
 import { NodeDef, NodeParamDef, NodePalette, palette } from './palette';
-import { ModernAudioContext, ModernAudioNode, removeArrayElement } from './modern';
+import { ModernAudioContext, ModernAudioNode, removeArrayElement } from '../utils/modern';
 import * as custom from './customNodes';
+import * as file from '../utils/file';
 
 
 const SEMITONE = Math.pow(2, 1/12);
@@ -265,32 +266,12 @@ class BufferURL implements ParamHandler {
 		return box;
 	}
 
-	ab2b64(buffer) {
-		var binary = '';
-		var bytes = new Uint8Array( buffer );
-		var len = bytes.byteLength;
-		for (var i = 0; i < len; i++) {
-			binary += String.fromCharCode( bytes[ i ] );
-		}
-		return window.btoa( binary );
-	}
-
-	b642ab(base64) {
-		var binary_string =  window.atob(base64);
-		var len = binary_string.length;
-		var bytes = new Uint8Array(len);
-		for (var i = 0; i < len; i++)        {
-			bytes[i] = binary_string.charCodeAt(i);
-		}
-		return bytes.buffer;
-	}
-
 	param2json(anode: AudioNode): any {
-		return this.ab2b64(anode['_encoded']);
+		return file.arrayBufferToBase64(anode['_encoded']);
 	}
 
 	json2param(anode: AudioNode, json: any) {
-		const encoded = this.b642ab(json);
+		const encoded = file.base64ToArrayBuffer(json);
 		anode['_encoded'] = encoded;
 		anode.context.decodeAudioData(encoded, buffer => anode['_buffer'] = buffer);
 	}

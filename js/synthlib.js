@@ -66,6 +66,7 @@
 	var palette_1 = __webpack_require__(6);
 	var modern_1 = __webpack_require__(5);
 	var custom = __webpack_require__(7);
+	var file = __webpack_require__(19);
 	var SEMITONE = Math.pow(2, 1 / 12);
 	var A4 = 57;
 	/**
@@ -310,29 +311,11 @@
 	        });
 	        return box;
 	    };
-	    BufferURL.prototype.ab2b64 = function (buffer) {
-	        var binary = '';
-	        var bytes = new Uint8Array(buffer);
-	        var len = bytes.byteLength;
-	        for (var i = 0; i < len; i++) {
-	            binary += String.fromCharCode(bytes[i]);
-	        }
-	        return window.btoa(binary);
-	    };
-	    BufferURL.prototype.b642ab = function (base64) {
-	        var binary_string = window.atob(base64);
-	        var len = binary_string.length;
-	        var bytes = new Uint8Array(len);
-	        for (var i = 0; i < len; i++) {
-	            bytes[i] = binary_string.charCodeAt(i);
-	        }
-	        return bytes.buffer;
-	    };
 	    BufferURL.prototype.param2json = function (anode) {
-	        return this.ab2b64(anode['_encoded']);
+	        return file.arrayBufferToBase64(anode['_encoded']);
 	    };
 	    BufferURL.prototype.json2param = function (anode, json) {
-	        var encoded = this.b642ab(json);
+	        var encoded = file.base64ToArrayBuffer(json);
 	        anode['_encoded'] = encoded;
 	        anode.context.decodeAudioData(encoded, function (buffer) { return anode['_buffer'] = buffer; });
 	    };
@@ -1320,6 +1303,54 @@
 	    };
 	    return SynthLoader;
 	})();
+
+
+/***/ },
+/* 18 */,
+/* 19 */
+/***/ function(module, exports) {
+
+	function arrayBufferToBase64(buffer) {
+	    var binary = '';
+	    var bytes = new Uint8Array(buffer);
+	    var len = bytes.byteLength;
+	    for (var i = 0; i < len; i++) {
+	        binary += String.fromCharCode(bytes[i]);
+	    }
+	    return window.btoa(binary);
+	}
+	exports.arrayBufferToBase64 = arrayBufferToBase64;
+	function base64ToArrayBuffer(base64) {
+	    var binary_string = window.atob(base64);
+	    var len = binary_string.length;
+	    var bytes = new Uint8Array(len);
+	    for (var i = 0; i < len; i++) {
+	        bytes[i] = binary_string.charCodeAt(i);
+	    }
+	    return bytes.buffer;
+	}
+	exports.base64ToArrayBuffer = base64ToArrayBuffer;
+	function browserSupportsDownload() {
+	    return !window.externalHost && 'download' in $('<a>')[0];
+	}
+	exports.browserSupportsDownload = browserSupportsDownload;
+	function download(fileName, fileData) {
+	    var a = $('<a>');
+	    a.attr('download', fileName);
+	    a.attr('href', 'data:application/octet-stream;base64,' + btoa(fileData));
+	    var clickEvent = new MouseEvent('click', { view: window, bubbles: true, cancelable: false });
+	    a[0].dispatchEvent(clickEvent);
+	}
+	exports.download = download;
+	function upload(event, cb) {
+	    if (!event.target.files || event.target.files.length <= 0)
+	        return cb(null);
+	    var file = event.target.files[0];
+	    var reader = new FileReader();
+	    reader.onload = function (loadEvt) { return cb(loadEvt.target.result); };
+	    reader.readAsText(file);
+	}
+	exports.upload = upload;
 
 
 /***/ }

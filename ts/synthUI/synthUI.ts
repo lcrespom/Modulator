@@ -1,7 +1,7 @@
 import { Graph, Node, GraphHandler } from './graph';
 import { Synth, NodeData } from '../synth/synth';
-import { ModernAudioContext, ModernAudioNode } from '../synth/modern';
-import * as popups from '../popups';
+import { ModernAudioContext, ModernAudioNode } from '../utils/modern';
+import * as popups from '../utils/popups';
 
 /**
  * Customizes the generic graph editor in order to manipulate and control a graph of
@@ -175,7 +175,7 @@ class SynthGraphHandler implements GraphHandler {
 		return aparams.length > 0;
 	}
 
-	//-------------------- Implementation of the GraphHandler interface -------------------- 
+	//-------------------- Implementation of the GraphHandler interface --------------------
 	canBeSource(n: Node): boolean {
 		const data: NodeData = n.data;
 		return data.anode != this.synthUI.outNode;

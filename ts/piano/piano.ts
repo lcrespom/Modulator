@@ -1,5 +1,5 @@
-import * as popups from '../popups';
-import { log2linear, linear2log } from '../synth/modern';
+import * as popups from '../utils/popups';
+import { log2linear, linear2log } from '../utils/modern';
 
 const NUM_WHITES = 17;
 const BASE_NOTE = 36;

@@ -233,7 +233,7 @@
 	            .filter(function (pname) { return ndata.anode[pname] instanceof AudioParam; });
 	        return aparams.length > 0;
 	    };
-	    //-------------------- Implementation of the GraphHandler interface -------------------- 
+	    //-------------------- Implementation of the GraphHandler interface --------------------
 	    SynthGraphHandler.prototype.canBeSource = function (n) {
 	        var data = n.data;
 	        return data.anode != this.synthUI.outNode;
@@ -690,6 +690,7 @@
 	var palette_1 = __webpack_require__(6);
 	var modern_1 = __webpack_require__(5);
 	var custom = __webpack_require__(7);
+	var file = __webpack_require__(19);
 	var SEMITONE = Math.pow(2, 1 / 12);
 	var A4 = 57;
 	/**
@@ -934,29 +935,11 @@
 	        });
 	        return box;
 	    };
-	    BufferURL.prototype.ab2b64 = function (buffer) {
-	        var binary = '';
-	        var bytes = new Uint8Array(buffer);
-	        var len = bytes.byteLength;
-	        for (var i = 0; i < len; i++) {
-	            binary += String.fromCharCode(bytes[i]);
-	        }
-	        return window.btoa(binary);
-	    };
-	    BufferURL.prototype.b642ab = function (base64) {
-	        var binary_string = window.atob(base64);
-	        var len = binary_string.length;
-	        var bytes = new Uint8Array(len);
-	        for (var i = 0; i < len; i++) {
-	            bytes[i] = binary_string.charCodeAt(i);
-	        }
-	        return bytes.buffer;
-	    };
 	    BufferURL.prototype.param2json = function (anode) {
-	        return this.ab2b64(anode['_encoded']);
+	        return file.arrayBufferToBase64(anode['_encoded']);
 	    };
 	    BufferURL.prototype.json2param = function (anode, json) {
-	        var encoded = this.b642ab(json);
+	        var encoded = file.base64ToArrayBuffer(json);
 	        anode['_encoded'] = encoded;
 	        anode.context.decodeAudioData(encoded, function (buffer) { return anode['_buffer'] = buffer; });
 	    };
@@ -2890,6 +2873,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var popups = __webpack_require__(8);
+	var file = __webpack_require__(19);
 	var MAX_PRESETS = 20;
 	/**
 	 * Manages the presets box:
@@ -3003,37 +2987,25 @@
 	    };
 	    Presets.prototype.loadPreset = function (evt) {
 	        var _this = this;
-	        if (!evt.target.files || evt.target.files.length <= 0)
-	            return;
-	        var file = evt.target.files[0];
-	        var reader = new FileReader();
-	        reader.onload = function (loadEvt) {
-	            var json = JSON.parse(loadEvt.target.result);
+	        file.upload(evt, function (data) {
+	            var json = JSON.parse(data);
 	            _this.presets[_this.presetNum] = json;
 	            _this.preset2synth();
-	        };
-	        reader.readAsText(file);
+	        });
 	    };
 	    Presets.prototype.savePreset = function () {
 	        var json = this.synthUI.gr.toJSON();
 	        this.beforeSave(json);
 	        json.name = $('#preset-name').val().trim();
 	        var jsonData = JSON.stringify(json);
-	        if (this.browserSupportsDownload()) {
+	        if (file.browserSupportsDownload()) {
 	            if (json.name.length == 0)
 	                json.name = '' + this.presetNum;
-	            var a = $('<a>');
-	            a.attr('download', json.name + '.json');
-	            a.attr('href', 'data:application/octet-stream;base64,' + btoa(jsonData));
-	            var clickEvent = new MouseEvent('click', { view: window, bubbles: true, cancelable: false });
-	            a[0].dispatchEvent(clickEvent);
+	            file.download(json.name + '.json', jsonData);
 	        }
 	        else {
 	            popups.prompt('Copy the text below to the clipboard and save it to a local text file', 'Save preset', jsonData, null);
 	        }
-	    };
-	    Presets.prototype.browserSupportsDownload = function () {
-	        return !window.externalHost && 'download' in $('<a>')[0];
 	    };
 	    // Extension point to specify additional data to save, e.g. keyboard settings
 	    Presets.prototype.beforeSave = function (json) { };
@@ -3042,6 +3014,53 @@
 	    return Presets;
 	})();
 	exports.Presets = Presets;
+
+
+/***/ },
+/* 19 */
+/***/ function(module, exports) {
+
+	function arrayBufferToBase64(buffer) {
+	    var binary = '';
+	    var bytes = new Uint8Array(buffer);
+	    var len = bytes.byteLength;
+	    for (var i = 0; i < len; i++) {
+	        binary += String.fromCharCode(bytes[i]);
+	    }
+	    return window.btoa(binary);
+	}
+	exports.arrayBufferToBase64 = arrayBufferToBase64;
+	function base64ToArrayBuffer(base64) {
+	    var binary_string = window.atob(base64);
+	    var len = binary_string.length;
+	    var bytes = new Uint8Array(len);
+	    for (var i = 0; i < len; i++) {
+	        bytes[i] = binary_string.charCodeAt(i);
+	    }
+	    return bytes.buffer;
+	}
+	exports.base64ToArrayBuffer = base64ToArrayBuffer;
+	function browserSupportsDownload() {
+	    return !window.externalHost && 'download' in $('<a>')[0];
+	}
+	exports.browserSupportsDownload = browserSupportsDownload;
+	function download(fileName, fileData) {
+	    var a = $('<a>');
+	    a.attr('download', fileName);
+	    a.attr('href', 'data:application/octet-stream;base64,' + btoa(fileData));
+	    var clickEvent = new MouseEvent('click', { view: window, bubbles: true, cancelable: false });
+	    a[0].dispatchEvent(clickEvent);
+	}
+	exports.download = download;
+	function upload(event, cb) {
+	    if (!event.target.files || event.target.files.length <= 0)
+	        return cb(null);
+	    var file = event.target.files[0];
+	    var reader = new FileReader();
+	    reader.onload = function (loadEvt) { return cb(loadEvt.target.result); };
+	    reader.readAsText(file);
+	}
+	exports.upload = upload;
 
 
 /***/ }

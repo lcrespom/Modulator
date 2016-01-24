@@ -1,6 +1,6 @@
 import { NodeData } from './synth';
 import { ADSR } from './customNodes';
-import { ModernAudioNode, removeArrayElement } from './modern';
+import { ModernAudioNode, removeArrayElement } from '../utils/modern';
 
 
 /**
