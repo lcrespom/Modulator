@@ -65,8 +65,6 @@
 		synth comments
 	- Display synth comments on bottom left corner of canvas
 
-- Modify Buffer node:
-	- To use sample via file upload instead of URL
 - Update JSON format: add "modulatorType" top-level JSON property
 	- "synth": single patch
 	- "synths": list of patches => but how to save a list of patches?
