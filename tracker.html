@@ -70,13 +70,19 @@
 	<div class="graph-row" style="margin-top: 10px">
 		<!--------------- Part score --------------->
 		<div class="graph-box">
-			<h5 class="bg-primary box-header">Part score</h5>
-			<div style="width: 650px; height: 110px"></div>
+			<h5 class="bg-primary box-header" style="margin-bottom: 2px">
+				Part score
+			</h5>
+			<canvas id="past-notes" width="630" height="108"
+				style="margin-bottom: -6px; padding: 0 10px">
+			</canvas>
 			<div id="piano"
 				style="width: 650px; height: 100px; position: relative;
 					padding: 0 10px">
 			</div>
-			<div style="width: 650px; height: 280px"></div>
+			<canvas id="future-notes" width="630" height="280"
+				style="margin-bottom: -6px; padding: 0 10px">
+			</canvas>
 		</div><!--
 		--------------- Tracks ---------------
 	--><div class="graph-box" style="margin-left: 10px; vertical-align: top">

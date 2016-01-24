@@ -46,9 +46,27 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var piano_1 = __webpack_require__(15);
+	var NUM_WHITES = 24;
 	console.log('Hello from tracker');
-	var pk = new piano_1.PianoKeys(24);
+	var pk = new piano_1.PianoKeys(NUM_WHITES);
 	var keys = pk.createKeys($('#piano'));
+	var canvas = $('#past-notes')[0];
+	paintNoteColumns(canvas, canvas.getContext('2d'), NUM_WHITES * 2);
+	function paintNoteColumns(canvas, gc, numKeys) {
+	    var w = canvas.width / numKeys;
+	    var x = w / 2;
+	    gc.translate(-0.5, 0);
+	    gc.strokeStyle = '#999';
+	    gc.lineWidth = 1;
+	    gc.setLineDash([1, 2]);
+	    for (var i = 0; i <= numKeys; i++) {
+	        var ix = Math.round(x);
+	        gc.moveTo(ix, 0);
+	        gc.lineTo(ix, canvas.height);
+	        gc.stroke();
+	        x += w;
+	    }
+	}
 
 
 /***/ },
