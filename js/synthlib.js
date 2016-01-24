@@ -1039,6 +1039,7 @@
 /* 8 */
 /***/ function(module, exports) {
 
+	//-------------------- Encoding / decoding --------------------
 	function arrayBufferToBase64(buffer) {
 	    var binary = '';
 	    var bytes = new Uint8Array(buffer);
@@ -1059,6 +1060,7 @@
 	    return bytes.buffer;
 	}
 	exports.base64ToArrayBuffer = base64ToArrayBuffer;
+	//-------------------- Downloading --------------------
 	function browserSupportsDownload() {
 	    return !window.externalHost && 'download' in $('<a>')[0];
 	}
@@ -1071,6 +1073,7 @@
 	    a[0].dispatchEvent(clickEvent);
 	}
 	exports.download = download;
+	//-------------------- Uploading --------------------
 	function uploadText(event, cb) {
 	    upload(event, cb, 'readAsText');
 	}

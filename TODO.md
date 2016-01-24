@@ -13,14 +13,8 @@
 
 ##Functionality
 
-- Start using semver
-	- Breaking, feature, fix
-		- Breaking if Synthlib API change or file format change
-	- Add change log to CHANGELOG.md
-
-- Update presets so keyboard params are inside the JSON (just load & save them again)
-	- For demo purposes, enable arpeggio and portamento in some patches,
-		or create new ones if required.
+- For demo purposes, enable arpeggio and portamento in some patches,
+	or create new ones if required.
 
 - Custom nodes
 	- Keyboard control node
@@ -64,12 +58,6 @@
 	- Double click on a free spot in canvas to show popup to let the user edit
 		synth comments
 	- Display synth comments on bottom left corner of canvas
-
-- Update JSON format: add "modulatorType" top-level JSON property
-	- "synth": single patch
-	- "synths": list of patches => but how to save a list of patches?
-	- Extensible for future files such as songs, etc.
-
 
 - Limitation: a control node can only control a single parameter name
 	- Prevent from connecting a control node to more than one destination

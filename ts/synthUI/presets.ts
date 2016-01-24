@@ -90,8 +90,12 @@ export class Presets {
 	}
 
 	synth2preset() {
-		this.presets[this.presetNum] = this.synthUI.gr.toJSON();
-		this.presets[this.presetNum].name = $('#preset-name').val();
+		const json = this.synthUI.gr.toJSON();
+		json.name = $('#preset-name').val().trim();
+		json.modulatorType = 'synth';
+		this.beforeSave(json);
+		this.presets[this.presetNum] = json;
+		return json;
 	}
 
 	preset2synth() {
@@ -114,16 +118,21 @@ export class Presets {
 
 	loadPreset(evt) {
 		file.uploadText(evt, data => {
-			const json = JSON.parse(data);
-			this.presets[this.presetNum] = json;
-			this.preset2synth();
+			try {
+				const json = JSON.parse(data);
+				if (json.modulatorType != 'synth') throw 'Invalid file format';
+				this.presets[this.presetNum] = json;
+				this.preset2synth();
+			}
+			catch (e) {
+				console.error(e);
+				popups.alert('Could not load synth: invalid file format', 'Load error');
+			}
 		});
 	}
 
 	savePreset() {
-		const json = this.synthUI.gr.toJSON();
-		this.beforeSave(json);
-		json.name = $('#preset-name').val().trim();
+		const json = this.synth2preset();
 		const jsonData = JSON.stringify(json);
 		if (file.browserSupportsDownload()) {
 			if (json.name.length == 0) json.name = '' + this.presetNum;

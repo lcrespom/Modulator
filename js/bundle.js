@@ -1662,6 +1662,7 @@
 /* 8 */
 /***/ function(module, exports) {
 
+	//-------------------- Encoding / decoding --------------------
 	function arrayBufferToBase64(buffer) {
 	    var binary = '';
 	    var bytes = new Uint8Array(buffer);
@@ -1682,6 +1683,7 @@
 	    return bytes.buffer;
 	}
 	exports.base64ToArrayBuffer = base64ToArrayBuffer;
+	//-------------------- Downloading --------------------
 	function browserSupportsDownload() {
 	    return !window.externalHost && 'download' in $('<a>')[0];
 	}
@@ -1694,6 +1696,7 @@
 	    a[0].dispatchEvent(clickEvent);
 	}
 	exports.download = download;
+	//-------------------- Uploading --------------------
 	function uploadText(event, cb) {
 	    upload(event, cb, 'readAsText');
 	}
@@ -2976,8 +2979,12 @@
 	        this.preset2synth();
 	    };
 	    Presets.prototype.synth2preset = function () {
-	        this.presets[this.presetNum] = this.synthUI.gr.toJSON();
-	        this.presets[this.presetNum].name = $('#preset-name').val();
+	        var json = this.synthUI.gr.toJSON();
+	        json.name = $('#preset-name').val().trim();
+	        json.modulatorType = 'synth';
+	        this.beforeSave(json);
+	        this.presets[this.presetNum] = json;
+	        return json;
 	    };
 	    Presets.prototype.preset2synth = function () {
 	        var preset = this.presets[this.presetNum];
@@ -3002,15 +3009,21 @@
 	    Presets.prototype.loadPreset = function (evt) {
 	        var _this = this;
 	        file.uploadText(evt, function (data) {
-	            var json = JSON.parse(data);
-	            _this.presets[_this.presetNum] = json;
-	            _this.preset2synth();
+	            try {
+	                var json = JSON.parse(data);
+	                if (json.modulatorType != 'synth')
+	                    throw 'Invalid file format';
+	                _this.presets[_this.presetNum] = json;
+	                _this.preset2synth();
+	            }
+	            catch (e) {
+	                console.error(e);
+	                popups.alert('Could not load synth: invalid file format', 'Load error');
+	            }
 	        });
 	    };
 	    Presets.prototype.savePreset = function () {
-	        var json = this.synthUI.gr.toJSON();
-	        this.beforeSave(json);
-	        json.name = $('#preset-name').val().trim();
+	        var json = this.synth2preset();
 	        var jsonData = JSON.stringify(json);
 	        if (file.browserSupportsDownload()) {
 	            if (json.name.length == 0)

@@ -1,3 +1,5 @@
+//-------------------- Encoding / decoding --------------------
+
 export function arrayBufferToBase64(buffer) {
 	var binary = '';
 	var bytes = new Uint8Array( buffer );
@@ -18,6 +20,9 @@ export function base64ToArrayBuffer(base64) {
 	return bytes.buffer;
 }
 
+
+//-------------------- Downloading --------------------
+
 export function browserSupportsDownload(): boolean {
 	return !(<any>window).externalHost && 'download' in $('<a>')[0];
 }
@@ -32,6 +37,9 @@ export function download(fileName, fileData) {
 	a[0].dispatchEvent(clickEvent);
 }
 
+
+//-------------------- Uploading --------------------
+
 export function uploadText(event, cb: (text) => void) {
 	upload(event, cb, 'readAsText');
 }
@@ -39,7 +47,6 @@ export function uploadText(event, cb: (text) => void) {
 export function uploadArrayBuffer(event, cb: (ab) => void) {
 	upload(event, cb, 'readAsArrayBuffer');
 }
-
 
 function upload(event, cb, readFunc: string) {
 	if (!event.target.files || event.target.files.length <= 0) return cb(null);
