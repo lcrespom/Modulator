@@ -41,7 +41,7 @@
 
 - Make analyzer work also in polyphonic mode
 
-- Navigate selection of audio notes in the graph using the keyboard,
+- Navigate selection of audio nodes in the graph using the keyboard,
 	e.g. page up / page down, or alt+left / alt+right
 
 - Preset selector: update preset combo when navigating with keys or < and > buttons
@@ -129,7 +129,6 @@
 	- Public sample library
 - 100% responsive & mobile / tablet friendly
 - Mobile app
-- Atom wrapper to allow a more natural integration with file system
 
 ##Code
 - Provide an interface that predefines the very common noteOn / noteOff methods
