@@ -1,0 +1,72 @@
+<!doctype html>
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<title>Modulator</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="css/bootstrap/bootstrap.min.css">
+	<link rel="stylesheet" href="css/bootstrap/bootstrap-theme.min.css">
+	<link rel="stylesheet" href="css/nanoscroller.css">
+	<link rel="stylesheet" type="text/css" href="css/main.css">
+	<link rel="shortcut icon" href="modulator32.ico" />
+</head>
+
+<body>
+
+<!-- Top row with title and a couple of buttons -->
+<div class="app-navbar" style="width: 1000px">
+	<div style="float: left; margin-top: 4px">
+		<a href="http://github.com/lcrespom/Modulator" target="_blank"
+			class="btn btn-primary btn-sm" style="width: 4em; padding: 5px">Code</a>
+	</div>
+	<div style="width: 250px; margin: 0 auto">
+		<img src="img/logo.svg" style="width: 250px">
+	</div>
+	<div style="display: inline-block; position: absolute; right: -3px; top: 0px; margin-top: 4px">
+		<a href="help.html" target="_blank"
+			class="btn btn-primary btn-sm" style="width: 4em; padding: 5px">Help</a>
+	</div>
+</div>
+
+
+<!-- Main app area -->
+<div class="main" style="max-width:1000px">
+
+	<div class="graph-row">
+		<!--------------- Parts --------------->
+		<div class="graph-box">
+			<h5 class="bg-primary box-header">Parts</h5>
+			<div style="width: 650px; height: 170px"></div>
+		</div><!--
+		--------------- Song ---------------
+	--><div class="graph-box" style="margin-left: 10px">
+			<h5 class="bg-primary box-header">Song</h5>
+			<div style="width: 340px; height: 170px;"></div>
+		</div>
+	</div>
+
+	<div class="graph-row" style="margin-top: 10px">
+		<!--------------- Part editor --------------->
+		<div class="graph-box">
+			<h5 class="bg-primary box-header">Part editor</h5>
+			<div style="width: 650px; height: 90px"></div>
+			<div style="width: 650px; height: 120px; background: #FFA"></div>
+			<div style="width: 650px; height: 280px"></div>
+		</div><!--
+		--------------- Tracks ---------------
+	--><div class="graph-box" style="margin-left: 10px">
+			<h5 class="bg-primary box-header">Tracks</h5>
+			<div style="width: 340px; height: 490px;"></div>
+		</div>
+	</div>
+
+</div><!-- end of main -->
+
+<script src="js/vendor/jquery-1.11.2.min.js"></script>
+<script src="js/vendor/jquery-ui.min.js"></script>
+<script src="js/vendor/bootstrap.min.js"></script>
+<script src="js/vendor/jquery.nanoscroller.min.js"></script>
+
+</body>
+</html>
