@@ -36,8 +36,9 @@
 	- Etc?
 - Improve ADSR
 	- Linear/exponential switch
-	- Harder now with ramp rescheduling: requires knowing the exact formula
-		used by Web Audio for exponential ramps
+	- For calculating exponential ramp cut, the
+		[spec](https://webaudio.github.io/web-audio-api/#widl-AudioParam-exponentialRampToValueAtTime-AudioParam-float-value-double-endTime)
+		has the formula.
 
 - Make analyzer work also in polyphonic mode
 

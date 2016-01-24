@@ -2311,33 +2311,12 @@
 	var ARPEGGIO_MAX = 480;
 	var PORTAMENTO_MIN = 0;
 	var PORTAMENTO_MAX = 1;
-	/**
-	 * A virtual piano keyboard that:
-	 * 	- Captures mouse input and generates corresponding note events
-	 * 	- Displays note events as CSS-animated colors in the pressed keys
-	 * 	- Supports octave switching
-	 * 	- Provides a poly/mono button
-	 */
-	var PianoKeyboard = (function () {
-	    function PianoKeyboard(panel) {
-	        this.arpeggio = {
-	            mode: 0,
-	            octave: 1,
-	            bpm: 60
-	        };
-	        this.baseNote = BASE_NOTE;
-	        this.octave = 3;
-	        this.poly = false;
-	        this.envelope = { attack: 0, release: 0 };
-	        this.createKeys(panel);
-	        for (var i = 0; i < this.keys.length; i++)
-	            this.registerKey(this.keys[i], i);
-	        this.controls = panel.parent();
-	        this.registerButtons(this.controls);
-	        this.portaSlider = this.controls.find('.portamento-box input');
+	/** Builds a piano keyboard out of DIVs */
+	var PianoKeys = (function () {
+	    function PianoKeys() {
 	    }
-	    PianoKeyboard.prototype.createKeys = function (panel) {
-	        this.keys = [];
+	    PianoKeys.prototype.createKeys = function (panel) {
+	        var keys = [];
 	        var pw = panel.width();
 	        var ph = panel.height();
 	        var kw = pw / NUM_WHITES + 1;
@@ -2351,7 +2330,7 @@
 	                height: '' + ph + 'px'
 	            });
 	            panel.append(key);
-	            this.keys[knum++] = key;
+	            keys[knum++] = key;
 	            if (this.hasBlack(i))
 	                knum++;
 	        }
@@ -2370,13 +2349,43 @@
 	                top: '10px'
 	            });
 	            panel.append(key);
-	            this.keys[knum++] = key;
+	            keys[knum++] = key;
 	        }
+	        return keys;
 	    };
-	    PianoKeyboard.prototype.hasBlack = function (num) {
+	    PianoKeys.prototype.hasBlack = function (num) {
 	        var mod7 = num % 7;
 	        return mod7 != 2 && mod7 != 6;
 	    };
+	    return PianoKeys;
+	})();
+	exports.PianoKeys = PianoKeys;
+	/**
+	 * A virtual piano keyboard that:
+	 * 	- Captures mouse input and generates corresponding note events
+	 * 	- Displays note events as CSS-animated colors in the pressed keys
+	 * 	- Supports octave switching
+	 * 	- Provides a poly/mono button
+	 */
+	var PianoKeyboard = (function () {
+	    function PianoKeyboard(panel) {
+	        this.arpeggio = {
+	            mode: 0,
+	            octave: 1,
+	            bpm: 60
+	        };
+	        this.baseNote = BASE_NOTE;
+	        this.octave = 3;
+	        this.poly = false;
+	        this.envelope = { attack: 0, release: 0 };
+	        var pianoKeys = new PianoKeys();
+	        this.keys = pianoKeys.createKeys(panel);
+	        for (var i = 0; i < this.keys.length; i++)
+	            this.registerKey(this.keys[i], i);
+	        this.controls = panel.parent();
+	        this.registerButtons(this.controls);
+	        this.portaSlider = this.controls.find('.portamento-box input');
+	    }
 	    PianoKeyboard.prototype.registerKey = function (key, knum) {
 	        var _this = this;
 	        key.mousedown(function (_) {
