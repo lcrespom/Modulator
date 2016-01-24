@@ -113,7 +113,7 @@ export class Presets {
 	}
 
 	loadPreset(evt) {
-		file.upload(evt, data => {
+		file.uploadText(evt, data => {
 			const json = JSON.parse(data);
 			this.presets[this.presetNum] = json;
 			this.preset2synth();

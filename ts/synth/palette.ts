@@ -58,7 +58,7 @@ export var palette: NodePalette = {
 			detune: OCTAVE_DETUNE,
 			buffer: {
 				initial: null,
-				handler: 'BufferURL'
+				handler: 'BufferData'
 			},
 			loop: { initial: false },
 			loopStart: { initial: 0, min: 0, max: 10 },

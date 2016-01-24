@@ -70,7 +70,7 @@ export class Synth {
 		this.registerCustomNode('createNoiseCtrl', custom.NoiseCtrlGenerator);
 		this.registerCustomNode('createLineIn', custom.LineInNode);
 		this.registerCustomNode('createDetuner', custom.Detuner);
-		this.registerParamHandler('BufferURL', new BufferURL());
+		this.registerParamHandler('BufferData', new BufferData());
 	}
 
 	createAudioNode(type: string): AudioNode {
@@ -234,35 +234,26 @@ export class Synth {
 
 //-------------------- Parameter handlers --------------------
 
-class BufferURL implements ParamHandler {
-	popups: any;
+class BufferData implements ParamHandler {
 
-	initialize(anode: AudioNode, def: NodeDef): void {
-		const absn: AudioBufferSourceNode = <AudioBufferSourceNode>anode;
-		const url: string = <string>def.params['buffer'].initial;
-		if (!url) return;
-		if (!this.popups) this.popups = {
-			prompt: () => {},
-			close: () => {},
-			progress: () => {}
-		};
-		this.loadBufferParam(absn, url);
-	}
+	initialize(anode: AudioNode, def: NodeDef): void {}
 
 	renderParam(panel: JQuery, pdef: NodeParamDef,
 		anode: AudioNode, param: string, label: string): JQuery {
 		const box = $('<div class="choice-box">');
-		const button = $('<button class="btn btn-primary">URL</button>');
+		const button = $(`
+			<span class="btn btn-primary upload">
+				<input type="file" id="load-file">
+				Load&nbsp;
+				<span class="glyphicon glyphicon-open" aria-hidden="true"></span>
+			</span>`);
 		box.append(button);
 		button.after('<br/><br/>' + label);
 		panel.append(box);
-		button.click(_ => {
-			this.popups.prompt('Audio buffer URL:', 'Please provide URL', null, url => {
-				if (!url) return;
-				const absn: AudioBufferSourceNode = <AudioBufferSourceNode>anode;
-				this.loadBufferParam(absn, url);
-			});
-		});
+		button.find('input').change(evt => file.uploadArrayBuffer(evt, soundFile => {
+			anode['_encoded'] = soundFile;
+			anode.context.decodeAudioData(soundFile, buffer => anode['_buffer'] = buffer);
+		}));
 		return box;
 	}
 
@@ -276,27 +267,4 @@ class BufferURL implements ParamHandler {
 		anode.context.decodeAudioData(encoded, buffer => anode['_buffer'] = buffer);
 	}
 
-	loadBufferParam(absn: AudioBufferSourceNode, url: string): void {
-		this.loadBuffer(absn.context, url, (buffer, encoded) => {
-			absn['_encoded'] = encoded;
-			absn['_buffer'] = buffer;
-			absn['_url'] = url;
-		});
-	}
-
-	loadBuffer(ac: AudioContext, url: string,
-		cb: (buffer: AudioBuffer, encoded: ArrayBuffer) => void): void {
-		const xhr = new XMLHttpRequest();
-		xhr.open('GET', url, true);
-		xhr.responseType = 'arraybuffer';
-		xhr.onload = _ => {
-			this.popups.close();
-			ac.decodeAudioData(xhr.response, buffer => cb(buffer, xhr.response));
-		};
-		xhr.send();
-		setTimeout(_ => {
-			if (xhr.readyState != xhr.DONE)
-				this.popups.progress('Loading ' + url + '...');
-		}, 300);
-	}
 }

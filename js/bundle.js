@@ -48,8 +48,8 @@
 	 * Main entry point: setup synth editor and keyboard listener.
 	 */
 	var synthUI_1 = __webpack_require__(1);
-	var noteInputs_1 = __webpack_require__(11);
-	var presets_1 = __webpack_require__(18);
+	var noteInputs_1 = __webpack_require__(12);
+	var presets_1 = __webpack_require__(19);
 	var graphCanvas = $('#graph-canvas')[0];
 	var synthUI = new synthUI_1.SynthUI(createAudioContext(), graphCanvas, $('#node-params'), $('#audio-graph-fft'), $('#audio-graph-osc'));
 	setupPanels();
@@ -82,7 +82,7 @@
 	};
 	var graph_1 = __webpack_require__(2);
 	var synth_1 = __webpack_require__(3);
-	var popups = __webpack_require__(8);
+	var popups = __webpack_require__(9);
 	/**
 	 * Customizes the generic graph editor in order to manipulate and control a graph of
 	 * AudioNodes
@@ -92,7 +92,6 @@
 	        this.gr = new graph_1.Graph(graphCanvas);
 	        this.gr.handler = new SynthGraphHandler(this, jqParams, jqFFT, jqOsc);
 	        this.synth = new synth_1.Synth(ac);
-	        this.synth.paramHandlers.BufferURL.popups = popups;
 	        this.registerPaletteHandler();
 	        this.addOutputNode();
 	    }
@@ -173,8 +172,8 @@
 	    return SynthUI;
 	})();
 	exports.SynthUI = SynthUI;
-	var paramsUI_1 = __webpack_require__(9);
-	var analyzer_1 = __webpack_require__(10);
+	var paramsUI_1 = __webpack_require__(10);
+	var analyzer_1 = __webpack_require__(11);
 	var GraphNodeData = (function (_super) {
 	    __extends(GraphNodeData, _super);
 	    function GraphNodeData(node) {
@@ -690,7 +689,7 @@
 	var palette_1 = __webpack_require__(6);
 	var modern_1 = __webpack_require__(5);
 	var custom = __webpack_require__(7);
-	var file = __webpack_require__(19);
+	var file = __webpack_require__(8);
 	var SEMITONE = Math.pow(2, 1 / 12);
 	var A4 = 57;
 	/**
@@ -737,7 +736,7 @@
 	        this.registerCustomNode('createNoiseCtrl', custom.NoiseCtrlGenerator);
 	        this.registerCustomNode('createLineIn', custom.LineInNode);
 	        this.registerCustomNode('createDetuner', custom.Detuner);
-	        this.registerParamHandler('BufferURL', new BufferURL());
+	        this.registerParamHandler('BufferData', new BufferData());
 	    }
 	    Synth.prototype.createAudioNode = function (type) {
 	        var def = palette_1.palette[type];
@@ -902,70 +901,31 @@
 	})();
 	exports.Synth = Synth;
 	//-------------------- Parameter handlers --------------------
-	var BufferURL = (function () {
-	    function BufferURL() {
+	var BufferData = (function () {
+	    function BufferData() {
 	    }
-	    BufferURL.prototype.initialize = function (anode, def) {
-	        var absn = anode;
-	        var url = def.params['buffer'].initial;
-	        if (!url)
-	            return;
-	        if (!this.popups)
-	            this.popups = {
-	                prompt: function () { },
-	                close: function () { },
-	                progress: function () { }
-	            };
-	        this.loadBufferParam(absn, url);
-	    };
-	    BufferURL.prototype.renderParam = function (panel, pdef, anode, param, label) {
-	        var _this = this;
+	    BufferData.prototype.initialize = function (anode, def) { };
+	    BufferData.prototype.renderParam = function (panel, pdef, anode, param, label) {
 	        var box = $('<div class="choice-box">');
-	        var button = $('<button class="btn btn-primary">URL</button>');
+	        var button = $("\n\t\t\t<span class=\"btn btn-primary upload\">\n\t\t\t\t<input type=\"file\" id=\"load-file\">\n\t\t\t\tLoad&nbsp;\n\t\t\t\t<span class=\"glyphicon glyphicon-open\" aria-hidden=\"true\"></span>\n\t\t\t</span>");
 	        box.append(button);
 	        button.after('<br/><br/>' + label);
 	        panel.append(box);
-	        button.click(function (_) {
-	            _this.popups.prompt('Audio buffer URL:', 'Please provide URL', null, function (url) {
-	                if (!url)
-	                    return;
-	                var absn = anode;
-	                _this.loadBufferParam(absn, url);
-	            });
-	        });
+	        button.find('input').change(function (evt) { return file.uploadArrayBuffer(evt, function (soundFile) {
+	            anode['_encoded'] = soundFile;
+	            anode.context.decodeAudioData(soundFile, function (buffer) { return anode['_buffer'] = buffer; });
+	        }); });
 	        return box;
 	    };
-	    BufferURL.prototype.param2json = function (anode) {
+	    BufferData.prototype.param2json = function (anode) {
 	        return file.arrayBufferToBase64(anode['_encoded']);
 	    };
-	    BufferURL.prototype.json2param = function (anode, json) {
+	    BufferData.prototype.json2param = function (anode, json) {
 	        var encoded = file.base64ToArrayBuffer(json);
 	        anode['_encoded'] = encoded;
 	        anode.context.decodeAudioData(encoded, function (buffer) { return anode['_buffer'] = buffer; });
 	    };
-	    BufferURL.prototype.loadBufferParam = function (absn, url) {
-	        this.loadBuffer(absn.context, url, function (buffer, encoded) {
-	            absn['_encoded'] = encoded;
-	            absn['_buffer'] = buffer;
-	            absn['_url'] = url;
-	        });
-	    };
-	    BufferURL.prototype.loadBuffer = function (ac, url, cb) {
-	        var _this = this;
-	        var xhr = new XMLHttpRequest();
-	        xhr.open('GET', url, true);
-	        xhr.responseType = 'arraybuffer';
-	        xhr.onload = function (_) {
-	            _this.popups.close();
-	            ac.decodeAudioData(xhr.response, function (buffer) { return cb(buffer, xhr.response); });
-	        };
-	        xhr.send();
-	        setTimeout(function (_) {
-	            if (xhr.readyState != xhr.DONE)
-	                _this.popups.progress('Loading ' + url + '...');
-	        }, 300);
-	    };
-	    return BufferURL;
+	    return BufferData;
 	})();
 
 
@@ -1382,7 +1342,7 @@
 	            detune: OCTAVE_DETUNE,
 	            buffer: {
 	                initial: null,
-	                handler: 'BufferURL'
+	                handler: 'BufferData'
 	            },
 	            loop: { initial: false },
 	            loopStart: { initial: 0, min: 0, max: 10 },
@@ -1702,6 +1662,60 @@
 /* 8 */
 /***/ function(module, exports) {
 
+	function arrayBufferToBase64(buffer) {
+	    var binary = '';
+	    var bytes = new Uint8Array(buffer);
+	    var len = bytes.byteLength;
+	    for (var i = 0; i < len; i++) {
+	        binary += String.fromCharCode(bytes[i]);
+	    }
+	    return window.btoa(binary);
+	}
+	exports.arrayBufferToBase64 = arrayBufferToBase64;
+	function base64ToArrayBuffer(base64) {
+	    var binary_string = window.atob(base64);
+	    var len = binary_string.length;
+	    var bytes = new Uint8Array(len);
+	    for (var i = 0; i < len; i++) {
+	        bytes[i] = binary_string.charCodeAt(i);
+	    }
+	    return bytes.buffer;
+	}
+	exports.base64ToArrayBuffer = base64ToArrayBuffer;
+	function browserSupportsDownload() {
+	    return !window.externalHost && 'download' in $('<a>')[0];
+	}
+	exports.browserSupportsDownload = browserSupportsDownload;
+	function download(fileName, fileData) {
+	    var a = $('<a>');
+	    a.attr('download', fileName);
+	    a.attr('href', 'data:application/octet-stream;base64,' + btoa(fileData));
+	    var clickEvent = new MouseEvent('click', { view: window, bubbles: true, cancelable: false });
+	    a[0].dispatchEvent(clickEvent);
+	}
+	exports.download = download;
+	function uploadText(event, cb) {
+	    upload(event, cb, 'readAsText');
+	}
+	exports.uploadText = uploadText;
+	function uploadArrayBuffer(event, cb) {
+	    upload(event, cb, 'readAsArrayBuffer');
+	}
+	exports.uploadArrayBuffer = uploadArrayBuffer;
+	function upload(event, cb, readFunc) {
+	    if (!event.target.files || event.target.files.length <= 0)
+	        return cb(null);
+	    var file = event.target.files[0];
+	    var reader = new FileReader();
+	    reader.onload = function (loadEvt) { return cb(loadEvt.target.result); };
+	    reader[readFunc](file);
+	}
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports) {
+
 	/** Informs whether a popup is open or not */
 	exports.isOpen = false;
 	/** Bootstrap-based equivalent of standard alert function */
@@ -1787,7 +1801,7 @@
 
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var modern_1 = __webpack_require__(5);
@@ -1957,7 +1971,7 @@
 
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports) {
 
 	/**
@@ -2054,14 +2068,14 @@
 
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var keyboard_1 = __webpack_require__(12);
-	var midi_1 = __webpack_require__(13);
-	var piano_1 = __webpack_require__(14);
-	var arpeggiator_1 = __webpack_require__(15);
-	var instrument_1 = __webpack_require__(17);
+	var keyboard_1 = __webpack_require__(13);
+	var midi_1 = __webpack_require__(14);
+	var piano_1 = __webpack_require__(15);
+	var arpeggiator_1 = __webpack_require__(16);
+	var instrument_1 = __webpack_require__(18);
 	var NUM_VOICES = 8;
 	/**
 	 * Manages all note-generation inputs:
@@ -2187,7 +2201,7 @@
 
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports) {
 
 	var KB_NOTES = 'ZSXDCVGBHNJMQ2W3ER5T6Y7UI9O0P';
@@ -2238,7 +2252,7 @@
 
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports) {
 
 	var MidiKeyboard = (function () {
@@ -2280,10 +2294,10 @@
 
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var popups = __webpack_require__(8);
+	var popups = __webpack_require__(9);
 	var modern_1 = __webpack_require__(5);
 	var NUM_WHITES = 17;
 	var BASE_NOTE = 36;
@@ -2516,10 +2530,10 @@
 
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var timer_1 = __webpack_require__(16);
+	var timer_1 = __webpack_require__(17);
 	var Arpeggiator = (function () {
 	    function Arpeggiator(ac) {
 	        this.backward = false;
@@ -2646,7 +2660,7 @@
 
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports) {
 
 	var Timer = (function () {
@@ -2701,7 +2715,7 @@
 
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __extends = (this && this.__extends) || function (d, b) {
@@ -2869,11 +2883,11 @@
 
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var popups = __webpack_require__(8);
-	var file = __webpack_require__(19);
+	var popups = __webpack_require__(9);
+	var file = __webpack_require__(8);
 	var MAX_PRESETS = 20;
 	/**
 	 * Manages the presets box:
@@ -2987,7 +3001,7 @@
 	    };
 	    Presets.prototype.loadPreset = function (evt) {
 	        var _this = this;
-	        file.upload(evt, function (data) {
+	        file.uploadText(evt, function (data) {
 	            var json = JSON.parse(data);
 	            _this.presets[_this.presetNum] = json;
 	            _this.preset2synth();
@@ -3014,53 +3028,6 @@
 	    return Presets;
 	})();
 	exports.Presets = Presets;
-
-
-/***/ },
-/* 19 */
-/***/ function(module, exports) {
-
-	function arrayBufferToBase64(buffer) {
-	    var binary = '';
-	    var bytes = new Uint8Array(buffer);
-	    var len = bytes.byteLength;
-	    for (var i = 0; i < len; i++) {
-	        binary += String.fromCharCode(bytes[i]);
-	    }
-	    return window.btoa(binary);
-	}
-	exports.arrayBufferToBase64 = arrayBufferToBase64;
-	function base64ToArrayBuffer(base64) {
-	    var binary_string = window.atob(base64);
-	    var len = binary_string.length;
-	    var bytes = new Uint8Array(len);
-	    for (var i = 0; i < len; i++) {
-	        bytes[i] = binary_string.charCodeAt(i);
-	    }
-	    return bytes.buffer;
-	}
-	exports.base64ToArrayBuffer = base64ToArrayBuffer;
-	function browserSupportsDownload() {
-	    return !window.externalHost && 'download' in $('<a>')[0];
-	}
-	exports.browserSupportsDownload = browserSupportsDownload;
-	function download(fileName, fileData) {
-	    var a = $('<a>');
-	    a.attr('download', fileName);
-	    a.attr('href', 'data:application/octet-stream;base64,' + btoa(fileData));
-	    var clickEvent = new MouseEvent('click', { view: window, bubbles: true, cancelable: false });
-	    a[0].dispatchEvent(clickEvent);
-	}
-	exports.download = download;
-	function upload(event, cb) {
-	    if (!event.target.files || event.target.files.length <= 0)
-	        return cb(null);
-	    var file = event.target.files[0];
-	    var reader = new FileReader();
-	    reader.onload = function (loadEvt) { return cb(loadEvt.target.result); };
-	    reader.readAsText(file);
-	}
-	exports.upload = upload;
 
 
 /***/ }

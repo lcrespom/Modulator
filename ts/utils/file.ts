@@ -32,10 +32,19 @@ export function download(fileName, fileData) {
 	a[0].dispatchEvent(clickEvent);
 }
 
-export function upload(event, cb: (fileData) => void) {
+export function uploadText(event, cb: (text) => void) {
+	upload(event, cb, 'readAsText');
+}
+
+export function uploadArrayBuffer(event, cb: (ab) => void) {
+	upload(event, cb, 'readAsArrayBuffer');
+}
+
+
+function upload(event, cb, readFunc: string) {
 	if (!event.target.files || event.target.files.length <= 0) return cb(null);
 	const file = event.target.files[0];
 	const reader = new FileReader();
 	reader.onload = (loadEvt: any)  => cb(loadEvt.target.result);
-	reader.readAsText(file);
+	reader[readFunc](file);
 }

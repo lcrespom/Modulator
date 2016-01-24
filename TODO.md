@@ -148,7 +148,7 @@
 ##Code
 - Provide an interface that predefines the very common noteOn / noteOff methods
 - Decoupling
-	- synth.ts contains BufferURL ParamHandler,
+	- synth.ts contains BufferData ParamHandler,
 		which has UI code that should be moved elsewhere
 	- The *piano* module group should not contain UI code. Therefore,
 		module piano.ts should be moved out of it, and the dependency
