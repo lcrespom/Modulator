@@ -16,16 +16,21 @@ const PORTAMENTO_MAX = 1;
 
 /** Builds a piano keyboard out of DIVs */
 export class PianoKeys {
-	createKeys(panel: JQuery) {
+	constructor(public numWhites = NUM_WHITES) {
+	}
+
+	createKeys(panel: JQuery): JQuery[] {
 		const keys = [];
-		var pw = panel.width();
-		var ph = panel.height();
-		var kw = pw / NUM_WHITES + 1;
-		var bw = kw * 2 / 3;
-		var bh = ph * 2 / 3;
+		const pw = panel.width();
+		const ph = panel.height();
+		const fromX = parseFloat(panel.css('padding-left'));
+		const fromY = parseFloat(panel.css('padding-top'));
+		const kw = pw / this.numWhites + 1;
+		const bw = kw * 2 / 3;
+		const bh = ph * 2 / 3;
 		// Create white keys
-		var knum = 0;
-		for (let i = 0; i < NUM_WHITES; i++) {
+		let knum = 0;
+		for (let i = 0; i < this.numWhites; i++) {
 			const key = $('<div class="piano-key">').css({
 				width: '' + kw + 'px',
 				height: '' + ph + 'px'
@@ -35,9 +40,9 @@ export class PianoKeys {
 			if (this.hasBlack(i)) knum++;
 		}
 		// Create black keys
-		var knum = 0;
-		let x = 10 - bw / 2;
-		for (let i = 0; i < NUM_WHITES - 1; i++) {
+		knum = 0;
+		let x = fromX - bw / 2;
+		for (let i = 0; i < this.numWhites - 1; i++) {
 			x += kw - 1;
 			knum++;
 			if (!this.hasBlack(i)) continue;
@@ -45,7 +50,7 @@ export class PianoKeys {
 				width: '' + bw + 'px',
 				height: '' + bh + 'px',
 				left: '' + x + 'px',
-				top: '10px'
+				top: '' + fromY + 'px'
 			});
 			panel.append(key);
 			keys[knum++] = key;

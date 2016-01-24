@@ -2313,18 +2313,22 @@
 	var PORTAMENTO_MAX = 1;
 	/** Builds a piano keyboard out of DIVs */
 	var PianoKeys = (function () {
-	    function PianoKeys() {
+	    function PianoKeys(numWhites) {
+	        if (numWhites === void 0) { numWhites = NUM_WHITES; }
+	        this.numWhites = numWhites;
 	    }
 	    PianoKeys.prototype.createKeys = function (panel) {
 	        var keys = [];
 	        var pw = panel.width();
 	        var ph = panel.height();
-	        var kw = pw / NUM_WHITES + 1;
+	        var fromX = parseFloat(panel.css('padding-left'));
+	        var fromY = parseFloat(panel.css('padding-top'));
+	        var kw = pw / this.numWhites + 1;
 	        var bw = kw * 2 / 3;
 	        var bh = ph * 2 / 3;
 	        // Create white keys
 	        var knum = 0;
-	        for (var i = 0; i < NUM_WHITES; i++) {
+	        for (var i = 0; i < this.numWhites; i++) {
 	            var key = $('<div class="piano-key">').css({
 	                width: '' + kw + 'px',
 	                height: '' + ph + 'px'
@@ -2335,9 +2339,9 @@
 	                knum++;
 	        }
 	        // Create black keys
-	        var knum = 0;
-	        var x = 10 - bw / 2;
-	        for (var i = 0; i < NUM_WHITES - 1; i++) {
+	        knum = 0;
+	        var x = fromX - bw / 2;
+	        for (var i = 0; i < this.numWhites - 1; i++) {
 	            x += kw - 1;
 	            knum++;
 	            if (!this.hasBlack(i))
@@ -2346,7 +2350,7 @@
 	                width: '' + bw + 'px',
 	                height: '' + bh + 'px',
 	                left: '' + x + 'px',
-	                top: '10px'
+	                top: '' + fromY + 'px'
 	            });
 	            panel.append(key);
 	            keys[knum++] = key;

@@ -2,7 +2,8 @@ module.exports = {
 	devtool: 'source-map',
 	entry: {
 		bundle: './ts/main',
-		synthlib: './ts/synthlib' 	
+		synthlib: './ts/synthlib',
+		tracker: './ts/tracker'
 	},
 	output: {
 		path: __dirname + '/js',
