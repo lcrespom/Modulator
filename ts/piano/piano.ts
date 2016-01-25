@@ -26,8 +26,8 @@ export class PianoKeys {
 		const fromX = parseFloat(panel.css('padding-left'));
 		const fromY = parseFloat(panel.css('padding-top'));
 		const kw = pw / this.numWhites + 1;
-		const bw = kw * 2 / 3;
-		const bh = ph * 2 / 3;
+		const bw = Math.round(kw * 2 / 3);
+		const bh = Math.round(ph * 2 / 3);
 		// Create white keys
 		let knum = 0;
 		for (let i = 0; i < this.numWhites; i++) {

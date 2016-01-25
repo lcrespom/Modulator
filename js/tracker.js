@@ -58,7 +58,7 @@
 	function paintNoteColumns(canvas, gc, numKeys) {
 	    var w = canvas.width / numKeys;
 	    var x = w / 2;
-	    gc.translate(-0.5, -0.5);
+	    gc.translate(-2, 0);
 	    gc.fillStyle = '#E0E0E0';
 	    var oldx = 0;
 	    for (var i = 0; i < numKeys - 1; i++) {
@@ -68,6 +68,33 @@
 	        x += w;
 	    }
 	}
+	var Note = (function () {
+	    function Note() {
+	    }
+	    return Note;
+	})();
+	var NoteRow = (function () {
+	    function NoteRow() {
+	    }
+	    return NoteRow;
+	})();
+	var Part = (function () {
+	    function Part() {
+	    }
+	    return Part;
+	})();
+	var Track = (function () {
+	    function Track() {
+	    }
+	    return Track;
+	})();
+	var Song = (function () {
+	    function Song() {
+	    }
+	    Song.prototype.play = function () { };
+	    Song.prototype.stop = function () { };
+	    return Song;
+	})();
 
 
 /***/ },
@@ -224,8 +251,8 @@
 	        var fromX = parseFloat(panel.css('padding-left'));
 	        var fromY = parseFloat(panel.css('padding-top'));
 	        var kw = pw / this.numWhites + 1;
-	        var bw = kw * 2 / 3;
-	        var bh = ph * 2 / 3;
+	        var bw = Math.round(kw * 2 / 3);
+	        var bh = Math.round(ph * 2 / 3);
 	        // Create white keys
 	        var knum = 0;
 	        for (var i = 0; i < this.numWhites; i++) {

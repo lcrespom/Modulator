@@ -18,7 +18,7 @@ function paintNoteColumns(
 	canvas: HTMLCanvasElement, gc: CanvasRenderingContext2D, numKeys) {
 	const w = canvas.width / numKeys;
 	let x = w/2;
-	gc.translate(-0.5, -0.5);
+	gc.translate(-2, 0);
 	gc.fillStyle = '#E0E0E0';
 	let oldx = 0;
 	for (let i = 0; i < numKeys - 1; i++) {
@@ -27,4 +27,34 @@ function paintNoteColumns(
 		oldx = x;
 		x += w;
 	}
+}
+
+class Note {
+	type: number;
+	midi: number;
+	velocity: number;
+}
+
+class NoteRow {
+	notes: Note[];
+	commands: any[];
+}
+
+class Part {
+	name: string;
+	voices: number;
+	instrument: any;
+	rows: NoteRow[];
+}
+
+class Track {
+	parts: Part[];
+}
+
+class Song {
+	title: string;
+	bpm: number;
+	tracks: Track[];
+	play() {}
+	stop() {}
 }

@@ -2324,8 +2324,8 @@
 	        var fromX = parseFloat(panel.css('padding-left'));
 	        var fromY = parseFloat(panel.css('padding-top'));
 	        var kw = pw / this.numWhites + 1;
-	        var bw = kw * 2 / 3;
-	        var bh = ph * 2 / 3;
+	        var bw = Math.round(kw * 2 / 3);
+	        var bh = Math.round(ph * 2 / 3);
 	        // Create white keys
 	        var knum = 0;
 	        for (var i = 0; i < this.numWhites; i++) {
