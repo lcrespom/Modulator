@@ -45,7 +45,6 @@
 /***/ 0:
 /***/ function(module, exports, __webpack_require__) {
 
-	var piano_1 = __webpack_require__(15);
 	var tracker = __webpack_require__(20);
 	var pianola_1 = __webpack_require__(21);
 	function rowWithNotes() {
@@ -101,17 +100,9 @@
 	    return s;
 	}
 	//--------------------------------------------------
-	var NUM_WHITES = 28;
-	var pk = new piano_1.PianoKeys(NUM_WHITES);
-	var keys = pk.createKeys($('#piano'));
-	var past = new pianola_1.NoteCanvas($('#past-notes'), NUM_WHITES * 2);
-	past.paintNoteColumns();
-	var future = new pianola_1.NoteCanvas($('#future-notes'), NUM_WHITES * 2);
-	future.paintNoteColumns();
+	var pianola = new pianola_1.Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
 	var sw = starWars();
-	future.part = sw.tracks[0].parts[0];
-	future.keys = keys;
-	future.renderFutureNotes(0);
+	pianola.render(sw.tracks[0].parts[0], 0);
 
 
 /***/ },
@@ -551,8 +542,29 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var tracker = __webpack_require__(20);
+	var piano_1 = __webpack_require__(15);
+	var NUM_WHITES = 28;
 	var NOTE_COLOR = '#0CC';
 	var BASE_NOTE = 24;
+	var Pianola = (function () {
+	    function Pianola($past, $piano, $future) {
+	        this.pk = new piano_1.PianoKeys(NUM_WHITES);
+	        this.keys = this.pk.createKeys($('#piano'));
+	        this.past = new NoteCanvas($('#past-notes'), NUM_WHITES * 2);
+	        this.future = new NoteCanvas($('#future-notes'), NUM_WHITES * 2);
+	    }
+	    Pianola.prototype.render = function (part, currentRow) {
+	        this.past.paintNoteColumns();
+	        this.future.paintNoteColumns();
+	        //TODO render past notes
+	        //TODO render piano keys
+	        this.future.part = part;
+	        this.future.keys = this.keys;
+	        this.future.renderFutureNotes(0);
+	    };
+	    return Pianola;
+	})();
+	exports.Pianola = Pianola;
 	var NoteCanvas = (function () {
 	    function NoteCanvas($canvas, numKeys) {
 	        this.canvas = $canvas[0];
@@ -561,6 +573,7 @@
 	        this.notes = [];
 	    }
 	    NoteCanvas.prototype.paintNoteColumns = function () {
+	        this.gc.clearRect(0, 0, this.canvas.width, this.canvas.height);
 	        var w = this.canvas.width / this.numKeys;
 	        this.noteW = w;
 	        var x = w / 2;

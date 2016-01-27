@@ -1,6 +1,5 @@
-import { PianoKeys } from './piano/piano';
 import * as tracker from './tracker/song';
-import { NoteCanvas } from './tracker/pianola';
+import { Pianola } from './tracker/pianola';
 
 
 function rowWithNotes(...notes): tracker.NoteRow {
@@ -57,17 +56,7 @@ function starWars(): tracker.Song {
 
 //--------------------------------------------------
 
-const NUM_WHITES = 28;
-
-const pk = new PianoKeys(NUM_WHITES);
-const keys = pk.createKeys($('#piano'));
-
-const past = new NoteCanvas($('#past-notes'), NUM_WHITES * 2);
-past.paintNoteColumns();
-const future = new NoteCanvas($('#future-notes'), NUM_WHITES * 2);
-future.paintNoteColumns();
+const pianola = new Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
 
 const sw = starWars();
-future.part = sw.tracks[0].parts[0];
-future.keys = keys;
-future.renderFutureNotes(0);
+pianola.render(sw.tracks[0].parts[0], 0);

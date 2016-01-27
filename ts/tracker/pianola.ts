@@ -1,7 +1,35 @@
 import * as tracker from './song';
+import { PianoKeys } from '../piano/piano';
+
+const NUM_WHITES = 28;
 
 const NOTE_COLOR = '#0CC';
 const BASE_NOTE = 24;
+
+export class Pianola {
+	pk: PianoKeys;
+	keys: JQuery[];
+	past: NoteCanvas;
+	future: NoteCanvas;
+
+	constructor($past, $piano, $future) {
+		this.pk = new PianoKeys(NUM_WHITES);
+		this.keys = this.pk.createKeys($('#piano'));
+		this.past = new NoteCanvas($('#past-notes'), NUM_WHITES * 2);
+		this.future = new NoteCanvas($('#future-notes'), NUM_WHITES * 2);
+	}
+
+	render(part: tracker.Part, currentRow: number) {
+		this.past.paintNoteColumns();
+		this.future.paintNoteColumns();
+		//TODO render past notes
+		//TODO render piano keys
+		this.future.part = part;
+		this.future.keys = this.keys;
+		this.future.renderFutureNotes(0);		
+	}
+}
+
 
 export class NoteCanvas {
 	canvas: HTMLCanvasElement;
@@ -20,6 +48,7 @@ export class NoteCanvas {
 	}
 
 	paintNoteColumns() {
+		this.gc.clearRect(0, 0, this.canvas.width, this.canvas.height);
 		const w = this.canvas.width / this.numKeys;
 		this.noteW = w;
 		let x = w/2;
