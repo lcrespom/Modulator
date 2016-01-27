@@ -1,6 +1,7 @@
 import { PianoKeys } from './piano/piano'
 
 const NOTE_COLOR = '#0CC';
+const BASE_NOTE = 24;
 
 class NoteCanvas {
 	canvas: HTMLCanvasElement;
@@ -8,6 +9,7 @@ class NoteCanvas {
 	numKeys: number;
 	noteW: number;
 	part: Part;
+	keys: JQuery[];
 	notes: number[];
 
 	constructor($canvas: JQuery, numKeys: number) {
@@ -32,16 +34,36 @@ class NoteCanvas {
 		}
 	}
 
+	renderPastNotes(start: number) {
+	}
+
 	renderFutureNotes(start: number) {
 		let y = 0;
 		for (let i = start; i < this.part.rows.length; i++) {
-			this.renderRow(y, this.part.rows[i]);
-			y += this.noteW;
+			this.renderRow(y++, this.part.rows[i]);
 		}
 	}
 
 	renderRow(y: number, row: NoteRow) {
-		
+		// Update notes array
+		const notes = row && row.notes ? row.notes : [];
+		let note;
+		for (note of notes) {
+			if (note.type == Note.NoteOn)
+				this.notes.push(note.midi);
+			else if (note.type == Note.NoteOff)
+				this.notes = this.notes.filter(midi => midi != note.midi);
+		}
+		// Render row according to current state of notes array
+		this.gc.fillStyle = NOTE_COLOR;
+		const wh = this.noteW;
+		const ofs = $(this.canvas).offset().left;
+		for (const midi of this.notes) {
+			const $key = this.keys[midi - BASE_NOTE];
+			let x = $key.offset().left - ofs;
+			x -= $key.hasClass('piano-black') ? 6.5 : 3;
+			this.gc.fillRect(x, y * wh, wh, wh);
+		}
 	}
 }
 
@@ -108,22 +130,22 @@ function createNotes(): NoteRow[] {
 	rows[i] = rowWithNotes(Note.off(48), Note.on(55));
 	i += 4;
 	rows[i++] = rowWithNotes(Note.off(55), Note.on(53));
-	rows[i++] = rowWithNotes(Note.off(53), Note.on(51));
-	rows[i++] = rowWithNotes(Note.off(51), Note.on(50));
+	rows[i++] = rowWithNotes(Note.off(53), Note.on(52));
+	rows[i++] = rowWithNotes(Note.off(52), Note.on(50));
 	rows[i] = rowWithNotes(Note.off(50), Note.on(60));
 	i += 4;
 	rows[i] = rowWithNotes(Note.off(60), Note.on(55));
 	i += 4;
 	rows[i++] = rowWithNotes(Note.off(55), Note.on(53));
-	rows[i++] = rowWithNotes(Note.off(53), Note.on(51));
-	rows[i++] = rowWithNotes(Note.off(51), Note.on(50));
+	rows[i++] = rowWithNotes(Note.off(53), Note.on(52));
+	rows[i++] = rowWithNotes(Note.off(52), Note.on(50));
 	rows[i] = rowWithNotes(Note.off(50), Note.on(60));
 	i += 4;
 	rows[i] = rowWithNotes(Note.off(60), Note.on(55));
 	i += 4;
 	rows[i++] = rowWithNotes(Note.off(55), Note.on(53));
-	rows[i++] = rowWithNotes(Note.off(53), Note.on(51));
-	rows[i++] = rowWithNotes(Note.off(51), Note.on(53));
+	rows[i++] = rowWithNotes(Note.off(53), Note.on(52));
+	rows[i++] = rowWithNotes(Note.off(52), Note.on(53));
 	rows[i] = rowWithNotes(Note.off(53), Note.on(50));
 	i += 4;
 	rows[i] = rowWithNotes(Note.off(50));
@@ -158,4 +180,7 @@ past.paintNoteColumns();
 const future = new NoteCanvas($('#future-notes'), NUM_WHITES * 2);
 future.paintNoteColumns();
 
+const sw = starWars();
+future.part = sw.tracks[0].parts[0];
+future.keys = keys;
 future.renderFutureNotes(0);
