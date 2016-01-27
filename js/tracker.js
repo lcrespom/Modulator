@@ -46,155 +46,55 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var piano_1 = __webpack_require__(15);
-	var NOTE_COLOR = '#0CC';
-	var BASE_NOTE = 24;
-	var NoteCanvas = (function () {
-	    function NoteCanvas($canvas, numKeys) {
-	        this.canvas = $canvas[0];
-	        this.gc = this.canvas.getContext('2d');
-	        this.numKeys = numKeys;
-	        this.notes = [];
-	    }
-	    NoteCanvas.prototype.paintNoteColumns = function () {
-	        var w = this.canvas.width / this.numKeys;
-	        this.noteW = w;
-	        var x = w / 2;
-	        this.gc.translate(-2, 0);
-	        this.gc.fillStyle = '#E0E0E0';
-	        var oldx = 0;
-	        for (var i = 0; i < this.numKeys - 1; i++) {
-	            if (i % 2)
-	                this.gc.fillRect(Math.round(x), 0, Math.round(x - oldx), this.canvas.height);
-	            oldx = x;
-	            x += w;
-	        }
-	    };
-	    NoteCanvas.prototype.renderPastNotes = function (start) {
-	    };
-	    NoteCanvas.prototype.renderFutureNotes = function (start) {
-	        var y = 0;
-	        for (var i = start; i < this.part.rows.length; i++) {
-	            this.renderRow(y++, this.part.rows[i]);
-	        }
-	    };
-	    NoteCanvas.prototype.renderRow = function (y, row) {
-	        // Update notes array
-	        var notes = row && row.notes ? row.notes : [];
-	        var note;
-	        for (var _i = 0; _i < notes.length; _i++) {
-	            note = notes[_i];
-	            if (note.type == Note.NoteOn)
-	                this.notes.push(note.midi);
-	            else if (note.type == Note.NoteOff)
-	                this.notes = this.notes.filter(function (midi) { return midi != note.midi; });
-	        }
-	        // Render row according to current state of notes array
-	        this.gc.fillStyle = NOTE_COLOR;
-	        var wh = this.noteW;
-	        var ofs = $(this.canvas).offset().left;
-	        for (var _a = 0, _b = this.notes; _a < _b.length; _a++) {
-	            var midi = _b[_a];
-	            var $key = this.keys[midi - BASE_NOTE];
-	            var x = $key.offset().left - ofs;
-	            x -= $key.hasClass('piano-black') ? 6.5 : 3;
-	            this.gc.fillRect(x, y * wh, wh, wh);
-	        }
-	    };
-	    return NoteCanvas;
-	})();
-	//--------------------------------------------------------
-	var Note = (function () {
-	    function Note(type, midi, velocity) {
-	        if (velocity === void 0) { velocity = 1; }
-	        this.type = type;
-	        this.midi = midi;
-	        this.velocity = velocity;
-	    }
-	    Note.on = function (midi, velocity) {
-	        if (velocity === void 0) { velocity = 1; }
-	        return new Note(Note.NoteOn, midi, velocity);
-	    };
-	    Note.off = function (midi, velocity) {
-	        if (velocity === void 0) { velocity = 1; }
-	        return new Note(Note.NoteOff, midi, velocity);
-	    };
-	    Note.NoteOn = 0;
-	    Note.NoteOff = 1;
-	    return Note;
-	})();
-	var NoteRow = (function () {
-	    function NoteRow() {
-	    }
-	    return NoteRow;
-	})();
-	var Part = (function () {
-	    function Part() {
-	        this.rows = [];
-	    }
-	    return Part;
-	})();
-	var Track = (function () {
-	    function Track() {
-	        this.parts = [];
-	    }
-	    return Track;
-	})();
-	var Song = (function () {
-	    function Song() {
-	        this.tracks = [];
-	    }
-	    Song.prototype.play = function () { };
-	    Song.prototype.stop = function () { };
-	    return Song;
-	})();
-	//--------------------------------------------------------
+	var tracker = __webpack_require__(20);
+	var pianola_1 = __webpack_require__(21);
 	function rowWithNotes() {
 	    var notes = [];
 	    for (var _i = 0; _i < arguments.length; _i++) {
 	        notes[_i - 0] = arguments[_i];
 	    }
-	    var nr = new NoteRow();
+	    var nr = new tracker.NoteRow();
 	    nr.notes = notes;
 	    return nr;
 	}
 	function createNotes() {
 	    var rows = [];
 	    var i = 0;
-	    rows[i] = rowWithNotes(Note.on(48));
+	    rows[i] = rowWithNotes(tracker.Note.on(48));
 	    i += 4;
-	    rows[i] = rowWithNotes(Note.off(48), Note.on(55));
+	    rows[i] = rowWithNotes(tracker.Note.off(48), tracker.Note.on(55));
 	    i += 4;
-	    rows[i++] = rowWithNotes(Note.off(55), Note.on(53));
-	    rows[i++] = rowWithNotes(Note.off(53), Note.on(52));
-	    rows[i++] = rowWithNotes(Note.off(52), Note.on(50));
-	    rows[i] = rowWithNotes(Note.off(50), Note.on(60));
+	    rows[i++] = rowWithNotes(tracker.Note.off(55), tracker.Note.on(53));
+	    rows[i++] = rowWithNotes(tracker.Note.off(53), tracker.Note.on(52));
+	    rows[i++] = rowWithNotes(tracker.Note.off(52), tracker.Note.on(50));
+	    rows[i] = rowWithNotes(tracker.Note.off(50), tracker.Note.on(60));
 	    i += 4;
-	    rows[i] = rowWithNotes(Note.off(60), Note.on(55));
+	    rows[i] = rowWithNotes(tracker.Note.off(60), tracker.Note.on(55));
 	    i += 4;
-	    rows[i++] = rowWithNotes(Note.off(55), Note.on(53));
-	    rows[i++] = rowWithNotes(Note.off(53), Note.on(52));
-	    rows[i++] = rowWithNotes(Note.off(52), Note.on(50));
-	    rows[i] = rowWithNotes(Note.off(50), Note.on(60));
+	    rows[i++] = rowWithNotes(tracker.Note.off(55), tracker.Note.on(53));
+	    rows[i++] = rowWithNotes(tracker.Note.off(53), tracker.Note.on(52));
+	    rows[i++] = rowWithNotes(tracker.Note.off(52), tracker.Note.on(50));
+	    rows[i] = rowWithNotes(tracker.Note.off(50), tracker.Note.on(60));
 	    i += 4;
-	    rows[i] = rowWithNotes(Note.off(60), Note.on(55));
+	    rows[i] = rowWithNotes(tracker.Note.off(60), tracker.Note.on(55));
 	    i += 4;
-	    rows[i++] = rowWithNotes(Note.off(55), Note.on(53));
-	    rows[i++] = rowWithNotes(Note.off(53), Note.on(52));
-	    rows[i++] = rowWithNotes(Note.off(52), Note.on(53));
-	    rows[i] = rowWithNotes(Note.off(53), Note.on(50));
+	    rows[i++] = rowWithNotes(tracker.Note.off(55), tracker.Note.on(53));
+	    rows[i++] = rowWithNotes(tracker.Note.off(53), tracker.Note.on(52));
+	    rows[i++] = rowWithNotes(tracker.Note.off(52), tracker.Note.on(53));
+	    rows[i] = rowWithNotes(tracker.Note.off(53), tracker.Note.on(50));
 	    i += 4;
-	    rows[i] = rowWithNotes(Note.off(50));
+	    rows[i] = rowWithNotes(tracker.Note.off(50));
 	    return rows;
 	}
 	function starWars() {
-	    var p = new Part();
+	    var p = new tracker.Part();
 	    p.instrument = null; //TODO
 	    p.voices = 1;
 	    p.name = 'Main theme';
 	    p.rows = createNotes();
-	    var t = new Track();
+	    var t = new tracker.Track();
 	    t.parts.push(p);
-	    var s = new Song();
+	    var s = new tracker.Song();
 	    s.title = 'Star Wars';
 	    s.bpm = 90;
 	    s.tracks.push(t);
@@ -204,9 +104,9 @@
 	var NUM_WHITES = 28;
 	var pk = new piano_1.PianoKeys(NUM_WHITES);
 	var keys = pk.createKeys($('#piano'));
-	var past = new NoteCanvas($('#past-notes'), NUM_WHITES * 2);
+	var past = new pianola_1.NoteCanvas($('#past-notes'), NUM_WHITES * 2);
 	past.paintNoteColumns();
-	var future = new NoteCanvas($('#future-notes'), NUM_WHITES * 2);
+	var future = new pianola_1.NoteCanvas($('#future-notes'), NUM_WHITES * 2);
 	future.paintNoteColumns();
 	var sw = starWars();
 	future.part = sw.tracks[0].parts[0];
@@ -587,6 +487,129 @@
 	    return PianoKeyboard;
 	})();
 	exports.PianoKeyboard = PianoKeyboard;
+
+
+/***/ },
+
+/***/ 20:
+/***/ function(module, exports) {
+
+	var Note = (function () {
+	    function Note(type, midi, velocity) {
+	        if (velocity === void 0) { velocity = 1; }
+	        this.type = type;
+	        this.midi = midi;
+	        this.velocity = velocity;
+	    }
+	    Note.on = function (midi, velocity) {
+	        if (velocity === void 0) { velocity = 1; }
+	        return new Note(Note.NoteOn, midi, velocity);
+	    };
+	    Note.off = function (midi, velocity) {
+	        if (velocity === void 0) { velocity = 1; }
+	        return new Note(Note.NoteOff, midi, velocity);
+	    };
+	    Note.NoteOn = 0;
+	    Note.NoteOff = 1;
+	    return Note;
+	})();
+	exports.Note = Note;
+	var NoteRow = (function () {
+	    function NoteRow() {
+	    }
+	    return NoteRow;
+	})();
+	exports.NoteRow = NoteRow;
+	var Part = (function () {
+	    function Part() {
+	        this.rows = [];
+	    }
+	    return Part;
+	})();
+	exports.Part = Part;
+	var Track = (function () {
+	    function Track() {
+	        this.parts = [];
+	    }
+	    return Track;
+	})();
+	exports.Track = Track;
+	var Song = (function () {
+	    function Song() {
+	        this.tracks = [];
+	    }
+	    Song.prototype.play = function () { };
+	    Song.prototype.stop = function () { };
+	    return Song;
+	})();
+	exports.Song = Song;
+
+
+/***/ },
+
+/***/ 21:
+/***/ function(module, exports, __webpack_require__) {
+
+	var tracker = __webpack_require__(20);
+	var NOTE_COLOR = '#0CC';
+	var BASE_NOTE = 24;
+	var NoteCanvas = (function () {
+	    function NoteCanvas($canvas, numKeys) {
+	        this.canvas = $canvas[0];
+	        this.gc = this.canvas.getContext('2d');
+	        this.numKeys = numKeys;
+	        this.notes = [];
+	    }
+	    NoteCanvas.prototype.paintNoteColumns = function () {
+	        var w = this.canvas.width / this.numKeys;
+	        this.noteW = w;
+	        var x = w / 2;
+	        this.gc.translate(-2, 0);
+	        this.gc.fillStyle = '#E0E0E0';
+	        var oldx = 0;
+	        for (var i = 0; i < this.numKeys - 1; i++) {
+	            if (i % 2)
+	                this.gc.fillRect(Math.round(x), 0, Math.round(x - oldx), this.canvas.height);
+	            oldx = x;
+	            x += w;
+	        }
+	    };
+	    NoteCanvas.prototype.renderPastNotes = function (start) {
+	    };
+	    NoteCanvas.prototype.renderFutureNotes = function (start) {
+	        var y = 0;
+	        for (var i = start; i < this.part.rows.length; i++) {
+	            var row = this.part.rows[i];
+	            this.updateNotes(this.part.rows[i]);
+	            this.renderRow(y++, row);
+	        }
+	    };
+	    NoteCanvas.prototype.updateNotes = function (row) {
+	        var notes = row && row.notes ? row.notes : [];
+	        var note;
+	        for (var _i = 0; _i < notes.length; _i++) {
+	            note = notes[_i];
+	            if (note.type == tracker.Note.NoteOn)
+	                this.notes.push(note.midi);
+	            else if (note.type == tracker.Note.NoteOff)
+	                this.notes = this.notes.filter(function (midi) { return midi != note.midi; });
+	        }
+	    };
+	    NoteCanvas.prototype.renderRow = function (y, row) {
+	        this.gc.fillStyle = NOTE_COLOR;
+	        var wh = this.noteW;
+	        var ofs = $(this.canvas).offset().left;
+	        for (var _i = 0, _a = this.notes; _i < _a.length; _i++) {
+	            var midi = _a[_i];
+	            var $key = this.keys[midi - BASE_NOTE];
+	            var x = $key.offset().left - ofs;
+	            x -= $key.hasClass('piano-black') ? 6.5 : 3;
+	            this.gc.fillRect(x, y * wh, wh, wh);
+	        }
+	    };
+	    return NoteCanvas;
+	})();
+	exports.NoteCanvas = NoteCanvas;
 
 
 /***/ }
