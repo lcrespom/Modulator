@@ -59,4 +59,17 @@ function starWars(): tracker.Song {
 const pianola = new Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
 
 const sw = starWars();
-pianola.render(sw.tracks[0].parts[0], 0);
+const part = sw.tracks[0].parts[0];
+
+let tick = 0;
+let rowNum = 0;
+
+const animationTick = _ => {
+	if (rowNum > part.rows.length) return;
+	requestAnimationFrame(animationTick);
+	if (tick++ < 15) return;
+	tick = 0;
+	pianola.render(part, rowNum++);
+}
+
+requestAnimationFrame(animationTick);

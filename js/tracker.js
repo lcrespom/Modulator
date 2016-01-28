@@ -102,7 +102,19 @@
 	//--------------------------------------------------
 	var pianola = new pianola_1.Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
 	var sw = starWars();
-	pianola.render(sw.tracks[0].parts[0], 0);
+	var part = sw.tracks[0].parts[0];
+	var tick = 0;
+	var rowNum = 0;
+	var animationTick = function (_) {
+	    if (rowNum > part.rows.length)
+	        return;
+	    requestAnimationFrame(animationTick);
+	    if (tick++ < 15)
+	        return;
+	    tick = 0;
+	    pianola.render(part, rowNum++);
+	};
+	requestAnimationFrame(animationTick);
 
 
 /***/ },
@@ -548,17 +560,15 @@
 	var BASE_NOTE = 24;
 	var Pianola = (function () {
 	    function Pianola($past, $piano, $future) {
-	        this.pk = new piano_1.PianoKeys(NUM_WHITES);
-	        this.keys = this.pk.createKeys($('#piano'));
-	        this.past = new NoteCanvas($('#past-notes'), NUM_WHITES * 2);
-	        this.future = new NoteCanvas($('#future-notes'), NUM_WHITES * 2);
+	        this.pkh = new PianoKeyHelper(new piano_1.PianoKeys(NUM_WHITES));
+	        this.past = new NoteCanvas($('#past-notes'), NUM_WHITES * 2, this.pkh);
+	        this.future = new NoteCanvas($('#future-notes'), NUM_WHITES * 2, this.pkh);
 	        this.notes = [];
+	        this.oldNotes = [];
 	    }
 	    Pianola.prototype.render = function (part, currentRow) {
 	        this.past.paintNoteColumns();
 	        this.future.paintNoteColumns();
-	        this.future.keys = this.keys;
-	        var y = 0;
 	        for (var i = 0; i < part.rows.length; i++) {
 	            var row = part.rows[i];
 	            this.updateNotes(part.rows[i]);
@@ -567,15 +577,21 @@
 	            else if (i == currentRow)
 	                this.renderCurrentRow();
 	            else
-	                this.renderFutureRow(y++);
+	                this.renderFutureRow(i - currentRow - 1);
 	        }
 	    };
 	    Pianola.prototype.renderPastRow = function () {
 	    };
 	    Pianola.prototype.renderCurrentRow = function () {
-	        for (var _i = 0, _a = this.notes; _i < _a.length; _i++) {
+	        for (var _i = 0, _a = this.oldNotes; _i < _a.length; _i++) {
 	            var note = _a[_i];
+	            this.pkh.keyUp(note);
 	        }
+	        for (var _b = 0, _c = this.notes; _b < _c.length; _b++) {
+	            var note = _c[_b];
+	            this.pkh.keyDown(note);
+	        }
+	        this.oldNotes = this.notes.slice();
 	    };
 	    Pianola.prototype.renderFutureRow = function (y) {
 	        this.future.renderNoteRow(y, this.notes);
@@ -597,14 +613,31 @@
 	var PianoKeyHelper = (function () {
 	    function PianoKeyHelper(pk) {
 	        this.pk = pk;
+	        this.keys = this.pk.createKeys($('#piano'));
 	    }
+	    PianoKeyHelper.prototype.getKey = function (midi) {
+	        return this.keys[midi - BASE_NOTE];
+	    };
+	    PianoKeyHelper.prototype.keyDown = function (midi) {
+	        var key = this.getKey(midi);
+	        key.addClass('piano-key-pressed');
+	    };
+	    PianoKeyHelper.prototype.keyUp = function (midi) {
+	        var key = this.getKey(midi);
+	        key.removeClass('piano-key-pressed');
+	    };
+	    PianoKeyHelper.prototype.reset = function () {
+	        for (var key in this.keys)
+	            key.removeClass('piano-key-pressed');
+	    };
 	    return PianoKeyHelper;
 	})();
 	var NoteCanvas = (function () {
-	    function NoteCanvas($canvas, numKeys) {
+	    function NoteCanvas($canvas, numKeys, pkh) {
 	        this.canvas = $canvas[0];
 	        this.gc = this.canvas.getContext('2d');
 	        this.numKeys = numKeys;
+	        this.pkh = pkh;
 	    }
 	    NoteCanvas.prototype.paintNoteColumns = function () {
 	        //TODO paint only the area belonging to existing part rows
@@ -612,12 +645,12 @@
 	        var w = this.canvas.width / this.numKeys;
 	        this.noteW = w;
 	        var x = w / 2;
-	        this.gc.translate(-2, 0);
+	        //this.gc.translate(-2, 0);
 	        this.gc.fillStyle = '#E0E0E0';
 	        var oldx = 0;
 	        for (var i = 0; i < this.numKeys - 1; i++) {
 	            if (i % 2)
-	                this.gc.fillRect(Math.round(x), 0, Math.round(x - oldx), this.canvas.height);
+	                this.gc.fillRect(Math.round(x) - 1, 0, Math.round(x - oldx), this.canvas.height);
 	            oldx = x;
 	            x += w;
 	        }
@@ -628,9 +661,9 @@
 	        var ofs = $(this.canvas).offset().left;
 	        for (var _i = 0; _i < notes.length; _i++) {
 	            var midi = notes[_i];
-	            var $key = this.keys[midi - BASE_NOTE];
+	            var $key = this.pkh.getKey(midi);
 	            var x = $key.offset().left - ofs;
-	            x -= $key.hasClass('piano-black') ? 6.5 : 3;
+	            x -= $key.hasClass('piano-black') ? 7.5 : 4;
 	            this.gc.fillRect(x, y * wh, wh, wh);
 	        }
 	    };
