@@ -11,43 +11,75 @@ export class Pianola {
 	keys: JQuery[];
 	past: NoteCanvas;
 	future: NoteCanvas;
+	notes: number[];
 
 	constructor($past, $piano, $future) {
 		this.pk = new PianoKeys(NUM_WHITES);
 		this.keys = this.pk.createKeys($('#piano'));
 		this.past = new NoteCanvas($('#past-notes'), NUM_WHITES * 2);
 		this.future = new NoteCanvas($('#future-notes'), NUM_WHITES * 2);
+		this.notes = [];
 	}
 
 	render(part: tracker.Part, currentRow: number) {
 		this.past.paintNoteColumns();
 		this.future.paintNoteColumns();
-		//TODO render past notes
-		//TODO render piano keys
-		this.future.part = part;
 		this.future.keys = this.keys;
-		this.future.renderFutureNotes(0);		
+		let y = 0;
+		for (let i = 0; i < part.rows.length; i++) {
+			const row = part.rows[i];
+			this.updateNotes(part.rows[i]);
+			if (i < currentRow) this.renderPastRow();
+			else if (i == currentRow) this.renderCurrentRow();
+			else this.renderFutureRow(y++);
+		}
+	}
+
+	renderPastRow() {
+	}
+
+	renderCurrentRow() {
+		for (const note of this.notes) {
+			
+		}
+	}
+
+	renderFutureRow(y: number) {
+		this.future.renderNoteRow(y, this.notes);
+	}
+
+	updateNotes(row: tracker.NoteRow) {
+		const rowNotes = row && row.notes ? row.notes : [];
+		let note;
+		for (note of rowNotes) {
+			if (note.type == tracker.Note.NoteOn)
+				this.notes.push(note.midi);
+			else if (note.type == tracker.Note.NoteOff)
+				this.notes = this.notes.filter(midi => midi != note.midi);
+		}
 	}
 }
 
+class PianoKeyHelper {
+	constructor(public pk: PianoKeys) {
+	}
+}
 
-export class NoteCanvas {
+class NoteCanvas {
 	canvas: HTMLCanvasElement;
 	gc: CanvasRenderingContext2D;
 	numKeys: number;
 	noteW: number;
-	part: tracker.Part;
 	keys: JQuery[];
-	notes: number[];
 
 	constructor($canvas: JQuery, numKeys: number) {
 		this.canvas = <HTMLCanvasElement>$canvas[0];
 		this.gc = this.canvas.getContext('2d');
 		this.numKeys = numKeys;
-		this.notes = [];
 	}
 
 	paintNoteColumns() {
+		//TODO paint only the area belonging to existing part rows
 		this.gc.clearRect(0, 0, this.canvas.width, this.canvas.height);
 		const w = this.canvas.width / this.numKeys;
 		this.noteW = w;
@@ -63,34 +95,11 @@ export class NoteCanvas {
 		}
 	}
 
-	renderPastNotes(start: number) {
-	}
-
-	renderFutureNotes(start: number) {
-		let y = 0;
-		for (let i = start; i < this.part.rows.length; i++) {
-			const row = this.part.rows[i];
-			this.updateNotes(this.part.rows[i]);
-			this.renderRow(y++, row);
-		}
-	}
-
-	updateNotes(row: tracker.NoteRow) {
-		const notes = row && row.notes ? row.notes : [];
-		let note;
-		for (note of notes) {
-			if (note.type == tracker.Note.NoteOn)
-				this.notes.push(note.midi);
-			else if (note.type == tracker.Note.NoteOff)
-				this.notes = this.notes.filter(midi => midi != note.midi);
-		}
-	}
-
-	renderRow(y: number, row: tracker.NoteRow) {
+	renderNoteRow(y: number, notes: number[]) {
 		this.gc.fillStyle = NOTE_COLOR;
 		const wh = this.noteW;
 		const ofs = $(this.canvas).offset().left;
-		for (const midi of this.notes) {
+		for (const midi of notes) {
 			const $key = this.keys[midi - BASE_NOTE];
 			let x = $key.offset().left - ofs;
 			x -= $key.hasClass('piano-black') ? 6.5 : 3;

@@ -552,27 +552,62 @@
 	        this.keys = this.pk.createKeys($('#piano'));
 	        this.past = new NoteCanvas($('#past-notes'), NUM_WHITES * 2);
 	        this.future = new NoteCanvas($('#future-notes'), NUM_WHITES * 2);
+	        this.notes = [];
 	    }
 	    Pianola.prototype.render = function (part, currentRow) {
 	        this.past.paintNoteColumns();
 	        this.future.paintNoteColumns();
-	        //TODO render past notes
-	        //TODO render piano keys
-	        this.future.part = part;
 	        this.future.keys = this.keys;
-	        this.future.renderFutureNotes(0);
+	        var y = 0;
+	        for (var i = 0; i < part.rows.length; i++) {
+	            var row = part.rows[i];
+	            this.updateNotes(part.rows[i]);
+	            if (i < currentRow)
+	                this.renderPastRow();
+	            else if (i == currentRow)
+	                this.renderCurrentRow();
+	            else
+	                this.renderFutureRow(y++);
+	        }
+	    };
+	    Pianola.prototype.renderPastRow = function () {
+	    };
+	    Pianola.prototype.renderCurrentRow = function () {
+	        for (var _i = 0, _a = this.notes; _i < _a.length; _i++) {
+	            var note = _a[_i];
+	        }
+	    };
+	    Pianola.prototype.renderFutureRow = function (y) {
+	        this.future.renderNoteRow(y, this.notes);
+	    };
+	    Pianola.prototype.updateNotes = function (row) {
+	        var rowNotes = row && row.notes ? row.notes : [];
+	        var note;
+	        for (var _i = 0; _i < rowNotes.length; _i++) {
+	            note = rowNotes[_i];
+	            if (note.type == tracker.Note.NoteOn)
+	                this.notes.push(note.midi);
+	            else if (note.type == tracker.Note.NoteOff)
+	                this.notes = this.notes.filter(function (midi) { return midi != note.midi; });
+	        }
 	    };
 	    return Pianola;
 	})();
 	exports.Pianola = Pianola;
+	var PianoKeyHelper = (function () {
+	    function PianoKeyHelper(pk) {
+	        this.pk = pk;
+	    }
+	    return PianoKeyHelper;
+	})();
 	var NoteCanvas = (function () {
 	    function NoteCanvas($canvas, numKeys) {
 	        this.canvas = $canvas[0];
 	        this.gc = this.canvas.getContext('2d');
 	        this.numKeys = numKeys;
-	        this.notes = [];
 	    }
 	    NoteCanvas.prototype.paintNoteColumns = function () {
+	        //TODO paint only the area belonging to existing part rows
 	        this.gc.clearRect(0, 0, this.canvas.width, this.canvas.height);
 	        var w = this.canvas.width / this.numKeys;
 	        this.noteW = w;
@@ -587,33 +622,12 @@
 	            x += w;
 	        }
 	    };
-	    NoteCanvas.prototype.renderPastNotes = function (start) {
-	    };
-	    NoteCanvas.prototype.renderFutureNotes = function (start) {
-	        var y = 0;
-	        for (var i = start; i < this.part.rows.length; i++) {
-	            var row = this.part.rows[i];
-	            this.updateNotes(this.part.rows[i]);
-	            this.renderRow(y++, row);
-	        }
-	    };
-	    NoteCanvas.prototype.updateNotes = function (row) {
-	        var notes = row && row.notes ? row.notes : [];
-	        var note;
-	        for (var _i = 0; _i < notes.length; _i++) {
-	            note = notes[_i];
-	            if (note.type == tracker.Note.NoteOn)
-	                this.notes.push(note.midi);
-	            else if (note.type == tracker.Note.NoteOff)
-	                this.notes = this.notes.filter(function (midi) { return midi != note.midi; });
-	        }
-	    };
-	    NoteCanvas.prototype.renderRow = function (y, row) {
+	    NoteCanvas.prototype.renderNoteRow = function (y, notes) {
 	        this.gc.fillStyle = NOTE_COLOR;
 	        var wh = this.noteW;
 	        var ofs = $(this.canvas).offset().left;
-	        for (var _i = 0, _a = this.notes; _i < _a.length; _i++) {
-	            var midi = _a[_i];
+	        for (var _i = 0; _i < notes.length; _i++) {
+	            var midi = notes[_i];
 	            var $key = this.keys[midi - BASE_NOTE];
 	            var x = $key.offset().left - ofs;
 	            x -= $key.hasClass('piano-black') ? 6.5 : 3;
@@ -622,7 +636,6 @@
 	    };
 	    return NoteCanvas;
 	})();
-	exports.NoteCanvas = NoteCanvas;
 
 
 /***/ }
