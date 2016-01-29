@@ -567,8 +567,8 @@
 	        this.oldNotes = [];
 	    }
 	    Pianola.prototype.render = function (part, currentRow) {
-	        this.past.paintNoteColumns();
-	        this.future.paintNoteColumns();
+	        this.past.paintNoteColumns(this.past.numRows - currentRow, this.past.numRows);
+	        this.future.paintNoteColumns(0, part.rows.length - currentRow);
 	        for (var i = 0; i < part.rows.length; i++) {
 	            var row = part.rows[i];
 	            this.updateNotes(part.rows[i]);
@@ -582,7 +582,7 @@
 	    };
 	    Pianola.prototype.renderPastRow = function (rowNum, currentRow) {
 	        var y = this.past.numRows - currentRow + rowNum;
-	        this.past.renderNoteRow(y, this.notes, this.past.remainH);
+	        this.past.renderNoteRow(y, this.notes);
 	    };
 	    Pianola.prototype.renderCurrentRow = function () {
 	        for (var _i = 0, _a = this.oldNotes; _i < _a.length; _i++) {
@@ -644,25 +644,23 @@
 	        this.noteW = this.canvas.width / this.numKeys;
 	        this.noteH = this.noteW;
 	        this.numRows = Math.floor(this.canvas.height / this.noteH);
-	        this.remainH = this.canvas.height % this.noteH;
 	    }
-	    NoteCanvas.prototype.paintNoteColumns = function () {
-	        //TODO paint only the area belonging to existing part rows
+	    NoteCanvas.prototype.paintNoteColumns = function (fromRow, toRow) {
 	        this.gc.clearRect(0, 0, this.canvas.width, this.canvas.height);
 	        var x = this.noteW / 2;
-	        //this.gc.translate(-2, 0);
 	        this.gc.fillStyle = '#E0E0E0';
 	        var oldx = 0;
+	        var colY = fromRow * this.noteH;
+	        var colH = (toRow + 1) * this.noteH - colY;
 	        for (var i = 0; i < this.numKeys - 1; i++) {
 	            if (i % 2)
-	                this.gc.fillRect(Math.round(x) - 1, 0, Math.round(x - oldx), this.canvas.height);
+	                this.gc.fillRect(Math.round(x) - 1, colY, Math.round(x - oldx), colH);
 	            oldx = x;
 	            x += this.noteW;
 	        }
 	    };
-	    NoteCanvas.prototype.renderNoteRow = function (y, notes, yOffset) {
-	        if (yOffset === void 0) { yOffset = 0; }
-	        var yy = y * this.noteH + yOffset;
+	    NoteCanvas.prototype.renderNoteRow = function (y, notes) {
+	        var yy = y * this.noteH;
 	        if (yy + this.noteH < 0 || yy > this.canvas.height)
 	            return;
 	        this.gc.fillStyle = NOTE_COLOR;

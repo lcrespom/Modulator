@@ -22,8 +22,8 @@ export class Pianola {
 	}
 
 	render(part: tracker.Part, currentRow: number) {
-		this.past.paintNoteColumns();
-		this.future.paintNoteColumns();
+		this.past.paintNoteColumns(this.past.numRows - currentRow, this.past.numRows);
+		this.future.paintNoteColumns(0, part.rows.length - currentRow);
 		for (let i = 0; i < part.rows.length; i++) {
 			const row = part.rows[i];
 			this.updateNotes(part.rows[i]);
@@ -35,7 +35,7 @@ export class Pianola {
 
 	renderPastRow(rowNum: number, currentRow: number) {
 		const y = this.past.numRows - currentRow + rowNum;
-		this.past.renderNoteRow(y, this.notes, this.past.remainH);
+		this.past.renderNoteRow(y, this.notes);
 	}
 
 	renderCurrentRow() {
@@ -100,7 +100,6 @@ class NoteCanvas {
 	noteW: number;
 	noteH: number;
 	numRows: number;
-	remainH: number;
 
 	constructor($canvas: JQuery, numKeys: number, pkh: PianoKeyHelper) {
 		this.canvas = <HTMLCanvasElement>$canvas[0];
@@ -110,26 +109,25 @@ class NoteCanvas {
 		this.noteW = this.canvas.width / this.numKeys;
 		this.noteH = this.noteW;
 		this.numRows = Math.floor(this.canvas.height / this.noteH);
-		this.remainH = this.canvas.height % this.noteH;
 	}
 
-	paintNoteColumns() {
-		//TODO paint only the area belonging to existing part rows
+	paintNoteColumns(fromRow: number, toRow: number) {
 		this.gc.clearRect(0, 0, this.canvas.width, this.canvas.height);
 		let x = this.noteW / 2;
-		//this.gc.translate(-2, 0);
 		this.gc.fillStyle = '#E0E0E0';
 		let oldx = 0;
+		let colY = fromRow * this.noteH;
+		let colH = (toRow + 1) * this.noteH - colY;
 		for (let i = 0; i < this.numKeys - 1; i++) {
-			if (i % 2)	//  && pk.hasBlack((i-1)/2)
-				this.gc.fillRect(Math.round(x) - 1, 0, Math.round(x - oldx), this.canvas.height);
+			if (i % 2)
+				this.gc.fillRect(Math.round(x) - 1, colY, Math.round(x - oldx), colH);
 			oldx = x;
 			x += this.noteW;
 		}
 	}
 
-	renderNoteRow(y: number, notes: number[], yOffset = 0) {
-		const yy = y * this.noteH + yOffset;
+	renderNoteRow(y: number, notes: number[]) {
+		const yy = y * this.noteH;
 		if (yy + this.noteH < 0 || yy > this.canvas.height) return;
 		this.gc.fillStyle = NOTE_COLOR;
 		const xOffset = $(this.canvas).offset().left;
