@@ -27,13 +27,15 @@ export class Pianola {
 		for (let i = 0; i < part.rows.length; i++) {
 			const row = part.rows[i];
 			this.updateNotes(part.rows[i]);
-			if (i < currentRow) this.renderPastRow();
+			if (i < currentRow) this.renderPastRow(i, currentRow);
 			else if (i == currentRow) this.renderCurrentRow();
-			else this.renderFutureRow(i - currentRow - 1);
+			else this.renderFutureRow(i, currentRow);
 		}
 	}
 
-	renderPastRow() {
+	renderPastRow(rowNum: number, currentRow: number) {
+		const y = this.past.numRows - currentRow + rowNum;
+		this.past.renderNoteRow(y, this.notes, this.past.remainH);
 	}
 
 	renderCurrentRow() {
@@ -44,7 +46,8 @@ export class Pianola {
 		this.oldNotes = this.notes.slice();
 	}
 
-	renderFutureRow(y: number) {
+	renderFutureRow(rowNum: number, currentRow: number) {
+		const y = rowNum - currentRow - 1;
 		this.future.renderNoteRow(y, this.notes);
 	}
 
@@ -95,20 +98,25 @@ class NoteCanvas {
 	numKeys: number;
 	pkh: PianoKeyHelper;
 	noteW: number;
+	noteH: number;
+	numRows: number;
+	remainH: number;
 
 	constructor($canvas: JQuery, numKeys: number, pkh: PianoKeyHelper) {
 		this.canvas = <HTMLCanvasElement>$canvas[0];
 		this.gc = this.canvas.getContext('2d');
 		this.numKeys = numKeys;
 		this.pkh = pkh;
+		this.noteW = this.canvas.width / this.numKeys;
+		this.noteH = this.noteW;
+		this.numRows = Math.floor(this.canvas.height / this.noteH);
+		this.remainH = this.canvas.height % this.noteH;
 	}
 
 	paintNoteColumns() {
 		//TODO paint only the area belonging to existing part rows
 		this.gc.clearRect(0, 0, this.canvas.width, this.canvas.height);
-		const w = this.canvas.width / this.numKeys;
-		this.noteW = w;
-		let x = w/2;
+		let x = this.noteW / 2;
 		//this.gc.translate(-2, 0);
 		this.gc.fillStyle = '#E0E0E0';
 		let oldx = 0;
@@ -116,19 +124,20 @@ class NoteCanvas {
 			if (i % 2)	//  && pk.hasBlack((i-1)/2)
 				this.gc.fillRect(Math.round(x) - 1, 0, Math.round(x - oldx), this.canvas.height);
 			oldx = x;
-			x += w;
+			x += this.noteW;
 		}
 	}
 
-	renderNoteRow(y: number, notes: number[]) {
+	renderNoteRow(y: number, notes: number[], yOffset = 0) {
+		const yy = y * this.noteH + yOffset;
+		if (yy + this.noteH < 0 || yy > this.canvas.height) return;
 		this.gc.fillStyle = NOTE_COLOR;
-		const wh = this.noteW;
-		const ofs = $(this.canvas).offset().left;
+		const xOffset = $(this.canvas).offset().left;
 		for (const midi of notes) {
 			const $key = this.pkh.getKey(midi);
-			let x = $key.offset().left - ofs;
+			let x = $key.offset().left - xOffset;
 			x -= $key.hasClass('piano-black') ? 7.5 : 4;
-			this.gc.fillRect(x, y * wh, wh, wh);
+			this.gc.fillRect(x, yy, this.noteW, this.noteH);
 		}
 	}
 }

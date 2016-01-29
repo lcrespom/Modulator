@@ -573,14 +573,16 @@
 	            var row = part.rows[i];
 	            this.updateNotes(part.rows[i]);
 	            if (i < currentRow)
-	                this.renderPastRow();
+	                this.renderPastRow(i, currentRow);
 	            else if (i == currentRow)
 	                this.renderCurrentRow();
 	            else
-	                this.renderFutureRow(i - currentRow - 1);
+	                this.renderFutureRow(i, currentRow);
 	        }
 	    };
-	    Pianola.prototype.renderPastRow = function () {
+	    Pianola.prototype.renderPastRow = function (rowNum, currentRow) {
+	        var y = this.past.numRows - currentRow + rowNum;
+	        this.past.renderNoteRow(y, this.notes, this.past.remainH);
 	    };
 	    Pianola.prototype.renderCurrentRow = function () {
 	        for (var _i = 0, _a = this.oldNotes; _i < _a.length; _i++) {
@@ -593,7 +595,8 @@
 	        }
 	        this.oldNotes = this.notes.slice();
 	    };
-	    Pianola.prototype.renderFutureRow = function (y) {
+	    Pianola.prototype.renderFutureRow = function (rowNum, currentRow) {
+	        var y = rowNum - currentRow - 1;
 	        this.future.renderNoteRow(y, this.notes);
 	    };
 	    Pianola.prototype.updateNotes = function (row) {
@@ -638,13 +641,15 @@
 	        this.gc = this.canvas.getContext('2d');
 	        this.numKeys = numKeys;
 	        this.pkh = pkh;
+	        this.noteW = this.canvas.width / this.numKeys;
+	        this.noteH = this.noteW;
+	        this.numRows = Math.floor(this.canvas.height / this.noteH);
+	        this.remainH = this.canvas.height % this.noteH;
 	    }
 	    NoteCanvas.prototype.paintNoteColumns = function () {
 	        //TODO paint only the area belonging to existing part rows
 	        this.gc.clearRect(0, 0, this.canvas.width, this.canvas.height);
-	        var w = this.canvas.width / this.numKeys;
-	        this.noteW = w;
-	        var x = w / 2;
+	        var x = this.noteW / 2;
 	        //this.gc.translate(-2, 0);
 	        this.gc.fillStyle = '#E0E0E0';
 	        var oldx = 0;
@@ -652,19 +657,22 @@
 	            if (i % 2)
 	                this.gc.fillRect(Math.round(x) - 1, 0, Math.round(x - oldx), this.canvas.height);
 	            oldx = x;
-	            x += w;
+	            x += this.noteW;
 	        }
 	    };
-	    NoteCanvas.prototype.renderNoteRow = function (y, notes) {
+	    NoteCanvas.prototype.renderNoteRow = function (y, notes, yOffset) {
+	        if (yOffset === void 0) { yOffset = 0; }
+	        var yy = y * this.noteH + yOffset;
+	        if (yy + this.noteH < 0 || yy > this.canvas.height)
+	            return;
 	        this.gc.fillStyle = NOTE_COLOR;
-	        var wh = this.noteW;
-	        var ofs = $(this.canvas).offset().left;
+	        var xOffset = $(this.canvas).offset().left;
 	        for (var _i = 0; _i < notes.length; _i++) {
 	            var midi = notes[_i];
 	            var $key = this.pkh.getKey(midi);
-	            var x = $key.offset().left - ofs;
+	            var x = $key.offset().left - xOffset;
 	            x -= $key.hasClass('piano-black') ? 7.5 : 4;
-	            this.gc.fillRect(x, y * wh, wh, wh);
+	            this.gc.fillRect(x, yy, this.noteW, this.noteH);
 	        }
 	    };
 	    return NoteCanvas;
