@@ -1105,16 +1105,14 @@
 /***/ function(module, exports) {
 
 	var Timer = (function () {
-	    function Timer(ac, bpm, interval, ahead) {
+	    function Timer(ac, bpm, ahead) {
 	        if (bpm === void 0) { bpm = 60; }
-	        if (interval === void 0) { interval = 0.025; }
 	        if (ahead === void 0) { ahead = 0.1; }
 	        this.running = false;
 	        this.ac = ac;
 	        this.noteDuration = 0;
 	        this.nextNoteTime = 0;
 	        this.bpm = bpm;
-	        this.interval = interval;
 	        this.ahead = ahead;
 	    }
 	    Object.defineProperty(Timer.prototype, "bpm", {
@@ -1143,7 +1141,7 @@
 	    Timer.prototype.tick = function () {
 	        if (!this.running)
 	            return;
-	        setTimeout(this.tick.bind(this), this.interval * 1000);
+	        requestAnimationFrame(this.tick.bind(this));
 	        while (this.nextNoteTime < this.ac.currentTime + this.ahead) {
 	            if (this.cb)
 	                this.cb(this.nextNoteTime);

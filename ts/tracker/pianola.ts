@@ -2,9 +2,10 @@ import * as tracker from './song';
 import { PianoKeys } from '../piano/piano';
 
 const NUM_WHITES = 28;
-
-const NOTE_COLOR = '#0CC';
 const BASE_NOTE = 24;
+const NOTE_COLOR = '#0CC';
+const COLUMN_COLOR = '#E0E0E0';
+
 
 export class Pianola {
 	pkh: PianoKeyHelper;
@@ -23,7 +24,7 @@ export class Pianola {
 
 	render(part: tracker.Part, currentRow: number) {
 		this.past.paintNoteColumns(this.past.numRows - currentRow, this.past.numRows);
-		this.future.paintNoteColumns(0, part.rows.length - currentRow);
+		this.future.paintNoteColumns(0, part.rows.length - currentRow - 1);
 		for (let i = 0; i < part.rows.length; i++) {
 			const row = part.rows[i];
 			this.updateNotes(part.rows[i]);
@@ -114,7 +115,7 @@ class NoteCanvas {
 	paintNoteColumns(fromRow: number, toRow: number) {
 		this.gc.clearRect(0, 0, this.canvas.width, this.canvas.height);
 		let x = this.noteW / 2;
-		this.gc.fillStyle = '#E0E0E0';
+		this.gc.fillStyle = COLUMN_COLOR;
 		let oldx = 0;
 		let colY = fromRow * this.noteH;
 		let colH = (toRow + 1) * this.noteH - colY;

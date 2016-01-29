@@ -1,3 +1,6 @@
+import { Instrument } from '../synth/instrument';
+
+
 export class Note {
 	static NoteOn = 0;
 	static NoteOff = 1;
@@ -25,8 +28,18 @@ export class NoteRow {
 export class Part {
 	name: string;
 	voices: number;
-	instrument: any;
+	instrument: Instrument;
 	rows: NoteRow[] = [];
+	playRow(rowNum: number, when: number) {
+		const row = this.rows[rowNum];
+		if (!row || !row.notes) return;
+		for (const note of row.notes) {
+			if (note.type == Note.NoteOn)
+				this.instrument.noteOn(note.midi, note.velocity, when);
+			else if (note.type == Note.NoteOff)
+				this.instrument.noteOff(note.midi, note.velocity, when);
+		}
+	}
 }
 
 export class Track {

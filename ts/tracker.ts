@@ -1,5 +1,8 @@
 import * as tracker from './tracker/song';
 import { Pianola } from './tracker/pianola';
+import { Timer } from './synth/timer';
+import { Instrument } from './synth/instrument';
+import { ModernAudioContext } from './utils/modern';
 
 
 function rowWithNotes(...notes): tracker.NoteRow {
@@ -38,10 +41,20 @@ function createNotes(): tracker.NoteRow[] {
 	return rows;
 }
 
-function starWars(): tracker.Song {
+function starWars(ac: ModernAudioContext): tracker.Song {
 	const p = new tracker.Part();
-	p.instrument = null; //TODO
 	p.voices = 1;
+	const json = {
+		nodes: [
+			{id: 0, inputs: [1]},
+			{id: 1, inputs: []}
+		],
+		nodeData: [
+			{type: 'out', params: {}},
+			{type: 'Oscillator', params: {frequency: 440, detune: 0, type: 'square'}}
+		]
+	};
+	p.instrument = new Instrument(ac, json, p.voices);
 	p.name = 'Main theme';
 	p.rows = createNotes();
 	const t = new tracker.Track();
@@ -57,19 +70,16 @@ function starWars(): tracker.Song {
 //--------------------------------------------------
 
 const pianola = new Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
-
-const sw = starWars();
+const ac = <ModernAudioContext>new AudioContext();
+const sw = starWars(ac);
 const part = sw.tracks[0].parts[0];
 
 let tick = 0;
 let rowNum = 0;
 
-const animationTick = _ => {
-	if (rowNum > part.rows.length) return;
-	requestAnimationFrame(animationTick);
-	if (tick++ < 15) return;
-	tick = 0;
+const t = new Timer(ac, 90);
+t.start(when => {
+	part.playRow(rowNum, when);
 	pianola.render(part, rowNum++);
-}
-
-requestAnimationFrame(animationTick);
+	if (rowNum > part.rows.length) t.stop();
+});
