@@ -5,6 +5,11 @@ body {
 	font-family: Electrolize, "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
+input.rounded {
+	border: 1px solid #DFDFDF;
+	border-radius: 5px;
+}
+
 .main {
 	max-width: 810px;
 	margin: auto;
@@ -37,6 +42,7 @@ body {
 	-webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
 			box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
 	display: inline-block;
+	vertical-align: top;
 }
 
 .box-header {

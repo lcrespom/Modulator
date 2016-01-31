@@ -119,7 +119,7 @@
 	var rowNum = 0;
 	var t = new timer_1.Timer(ac, 90);
 	t.start(function (when) {
-	    part.playRow(rowNum, when);
+	    //part.playRow(rowNum, when);
 	    pianola.render(part, rowNum++);
 	    if (rowNum > part.rows.length)
 	        t.stop();

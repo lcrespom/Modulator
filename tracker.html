@@ -37,20 +37,88 @@
 		<!--------------- Parts --------------->
 		<div class="graph-box">
 			<h5 class="bg-primary box-header">Parts</h5>
-			<!--
-				Combo with list of parts
-			-->
-			<div style="width: 170px; height: 170px"></div>
+			<!-- Combo with list of parts -->
+			<select size="2" style="width: 170px; height: 170px; border: none">
+				<option>1</option>
+				<option>2</option>
+				<option>3</option>
+				<option>4</option>
+				<option>5</option>
+				<option>6</option>
+				<option>7</option>
+				<option>8</option>
+				<option>9</option>
+				<option>10</option>
+			</select>
 		</div><!--
 		--------------- Part data ---------------
 	--><div class="graph-box" style="margin-left: 10px">
 			<h5 class="bg-primary box-header">Part data</h5>
-			<div style="width: 454px; height: 170px;"></div>
+			<div style="width: 454px; height: 170px; padding: 10px; position: relative">
+				<!-- First input row -->
+				<div>
+					<span>
+						<label style="width: 75px">Name</label>
+						<input style="width: 200px">
+					</span>
+					<span style="position: absolute; right: 10px">
+						<label>Rows</label>
+						<select>
+							<option>16</option>
+							<option>32</option>
+							<option>64</option>
+						</select>
+					</span>
+				</div>
+				<!-- Second input row -->
+				<div style="padding-top: 3px">
+					<span>
+						<label style="width: 75px">Instrument</label>
+						<select style="width: 200px">
+							<option>Lorem</option>
+							<option>Ipsum</option>
+							<option>Dolor</option>
+							<option>Sit</option>
+							<option>Amet</option>
+						</select>
+					</span>
+					<span style="position: absolute; right: 10px">
+						<label>Voices</label>
+						<select>
+							<option>1</option>
+							<option>2</option>
+							<option>4</option>
+							<option>6</option>
+							<option>8</option>
+							<option>12</option>
+							<option>16</option>
+						</select>
+					</span>
+				</div>
+				<!-- Bottom-level buttons -->
+				<div style="position: absolute; bottom: 10px">
+					<button class="btn btn-primary" style="margin-right: 235px">
+						<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+					</button>
+					<button class="btn btn-primary">
+						New
+					</button>
+					&nbsp;
+					<button class="btn btn-danger">
+						<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+					</button>
+					&nbsp;
+					<button class="btn btn-primary">
+						<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+					</button>
+				</div>
+			</div>
 			<!--
 				Name: ...
 				Instrument: (drop down list)
 				Voices: x
 				Rows: 16/32/64
+				Play / Pause
 				New / Delete / Add to track / move up / move down
 			-->
 		</div><!--
@@ -86,7 +154,7 @@
 			</canvas>
 		</div><!--
 		--------------- Tracks ---------------
-	--><div class="graph-box" style="margin-left: 10px; vertical-align: top">
+	--><div class="graph-box" style="margin-left: 10px">
 			<h5 class="bg-primary box-header">Tracks</h5>
 			<div style="width: 354px; height: 490px;"></div>
 		</div>
