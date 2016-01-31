@@ -79,7 +79,7 @@ let rowNum = 0;
 
 const t = new Timer(ac, 90);
 t.start(when => {
-	//part.playRow(rowNum, when);
+	part.playRow(rowNum, when);
 	pianola.render(part, rowNum++);
 	if (rowNum > part.rows.length) t.stop();
 });

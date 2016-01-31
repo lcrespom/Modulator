@@ -121,6 +121,7 @@
 				Name: ...
 				Instrument: (drop down list)
 				Voices: x
+				Optionally, comments
 				Rows: 16/32/64
 				Play / Pause
 				New / Delete / Add to track / move up / move down
@@ -129,14 +130,54 @@
 		--------------- Song ---------------
 	--><div class="graph-box" style="margin-left: 10px">
 			<h5 class="bg-primary box-header">Song</h5>
-			<div style="width: 354px; height: 170px;"></div>
+			<div style="width: 354px; height: 170px; padding: 10px; position: relative">
+				<div style="width: 100%">
+					<label style="width: 65px">Title</label>
+					<input style="width: 265px">
+				</div>
+				<div style="width: 100%; margin-top: 5px">
+					<label style="width: 65px">File name</label>
+					<input>
+					<span style="position: absolute; right: 10px">
+						<label>BPM</label>
+						<input type="number" value="120" style="width:60px; text-align: center">
+					</span>
+				</div>
+				<div style="margin-top: 10px; margin-left: auto; margin-right: auto;
+					position: relative; width: 70%">
+					<span class="btn btn-primary">
+						Load&nbsp;
+						<span class="glyphicon glyphicon-open" aria-hidden="true"></span>
+					</span>
+					<button id="save-but" class="btn btn-primary"
+						style="position: absolute; right: 10px">
+						Save&nbsp;
+						<span class="glyphicon glyphicon-save" aria-hidden="true"></span>
+					</button>
+				</div>
+				<div style="margin-top: 10px; display: flex; justify-content: space-around">
+					<button class="btn btn-primary">
+						<span class="glyphicon glyphicon-backward" aria-hidden="true"></span>
+					</button>
+					<button class="btn btn-primary">
+						<span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
+					</button>
+					<button class="btn btn-primary">
+						<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+					</button>
+					<button class="btn btn-primary">
+						<span class="glyphicon glyphicon-forward" aria-hidden="true"></span>
+					</button>
+				</div>
 			<!--
 				Song title: ...
 				File name: ...
+				Optionally, comments
 				BPM
 				Load / Save
 				Play / Pause / Stop / Next / Prev
 			-->
+			</div>
 		</div>
 	</div>
 
