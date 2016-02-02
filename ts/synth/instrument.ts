@@ -46,6 +46,12 @@ export class Instrument {
 		}
 	}
 
+	allNotesOff() {
+		for (const voice of this.voices) {
+			if (voice.lastNote) voice.noteOff(voice.lastNote);
+		}
+	}
+
 	findVoice(): number {
 		let voices: number[];
 		if (this.released.length > 0) voices = this.released;

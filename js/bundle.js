@@ -2776,6 +2776,13 @@
 	            }
 	        }
 	    };
+	    Instrument.prototype.allNotesOff = function () {
+	        for (var _i = 0, _a = this.voices; _i < _a.length; _i++) {
+	            var voice = _a[_i];
+	            if (voice.lastNote)
+	                voice.noteOff(voice.lastNote);
+	        }
+	    };
 	    Instrument.prototype.findVoice = function () {
 	        var voices;
 	        if (this.released.length > 0)

@@ -46,7 +46,7 @@
 
 	var tracker = __webpack_require__(20);
 	var pianola_1 = __webpack_require__(21);
-	var timer_1 = __webpack_require__(17);
+	var partUI_1 = __webpack_require__(22);
 	var instrument_1 = __webpack_require__(18);
 	function rowWithNotes() {
 	    var notes = [];
@@ -111,19 +111,11 @@
 	    return s;
 	}
 	//--------------------------------------------------
-	var pianola = new pianola_1.Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
 	var ac = new AudioContext();
 	var sw = starWars(ac);
-	var part = sw.tracks[0].parts[0];
-	var tick = 0;
-	var rowNum = 0;
-	var t = new timer_1.Timer(ac, 90);
-	t.start(function (when) {
-	    part.playRow(rowNum, when);
-	    pianola.render(part, rowNum++);
-	    if (rowNum > part.rows.length)
-	        t.stop();
-	});
+	var pbox = new partUI_1.PartBox(ac, $('#part-box'));
+	pbox.pianola = new pianola_1.Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
+	pbox.part = sw.tracks[0].parts[0];
 
 
 /***/ },
@@ -1606,6 +1598,13 @@
 	            }
 	        }
 	    };
+	    Instrument.prototype.allNotesOff = function () {
+	        for (var _i = 0, _a = this.voices; _i < _a.length; _i++) {
+	            var voice = _a[_i];
+	            if (voice.lastNote)
+	                voice.noteOff(voice.lastNote);
+	        }
+	    };
 	    Instrument.prototype.findVoice = function () {
 	        var voices;
 	        if (this.released.length > 0)
@@ -1921,6 +1920,64 @@
 	    };
 	    return NoteCanvas;
 	})();
+
+
+/***/ },
+/* 22 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var timer_1 = __webpack_require__(17);
+	var PartBox = (function () {
+	    function PartBox(ac, $elem) {
+	        var _this = this;
+	        this.playing = false;
+	        this.ac = ac;
+	        this.$play = $elem.find('.play');
+	        this.$play.click(function (_) { return _this.play(); });
+	    }
+	    Object.defineProperty(PartBox.prototype, "part", {
+	        get: function () { return this._part; },
+	        set: function (part) {
+	            this._part = part;
+	            this.rowNum = 0;
+	            if (this.pianola)
+	                this.pianola.render(this._part, this.rowNum);
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
+	    PartBox.prototype.play = function () {
+	        var _this = this;
+	        if (!this.part)
+	            return;
+	        this.playing = !this.playing;
+	        if (this.playing) {
+	            //TODO: change button icon to "pause"
+	            this.timer = new timer_1.Timer(this.ac, 90);
+	            this.timer.start(function (when) {
+	                _this.part.playRow(_this.rowNum, when);
+	                _this.pianola.render(_this.part, _this.rowNum++);
+	                if (_this.rowNum > _this.part.rows.length)
+	                    _this.stop();
+	            });
+	        }
+	        else {
+	            //TODO: change button icon to "play"
+	            this.pause();
+	        }
+	    };
+	    PartBox.prototype.pause = function () {
+	        this.timer.stop();
+	        this.part.instrument.allNotesOff();
+	    };
+	    PartBox.prototype.stop = function () {
+	        this.pause();
+	        this.playing = false;
+	        this.rowNum = 0;
+	    };
+	    return PartBox;
+	})();
+	exports.PartBox = PartBox;
 
 
 /***/ }

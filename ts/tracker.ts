@@ -1,7 +1,9 @@
 import * as tracker from './tracker/song';
 import { Pianola } from './tracker/pianola';
-import { Timer } from './synth/timer';
+import { PartBox } from './tracker/partUI';
+
 import { Instrument } from './synth/instrument';
+
 import { ModernAudioContext } from './utils/modern';
 
 
@@ -69,17 +71,9 @@ function starWars(ac: ModernAudioContext): tracker.Song {
 
 //--------------------------------------------------
 
-const pianola = new Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
 const ac = <ModernAudioContext>new AudioContext();
 const sw = starWars(ac);
-const part = sw.tracks[0].parts[0];
 
-let tick = 0;
-let rowNum = 0;
-
-const t = new Timer(ac, 90);
-t.start(when => {
-	part.playRow(rowNum, when);
-	pianola.render(part, rowNum++);
-	if (rowNum > part.rows.length) t.stop();
-});
+const pbox = new PartBox(ac, $('#part-box'));
+pbox.pianola = new Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
+pbox.part = sw.tracks[0].parts[0];
