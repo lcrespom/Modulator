@@ -24,21 +24,21 @@ function createNotes(): tracker.NoteRow[] {
 	rows[i++] = rowWithNotes(tracker.Note.off(53), tracker.Note.on(52));
 	rows[i++] = rowWithNotes(tracker.Note.off(52), tracker.Note.on(50));
 	rows[i] = rowWithNotes(tracker.Note.off(50), tracker.Note.on(60));
-	i += 4;
+	i += 5;
 	rows[i] = rowWithNotes(tracker.Note.off(60), tracker.Note.on(55));
 	i += 4;
 	rows[i++] = rowWithNotes(tracker.Note.off(55), tracker.Note.on(53));
 	rows[i++] = rowWithNotes(tracker.Note.off(53), tracker.Note.on(52));
 	rows[i++] = rowWithNotes(tracker.Note.off(52), tracker.Note.on(50));
 	rows[i] = rowWithNotes(tracker.Note.off(50), tracker.Note.on(60));
-	i += 4;
+	i += 5;
 	rows[i] = rowWithNotes(tracker.Note.off(60), tracker.Note.on(55));
 	i += 4;
 	rows[i++] = rowWithNotes(tracker.Note.off(55), tracker.Note.on(53));
 	rows[i++] = rowWithNotes(tracker.Note.off(53), tracker.Note.on(52));
 	rows[i++] = rowWithNotes(tracker.Note.off(52), tracker.Note.on(53));
 	rows[i] = rowWithNotes(tracker.Note.off(53), tracker.Note.on(50));
-	i += 4;
+	i += 5;
 	rows[i] = rowWithNotes(tracker.Note.off(50));
 	return rows;
 }

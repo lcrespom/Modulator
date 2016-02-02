@@ -37,6 +37,8 @@ export class Pianola {
 	renderPastRow(rowNum: number, currentRow: number) {
 		const y = this.past.numRows - currentRow + rowNum;
 		this.past.renderNoteRow(y, this.notes);
+		if (rowNum % 4 == 0)
+			this.past.renderBar(y);
 	}
 
 	renderCurrentRow() {
@@ -50,6 +52,8 @@ export class Pianola {
 	renderFutureRow(rowNum: number, currentRow: number) {
 		const y = rowNum - currentRow - 1;
 		this.future.renderNoteRow(y, this.notes);
+		if (rowNum % 4 == 0)
+			this.future.renderBar(y);
 	}
 
 	updateNotes(row: tracker.NoteRow) {
@@ -138,5 +142,18 @@ class NoteCanvas {
 			x -= $key.hasClass('piano-black') ? 7.5 : 4;
 			this.gc.fillRect(x, yy, this.noteW, this.noteH);
 		}
+	}
+
+	renderBar(y: number) {
+		const yy = y * this.noteH - 0.5;
+		this.gc.save();
+		this.gc.strokeStyle = 'black';
+		this.gc.setLineDash([1, 4]);
+		this.gc.beginPath();
+		this.gc.moveTo(0, yy);
+		this.gc.lineTo(this.canvas.width, yy);
+		this.gc.stroke();
+		this.gc.closePath();
+		this.gc.restore();
 	}
 }

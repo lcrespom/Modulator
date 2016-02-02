@@ -68,21 +68,21 @@
 	    rows[i++] = rowWithNotes(tracker.Note.off(53), tracker.Note.on(52));
 	    rows[i++] = rowWithNotes(tracker.Note.off(52), tracker.Note.on(50));
 	    rows[i] = rowWithNotes(tracker.Note.off(50), tracker.Note.on(60));
-	    i += 4;
+	    i += 5;
 	    rows[i] = rowWithNotes(tracker.Note.off(60), tracker.Note.on(55));
 	    i += 4;
 	    rows[i++] = rowWithNotes(tracker.Note.off(55), tracker.Note.on(53));
 	    rows[i++] = rowWithNotes(tracker.Note.off(53), tracker.Note.on(52));
 	    rows[i++] = rowWithNotes(tracker.Note.off(52), tracker.Note.on(50));
 	    rows[i] = rowWithNotes(tracker.Note.off(50), tracker.Note.on(60));
-	    i += 4;
+	    i += 5;
 	    rows[i] = rowWithNotes(tracker.Note.off(60), tracker.Note.on(55));
 	    i += 4;
 	    rows[i++] = rowWithNotes(tracker.Note.off(55), tracker.Note.on(53));
 	    rows[i++] = rowWithNotes(tracker.Note.off(53), tracker.Note.on(52));
 	    rows[i++] = rowWithNotes(tracker.Note.off(52), tracker.Note.on(53));
 	    rows[i] = rowWithNotes(tracker.Note.off(53), tracker.Note.on(50));
-	    i += 4;
+	    i += 5;
 	    rows[i] = rowWithNotes(tracker.Note.off(50));
 	    return rows;
 	}
@@ -1828,6 +1828,8 @@
 	    Pianola.prototype.renderPastRow = function (rowNum, currentRow) {
 	        var y = this.past.numRows - currentRow + rowNum;
 	        this.past.renderNoteRow(y, this.notes);
+	        if (rowNum % 4 == 0)
+	            this.past.renderBar(y);
 	    };
 	    Pianola.prototype.renderCurrentRow = function () {
 	        for (var _i = 0, _a = this.oldNotes; _i < _a.length; _i++) {
@@ -1843,6 +1845,8 @@
 	    Pianola.prototype.renderFutureRow = function (rowNum, currentRow) {
 	        var y = rowNum - currentRow - 1;
 	        this.future.renderNoteRow(y, this.notes);
+	        if (rowNum % 4 == 0)
+	            this.future.renderBar(y);
 	    };
 	    Pianola.prototype.updateNotes = function (row) {
 	        var rowNotes = row && row.notes ? row.notes : [];
@@ -1917,6 +1921,18 @@
 	            x -= $key.hasClass('piano-black') ? 7.5 : 4;
 	            this.gc.fillRect(x, yy, this.noteW, this.noteH);
 	        }
+	    };
+	    NoteCanvas.prototype.renderBar = function (y) {
+	        var yy = y * this.noteH - 0.5;
+	        this.gc.save();
+	        this.gc.strokeStyle = 'black';
+	        this.gc.setLineDash([1, 4]);
+	        this.gc.beginPath();
+	        this.gc.moveTo(0, yy);
+	        this.gc.lineTo(this.canvas.width, yy);
+	        this.gc.stroke();
+	        this.gc.closePath();
+	        this.gc.restore();
 	    };
 	    return NoteCanvas;
 	})();
