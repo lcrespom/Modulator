@@ -38,6 +38,7 @@ export class Pianola {
 
 	renderPastRow(rowNum: number, currentRow: number) {
 		const y = this.past.numRows - currentRow + rowNum;
+		//TODO this is WET, should be DRY
 		this.past.renderNoteRow(y, this.notes);
 		if (rowNum % 4 == 0)
 			this.past.renderBar(y);

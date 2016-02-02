@@ -30,12 +30,15 @@ export class Part {
 	voices: number;
 	instrument: Instrument;
 	rows: NoteRow[] = [];
-	playRow(rowNum: number, when: number) {
+	playRow(rowNum: number, when: number, offDelay = 0) {
 		const row = this.rows[rowNum];
 		if (!row || !row.notes) return;
 		for (const note of row.notes) {
-			if (note.type == Note.NoteOn)
+			if (note.type == Note.NoteOn) {
 				this.instrument.noteOn(note.midi, note.velocity, when);
+				if (offDelay)
+					this.instrument.noteOff(note.midi, 1, when + offDelay);
+			}
 			else if (note.type == Note.NoteOff)
 				this.instrument.noteOff(note.midi, note.velocity, when);
 		}

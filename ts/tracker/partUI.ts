@@ -11,6 +11,7 @@ export class PartBox {
 	part: Part;
 	pianola: Pianola;
 	rowNum: number;
+	rowOfs: number;
 
 	constructor(ac: ModernAudioContext, $elem: JQuery, part: Part, pianola: Pianola) {
 		this.rowNum = 0;
@@ -20,7 +21,8 @@ export class PartBox {
 		this.part = part;
 		this.pianola = pianola;
 		this.pianola.render(this.part, this.rowNum);
-		this.registerWheel();
+		this.registerPianolaScroll();
+		this.rowOfs = 0;
 	}
 
 	play() {
@@ -32,6 +34,7 @@ export class PartBox {
 			this.timer.start(when => {
 				this.part.playRow(this.rowNum, when);
 				this.pianola.render(this.part, this.rowNum++);
+				this.rowOfs = this.rowNum;
 				if (this.rowNum > this.part.rows.length)
 					this.stop();
 			});
@@ -60,6 +63,34 @@ export class PartBox {
 		$glyph.attr('class', classes.join(' '));
 	}
 
-	registerWheel() {
+	registerPianolaScroll() {
+		this.pianola.parent.on('wheel', evt => {
+			if (this.playing) return;
+			var oe = <any>evt.originalEvent;
+			evt.preventDefault();
+			var dy = oe.deltaY;
+			if (oe.deltaMode == 1) dy *= 100 / 3;
+			dy /= 5;
+			this.updateRowOfs(dy / 2);
+		});
+		//TODO register also key up and down, and page up and down
+	}
+
+	updateRowOfs(dy: number) {
+		this.rowOfs += dy;
+		if (this.rowOfs < 0)
+			this.rowOfs = 0;
+		else if (this.rowOfs > this.part.rows.length)
+			this.rowOfs = this.part.rows.length;
+		const newRow = Math.floor(this.rowOfs);
+		if (newRow != this.rowNum) {
+			this.rowNum = newRow;
+			this.pianola.render(this.part, this.rowNum);
+			this.playRowNotes();
+		}
+	}
+
+	playRowNotes() {
+		//TODO play notes of current row, with auto note off after 0.5 seconds
 	}
 }

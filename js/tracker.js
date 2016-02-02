@@ -1760,14 +1760,18 @@
 	    function Part() {
 	        this.rows = [];
 	    }
-	    Part.prototype.playRow = function (rowNum, when) {
+	    Part.prototype.playRow = function (rowNum, when, offDelay) {
+	        if (offDelay === void 0) { offDelay = 0; }
 	        var row = this.rows[rowNum];
 	        if (!row || !row.notes)
 	            return;
 	        for (var _i = 0, _a = row.notes; _i < _a.length; _i++) {
 	            var note = _a[_i];
-	            if (note.type == Note.NoteOn)
+	            if (note.type == Note.NoteOn) {
 	                this.instrument.noteOn(note.midi, note.velocity, when);
+	                if (offDelay)
+	                    this.instrument.noteOff(note.midi, 1, when + offDelay);
+	            }
 	            else if (note.type == Note.NoteOff)
 	                this.instrument.noteOff(note.midi, note.velocity, when);
 	        }
@@ -1828,6 +1832,7 @@
 	    };
 	    Pianola.prototype.renderPastRow = function (rowNum, currentRow) {
 	        var y = this.past.numRows - currentRow + rowNum;
+	        //TODO this is WET, should be DRY
 	        this.past.renderNoteRow(y, this.notes);
 	        if (rowNum % 4 == 0)
 	            this.past.renderBar(y);
@@ -1955,7 +1960,8 @@
 	        this.part = part;
 	        this.pianola = pianola;
 	        this.pianola.render(this.part, this.rowNum);
-	        this.registerWheel();
+	        this.registerPianolaScroll();
+	        this.rowOfs = 0;
 	    }
 	    PartBox.prototype.play = function () {
 	        var _this = this;
@@ -1968,6 +1974,7 @@
 	            this.timer.start(function (when) {
 	                _this.part.playRow(_this.rowNum, when);
 	                _this.pianola.render(_this.part, _this.rowNum++);
+	                _this.rowOfs = _this.rowNum;
 	                if (_this.rowNum > _this.part.rows.length)
 	                    _this.stop();
 	            });
@@ -1992,7 +1999,36 @@
 	            .filter(function (c) { return !c.match(/glyphicon-/); }).concat('glyphicon-' + icon);
 	        $glyph.attr('class', classes.join(' '));
 	    };
-	    PartBox.prototype.registerWheel = function () {
+	    PartBox.prototype.registerPianolaScroll = function () {
+	        var _this = this;
+	        this.pianola.parent.on('wheel', function (evt) {
+	            if (_this.playing)
+	                return;
+	            var oe = evt.originalEvent;
+	            evt.preventDefault();
+	            var dy = oe.deltaY;
+	            if (oe.deltaMode == 1)
+	                dy *= 100 / 3;
+	            dy /= 5;
+	            _this.updateRowOfs(dy / 2);
+	        });
+	        //TODO register also key up and down, and page up and down
+	    };
+	    PartBox.prototype.updateRowOfs = function (dy) {
+	        this.rowOfs += dy;
+	        if (this.rowOfs < 0)
+	            this.rowOfs = 0;
+	        else if (this.rowOfs > this.part.rows.length)
+	            this.rowOfs = this.part.rows.length;
+	        var newRow = Math.floor(this.rowOfs);
+	        if (newRow != this.rowNum) {
+	            this.rowNum = newRow;
+	            this.pianola.render(this.part, this.rowNum);
+	            this.playRowNotes();
+	        }
+	    };
+	    PartBox.prototype.playRowNotes = function () {
+	        //TODO play notes of current row, with auto note off after 0.5 seconds
 	    };
 	    return PartBox;
 	})();
