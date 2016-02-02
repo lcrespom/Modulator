@@ -2045,7 +2045,7 @@
 	        }
 	    };
 	    PartBox.prototype.playRowNotes = function () {
-	        //TODO play notes of current row, with auto note off after 0.5 seconds
+	        this.part.playRow(this.rowNum, this.ac.currentTime, 0.5);
 	    };
 	    return PartBox;
 	})();
