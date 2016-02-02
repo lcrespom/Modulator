@@ -113,9 +113,9 @@
 	//--------------------------------------------------
 	var ac = new AudioContext();
 	var sw = starWars(ac);
-	var pbox = new partUI_1.PartBox(ac, $('#part-box'));
-	pbox.pianola = new pianola_1.Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
-	pbox.part = sw.tracks[0].parts[0];
+	var part = sw.tracks[0].parts[0];
+	var pianola = new pianola_1.Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
+	var pbox = new partUI_1.PartBox(ac, $('#part-box'), part, pianola);
 
 
 /***/ },
@@ -1805,11 +1805,12 @@
 	var COLUMN_COLOR = '#E0E0E0';
 	var Pianola = (function () {
 	    function Pianola($past, $piano, $future) {
-	        this.pkh = new PianoKeyHelper(new piano_1.PianoKeys(NUM_WHITES));
-	        this.past = new NoteCanvas($('#past-notes'), NUM_WHITES * 2, this.pkh);
-	        this.future = new NoteCanvas($('#future-notes'), NUM_WHITES * 2, this.pkh);
+	        this.pkh = new PianoKeyHelper(new piano_1.PianoKeys(NUM_WHITES), $piano);
+	        this.past = new NoteCanvas($past, NUM_WHITES * 2, this.pkh);
+	        this.future = new NoteCanvas($future, NUM_WHITES * 2, this.pkh);
 	        this.notes = [];
 	        this.oldNotes = [];
+	        this.parent = $piano.parent();
 	    }
 	    Pianola.prototype.render = function (part, currentRow) {
 	        this.past.paintNoteColumns(this.past.numRows - currentRow, this.past.numRows);
@@ -1863,9 +1864,9 @@
 	})();
 	exports.Pianola = Pianola;
 	var PianoKeyHelper = (function () {
-	    function PianoKeyHelper(pk) {
+	    function PianoKeyHelper(pk, $elem) {
 	        this.pk = pk;
-	        this.keys = this.pk.createKeys($('#piano'));
+	        this.keys = this.pk.createKeys($elem);
 	    }
 	    PianoKeyHelper.prototype.getKey = function (midi) {
 	        return this.keys[midi - BASE_NOTE];
@@ -1944,31 +1945,25 @@
 
 	var timer_1 = __webpack_require__(17);
 	var PartBox = (function () {
-	    function PartBox(ac, $elem) {
+	    function PartBox(ac, $elem, part, pianola) {
 	        var _this = this;
 	        this.playing = false;
+	        this.rowNum = 0;
 	        this.ac = ac;
 	        this.$play = $elem.find('.play');
 	        this.$play.click(function (_) { return _this.play(); });
+	        this.part = part;
+	        this.pianola = pianola;
+	        this.pianola.render(this.part, this.rowNum);
+	        this.registerWheel();
 	    }
-	    Object.defineProperty(PartBox.prototype, "part", {
-	        get: function () { return this._part; },
-	        set: function (part) {
-	            this._part = part;
-	            this.rowNum = 0;
-	            if (this.pianola)
-	                this.pianola.render(this._part, this.rowNum);
-	        },
-	        enumerable: true,
-	        configurable: true
-	    });
 	    PartBox.prototype.play = function () {
 	        var _this = this;
 	        if (!this.part)
 	            return;
 	        this.playing = !this.playing;
 	        if (this.playing) {
-	            //TODO: change button icon to "pause"
+	            this.setButIcon(this.$play, 'pause');
 	            this.timer = new timer_1.Timer(this.ac, 90);
 	            this.timer.start(function (when) {
 	                _this.part.playRow(_this.rowNum, when);
@@ -1978,11 +1973,11 @@
 	            });
 	        }
 	        else {
-	            //TODO: change button icon to "play"
 	            this.pause();
 	        }
 	    };
 	    PartBox.prototype.pause = function () {
+	        this.setButIcon(this.$play, 'play');
 	        this.timer.stop();
 	        this.part.instrument.allNotesOff();
 	    };
@@ -1990,6 +1985,14 @@
 	        this.pause();
 	        this.playing = false;
 	        this.rowNum = 0;
+	    };
+	    PartBox.prototype.setButIcon = function ($but, icon) {
+	        var $glyph = $but.find('.glyphicon');
+	        var classes = $glyph.attr('class').split(/\s+/)
+	            .filter(function (c) { return !c.match(/glyphicon-/); }).concat('glyphicon-' + icon);
+	        $glyph.attr('class', classes.join(' '));
+	    };
+	    PartBox.prototype.registerWheel = function () {
 	    };
 	    return PartBox;
 	})();

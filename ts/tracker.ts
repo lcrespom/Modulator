@@ -74,6 +74,6 @@ function starWars(ac: ModernAudioContext): tracker.Song {
 const ac = <ModernAudioContext>new AudioContext();
 const sw = starWars(ac);
 
-const pbox = new PartBox(ac, $('#part-box'));
-pbox.pianola = new Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
-pbox.part = sw.tracks[0].parts[0];
+const part = sw.tracks[0].parts[0];
+const pianola = new Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
+const pbox = new PartBox(ac, $('#part-box'), part, pianola);

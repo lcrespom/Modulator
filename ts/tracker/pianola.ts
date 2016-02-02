@@ -13,13 +13,15 @@ export class Pianola {
 	future: NoteCanvas;
 	notes: number[];
 	oldNotes: number[];
+	parent: JQuery;
 
 	constructor($past, $piano, $future) {
-		this.pkh = new PianoKeyHelper(new PianoKeys(NUM_WHITES));
-		this.past = new NoteCanvas($('#past-notes'), NUM_WHITES * 2, this.pkh);
-		this.future = new NoteCanvas($('#future-notes'), NUM_WHITES * 2, this.pkh);
+		this.pkh = new PianoKeyHelper(new PianoKeys(NUM_WHITES), $piano);
+		this.past = new NoteCanvas($past, NUM_WHITES * 2, this.pkh);
+		this.future = new NoteCanvas($future, NUM_WHITES * 2, this.pkh);
 		this.notes = [];
 		this.oldNotes = [];
+		this.parent = $piano.parent();
 	}
 
 	render(part: tracker.Part, currentRow: number) {
@@ -72,8 +74,8 @@ export class Pianola {
 class PianoKeyHelper {
 	keys: JQuery[];
 
-	constructor(public pk: PianoKeys) {
-		this.keys = this.pk.createKeys($('#piano'));
+	constructor(public pk: PianoKeys, $elem: JQuery) {
+		this.keys = this.pk.createKeys($elem);
 	}
 
 	getKey(midi: number): JQuery {

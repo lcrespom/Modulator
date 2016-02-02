@@ -16,8 +16,7 @@ const PORTAMENTO_MAX = 1;
 
 /** Builds a piano keyboard out of DIVs */
 export class PianoKeys {
-	constructor(public numWhites = NUM_WHITES) {
-	}
+	constructor(public numWhites = NUM_WHITES) {}
 
 	createKeys(panel: JQuery): JQuery[] {
 		const keys = [];
