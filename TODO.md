@@ -3,6 +3,9 @@
 ##Bugs
 - ADSR needs more testing & refining
 	- Probable memory leaks in Pew! instrument
+	- Also see http://www.soundonsound.com/sos/nov99/articles/synthsecrets.htm
+		for explanations on how to improve quality, especially the paragraph
+		about instruments swallowing its tongue.
 - Popping sound at note on/off (improved after adding adsr depth parameter)
 - Analyzer should detect when no sound is playing and clean osc and fft graphs
 	- Only visible in synths without ADSR
