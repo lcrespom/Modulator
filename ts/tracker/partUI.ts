@@ -70,10 +70,20 @@ export class PartBox {
 			evt.preventDefault();
 			var dy = oe.deltaY;
 			if (oe.deltaMode == 1) dy *= 100 / 3;
-			dy /= 5;
-			this.updateRowOfs(dy / 2);
+			this.updateRowOfs(dy / 10);
 		});
-		//TODO register also key up and down, and page up and down
+		$('body').on('keydown', evt => {
+			let dy = 0;
+			switch (evt.keyCode) {
+				case 33: dy = -4; break;
+				case 34: dy = +4; break;
+				case 38: dy = -1; break;
+				case 40: dy = +1; break;
+				default: return;
+			}
+			this.updateRowOfs(dy);
+		});
+
 	}
 
 	updateRowOfs(dy: number) {

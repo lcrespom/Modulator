@@ -2009,10 +2009,27 @@
 	            var dy = oe.deltaY;
 	            if (oe.deltaMode == 1)
 	                dy *= 100 / 3;
-	            dy /= 5;
-	            _this.updateRowOfs(dy / 2);
+	            _this.updateRowOfs(dy / 10);
 	        });
-	        //TODO register also key up and down, and page up and down
+	        $('body').on('keydown', function (evt) {
+	            var dy = 0;
+	            switch (evt.keyCode) {
+	                case 33:
+	                    dy = -4;
+	                    break;
+	                case 34:
+	                    dy = +4;
+	                    break;
+	                case 38:
+	                    dy = -1;
+	                    break;
+	                case 40:
+	                    dy = +1;
+	                    break;
+	                default: return;
+	            }
+	            _this.updateRowOfs(dy);
+	        });
 	    };
 	    PartBox.prototype.updateRowOfs = function (dy) {
 	        this.rowOfs += dy;
