@@ -1,5 +1,8 @@
 import * as tracker from './song';
+
 import { PianoKeys } from '../piano/piano';
+import { Keyboard } from '../piano/keyboard';
+import { MidiKeyboard } from '../piano/midi';
 
 const NUM_WHITES = 28;
 const BASE_NOTE = 24;
@@ -38,10 +41,7 @@ export class Pianola {
 
 	renderPastRow(rowNum: number, currentRow: number) {
 		const y = this.past.numRows - currentRow + rowNum;
-		//TODO this is WET, should be DRY
-		this.past.renderNoteRow(y, this.notes);
-		if (rowNum % 4 == 0)
-			this.past.renderBar(y);
+		this.renderCanvasRow(this.past, rowNum, y);
 	}
 
 	renderCurrentRow() {
@@ -54,9 +54,12 @@ export class Pianola {
 
 	renderFutureRow(rowNum: number, currentRow: number) {
 		const y = rowNum - currentRow - 1;
-		this.future.renderNoteRow(y, this.notes);
-		if (rowNum % 4 == 0)
-			this.future.renderBar(y);
+		this.renderCanvasRow(this.future, rowNum, y);
+	}
+
+	renderCanvasRow(nc: NoteCanvas, rowNum: number, y: number) {
+		nc.renderNoteRow(y, this.notes);
+		if (rowNum % 4 == 0) nc.renderBar(y);
 	}
 
 	updateNotes(row: tracker.NoteRow) {
@@ -76,7 +79,20 @@ class PianoKeyHelper {
 	keys: JQuery[];
 
 	constructor(public pk: PianoKeys, $elem: JQuery) {
+		// Setup virtual keyboard
 		this.keys = this.pk.createKeys($elem);
+		for (var i = 0; i < this.keys.length; i++)
+			this.registerKeyClick(i);
+		// Setup PC keyboard
+		const kb = new Keyboard();
+		kb.noteOn = midi => this.noteOn(midi, 1);
+		// Setup MIDI keyboard
+		const mk = new MidiKeyboard();
+		mk.noteOn = (midi, velocity, channel) => this.noteOn(midi, velocity);
+	}
+
+	registerKeyClick(i) {
+		this.keys[i].mousedown(_ =>	this.noteOn(i + BASE_NOTE, 1));
 	}
 
 	getKey(midi: number): JQuery {
@@ -97,6 +113,8 @@ class PianoKeyHelper {
 		for (const key in this.keys)
 			key.removeClass('piano-key-pressed');
 	}
+
+	noteOn(midi: number, velocity: number) {}
 }
 
 

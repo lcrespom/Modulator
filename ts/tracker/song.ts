@@ -21,8 +21,8 @@ export class Note {
 }
 
 export class NoteRow {
-	notes: Note[];
-	commands: any[];
+	notes: Note[] = [];
+	commands: any[] = [];
 }
 
 export class Part {
@@ -32,7 +32,7 @@ export class Part {
 	rows: NoteRow[] = [];
 	playRow(rowNum: number, when: number, offDelay = 0) {
 		const row = this.rows[rowNum];
-		if (!row || !row.notes) return;
+		if (!row) return;
 		for (const note of row.notes) {
 			if (note.type == Note.NoteOn) {
 				this.instrument.noteOn(note.midi, note.velocity, when);

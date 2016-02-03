@@ -1,5 +1,5 @@
 import { Pianola } from './pianola';
-import { Part } from './song';
+import { Part, NoteRow, Note } from './song';
 import { Timer } from '../synth/timer';
 import { ModernAudioContext } from '../utils/modern';
 
@@ -22,6 +22,7 @@ export class PartBox {
 		this.pianola = pianola;
 		this.pianola.render(this.part, this.rowNum);
 		this.registerPianolaScroll();
+		this.pianola.pkh.noteOn = (midi, velocity) => this.editNote(midi, velocity);
 		this.rowOfs = 0;
 	}
 
@@ -103,4 +104,36 @@ export class PartBox {
 	playRowNotes() {
 		this.part.playRow(this.rowNum, this.ac.currentTime, 0.5);
 	}
+
+	editNote(midi: number, velocity: number) {
+		const rowNotes = this.getRowNotes();
+		const currentNotes = this.pianola.oldNotes;
+		// If Note is playing in current row
+		if (currentNotes.some(n => n == midi)) {
+			if (rowNotes.some(n => n.midi == midi)) {
+				// If noteOn is in current row, remove it
+				this.setRowNotes(rowNotes.filter(n => n.midi != midi));
+				//TODO move down to future rows and cancel note off if present
+			}
+			else {
+				// Otherwise cancel previous noteOn with a noteOff
+				rowNotes.push(Note.off(midi, velocity));
+			}
+		}
+		// Note is not playing, so add a noteOn
+		else {
+			rowNotes.push(Note.on(midi, velocity));
+		}
+		this.pianola.render(this.part, this.rowNum);
+	}
+
+	setRowNotes(notes: Note[]) {
+		this.part.rows[this.rowNum].notes = notes;
+	}
+	getRowNotes() {
+		if (!this.part.rows[this.rowNum])
+			this.part.rows[this.rowNum] = new NoteRow();
+		return this.part.rows[this.rowNum].notes;
+	}
+
 }

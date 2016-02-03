@@ -1246,8 +1246,99 @@
 /* 10 */,
 /* 11 */,
 /* 12 */,
-/* 13 */,
-/* 14 */,
+/* 13 */
+/***/ function(module, exports) {
+
+	var KB_NOTES = 'ZSXDCVGBHNJMQ2W3ER5T6Y7UI9O0P';
+	var BASE_NOTE = 36;
+	/**
+	 * Provides a piano keyboard using the PC keyboard.
+	 * Listens to keyboard events and generates MIDI-style noteOn/noteOff events.
+	 */
+	var Keyboard = (function () {
+	    function Keyboard() {
+	        this.setupHandler();
+	        this.baseNote = BASE_NOTE;
+	    }
+	    Keyboard.prototype.setupHandler = function () {
+	        var _this = this;
+	        var pressedKeys = {};
+	        $('body')
+	            .on('keydown', function (evt) {
+	            if (pressedKeys[evt.keyCode])
+	                return; // Skip repetitions
+	            if (evt.metaKey || evt.altKey || evt.ctrlKey)
+	                return; // Skip browser shortcuts
+	            pressedKeys[evt.keyCode] = true;
+	            var midi = _this.key2midi(evt.keyCode);
+	            if (midi < 0)
+	                return;
+	            _this.noteOn(midi);
+	        })
+	            .on('keyup', function (evt) {
+	            pressedKeys[evt.keyCode] = false;
+	            var midi = _this.key2midi(evt.keyCode);
+	            if (midi < 0)
+	                return;
+	            _this.noteOff(midi);
+	        });
+	    };
+	    Keyboard.prototype.key2midi = function (keyCode) {
+	        var pos = KB_NOTES.indexOf(String.fromCharCode(keyCode));
+	        if (pos < 0)
+	            return -1;
+	        return this.baseNote + pos;
+	    };
+	    Keyboard.prototype.noteOn = function (midi) { };
+	    Keyboard.prototype.noteOff = function (midi) { };
+	    return Keyboard;
+	})();
+	exports.Keyboard = Keyboard;
+
+
+/***/ },
+/* 14 */
+/***/ function(module, exports) {
+
+	var MidiKeyboard = (function () {
+	    function MidiKeyboard() {
+	        var _this = this;
+	        this.connected = false;
+	        if (!navigator.requestMIDIAccess)
+	            return;
+	        navigator.requestMIDIAccess({ sysex: false }).then(function (midiAccess) {
+	            if (midiAccess.inputs.size <= 0)
+	                return;
+	            var input = midiAccess.inputs.values().next().value;
+	            if (!input)
+	                return;
+	            input.onmidimessage = function (msg) { return _this.midiMessage(msg); };
+	            _this.connected = true;
+	        });
+	    }
+	    MidiKeyboard.prototype.midiMessage = function (msg) {
+	        var data = msg.data;
+	        var cmd = data[0] >> 4;
+	        var channel = data[0] & 0xf;
+	        var note = data[1];
+	        var velocity = data[2];
+	        switch (cmd) {
+	            case 9:
+	                this.noteOn(note, velocity, channel);
+	                break;
+	            case 8:
+	                this.noteOff(note, velocity, channel);
+	                break;
+	        }
+	    };
+	    MidiKeyboard.prototype.noteOn = function (midi, velocity, channel) { };
+	    MidiKeyboard.prototype.noteOff = function (midi, velocity, channel) { };
+	    return MidiKeyboard;
+	})();
+	exports.MidiKeyboard = MidiKeyboard;
+
+
+/***/ },
 /* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -1752,6 +1843,8 @@
 	exports.Note = Note;
 	var NoteRow = (function () {
 	    function NoteRow() {
+	        this.notes = [];
+	        this.commands = [];
 	    }
 	    return NoteRow;
 	})();
@@ -1763,7 +1856,7 @@
 	    Part.prototype.playRow = function (rowNum, when, offDelay) {
 	        if (offDelay === void 0) { offDelay = 0; }
 	        var row = this.rows[rowNum];
-	        if (!row || !row.notes)
+	        if (!row)
 	            return;
 	        for (var _i = 0, _a = row.notes; _i < _a.length; _i++) {
 	            var note = _a[_i];
@@ -1803,6 +1896,8 @@
 
 	var tracker = __webpack_require__(20);
 	var piano_1 = __webpack_require__(15);
+	var keyboard_1 = __webpack_require__(13);
+	var midi_1 = __webpack_require__(14);
 	var NUM_WHITES = 28;
 	var BASE_NOTE = 24;
 	var NOTE_COLOR = '#0CC';
@@ -1832,10 +1927,7 @@
 	    };
 	    Pianola.prototype.renderPastRow = function (rowNum, currentRow) {
 	        var y = this.past.numRows - currentRow + rowNum;
-	        //TODO this is WET, should be DRY
-	        this.past.renderNoteRow(y, this.notes);
-	        if (rowNum % 4 == 0)
-	            this.past.renderBar(y);
+	        this.renderCanvasRow(this.past, rowNum, y);
 	    };
 	    Pianola.prototype.renderCurrentRow = function () {
 	        for (var _i = 0, _a = this.oldNotes; _i < _a.length; _i++) {
@@ -1850,9 +1942,12 @@
 	    };
 	    Pianola.prototype.renderFutureRow = function (rowNum, currentRow) {
 	        var y = rowNum - currentRow - 1;
-	        this.future.renderNoteRow(y, this.notes);
+	        this.renderCanvasRow(this.future, rowNum, y);
+	    };
+	    Pianola.prototype.renderCanvasRow = function (nc, rowNum, y) {
+	        nc.renderNoteRow(y, this.notes);
 	        if (rowNum % 4 == 0)
-	            this.future.renderBar(y);
+	            nc.renderBar(y);
 	    };
 	    Pianola.prototype.updateNotes = function (row) {
 	        var rowNotes = row && row.notes ? row.notes : [];
@@ -1870,9 +1965,23 @@
 	exports.Pianola = Pianola;
 	var PianoKeyHelper = (function () {
 	    function PianoKeyHelper(pk, $elem) {
+	        var _this = this;
 	        this.pk = pk;
+	        // Setup virtual keyboard
 	        this.keys = this.pk.createKeys($elem);
+	        for (var i = 0; i < this.keys.length; i++)
+	            this.registerKeyClick(i);
+	        // Setup PC keyboard
+	        var kb = new keyboard_1.Keyboard();
+	        kb.noteOn = function (midi) { return _this.noteOn(midi, 1); };
+	        // Setup MIDI keyboard
+	        var mk = new midi_1.MidiKeyboard();
+	        mk.noteOn = function (midi, velocity, channel) { return _this.noteOn(midi, velocity); };
 	    }
+	    PianoKeyHelper.prototype.registerKeyClick = function (i) {
+	        var _this = this;
+	        this.keys[i].mousedown(function (_) { return _this.noteOn(i + BASE_NOTE, 1); });
+	    };
 	    PianoKeyHelper.prototype.getKey = function (midi) {
 	        return this.keys[midi - BASE_NOTE];
 	    };
@@ -1888,6 +1997,7 @@
 	        for (var key in this.keys)
 	            key.removeClass('piano-key-pressed');
 	    };
+	    PianoKeyHelper.prototype.noteOn = function (midi, velocity) { };
 	    return PianoKeyHelper;
 	})();
 	var NoteCanvas = (function () {
@@ -1948,6 +2058,7 @@
 /* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var song_1 = __webpack_require__(20);
 	var timer_1 = __webpack_require__(17);
 	var PartBox = (function () {
 	    function PartBox(ac, $elem, part, pianola) {
@@ -1961,6 +2072,7 @@
 	        this.pianola = pianola;
 	        this.pianola.render(this.part, this.rowNum);
 	        this.registerPianolaScroll();
+	        this.pianola.pkh.noteOn = function (midi, velocity) { return _this.editNote(midi, velocity); };
 	        this.rowOfs = 0;
 	    }
 	    PartBox.prototype.play = function () {
@@ -2046,6 +2158,33 @@
 	    };
 	    PartBox.prototype.playRowNotes = function () {
 	        this.part.playRow(this.rowNum, this.ac.currentTime, 0.5);
+	    };
+	    PartBox.prototype.editNote = function (midi, velocity) {
+	        var rowNotes = this.getRowNotes();
+	        var currentNotes = this.pianola.oldNotes;
+	        // If Note is playing in current row
+	        if (currentNotes.some(function (n) { return n == midi; })) {
+	            if (rowNotes.some(function (n) { return n.midi == midi; })) {
+	                // If noteOn is in current row, remove it
+	                this.setRowNotes(rowNotes.filter(function (n) { return n.midi != midi; }));
+	            }
+	            else {
+	                // Otherwise cancel previous noteOn with a noteOff
+	                rowNotes.push(song_1.Note.off(midi, velocity));
+	            }
+	        }
+	        else {
+	            rowNotes.push(song_1.Note.on(midi, velocity));
+	        }
+	        this.pianola.render(this.part, this.rowNum);
+	    };
+	    PartBox.prototype.setRowNotes = function (notes) {
+	        this.part.rows[this.rowNum].notes = notes;
+	    };
+	    PartBox.prototype.getRowNotes = function () {
+	        if (!this.part.rows[this.rowNum])
+	            this.part.rows[this.rowNum] = new song_1.NoteRow();
+	        return this.part.rows[this.rowNum].notes;
 	    };
 	    return PartBox;
 	})();
