@@ -15,7 +15,6 @@ export class Pianola {
 	past: NoteCanvas;
 	future: NoteCanvas;
 	notes: number[];
-	oldNotes: number[];
 	parent: JQuery;
 
 	constructor($past, $piano, $future) {
@@ -23,11 +22,11 @@ export class Pianola {
 		this.past = new NoteCanvas($past, NUM_WHITES * 2, this.pkh);
 		this.future = new NoteCanvas($future, NUM_WHITES * 2, this.pkh);
 		this.notes = [];
-		this.oldNotes = [];
 		this.parent = $piano.parent();
 	}
 
 	render(part: tracker.Part, currentRow: number) {
+		this.notes = [];
 		this.past.paintNoteColumns(this.past.numRows - currentRow, this.past.numRows);
 		this.future.paintNoteColumns(0, part.rows.length - currentRow - 1);
 		for (let i = 0; i < part.rows.length; i++) {
@@ -45,11 +44,9 @@ export class Pianola {
 	}
 
 	renderCurrentRow() {
-		for (const note of this.oldNotes)
-			this.pkh.keyUp(note);
+		this.pkh.reset();
 		for (const note of this.notes)
 			this.pkh.keyDown(note);
-		this.oldNotes = this.notes.slice();
 	}
 
 	renderFutureRow(rowNum: number, currentRow: number) {
@@ -71,6 +68,13 @@ export class Pianola {
 			else if (note.type == tracker.Note.NoteOff)
 				this.notes = this.notes.filter(midi => midi != note.midi);
 		}
+	}
+
+	calcNotesAtRow(part: tracker.Part, row: number): number[] {
+		this.notes = [];
+		for (let i = 0; i <= row; i++)
+			this.updateNotes(part.rows[i]);
+		return this.notes;
 	}
 }
 
@@ -110,7 +114,7 @@ class PianoKeyHelper {
 	}
 
 	reset() {
-		for (const key in this.keys)
+		for (const key of this.keys)
 			key.removeClass('piano-key-pressed');
 	}
 

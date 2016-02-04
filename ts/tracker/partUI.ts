@@ -107,7 +107,7 @@ export class PartBox {
 
 	editNote(midi: number, velocity: number) {
 		const rowNotes = this.getRowNotes();
-		const currentNotes = this.pianola.oldNotes;
+		const currentNotes = this.pianola.calcNotesAtRow(this.part, this.rowNum);
 		// If Note is playing in current row
 		if (currentNotes.some(n => n == midi)) {
 			if (rowNotes.some(n => n.midi == midi)) {
@@ -122,7 +122,9 @@ export class PartBox {
 		}
 		// Note is not playing, so add a noteOn
 		else {
-			rowNotes.push(Note.on(midi, velocity));
+			const note = Note.on(midi, velocity);
+			rowNotes.push(note);
+			this.part.playNote(note, this.ac.currentTime);
 		}
 		this.pianola.render(this.part, this.rowNum);
 	}

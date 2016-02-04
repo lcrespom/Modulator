@@ -1869,6 +1869,11 @@
 	                this.instrument.noteOff(note.midi, note.velocity, when);
 	        }
 	    };
+	    Part.prototype.playNote = function (note, when, offDelay) {
+	        if (offDelay === void 0) { offDelay = 0.5; }
+	        this.instrument.noteOn(note.midi, note.velocity, when);
+	        this.instrument.noteOff(note.midi, 1, when + offDelay);
+	    };
 	    return Part;
 	})();
 	exports.Part = Part;
@@ -1908,10 +1913,10 @@
 	        this.past = new NoteCanvas($past, NUM_WHITES * 2, this.pkh);
 	        this.future = new NoteCanvas($future, NUM_WHITES * 2, this.pkh);
 	        this.notes = [];
-	        this.oldNotes = [];
 	        this.parent = $piano.parent();
 	    }
 	    Pianola.prototype.render = function (part, currentRow) {
+	        this.notes = [];
 	        this.past.paintNoteColumns(this.past.numRows - currentRow, this.past.numRows);
 	        this.future.paintNoteColumns(0, part.rows.length - currentRow - 1);
 	        for (var i = 0; i < part.rows.length; i++) {
@@ -1930,15 +1935,11 @@
 	        this.renderCanvasRow(this.past, rowNum, y);
 	    };
 	    Pianola.prototype.renderCurrentRow = function () {
-	        for (var _i = 0, _a = this.oldNotes; _i < _a.length; _i++) {
+	        this.pkh.reset();
+	        for (var _i = 0, _a = this.notes; _i < _a.length; _i++) {
 	            var note = _a[_i];
-	            this.pkh.keyUp(note);
-	        }
-	        for (var _b = 0, _c = this.notes; _b < _c.length; _b++) {
-	            var note = _c[_b];
 	            this.pkh.keyDown(note);
 	        }
-	        this.oldNotes = this.notes.slice();
 	    };
 	    Pianola.prototype.renderFutureRow = function (rowNum, currentRow) {
 	        var y = rowNum - currentRow - 1;
@@ -1959,6 +1960,12 @@
 	            else if (note.type == tracker.Note.NoteOff)
 	                this.notes = this.notes.filter(function (midi) { return midi != note.midi; });
 	        }
+	    };
+	    Pianola.prototype.calcNotesAtRow = function (part, row) {
+	        this.notes = [];
+	        for (var i = 0; i <= row; i++)
+	            this.updateNotes(part.rows[i]);
+	        return this.notes;
 	    };
 	    return Pianola;
 	})();
@@ -1994,8 +2001,10 @@
 	        key.removeClass('piano-key-pressed');
 	    };
 	    PianoKeyHelper.prototype.reset = function () {
-	        for (var key in this.keys)
+	        for (var _i = 0, _a = this.keys; _i < _a.length; _i++) {
+	            var key = _a[_i];
 	            key.removeClass('piano-key-pressed');
+	        }
 	    };
 	    PianoKeyHelper.prototype.noteOn = function (midi, velocity) { };
 	    return PianoKeyHelper;
@@ -2161,7 +2170,7 @@
 	    };
 	    PartBox.prototype.editNote = function (midi, velocity) {
 	        var rowNotes = this.getRowNotes();
-	        var currentNotes = this.pianola.oldNotes;
+	        var currentNotes = this.pianola.calcNotesAtRow(this.part, this.rowNum);
 	        // If Note is playing in current row
 	        if (currentNotes.some(function (n) { return n == midi; })) {
 	            if (rowNotes.some(function (n) { return n.midi == midi; })) {
@@ -2174,7 +2183,9 @@
 	            }
 	        }
 	        else {
-	            rowNotes.push(song_1.Note.on(midi, velocity));
+	            var note = song_1.Note.on(midi, velocity);
+	            rowNotes.push(note);
+	            this.part.playNote(note, this.ac.currentTime);
 	        }
 	        this.pianola.render(this.part, this.rowNum);
 	    };

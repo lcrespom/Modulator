@@ -43,6 +43,10 @@ export class Part {
 				this.instrument.noteOff(note.midi, note.velocity, when);
 		}
 	}
+	playNote(note: Note, when, offDelay = 0.5) {
+		this.instrument.noteOn(note.midi, note.velocity, when);
+		this.instrument.noteOff(note.midi, 1, when + offDelay);
+	}
 }
 
 export class Track {
