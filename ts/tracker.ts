@@ -45,7 +45,7 @@ function createNotes(): tracker.NoteRow[] {
 
 function starWars(ac: ModernAudioContext): tracker.Song {
 	const p = new tracker.Part();
-	p.voices = 1;
+	p.voices = 4;
 	const json = {
 		nodes: [
 			{id: 0, inputs: [1]},

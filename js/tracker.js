@@ -88,7 +88,7 @@
 	}
 	function starWars(ac) {
 	    var p = new tracker.Part();
-	    p.voices = 1;
+	    p.voices = 4;
 	    var json = {
 	        nodes: [
 	            { id: 0, inputs: [1] },
@@ -2181,6 +2181,7 @@
 	                // Otherwise cancel previous noteOn with a noteOff
 	                rowNotes.push(song_1.Note.off(midi, velocity));
 	            }
+	            this.cancelNoteOff(midi);
 	        }
 	        else {
 	            var note = song_1.Note.on(midi, velocity);
@@ -2189,13 +2190,27 @@
 	        }
 	        this.pianola.render(this.part, this.rowNum);
 	    };
-	    PartBox.prototype.setRowNotes = function (notes) {
-	        this.part.rows[this.rowNum].notes = notes;
+	    PartBox.prototype.cancelNoteOff = function (midi) {
+	        for (var i = this.rowNum + 1; i < this.part.rows.length; i++) {
+	            var rowNotes = this.getRowNotes(i);
+	            var thisNote = rowNotes.filter(function (n) { return n.midi == midi; });
+	            if (thisNote.length == 0)
+	                continue;
+	            if (thisNote[0].type = song_1.Note.NoteOff)
+	                this.setRowNotes(rowNotes
+	                    .filter(function (n) { return n.midi != midi || n.type == song_1.Note.NoteOn; }), i);
+	            return;
+	        }
 	    };
-	    PartBox.prototype.getRowNotes = function () {
-	        if (!this.part.rows[this.rowNum])
-	            this.part.rows[this.rowNum] = new song_1.NoteRow();
-	        return this.part.rows[this.rowNum].notes;
+	    PartBox.prototype.setRowNotes = function (notes, pos) {
+	        if (pos === void 0) { pos = this.rowNum; }
+	        this.part.rows[pos].notes = notes;
+	    };
+	    PartBox.prototype.getRowNotes = function (pos) {
+	        if (pos === void 0) { pos = this.rowNum; }
+	        if (!this.part.rows[pos])
+	            this.part.rows[pos] = new song_1.NoteRow();
+	        return this.part.rows[pos].notes;
 	    };
 	    return PartBox;
 	})();

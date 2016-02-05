@@ -101,12 +101,22 @@
 - Branding
 - Naming
 
+
+##Tracker
+- Integrate with synth / feature toggle to disable until ready
+- Tracks
+	- add / remove track
+- Parts
+	- Code cleanup for parts with empty notes: create always default empty note array
+	- Record button - start with first note
+	- Start select / end select / cut / copy / paste
+	- Delete row / insert row
+	- New part / Delete part / Add to track / move up / move down
+- Apart from controlling Modulator instruments,
+	also emit MIDI events to external devices
+
+
 ##Long term
-- Tracker
-	- Probably as an independent app that can load synth presets
-	- Review [this article](http://www.html5rocks.com/en/tutorials/audio/scheduling/)
-	- Apart from controlling Modulator instruments,
-		also emit MIDI events to external devices
 - Rethink control nodes:
 	- It's not about control nodes, it's about control connections
 	- Any node output can be connected either to another node input or

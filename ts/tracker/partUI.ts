@@ -113,12 +113,12 @@ export class PartBox {
 			if (rowNotes.some(n => n.midi == midi)) {
 				// If noteOn is in current row, remove it
 				this.setRowNotes(rowNotes.filter(n => n.midi != midi));
-				//TODO move down to future rows and cancel note off if present
 			}
 			else {
 				// Otherwise cancel previous noteOn with a noteOff
 				rowNotes.push(Note.off(midi, velocity));
 			}
+			this.cancelNoteOff(midi);
 		}
 		// Note is not playing, so add a noteOn
 		else {
@@ -129,13 +129,26 @@ export class PartBox {
 		this.pianola.render(this.part, this.rowNum);
 	}
 
-	setRowNotes(notes: Note[]) {
-		this.part.rows[this.rowNum].notes = notes;
+	cancelNoteOff(midi) {
+		for (let i = this.rowNum + 1; i < this.part.rows.length; i++) {
+			const rowNotes = this.getRowNotes(i);
+			const thisNote = rowNotes.filter(n => n.midi == midi);
+			if (thisNote.length == 0) continue;
+			if (thisNote[0].type = Note.NoteOff)
+				this.setRowNotes(rowNotes
+					.filter(n => n.midi != midi || n.type == Note.NoteOn), i);
+			return;
+		}
 	}
-	getRowNotes() {
-		if (!this.part.rows[this.rowNum])
-			this.part.rows[this.rowNum] = new NoteRow();
-		return this.part.rows[this.rowNum].notes;
+
+	setRowNotes(notes: Note[], pos = this.rowNum) {
+		this.part.rows[pos].notes = notes;
+	}
+
+	getRowNotes(pos = this.rowNum) {
+		if (!this.part.rows[pos])
+			this.part.rows[pos] = new NoteRow();
+		return this.part.rows[pos].notes;
 	}
 
 }
