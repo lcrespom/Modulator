@@ -235,7 +235,7 @@ class GraphInteraction {
 	constructor(graph: Graph, gc: CanvasRenderingContext2D) {
 		this.graph = graph;
 		this.gc = gc;
-		this.setupConnectHandler();
+		this.setupConnectHandler(gc.canvas);
 	}
 
 	registerNode(n: Node) {
@@ -272,10 +272,12 @@ class GraphInteraction {
 		this.graph.handler.nodeSelected(n);
 	}
 
-	setupConnectHandler() {
+	setupConnectHandler(elem: HTMLElement) {
 		let srcn: Node;
 		let connecting = false;
-		$('body').keydown(evt => {
+		while (elem.tabIndex < 0 && elem.nodeName.toLowerCase() != 'body')
+			elem = elem.parentElement;
+		$(elem).keydown(evt => {
 			if (evt.keyCode == CAPS_LOCK) return this.setGrid([20, 20]);
 			if (evt.keyCode != SHIFT_KEY || connecting) return;
 			srcn = this.getNodeFromDOM(this.getElementUnderMouse());

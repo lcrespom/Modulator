@@ -2,8 +2,7 @@
  * Modernize browser interfaces so that TypeScript does not complain
  * when using new features.
  *
- * Also provides some basic utility funcitons which should be part of
- * the standard JavaScript library.
+ * Also provides some basic utility funcitons
  */
 
 export interface ModernWindow extends Window {
@@ -42,4 +41,10 @@ export function linear2log(value: number, min: number, max: number): number {
 export function log2linear(value: number, min: number, max: number): number {
 	const logRange = logarithm(LOG_BASE, max + 1 - min);
 	return min + Math.pow(LOG_BASE, value * logRange) - 1;
+}
+
+export function focusable(elem) {
+	while (elem.tabIndex < 0 && elem.nodeName.toLowerCase() != 'body')
+		elem = elem.parentElement;
+	return elem;
 }

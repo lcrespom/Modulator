@@ -1,6 +1,6 @@
 import { Graph, Node, GraphHandler } from './graph';
 import { Synth, NodeData } from '../synth/synth';
-import { ModernAudioContext, ModernAudioNode } from '../utils/modern';
+import { ModernAudioContext, ModernAudioNode, focusable } from '../utils/modern';
 import * as popups from '../utils/popups';
 
 /**
@@ -142,12 +142,12 @@ class SynthGraphHandler implements GraphHandler {
 		this.jqParams = jqParams;
 		this.arrowColor = getCssFromClass('arrow', 'color');
 		this.ctrlArrowColor = getCssFromClass('arrow-ctrl', 'color');
-		this.registerNodeDelete();
+		this.registerNodeDelete(jqParams.parent()[0]);
 		this.analyzer = new AudioAnalyzer(jqFFT, jqOsc);
 	}
 
-	registerNodeDelete() {
-		$('body').keydown(evt => {
+	registerNodeDelete(elem) {
+		$(focusable(elem)).keydown(evt => {
 			if (!(evt.keyCode == 46 || (evt.keyCode == 8 && evt.metaKey))) return;
 			if (popups.isOpen) return;
 			const selectedNode = this.getSelectedNode();

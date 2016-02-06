@@ -655,8 +655,7 @@
 	 * Modernize browser interfaces so that TypeScript does not complain
 	 * when using new features.
 	 *
-	 * Also provides some basic utility funcitons which should be part of
-	 * the standard JavaScript library.
+	 * Also provides some basic utility funcitons
 	 */
 	function removeArrayElement(a, e) {
 	    var pos = a.indexOf(e);
@@ -680,6 +679,12 @@
 	    return min + Math.pow(LOG_BASE, value * logRange) - 1;
 	}
 	exports.log2linear = log2linear;
+	function focusable(elem) {
+	    while (elem.tabIndex < 0 && elem.nodeName.toLowerCase() != 'body')
+	        elem = elem.parentElement;
+	    return elem;
+	}
+	exports.focusable = focusable;
 
 
 /***/ },

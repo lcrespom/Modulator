@@ -86,6 +86,7 @@
 	};
 	var graph_1 = __webpack_require__(2);
 	var synth_1 = __webpack_require__(3);
+	var modern_1 = __webpack_require__(5);
 	var popups = __webpack_require__(9);
 	/**
 	 * Customizes the generic graph editor in order to manipulate and control a graph of
@@ -200,12 +201,12 @@
 	        this.jqParams = jqParams;
 	        this.arrowColor = getCssFromClass('arrow', 'color');
 	        this.ctrlArrowColor = getCssFromClass('arrow-ctrl', 'color');
-	        this.registerNodeDelete();
+	        this.registerNodeDelete(jqParams.parent()[0]);
 	        this.analyzer = new analyzer_1.AudioAnalyzer(jqFFT, jqOsc);
 	    }
-	    SynthGraphHandler.prototype.registerNodeDelete = function () {
+	    SynthGraphHandler.prototype.registerNodeDelete = function (elem) {
 	        var _this = this;
-	        $('body').keydown(function (evt) {
+	        $(modern_1.focusable(elem)).keydown(function (evt) {
 	            if (!(evt.keyCode == 46 || (evt.keyCode == 8 && evt.metaKey)))
 	                return;
 	            if (popups.isOpen)
@@ -498,7 +499,7 @@
 	        this.dragging = false;
 	        this.graph = graph;
 	        this.gc = gc;
-	        this.setupConnectHandler();
+	        this.setupConnectHandler(gc.canvas);
 	    }
 	    GraphInteraction.prototype.registerNode = function (n) {
 	        var _this = this;
@@ -535,11 +536,13 @@
 	        this.selectedNode = n;
 	        this.graph.handler.nodeSelected(n);
 	    };
-	    GraphInteraction.prototype.setupConnectHandler = function () {
+	    GraphInteraction.prototype.setupConnectHandler = function (elem) {
 	        var _this = this;
 	        var srcn;
 	        var connecting = false;
-	        $('body').keydown(function (evt) {
+	        while (elem.tabIndex < 0 && elem.nodeName.toLowerCase() != 'body')
+	            elem = elem.parentElement;
+	        $(elem).keydown(function (evt) {
 	            if (evt.keyCode == CAPS_LOCK)
 	                return _this.setGrid([20, 20]);
 	            if (evt.keyCode != SHIFT_KEY || connecting)
@@ -1282,8 +1285,7 @@
 	 * Modernize browser interfaces so that TypeScript does not complain
 	 * when using new features.
 	 *
-	 * Also provides some basic utility funcitons which should be part of
-	 * the standard JavaScript library.
+	 * Also provides some basic utility funcitons
 	 */
 	function removeArrayElement(a, e) {
 	    var pos = a.indexOf(e);
@@ -1307,6 +1309,12 @@
 	    return min + Math.pow(LOG_BASE, value * logRange) - 1;
 	}
 	exports.log2linear = log2linear;
+	function focusable(elem) {
+	    while (elem.tabIndex < 0 && elem.nodeName.toLowerCase() != 'body')
+	        elem = elem.parentElement;
+	    return elem;
+	}
+	exports.focusable = focusable;
 
 
 /***/ },
@@ -2218,15 +2226,15 @@
 	 * Listens to keyboard events and generates MIDI-style noteOn/noteOff events.
 	 */
 	var Keyboard = (function () {
-	    function Keyboard(query) {
-	        if (query === void 0) { query = 'body'; }
-	        this.setupHandler(query);
+	    function Keyboard(kbTarget) {
+	        if (kbTarget === void 0) { kbTarget = 'body'; }
+	        this.setupHandler(kbTarget);
 	        this.baseNote = BASE_NOTE;
 	    }
-	    Keyboard.prototype.setupHandler = function (query) {
+	    Keyboard.prototype.setupHandler = function (kbTarget) {
 	        var _this = this;
 	        var pressedKeys = {};
-	        $(query)
+	        $(kbTarget)
 	            .on('keydown', function (evt) {
 	            if (pressedKeys[evt.keyCode])
 	                return; // Skip repetitions
@@ -2914,6 +2922,7 @@
 
 	var popups = __webpack_require__(9);
 	var file = __webpack_require__(8);
+	var modern_1 = __webpack_require__(5);
 	var MAX_PRESETS = 20;
 	/**
 	 * Manages the presets box:
@@ -2924,7 +2933,7 @@
 	    function Presets(synthUI) {
 	        this.presetNum = 0;
 	        this.synthUI = synthUI;
-	        this.registerListeners();
+	        this.registerListeners(synthUI.gr.canvas);
 	        this.loadPresets();
 	    }
 	    Presets.prototype.loadPresets = function () {
@@ -2952,13 +2961,13 @@
 	            ]
 	        };
 	    };
-	    Presets.prototype.registerListeners = function () {
+	    Presets.prototype.registerListeners = function (elem) {
 	        var _this = this;
 	        $('#save-but').click(function (_) { return _this.savePreset(); });
 	        $('#load-file').on('change', function (evt) { return _this.loadPreset(evt); });
 	        $('#prev-preset-but').click(function (_) { return _this.changePreset(_this.presetNum - 1); });
 	        $('#next-preset-but').click(function (_) { return _this.changePreset(_this.presetNum + 1); });
-	        $('body').keydown(function (evt) {
+	        $(modern_1.focusable(elem)).keydown(function (evt) {
 	            if (evt.target.nodeName == 'INPUT' || popups.isOpen)
 	                return;
 	            if (evt.keyCode == 37)
@@ -3424,6 +3433,7 @@
 
 	var song_1 = __webpack_require__(22);
 	var timer_1 = __webpack_require__(17);
+	var modern_1 = __webpack_require__(5);
 	var PartBox = (function () {
 	    function PartBox(ac, $elem, part, pianola) {
 	        var _this = this;
@@ -3487,7 +3497,8 @@
 	                dy *= 100 / 3;
 	            _this.updateRowOfs(dy / 10);
 	        });
-	        $('body').on('keydown', function (evt) {
+	        var $e = modern_1.focusable(this.pianola.parent[0]);
+	        $($e).on('keydown', function (evt) {
 	            var dy = 0;
 	            switch (evt.keyCode) {
 	                case 33:

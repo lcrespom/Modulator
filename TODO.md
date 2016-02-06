@@ -104,7 +104,7 @@
 
 ##Tracker
 - Integrate with synth / feature toggle to disable until ready
-	- Modify all kb listeners to register to proper div
+	- Minor bug: bad render upon first show
 - Tracks
 	- add / remove track
 - Parts

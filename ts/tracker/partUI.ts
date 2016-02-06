@@ -2,6 +2,7 @@ import { Pianola } from './pianola';
 import { Part, NoteRow, Note } from './song';
 import { Timer } from '../synth/timer';
 import { ModernAudioContext } from '../utils/modern';
+import { focusable } from '../utils/modern';
 
 export class PartBox {
 	playing = false;
@@ -73,7 +74,8 @@ export class PartBox {
 			if (oe.deltaMode == 1) dy *= 100 / 3;
 			this.updateRowOfs(dy / 10);
 		});
-		$('body').on('keydown', evt => {
+		const $e = focusable(this.pianola.parent[0]);
+		$($e).on('keydown', evt => {
 			let dy = 0;
 			switch (evt.keyCode) {
 				case 33: dy = -4; break;

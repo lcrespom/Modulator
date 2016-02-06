@@ -1,6 +1,7 @@
 import { SynthUI } from './synthUI';
 import * as popups from '../utils/popups';
 import * as file from '../utils/file';
+import { focusable } from '../utils/modern';
 
 const MAX_PRESETS = 20;
 
@@ -17,7 +18,7 @@ export class Presets {
 
 	constructor(synthUI: SynthUI) {
 		this.synthUI = synthUI;
-		this.registerListeners();
+		this.registerListeners(synthUI.gr.canvas);
 		this.loadPresets();
 	}
 
@@ -45,12 +46,12 @@ export class Presets {
 		};
 	}
 
-	registerListeners() {
+	registerListeners(elem) {
 		$('#save-but').click(_ => this.savePreset());
 		$('#load-file').on('change', evt  => this.loadPreset(evt));
 		$('#prev-preset-but').click(_ => this.changePreset(this.presetNum - 1));
 		$('#next-preset-but').click(_ => this.changePreset(this.presetNum + 1));
-		$('body').keydown(evt => {
+		$(focusable(elem)).keydown(evt => {
 			if (evt.target.nodeName == 'INPUT' || popups.isOpen) return;
 			if (evt.keyCode == 37) this.changePreset(this.presetNum - 1);
 			if (evt.keyCode == 39) this.changePreset(this.presetNum + 1);
