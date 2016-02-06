@@ -9,14 +9,14 @@ export class Keyboard {
 
 	baseNote: number;
 
-	constructor() {
-		this.setupHandler();
+	constructor(query = 'body') {
+		this.setupHandler(query);
 		this.baseNote = BASE_NOTE;
 	}
 
-	setupHandler() {
+	setupHandler(query) {
 		const pressedKeys = {};
-		$('body')
+		$(query)
 		.on('keydown', evt => {
 			if (pressedKeys[evt.keyCode]) return;					// Skip repetitions
 			if (evt.metaKey || evt.altKey || evt.ctrlKey) return;	// Skip browser shortcuts

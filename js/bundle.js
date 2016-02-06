@@ -50,11 +50,13 @@
 	var synthUI_1 = __webpack_require__(1);
 	var noteInputs_1 = __webpack_require__(12);
 	var presets_1 = __webpack_require__(19);
-	var routes_1 = __webpack_require__(23);
+	var routes_1 = __webpack_require__(20);
+	var tracker_1 = __webpack_require__(21);
 	var graphCanvas = $('#graph-canvas')[0];
-	var synthUI = new synthUI_1.SynthUI(createAudioContext(), graphCanvas, $('#node-params'), $('#audio-graph-fft'), $('#audio-graph-osc'));
+	var ac = createAudioContext();
+	var synthUI = new synthUI_1.SynthUI(ac, graphCanvas, $('#node-params'), $('#audio-graph-fft'), $('#audio-graph-osc'));
 	setupPanels();
-	routes_1.setupRoutes();
+	routes_1.setupRoutes('#synth').then(function (_) { return tracker_1.setupTracker(ac); });
 	function createAudioContext() {
 	    var CtxClass = window.AudioContext || window.webkitAudioContext;
 	    return new CtxClass();
@@ -2115,7 +2117,7 @@
 	    }
 	    NoteInputs.prototype.setupPCKeyboard = function (piano) {
 	        var _this = this;
-	        var kb = new keyboard_1.Keyboard();
+	        var kb = new keyboard_1.Keyboard('#synth');
 	        kb.noteOn = function (midi) {
 	            if (document.activeElement.nodeName == 'INPUT' &&
 	                document.activeElement.getAttribute('type') != 'range')
@@ -2216,14 +2218,15 @@
 	 * Listens to keyboard events and generates MIDI-style noteOn/noteOff events.
 	 */
 	var Keyboard = (function () {
-	    function Keyboard() {
-	        this.setupHandler();
+	    function Keyboard(query) {
+	        if (query === void 0) { query = 'body'; }
+	        this.setupHandler(query);
 	        this.baseNote = BASE_NOTE;
 	    }
-	    Keyboard.prototype.setupHandler = function () {
+	    Keyboard.prototype.setupHandler = function (query) {
 	        var _this = this;
 	        var pressedKeys = {};
-	        $('body')
+	        $(query)
 	            .on('keydown', function (evt) {
 	            if (pressedKeys[evt.keyCode])
 	                return; // Skip repetitions
@@ -3064,28 +3067,509 @@
 
 
 /***/ },
-/* 20 */,
-/* 21 */,
-/* 22 */,
-/* 23 */
+/* 20 */
 /***/ function(module, exports) {
 
 	var tracker, synth;
-	function setupRoutes() {
-	    loadPages();
+	function setupRoutes(mainRoute) {
 	    window.onhashchange = showPageFromHash;
-	    showPageFromHash();
+	    showPageFromHash(mainRoute);
+	    return loadPages();
 	}
 	exports.setupRoutes = setupRoutes;
-	function showPageFromHash() {
+	function showPageFromHash(mainRoute) {
+	    var hash = location.hash || mainRoute;
 	    $('#page > div').hide();
-	    $(location.hash).show();
+	    $(hash).show().css('outline', 'none').focus();
 	}
 	function loadPages() {
-	    $.get('tracker.html', function (data) {
-	        $('#tracker').empty().append(data);
+	    return new Promise(function (resolve) {
+	        $.get('tracker.html', function (data) {
+	            $('#tracker').empty().append(data);
+	            resolve();
+	        });
 	    });
 	}
+
+
+/***/ },
+/* 21 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var tracker = __webpack_require__(22);
+	var pianola_1 = __webpack_require__(23);
+	var partUI_1 = __webpack_require__(24);
+	var instrument_1 = __webpack_require__(18);
+	function rowWithNotes() {
+	    var notes = [];
+	    for (var _i = 0; _i < arguments.length; _i++) {
+	        notes[_i - 0] = arguments[_i];
+	    }
+	    var nr = new tracker.NoteRow();
+	    nr.notes = notes;
+	    return nr;
+	}
+	function createNotes() {
+	    var rows = [];
+	    var i = 0;
+	    rows[i] = rowWithNotes(tracker.Note.on(48));
+	    i += 4;
+	    rows[i] = rowWithNotes(tracker.Note.off(48), tracker.Note.on(55));
+	    i += 4;
+	    rows[i++] = rowWithNotes(tracker.Note.off(55), tracker.Note.on(53));
+	    rows[i++] = rowWithNotes(tracker.Note.off(53), tracker.Note.on(52));
+	    rows[i++] = rowWithNotes(tracker.Note.off(52), tracker.Note.on(50));
+	    rows[i] = rowWithNotes(tracker.Note.off(50), tracker.Note.on(60));
+	    i += 5;
+	    rows[i] = rowWithNotes(tracker.Note.off(60), tracker.Note.on(55));
+	    i += 4;
+	    rows[i++] = rowWithNotes(tracker.Note.off(55), tracker.Note.on(53));
+	    rows[i++] = rowWithNotes(tracker.Note.off(53), tracker.Note.on(52));
+	    rows[i++] = rowWithNotes(tracker.Note.off(52), tracker.Note.on(50));
+	    rows[i] = rowWithNotes(tracker.Note.off(50), tracker.Note.on(60));
+	    i += 5;
+	    rows[i] = rowWithNotes(tracker.Note.off(60), tracker.Note.on(55));
+	    i += 4;
+	    rows[i++] = rowWithNotes(tracker.Note.off(55), tracker.Note.on(53));
+	    rows[i++] = rowWithNotes(tracker.Note.off(53), tracker.Note.on(52));
+	    rows[i++] = rowWithNotes(tracker.Note.off(52), tracker.Note.on(53));
+	    rows[i] = rowWithNotes(tracker.Note.off(53), tracker.Note.on(50));
+	    i += 5;
+	    rows[i] = rowWithNotes(tracker.Note.off(50));
+	    return rows;
+	}
+	function starWars(ac) {
+	    var p = new tracker.Part();
+	    p.voices = 4;
+	    var json = {
+	        nodes: [
+	            { id: 0, inputs: [1] },
+	            { id: 1, inputs: [] }
+	        ],
+	        nodeData: [
+	            { type: 'out', params: {} },
+	            { type: 'Oscillator', params: { frequency: 440, detune: 0, type: 'square' } }
+	        ]
+	    };
+	    p.instrument = new instrument_1.Instrument(ac, json, p.voices);
+	    p.name = 'Main theme';
+	    p.rows = createNotes();
+	    var t = new tracker.Track();
+	    t.parts.push(p);
+	    var s = new tracker.Song();
+	    s.title = 'Star Wars';
+	    s.bpm = 90;
+	    s.tracks.push(t);
+	    return s;
+	}
+	//--------------------------------------------------
+	function setupTracker(ac) {
+	    var sw = starWars(ac);
+	    var part = sw.tracks[0].parts[0];
+	    var pianola = new pianola_1.Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
+	    var pbox = new partUI_1.PartBox(ac, $('#part-box'), part, pianola);
+	}
+	exports.setupTracker = setupTracker;
+
+
+/***/ },
+/* 22 */
+/***/ function(module, exports) {
+
+	var Note = (function () {
+	    function Note(type, midi, velocity) {
+	        if (velocity === void 0) { velocity = 1; }
+	        this.type = type;
+	        this.midi = midi;
+	        this.velocity = velocity;
+	    }
+	    Note.on = function (midi, velocity) {
+	        if (velocity === void 0) { velocity = 1; }
+	        return new Note(Note.NoteOn, midi, velocity);
+	    };
+	    Note.off = function (midi, velocity) {
+	        if (velocity === void 0) { velocity = 1; }
+	        return new Note(Note.NoteOff, midi, velocity);
+	    };
+	    Note.NoteOn = 0;
+	    Note.NoteOff = 1;
+	    return Note;
+	})();
+	exports.Note = Note;
+	var NoteRow = (function () {
+	    function NoteRow() {
+	        this.notes = [];
+	        this.commands = [];
+	    }
+	    return NoteRow;
+	})();
+	exports.NoteRow = NoteRow;
+	var Part = (function () {
+	    function Part() {
+	        this.rows = [];
+	    }
+	    Part.prototype.playRow = function (rowNum, when, offDelay) {
+	        if (offDelay === void 0) { offDelay = 0; }
+	        var row = this.rows[rowNum];
+	        if (!row)
+	            return;
+	        for (var _i = 0, _a = row.notes; _i < _a.length; _i++) {
+	            var note = _a[_i];
+	            if (note.type == Note.NoteOn) {
+	                this.instrument.noteOn(note.midi, note.velocity, when);
+	                if (offDelay)
+	                    this.instrument.noteOff(note.midi, 1, when + offDelay);
+	            }
+	            else if (note.type == Note.NoteOff)
+	                this.instrument.noteOff(note.midi, note.velocity, when);
+	        }
+	    };
+	    Part.prototype.playNote = function (note, when, offDelay) {
+	        if (offDelay === void 0) { offDelay = 0.5; }
+	        this.instrument.noteOn(note.midi, note.velocity, when);
+	        this.instrument.noteOff(note.midi, 1, when + offDelay);
+	    };
+	    return Part;
+	})();
+	exports.Part = Part;
+	var Track = (function () {
+	    function Track() {
+	        this.parts = [];
+	    }
+	    return Track;
+	})();
+	exports.Track = Track;
+	var Song = (function () {
+	    function Song() {
+	        this.tracks = [];
+	    }
+	    Song.prototype.play = function () { };
+	    Song.prototype.stop = function () { };
+	    return Song;
+	})();
+	exports.Song = Song;
+
+
+/***/ },
+/* 23 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var tracker = __webpack_require__(22);
+	var piano_1 = __webpack_require__(15);
+	var keyboard_1 = __webpack_require__(13);
+	var midi_1 = __webpack_require__(14);
+	var NUM_WHITES = 28;
+	var BASE_NOTE = 24;
+	var NOTE_COLOR = '#0CC';
+	var COLUMN_COLOR = '#E0E0E0';
+	var Pianola = (function () {
+	    function Pianola($past, $piano, $future) {
+	        this.pkh = new PianoKeyHelper(new piano_1.PianoKeys(NUM_WHITES), $piano);
+	        this.past = new NoteCanvas($past, NUM_WHITES * 2, this.pkh);
+	        this.future = new NoteCanvas($future, NUM_WHITES * 2, this.pkh);
+	        this.notes = [];
+	        this.parent = $piano.parent();
+	    }
+	    Pianola.prototype.render = function (part, currentRow) {
+	        this.notes = [];
+	        this.past.paintNoteColumns(this.past.numRows - currentRow, this.past.numRows);
+	        this.future.paintNoteColumns(0, part.rows.length - currentRow - 1);
+	        for (var i = 0; i < part.rows.length; i++) {
+	            var row = part.rows[i];
+	            this.updateNotes(part.rows[i]);
+	            if (i < currentRow)
+	                this.renderPastRow(i, currentRow);
+	            else if (i == currentRow)
+	                this.renderCurrentRow();
+	            else
+	                this.renderFutureRow(i, currentRow);
+	        }
+	    };
+	    Pianola.prototype.renderPastRow = function (rowNum, currentRow) {
+	        var y = this.past.numRows - currentRow + rowNum;
+	        this.renderCanvasRow(this.past, rowNum, y);
+	    };
+	    Pianola.prototype.renderCurrentRow = function () {
+	        this.pkh.reset();
+	        for (var _i = 0, _a = this.notes; _i < _a.length; _i++) {
+	            var note = _a[_i];
+	            this.pkh.keyDown(note);
+	        }
+	    };
+	    Pianola.prototype.renderFutureRow = function (rowNum, currentRow) {
+	        var y = rowNum - currentRow - 1;
+	        this.renderCanvasRow(this.future, rowNum, y);
+	    };
+	    Pianola.prototype.renderCanvasRow = function (nc, rowNum, y) {
+	        nc.renderNoteRow(y, this.notes);
+	        if (rowNum % 4 == 0)
+	            nc.renderBar(y);
+	    };
+	    Pianola.prototype.updateNotes = function (row) {
+	        var rowNotes = row && row.notes ? row.notes : [];
+	        var note;
+	        for (var _i = 0; _i < rowNotes.length; _i++) {
+	            note = rowNotes[_i];
+	            if (note.type == tracker.Note.NoteOn)
+	                this.notes.push(note.midi);
+	            else if (note.type == tracker.Note.NoteOff)
+	                this.notes = this.notes.filter(function (midi) { return midi != note.midi; });
+	        }
+	    };
+	    Pianola.prototype.calcNotesAtRow = function (part, row) {
+	        this.notes = [];
+	        for (var i = 0; i <= row; i++)
+	            this.updateNotes(part.rows[i]);
+	        return this.notes;
+	    };
+	    return Pianola;
+	})();
+	exports.Pianola = Pianola;
+	var PianoKeyHelper = (function () {
+	    function PianoKeyHelper(pk, $elem) {
+	        var _this = this;
+	        this.pk = pk;
+	        // Setup virtual keyboard
+	        this.keys = this.pk.createKeys($elem);
+	        for (var i = 0; i < this.keys.length; i++)
+	            this.registerKeyClick(i);
+	        // Setup PC keyboard
+	        var kb = new keyboard_1.Keyboard('#tracker');
+	        kb.noteOn = function (midi) { return _this.noteOn(midi, 1); };
+	        // Setup MIDI keyboard
+	        var mk = new midi_1.MidiKeyboard();
+	        mk.noteOn = function (midi, velocity, channel) { return _this.noteOn(midi, velocity); };
+	    }
+	    PianoKeyHelper.prototype.registerKeyClick = function (i) {
+	        var _this = this;
+	        this.keys[i].mousedown(function (_) { return _this.noteOn(i + BASE_NOTE, 1); });
+	    };
+	    PianoKeyHelper.prototype.getKey = function (midi) {
+	        return this.keys[midi - BASE_NOTE];
+	    };
+	    PianoKeyHelper.prototype.keyDown = function (midi) {
+	        var key = this.getKey(midi);
+	        key.addClass('piano-key-pressed');
+	    };
+	    PianoKeyHelper.prototype.keyUp = function (midi) {
+	        var key = this.getKey(midi);
+	        key.removeClass('piano-key-pressed');
+	    };
+	    PianoKeyHelper.prototype.reset = function () {
+	        for (var _i = 0, _a = this.keys; _i < _a.length; _i++) {
+	            var key = _a[_i];
+	            key.removeClass('piano-key-pressed');
+	        }
+	    };
+	    PianoKeyHelper.prototype.noteOn = function (midi, velocity) { };
+	    return PianoKeyHelper;
+	})();
+	var NoteCanvas = (function () {
+	    function NoteCanvas($canvas, numKeys, pkh) {
+	        this.canvas = $canvas[0];
+	        this.gc = this.canvas.getContext('2d');
+	        this.numKeys = numKeys;
+	        this.pkh = pkh;
+	        this.noteW = this.canvas.width / this.numKeys;
+	        this.noteH = this.noteW;
+	        this.numRows = Math.floor(this.canvas.height / this.noteH);
+	    }
+	    NoteCanvas.prototype.paintNoteColumns = function (fromRow, toRow) {
+	        this.gc.clearRect(0, 0, this.canvas.width, this.canvas.height);
+	        var x = this.noteW / 2;
+	        this.gc.fillStyle = COLUMN_COLOR;
+	        var oldx = 0;
+	        var colY = fromRow * this.noteH;
+	        var colH = (toRow + 1) * this.noteH - colY;
+	        for (var i = 0; i < this.numKeys - 1; i++) {
+	            if (i % 2)
+	                this.gc.fillRect(Math.round(x) - 1, colY, Math.round(x - oldx), colH);
+	            oldx = x;
+	            x += this.noteW;
+	        }
+	    };
+	    NoteCanvas.prototype.renderNoteRow = function (y, notes) {
+	        var yy = y * this.noteH;
+	        if (yy + this.noteH < 0 || yy > this.canvas.height)
+	            return;
+	        this.gc.fillStyle = NOTE_COLOR;
+	        var xOffset = $(this.canvas).offset().left;
+	        for (var _i = 0; _i < notes.length; _i++) {
+	            var midi = notes[_i];
+	            var $key = this.pkh.getKey(midi);
+	            var x = $key.offset().left - xOffset;
+	            x -= $key.hasClass('piano-black') ? 7.5 : 4;
+	            this.gc.fillRect(x, yy, this.noteW, this.noteH);
+	        }
+	    };
+	    NoteCanvas.prototype.renderBar = function (y) {
+	        var yy = y * this.noteH - 0.5;
+	        this.gc.save();
+	        this.gc.strokeStyle = 'black';
+	        this.gc.setLineDash([1, 4]);
+	        this.gc.beginPath();
+	        this.gc.moveTo(0, yy);
+	        this.gc.lineTo(this.canvas.width, yy);
+	        this.gc.stroke();
+	        this.gc.closePath();
+	        this.gc.restore();
+	    };
+	    return NoteCanvas;
+	})();
+
+
+/***/ },
+/* 24 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var song_1 = __webpack_require__(22);
+	var timer_1 = __webpack_require__(17);
+	var PartBox = (function () {
+	    function PartBox(ac, $elem, part, pianola) {
+	        var _this = this;
+	        this.playing = false;
+	        this.rowNum = 0;
+	        this.ac = ac;
+	        this.$play = $elem.find('.play');
+	        this.$play.click(function (_) { return _this.play(); });
+	        this.part = part;
+	        this.pianola = pianola;
+	        this.pianola.render(this.part, this.rowNum);
+	        this.registerPianolaScroll();
+	        this.pianola.pkh.noteOn = function (midi, velocity) { return _this.editNote(midi, velocity); };
+	        this.rowOfs = 0;
+	    }
+	    PartBox.prototype.play = function () {
+	        var _this = this;
+	        if (!this.part)
+	            return;
+	        this.playing = !this.playing;
+	        if (this.playing) {
+	            this.setButIcon(this.$play, 'pause');
+	            this.timer = new timer_1.Timer(this.ac, 90);
+	            this.timer.start(function (when) {
+	                _this.part.playRow(_this.rowNum, when);
+	                _this.pianola.render(_this.part, _this.rowNum++);
+	                _this.rowOfs = _this.rowNum;
+	                if (_this.rowNum > _this.part.rows.length)
+	                    _this.stop();
+	            });
+	        }
+	        else {
+	            this.pause();
+	        }
+	    };
+	    PartBox.prototype.pause = function () {
+	        this.setButIcon(this.$play, 'play');
+	        this.timer.stop();
+	        this.part.instrument.allNotesOff();
+	    };
+	    PartBox.prototype.stop = function () {
+	        this.pause();
+	        this.playing = false;
+	        this.rowNum = 0;
+	    };
+	    PartBox.prototype.setButIcon = function ($but, icon) {
+	        var $glyph = $but.find('.glyphicon');
+	        var classes = $glyph.attr('class').split(/\s+/)
+	            .filter(function (c) { return !c.match(/glyphicon-/); }).concat('glyphicon-' + icon);
+	        $glyph.attr('class', classes.join(' '));
+	    };
+	    PartBox.prototype.registerPianolaScroll = function () {
+	        var _this = this;
+	        this.pianola.parent.on('wheel', function (evt) {
+	            if (_this.playing)
+	                return;
+	            var oe = evt.originalEvent;
+	            evt.preventDefault();
+	            var dy = oe.deltaY;
+	            if (oe.deltaMode == 1)
+	                dy *= 100 / 3;
+	            _this.updateRowOfs(dy / 10);
+	        });
+	        $('body').on('keydown', function (evt) {
+	            var dy = 0;
+	            switch (evt.keyCode) {
+	                case 33:
+	                    dy = -4;
+	                    break;
+	                case 34:
+	                    dy = +4;
+	                    break;
+	                case 38:
+	                    dy = -1;
+	                    break;
+	                case 40:
+	                    dy = +1;
+	                    break;
+	                default: return;
+	            }
+	            _this.updateRowOfs(dy);
+	        });
+	    };
+	    PartBox.prototype.updateRowOfs = function (dy) {
+	        this.rowOfs += dy;
+	        if (this.rowOfs < 0)
+	            this.rowOfs = 0;
+	        else if (this.rowOfs > this.part.rows.length)
+	            this.rowOfs = this.part.rows.length;
+	        var newRow = Math.floor(this.rowOfs);
+	        if (newRow != this.rowNum) {
+	            this.rowNum = newRow;
+	            this.pianola.render(this.part, this.rowNum);
+	            this.playRowNotes();
+	        }
+	    };
+	    PartBox.prototype.playRowNotes = function () {
+	        this.part.playRow(this.rowNum, this.ac.currentTime, 0.5);
+	    };
+	    PartBox.prototype.editNote = function (midi, velocity) {
+	        var rowNotes = this.getRowNotes();
+	        var currentNotes = this.pianola.calcNotesAtRow(this.part, this.rowNum);
+	        // If Note is playing in current row
+	        if (currentNotes.some(function (n) { return n == midi; })) {
+	            if (rowNotes.some(function (n) { return n.midi == midi; })) {
+	                // If noteOn is in current row, remove it
+	                this.setRowNotes(rowNotes.filter(function (n) { return n.midi != midi; }));
+	            }
+	            else {
+	                // Otherwise cancel previous noteOn with a noteOff
+	                rowNotes.push(song_1.Note.off(midi, velocity));
+	            }
+	            this.cancelNoteOff(midi);
+	        }
+	        else {
+	            var note = song_1.Note.on(midi, velocity);
+	            rowNotes.push(note);
+	            this.part.playNote(note, this.ac.currentTime);
+	        }
+	        this.pianola.render(this.part, this.rowNum);
+	    };
+	    PartBox.prototype.cancelNoteOff = function (midi) {
+	        for (var i = this.rowNum + 1; i < this.part.rows.length; i++) {
+	            var rowNotes = this.getRowNotes(i);
+	            var thisNote = rowNotes.filter(function (n) { return n.midi == midi; });
+	            if (thisNote.length == 0)
+	                continue;
+	            if (thisNote[0].type = song_1.Note.NoteOff)
+	                this.setRowNotes(rowNotes
+	                    .filter(function (n) { return n.midi != midi || n.type == song_1.Note.NoteOn; }), i);
+	            return;
+	        }
+	    };
+	    PartBox.prototype.setRowNotes = function (notes, pos) {
+	        if (pos === void 0) { pos = this.rowNum; }
+	        this.part.rows[pos].notes = notes;
+	    };
+	    PartBox.prototype.getRowNotes = function (pos) {
+	        if (pos === void 0) { pos = this.rowNum; }
+	        if (!this.part.rows[pos])
+	            this.part.rows[pos] = new song_1.NoteRow();
+	        return this.part.rows[pos].notes;
+	    };
+	    return PartBox;
+	})();
+	exports.PartBox = PartBox;
 
 
 /***/ }

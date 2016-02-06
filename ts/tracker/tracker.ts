@@ -71,8 +71,7 @@ function starWars(ac: ModernAudioContext): tracker.Song {
 
 //--------------------------------------------------
 
-export function setupTracker() {
-	const ac = <ModernAudioContext>new AudioContext();
+export function setupTracker(ac: ModernAudioContext) {
 	const sw = starWars(ac);
 	const part = sw.tracks[0].parts[0];
 	const pianola = new Pianola($('#past-notes'), $('#piano'), $('#future-notes'));

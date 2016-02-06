@@ -48,7 +48,7 @@ export class NoteInputs {
 	}
 
 	setupPCKeyboard(piano: PianoKeyboard): Keyboard {
-		var kb = new Keyboard();
+		var kb = new Keyboard('#synth');
 		kb.noteOn = (midi) => {
 			if (document.activeElement.nodeName == 'INPUT' &&
 				document.activeElement.getAttribute('type') != 'range') return;

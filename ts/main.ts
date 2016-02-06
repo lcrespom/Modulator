@@ -7,12 +7,15 @@ import { NoteInputs } from './piano/noteInputs'
 import { Presets } from './synthUI/presets';
 import { ModernWindow, ModernAudioContext } from './utils/modern';
 import { setupRoutes } from './utils/routes';
+import { setupTracker } from './tracker/tracker';
 
 const graphCanvas = <HTMLCanvasElement>$('#graph-canvas')[0];
-const synthUI = new SynthUI(createAudioContext(), graphCanvas,
+const ac = createAudioContext();
+const synthUI = new SynthUI(ac, graphCanvas,
 	$('#node-params'), $('#audio-graph-fft'), $('#audio-graph-osc'));
+
 setupPanels();
-setupRoutes();
+setupRoutes('#synth').then(_ => setupTracker(ac));
 
 function createAudioContext(): ModernAudioContext {
 	const CtxClass: any = window.AudioContext || window.webkitAudioContext;
