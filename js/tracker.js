@@ -111,11 +111,14 @@
 	    return s;
 	}
 	//--------------------------------------------------
-	var ac = new AudioContext();
-	var sw = starWars(ac);
-	var part = sw.tracks[0].parts[0];
-	var pianola = new pianola_1.Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
-	var pbox = new partUI_1.PartBox(ac, $('#part-box'), part, pianola);
+	function setupTracker() {
+	    var ac = new AudioContext();
+	    var sw = starWars(ac);
+	    var part = sw.tracks[0].parts[0];
+	    var pianola = new pianola_1.Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
+	    var pbox = new partUI_1.PartBox(ac, $('#part-box'), part, pianola);
+	}
+	exports.setupTracker = setupTracker;
 
 
 /***/ },

@@ -1,10 +1,10 @@
-import * as tracker from './tracker/song';
-import { Pianola } from './tracker/pianola';
-import { PartBox } from './tracker/partUI';
+import * as tracker from './song';
+import { Pianola } from './pianola';
+import { PartBox } from './partUI';
 
-import { Instrument } from './synth/instrument';
+import { Instrument } from '../synth/instrument';
 
-import { ModernAudioContext } from './utils/modern';
+import { ModernAudioContext } from '../utils/modern';
 
 
 function rowWithNotes(...notes): tracker.NoteRow {
@@ -71,9 +71,10 @@ function starWars(ac: ModernAudioContext): tracker.Song {
 
 //--------------------------------------------------
 
-const ac = <ModernAudioContext>new AudioContext();
-const sw = starWars(ac);
-
-const part = sw.tracks[0].parts[0];
-const pianola = new Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
-const pbox = new PartBox(ac, $('#part-box'), part, pianola);
+export function setupTracker() {
+	const ac = <ModernAudioContext>new AudioContext();
+	const sw = starWars(ac);
+	const part = sw.tracks[0].parts[0];
+	const pianola = new Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
+	const pbox = new PartBox(ac, $('#part-box'), part, pianola);
+}

@@ -6,12 +6,13 @@ import { SynthUI } from './synthUI/synthUI';
 import { NoteInputs } from './piano/noteInputs'
 import { Presets } from './synthUI/presets';
 import { ModernWindow, ModernAudioContext } from './utils/modern';
+import { setupRoutes } from './utils/routes';
 
 const graphCanvas = <HTMLCanvasElement>$('#graph-canvas')[0];
 const synthUI = new SynthUI(createAudioContext(), graphCanvas,
 	$('#node-params'), $('#audio-graph-fft'), $('#audio-graph-osc'));
 setupPanels();
-
+setupRoutes();
 
 function createAudioContext(): ModernAudioContext {
 	const CtxClass: any = window.AudioContext || window.webkitAudioContext;

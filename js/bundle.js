@@ -50,9 +50,11 @@
 	var synthUI_1 = __webpack_require__(1);
 	var noteInputs_1 = __webpack_require__(12);
 	var presets_1 = __webpack_require__(19);
+	var routes_1 = __webpack_require__(23);
 	var graphCanvas = $('#graph-canvas')[0];
 	var synthUI = new synthUI_1.SynthUI(createAudioContext(), graphCanvas, $('#node-params'), $('#audio-graph-fft'), $('#audio-graph-osc'));
 	setupPanels();
+	routes_1.setupRoutes();
 	function createAudioContext() {
 	    var CtxClass = window.AudioContext || window.webkitAudioContext;
 	    return new CtxClass();
@@ -3059,6 +3061,31 @@
 	    return Presets;
 	})();
 	exports.Presets = Presets;
+
+
+/***/ },
+/* 20 */,
+/* 21 */,
+/* 22 */,
+/* 23 */
+/***/ function(module, exports) {
+
+	var tracker, synth;
+	function setupRoutes() {
+	    loadPages();
+	    window.onhashchange = showPageFromHash;
+	    showPageFromHash();
+	}
+	exports.setupRoutes = setupRoutes;
+	function showPageFromHash() {
+	    $('#page > div').hide();
+	    $(location.hash).show();
+	}
+	function loadPages() {
+	    $.get('tracker.html', function (data) {
+	        $('#tracker').empty().append(data);
+	    });
+	}
 
 
 /***/ }
