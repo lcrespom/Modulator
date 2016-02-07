@@ -59,7 +59,7 @@ function renderParamControl(ndata: NodeData, panel: JQuery): JQuery {
 	return combo.parent();
 }
 
-const renderMethods = {
+const customRenderMethods = {
 	renderBufferData
 };
 
@@ -77,7 +77,7 @@ function renderOtherParam(anode: AudioNode, ndef: NodeDef, param: string, panel:
 	else if (typeof pdef.initial == 'boolean')
 		return renderBoolean(panel, pdef, param, anode, ucfirst(param));
 	else if (pdef.phandler)
-		return renderMethods[pdef.phandler.uiRender](panel, pdef, anode, param, ucfirst(param));
+		return customRenderMethods[pdef.phandler.uiRender](panel, pdef, anode, param, ucfirst(param));
 }
 
 

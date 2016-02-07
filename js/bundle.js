@@ -1867,7 +1867,7 @@
 	    });
 	    return combo.parent();
 	}
-	var renderMethods = {
+	var customRenderMethods = {
 	    renderBufferData: renderBufferData
 	};
 	function renderOtherParam(anode, ndef, param, panel) {
@@ -1884,7 +1884,7 @@
 	    else if (typeof pdef.initial == 'boolean')
 	        return renderBoolean(panel, pdef, param, anode, ucfirst(param));
 	    else if (pdef.phandler)
-	        return renderMethods[pdef.phandler.uiRender](panel, pdef, anode, param, ucfirst(param));
+	        return customRenderMethods[pdef.phandler.uiRender](panel, pdef, anode, param, ucfirst(param));
 	}
 	function renderSlider(panel, pdef, param, value, setValue) {
 	    var sliderBox = $('<div class="slider-box">');
