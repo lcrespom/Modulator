@@ -3079,7 +3079,7 @@
 /* 20 */
 /***/ function(module, exports) {
 
-	var tracker, synth;
+	var oldPage = null;
 	function setupRoutes(mainRoute) {
 	    window.onhashchange = showPageFromHash;
 	    showPageFromHash(mainRoute);
@@ -3090,6 +3090,10 @@
 	    var hash = location.hash || mainRoute;
 	    $('#page > div').hide();
 	    $(hash).show().css('outline', 'none').focus();
+	    if (oldPage)
+	        $(document).trigger('route:hide', oldPage);
+	    $(document).trigger('route:show', hash);
+	    oldPage = hash;
 	}
 	function loadPages() {
 	    return new Promise(function (resolve) {
@@ -3177,6 +3181,10 @@
 	    var part = sw.tracks[0].parts[0];
 	    var pianola = new pianola_1.Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
 	    var pbox = new partUI_1.PartBox(ac, $('#part-box'), part, pianola);
+	    $(document).on('route:show', function (e, page) {
+	        if (page == '#tracker')
+	            pianola.render(pbox.part, pbox.rowNum);
+	    });
 	}
 	exports.setupTracker = setupTracker;
 

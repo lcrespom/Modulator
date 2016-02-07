@@ -103,9 +103,8 @@
 
 
 ##Tracker
-- Integrate with synth / feature toggle to disable until ready
-	- Minor bug: bad render upon first show
 - Tracks
+	- display track rows and content
 	- add / remove track
 - Parts
 	- Code cleanup for parts with empty notes: create always default empty note array

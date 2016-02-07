@@ -76,4 +76,7 @@ export function setupTracker(ac: ModernAudioContext) {
 	const part = sw.tracks[0].parts[0];
 	const pianola = new Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
 	const pbox = new PartBox(ac, $('#part-box'), part, pianola);
+	$(document).on('route:show', (e, page) => {
+		if (page == '#tracker') pianola.render(pbox.part, pbox.rowNum);
+	});
 }
