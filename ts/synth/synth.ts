@@ -42,9 +42,8 @@ export class Portamento {
 
 //TODO *** refactor & decouple from UI
 interface ParamHandler {
+	uiRender: string;
 	initialize(anode: AudioNode, def: NodeDef): void;
-	renderParam(panel: JQuery, pdef: NodeParamDef,
-		anode: AudioNode, param: string, label: string): JQuery;
 	param2json(anode: AudioNode): any;
 	json2param(anode: AudioNode, json: any);
 }
@@ -236,26 +235,9 @@ export class Synth {
 
 class BufferData implements ParamHandler {
 
-	initialize(anode: AudioNode, def: NodeDef): void {}
+	uiRender = 'renderBufferData';
 
-	renderParam(panel: JQuery, pdef: NodeParamDef,
-		anode: AudioNode, param: string, label: string): JQuery {
-		const box = $('<div class="choice-box">');
-		const button = $(`
-			<span class="btn btn-primary upload">
-				<input type="file" id="load-file">
-				Load&nbsp;
-				<span class="glyphicon glyphicon-open" aria-hidden="true"></span>
-			</span>`);
-		box.append(button);
-		button.after('<br/><br/>' + label);
-		panel.append(box);
-		button.find('input').change(evt => file.uploadArrayBuffer(evt, soundFile => {
-			anode['_encoded'] = soundFile;
-			anode.context.decodeAudioData(soundFile, buffer => anode['_buffer'] = buffer);
-		}));
-		return box;
-	}
+	initialize(anode: AudioNode, def: NodeDef): void {}
 
 	param2json(anode: AudioNode): any {
 		return file.arrayBufferToBase64(anode['_encoded']);

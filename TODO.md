@@ -147,8 +147,6 @@
 ##Code
 - Provide an interface that predefines the very common noteOn / noteOff methods
 - Decoupling
-	- synth.ts contains BufferData ParamHandler,
-		which has UI code that should be moved elsewhere
 	- The *piano* module group should not contain UI code. Therefore,
 		module piano.ts should be moved out of it, and the dependency
 		should be reversed so that the *piano* module group is
@@ -160,10 +158,7 @@
 	Just do a global search for `$('#` and review all matches not in main.ts.
 - Review jQuery event registration to check that no event gets registered
 	more than once
-- Move all generic code to modern.ts
-	- Review for very common code to be placed in there
 - Extract the following independent npm modules:
 	- graph.ts
 	- An npm module with all code in the synth folder
 - Improve code to clean hack that checks for custom nodes when connecting.
-

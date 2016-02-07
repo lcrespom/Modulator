@@ -2,6 +2,7 @@ import { Node } from './graph';
 import { NodeData } from '../synth/synth';
 import { NodeDef, NodeParamDef } from '../synth/palette';
 import { log2linear, linear2log } from '../utils/modern';
+import * as file from '../utils/file';
 
 /**
  * Renders the UI controls associated with the parameters of a given node
@@ -58,6 +59,10 @@ function renderParamControl(ndata: NodeData, panel: JQuery): JQuery {
 	return combo.parent();
 }
 
+const renderMethods = {
+	renderBufferData
+};
+
 function renderOtherParam(anode: AudioNode, ndef: NodeDef, param: string, panel: JQuery): JQuery {
 	const pdef: NodeParamDef = ndef.params[param];
 	if (pdef.choices) {
@@ -72,7 +77,7 @@ function renderOtherParam(anode: AudioNode, ndef: NodeDef, param: string, panel:
 	else if (typeof pdef.initial == 'boolean')
 		return renderBoolean(panel, pdef, param, anode, ucfirst(param));
 	else if (pdef.phandler)
-		return pdef.phandler.renderParam(panel, pdef, anode, param, ucfirst(param));
+		return renderMethods[pdef.phandler.uiRender](panel, pdef, anode, param, ucfirst(param));
 }
 
 
@@ -156,6 +161,28 @@ function slider2param(sliderValue: number, pdef: NodeParamDef): number {
 		return pdef.min + sliderValue * (pdef.max - pdef.min);
 	else
 		return log2linear(sliderValue, pdef.min, pdef.max);
+}
+
+
+//-------------------- Custom parameter rendering --------------------
+
+function renderBufferData(panel: JQuery, pdef: NodeParamDef,
+	anode: AudioNode, param: string, label: string): JQuery {
+	const box = $('<div class="choice-box">');
+	const button = $(`
+		<span class="btn btn-primary upload">
+			<input type="file" id="load-file">
+			Load&nbsp;
+			<span class="glyphicon glyphicon-open" aria-hidden="true"></span>
+		</span>`);
+	box.append(button);
+	button.after('<br/><br/>' + label);
+	panel.append(box);
+	button.find('input').change(evt => file.uploadArrayBuffer(evt, soundFile => {
+		anode['_encoded'] = soundFile;
+		anode.context.decodeAudioData(soundFile, buffer => anode['_buffer'] = buffer);
+	}));
+	return box;
 }
 
 

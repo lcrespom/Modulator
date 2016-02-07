@@ -280,20 +280,9 @@
 	//-------------------- Parameter handlers --------------------
 	var BufferData = (function () {
 	    function BufferData() {
+	        this.uiRender = 'renderBufferData';
 	    }
 	    BufferData.prototype.initialize = function (anode, def) { };
-	    BufferData.prototype.renderParam = function (panel, pdef, anode, param, label) {
-	        var box = $('<div class="choice-box">');
-	        var button = $("\n\t\t\t<span class=\"btn btn-primary upload\">\n\t\t\t\t<input type=\"file\" id=\"load-file\">\n\t\t\t\tLoad&nbsp;\n\t\t\t\t<span class=\"glyphicon glyphicon-open\" aria-hidden=\"true\"></span>\n\t\t\t</span>");
-	        box.append(button);
-	        button.after('<br/><br/>' + label);
-	        panel.append(box);
-	        button.find('input').change(function (evt) { return file.uploadArrayBuffer(evt, function (soundFile) {
-	            anode['_encoded'] = soundFile;
-	            anode.context.decodeAudioData(soundFile, function (buffer) { return anode['_buffer'] = buffer; });
-	        }); });
-	        return box;
-	    };
 	    BufferData.prototype.param2json = function (anode) {
 	        return file.arrayBufferToBase64(anode['_encoded']);
 	    };
