@@ -285,6 +285,23 @@ class RestartableNoteHandler extends BaseNoteHandler {
 }
 
 /**
+ * Handles note events for the SoundBank source node
+ */
+class SoundBankNoteHandler extends BaseNoteHandler {
+
+	noteOn(midi: number, gain: number, ratio: number, when: number):void {
+		const bufs = this.ndata.anode['_buffers'];
+		const absn = <AudioBufferSourceNode>this.clone();
+		absn.buffer = bufs[midi % bufs.length];
+		absn.start(when);
+	}
+
+	noteOff(midi: number, gain: number, when: number): void {}
+}
+
+//-------------------- Exported note handlers --------------------
+
+/**
  * Exports available note handlers so they are used by their respective
  * nodes from the palette.
  */
@@ -293,9 +310,12 @@ export const NoteHandlers = {
 	'buffer': BufferNoteHandler,
 	'ADSR': ADSRNoteHandler,
 	'LFO': LFONoteHandler,
-	'restartable': RestartableNoteHandler
+	'restartable': RestartableNoteHandler,
+	'soundBank': SoundBankNoteHandler
 };
 
+
+//-------------------- Private classes --------------------
 
 /**
  * Tracks a node output connections and disconnections, to be used

@@ -69,7 +69,8 @@ export class Synth {
 		this.registerCustomNode('createNoiseCtrl', custom.NoiseCtrlGenerator);
 		this.registerCustomNode('createLineIn', custom.LineInNode);
 		this.registerCustomNode('createDetuner', custom.Detuner);
-		this.registerParamHandler('BufferData', new BufferData());
+		this.registerParamHandler('BufferDataHandler', new BufferDataHandler());
+		this.registerParamHandler('SoundBankHandler', new SoundBankHandler());
 	}
 
 	createAudioNode(type: string): AudioNode {
@@ -233,10 +234,8 @@ export class Synth {
 
 //-------------------- Parameter handlers --------------------
 
-class BufferData implements ParamHandler {
-
+class BufferDataHandler implements ParamHandler {
 	uiRender = 'renderBufferData';
-
 	initialize(anode: AudioNode, def: NodeDef): void {}
 
 	param2json(anode: AudioNode): any {
@@ -248,5 +247,46 @@ class BufferData implements ParamHandler {
 		anode['_encoded'] = encoded;
 		anode.context.decodeAudioData(encoded, buffer => anode['_buffer'] = buffer);
 	}
+}
 
+class SoundBankHandler implements ParamHandler {
+	uiRender = 'renderSoundBank';
+	initialize(anode: AudioNode, def: NodeDef): void {
+		anode['_buffers'] = [];
+		anode['_encodedBuffers'] = [];
+		anode['_names'] = [];
+	}
+
+	param2json(anode: AudioNode): any {
+		const files = [];
+		const encs = anode['_encodedBuffers'];
+		const names = anode['_names'];
+		for (let i = 0; i < names.length; i++)
+			files.push({
+				name: names[i],
+				data: file.arrayBufferToBase64(encs[i])
+			});
+		return files;
+	}
+
+	json2param(anode: AudioNode, json: any) {
+		const bufs = anode['_buffers'];
+		bufs.length = 0;
+		const encs = anode['_encodedBuffers'];
+		encs.length = 0;
+		const names = anode['_names'];
+		names.length = 0;
+		for (let i = 0; i < json.length; i++) {
+			const item = json[i];
+			names.push(item.name);
+			encs.push(item.data);
+			this.decodeBuffer(anode, item.data, bufs, i);
+		}
+	}
+
+	decodeBuffer(anode, data, bufs, i) {
+		const encoded = file.base64ToArrayBuffer(data);
+		anode.context.decodeAudioData(encoded, buffer => bufs[i] = buffer);
+	}
+	
 }

@@ -248,6 +248,10 @@ input[type=range][orient=vertical] {
   height: 100%;
 }
 
+.upload .glyphicon {
+	pointer-events: none;
+}
+
 /*----- Piano box -----*/
 
 .piano-box {

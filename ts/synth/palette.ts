@@ -58,7 +58,7 @@ export var palette: NodePalette = {
 			detune: OCTAVE_DETUNE,
 			buffer: {
 				initial: null,
-				handler: 'BufferData'
+				handler: 'BufferDataHandler'
 			},
 			loop: { initial: false },
 			loopStart: { initial: 0, min: 0, max: 10 },
@@ -77,6 +77,16 @@ export var palette: NodePalette = {
 		constructor: 'createLineIn',
 		custom: true,
 		params: {}
+	},
+	SoundBank: {
+		constructor: 'createBufferSource',
+		noteHandler: 'soundBank',
+		params: {
+			buffer: {
+				initial: null,
+				handler: 'SoundBankHandler'
+			}
+		}	
 	},
 	// Effects
 	Gain: {

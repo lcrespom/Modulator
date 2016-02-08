@@ -2,19 +2,19 @@
 
 export function arrayBufferToBase64(buffer) {
 	var binary = '';
-	var bytes = new Uint8Array( buffer );
+	var bytes = new Uint8Array(buffer);
 	var len = bytes.byteLength;
 	for (var i = 0; i < len; i++) {
-		binary += String.fromCharCode( bytes[ i ] );
+		binary += String.fromCharCode(bytes[i]);
 	}
-	return window.btoa( binary );
+	return window.btoa(binary);
 }
 
 export function base64ToArrayBuffer(base64) {
-	var binary_string =  window.atob(base64);
+	var binary_string = window.atob(base64);
 	var len = binary_string.length;
 	var bytes = new Uint8Array(len);
-	for (var i = 0; i < len; i++)        {
+	for (var i = 0; i < len; i++) {
 		bytes[i] = binary_string.charCodeAt(i);
 	}
 	return bytes.buffer;
@@ -40,11 +40,11 @@ export function download(fileName, fileData) {
 
 //-------------------- Uploading --------------------
 
-export function uploadText(event, cb: (text) => void) {
+export function uploadText(event, cb: (text, file) => void) {
 	upload(event, cb, 'readAsText');
 }
 
-export function uploadArrayBuffer(event, cb: (ab) => void) {
+export function uploadArrayBuffer(event, cb: (ab, file) => void) {
 	upload(event, cb, 'readAsArrayBuffer');
 }
 
@@ -52,6 +52,6 @@ function upload(event, cb, readFunc: string) {
 	if (!event.target.files || event.target.files.length <= 0) return cb(null);
 	const file = event.target.files[0];
 	const reader = new FileReader();
-	reader.onload = (loadEvt: any)  => cb(loadEvt.target.result);
+	reader.onload = (loadEvt: any)  => cb(loadEvt.target.result, file);
 	reader[readFunc](file);
 }

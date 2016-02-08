@@ -3,6 +3,7 @@ import { NodeData } from '../synth/synth';
 import { NodeDef, NodeParamDef } from '../synth/palette';
 import { log2linear, linear2log } from '../utils/modern';
 import * as file from '../utils/file';
+import * as popups from '../utils/popups';
 
 /**
  * Renders the UI controls associated with the parameters of a given node
@@ -60,7 +61,8 @@ function renderParamControl(ndata: NodeData, panel: JQuery): JQuery {
 }
 
 const customRenderMethods = {
-	renderBufferData
+	renderBufferData,
+	renderSoundBank
 };
 
 function renderOtherParam(anode: AudioNode, ndef: NodeDef, param: string, panel: JQuery): JQuery {
@@ -113,7 +115,7 @@ function renderSlider(panel: JQuery, pdef: NodeParamDef,
 
 function renderCombo(panel: JQuery, choices: string[], selected: string, label: string): JQuery {
 	const choiceBox = $('<div class="choice-box">');
-	const combo = $('<select>').attr('size', choices.length);
+	const combo = $('<select>').attr('size', choices.length || 2);
 	for (const choice of choices) {
 		const option = $('<option>').text(choice);
 		if (choice == selected) option.attr('selected', 'selected');
@@ -171,20 +173,79 @@ function renderBufferData(panel: JQuery, pdef: NodeParamDef,
 	const box = $('<div class="choice-box">');
 	const button = $(`
 		<span class="btn btn-primary upload">
-			<input type="file" id="load-file">
+			<input type="file">
 			Load&nbsp;
 			<span class="glyphicon glyphicon-open" aria-hidden="true"></span>
 		</span>`);
 	box.append(button);
 	button.after('<br/><br/>' + label);
 	panel.append(box);
-	button.find('input').change(evt => file.uploadArrayBuffer(evt, soundFile => {
-		anode['_encoded'] = soundFile;
-		anode.context.decodeAudioData(soundFile, buffer => anode['_buffer'] = buffer);
-	}));
+	let loading = true;
+	button.find('input').change(evt => {
+		// Trigger asynchronous upload & decode
+		file.uploadArrayBuffer(evt, soundFile => {
+			anode['_encoded'] = soundFile;
+			anode.context.decodeAudioData(soundFile, buffer => {
+				anode['_buffer'] = buffer;
+				loading = false;
+				//TODO capture errors and report them with popups.alert
+				popups.close();
+			});
+		});
+		// Open progress popup
+		setTimeout(_ => {
+			if (loading)
+				popups.progress('Loading and decoding audio data...');
+		}, 300);
+	});
 	return box;
 }
 
+function setComboOptions(combo, names) {
+	combo.empty();
+	for (const name of names)
+		combo.append('<option>' + name + '</option>');
+}
+
+function renderSoundBank(panel: JQuery, pdef: NodeParamDef,
+	anode: AudioNode, param: string, label: string): JQuery {
+	const combo = renderCombo(panel, [], '', 'Buffers');
+	combo.css({
+		marginBottom: '10px', marginLeft: '-20px',
+		width: '140px', height: '100px',
+		overflowX: 'auto'
+	});
+	const buttons = $(`<div style="margin-bottom: -24px">
+		<span class="btn btn-primary upload">
+			<input type="file">
+			<span class="glyphicon glyphicon-open" aria-hidden="true"></span>
+		</span>
+		&nbsp;&nbsp;&nbsp;
+		<span class="btn btn-danger">
+			<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+		</span></div>`);
+	combo.after(buttons);
+	const bufs = anode['_buffers'];
+	const encs = anode['_encodedBuffers'];
+	const names = anode['_names'];
+	setComboOptions(combo, names);
+	buttons.find('input').change(evt => {
+		// Trigger asynchronous upload & decode
+		file.uploadArrayBuffer(evt, (fileData, file) => {
+			encs.push(fileData);
+			anode.context.decodeAudioData(fileData, buffer => bufs.push(buffer));
+			names.push(file.name);
+			setComboOptions(combo, names);
+		});
+	});
+	buttons.find('.btn-danger').click(_ => {
+		const idx = names.indexOf(combo.val());
+		if (idx < 0) return;
+		[encs, bufs, names].forEach(a => a.splice(idx, 1));
+		setComboOptions(combo, names);
+	});
+	return combo.parent();
+}
 
 //-------------------- Misc utilities --------------------
 

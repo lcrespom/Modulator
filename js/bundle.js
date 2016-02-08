@@ -743,7 +743,8 @@
 	        this.registerCustomNode('createNoiseCtrl', custom.NoiseCtrlGenerator);
 	        this.registerCustomNode('createLineIn', custom.LineInNode);
 	        this.registerCustomNode('createDetuner', custom.Detuner);
-	        this.registerParamHandler('BufferData', new BufferData());
+	        this.registerParamHandler('BufferDataHandler', new BufferDataHandler());
+	        this.registerParamHandler('SoundBankHandler', new SoundBankHandler());
 	    }
 	    Synth.prototype.createAudioNode = function (type) {
 	        var def = palette_1.palette[type];
@@ -908,20 +909,60 @@
 	})();
 	exports.Synth = Synth;
 	//-------------------- Parameter handlers --------------------
-	var BufferData = (function () {
-	    function BufferData() {
+	var BufferDataHandler = (function () {
+	    function BufferDataHandler() {
 	        this.uiRender = 'renderBufferData';
 	    }
-	    BufferData.prototype.initialize = function (anode, def) { };
-	    BufferData.prototype.param2json = function (anode) {
+	    BufferDataHandler.prototype.initialize = function (anode, def) { };
+	    BufferDataHandler.prototype.param2json = function (anode) {
 	        return file.arrayBufferToBase64(anode['_encoded']);
 	    };
-	    BufferData.prototype.json2param = function (anode, json) {
+	    BufferDataHandler.prototype.json2param = function (anode, json) {
 	        var encoded = file.base64ToArrayBuffer(json);
 	        anode['_encoded'] = encoded;
 	        anode.context.decodeAudioData(encoded, function (buffer) { return anode['_buffer'] = buffer; });
 	    };
-	    return BufferData;
+	    return BufferDataHandler;
+	})();
+	var SoundBankHandler = (function () {
+	    function SoundBankHandler() {
+	        this.uiRender = 'renderSoundBank';
+	    }
+	    SoundBankHandler.prototype.initialize = function (anode, def) {
+	        anode['_buffers'] = [];
+	        anode['_encodedBuffers'] = [];
+	        anode['_names'] = [];
+	    };
+	    SoundBankHandler.prototype.param2json = function (anode) {
+	        var files = [];
+	        var encs = anode['_encodedBuffers'];
+	        var names = anode['_names'];
+	        for (var i = 0; i < names.length; i++)
+	            files.push({
+	                name: names[i],
+	                data: file.arrayBufferToBase64(encs[i])
+	            });
+	        return files;
+	    };
+	    SoundBankHandler.prototype.json2param = function (anode, json) {
+	        var bufs = anode['_buffers'];
+	        bufs.length = 0;
+	        var encs = anode['_encodedBuffers'];
+	        encs.length = 0;
+	        var names = anode['_names'];
+	        names.length = 0;
+	        for (var i = 0; i < json.length; i++) {
+	            var item = json[i];
+	            names.push(item.name);
+	            encs.push(item.data);
+	            this.decodeBuffer(anode, item.data, bufs, i);
+	        }
+	    };
+	    SoundBankHandler.prototype.decodeBuffer = function (anode, data, bufs, i) {
+	        var encoded = file.base64ToArrayBuffer(data);
+	        anode.context.decodeAudioData(encoded, function (buffer) { return bufs[i] = buffer; });
+	    };
+	    return SoundBankHandler;
 	})();
 
 
@@ -1221,6 +1262,24 @@
 	    return RestartableNoteHandler;
 	})(BaseNoteHandler);
 	/**
+	 * Handles note events for the SoundBank source node
+	 */
+	var SoundBankNoteHandler = (function (_super) {
+	    __extends(SoundBankNoteHandler, _super);
+	    function SoundBankNoteHandler() {
+	        _super.apply(this, arguments);
+	    }
+	    SoundBankNoteHandler.prototype.noteOn = function (midi, gain, ratio, when) {
+	        var bufs = this.ndata.anode['_buffers'];
+	        var absn = this.clone();
+	        absn.buffer = bufs[midi % bufs.length];
+	        absn.start(when);
+	    };
+	    SoundBankNoteHandler.prototype.noteOff = function (midi, gain, when) { };
+	    return SoundBankNoteHandler;
+	})(BaseNoteHandler);
+	//-------------------- Exported note handlers --------------------
+	/**
 	 * Exports available note handlers so they are used by their respective
 	 * nodes from the palette.
 	 */
@@ -1229,8 +1288,10 @@
 	    'buffer': BufferNoteHandler,
 	    'ADSR': ADSRNoteHandler,
 	    'LFO': LFONoteHandler,
-	    'restartable': RestartableNoteHandler
+	    'restartable': RestartableNoteHandler,
+	    'soundBank': SoundBankNoteHandler
 	};
+	//-------------------- Private classes --------------------
 	/**
 	 * Tracks a node output connections and disconnections, to be used
 	 * when cloning, removing or controlling nodes.
@@ -1343,7 +1404,7 @@
 	            detune: OCTAVE_DETUNE,
 	            buffer: {
 	                initial: null,
-	                handler: 'BufferData'
+	                handler: 'BufferDataHandler'
 	            },
 	            loop: { initial: false },
 	            loopStart: { initial: 0, min: 0, max: 10 },
@@ -1362,6 +1423,16 @@
 	        constructor: 'createLineIn',
 	        custom: true,
 	        params: {}
+	    },
+	    SoundBank: {
+	        constructor: 'createBufferSource',
+	        noteHandler: 'soundBank',
+	        params: {
+	            buffer: {
+	                initial: null,
+	                handler: 'SoundBankHandler'
+	            }
+	        }
 	    },
 	    // Effects
 	    Gain: {
@@ -1711,7 +1782,7 @@
 	        return cb(null);
 	    var file = event.target.files[0];
 	    var reader = new FileReader();
-	    reader.onload = function (loadEvt) { return cb(loadEvt.target.result); };
+	    reader.onload = function (loadEvt) { return cb(loadEvt.target.result, file); };
 	    reader[readFunc](file);
 	}
 
@@ -1810,6 +1881,7 @@
 
 	var modern_1 = __webpack_require__(5);
 	var file = __webpack_require__(8);
+	var popups = __webpack_require__(9);
 	/**
 	 * Renders the UI controls associated with the parameters of a given node
 	 */
@@ -1868,7 +1940,8 @@
 	    return combo.parent();
 	}
 	var customRenderMethods = {
-	    renderBufferData: renderBufferData
+	    renderBufferData: renderBufferData,
+	    renderSoundBank: renderSoundBank
 	};
 	function renderOtherParam(anode, ndef, param, panel) {
 	    var pdef = ndef.params[param];
@@ -1917,7 +1990,7 @@
 	}
 	function renderCombo(panel, choices, selected, label) {
 	    var choiceBox = $('<div class="choice-box">');
-	    var combo = $('<select>').attr('size', choices.length);
+	    var combo = $('<select>').attr('size', choices.length || 2);
 	    for (var _i = 0; _i < choices.length; _i++) {
 	        var choice = choices[_i];
 	        var option = $('<option>').text(choice);
@@ -1967,15 +2040,67 @@
 	//-------------------- Custom parameter rendering --------------------
 	function renderBufferData(panel, pdef, anode, param, label) {
 	    var box = $('<div class="choice-box">');
-	    var button = $("\n\t\t<span class=\"btn btn-primary upload\">\n\t\t\t<input type=\"file\" id=\"load-file\">\n\t\t\tLoad&nbsp;\n\t\t\t<span class=\"glyphicon glyphicon-open\" aria-hidden=\"true\"></span>\n\t\t</span>");
+	    var button = $("\n\t\t<span class=\"btn btn-primary upload\">\n\t\t\t<input type=\"file\">\n\t\t\tLoad&nbsp;\n\t\t\t<span class=\"glyphicon glyphicon-open\" aria-hidden=\"true\"></span>\n\t\t</span>");
 	    box.append(button);
 	    button.after('<br/><br/>' + label);
 	    panel.append(box);
-	    button.find('input').change(function (evt) { return file.uploadArrayBuffer(evt, function (soundFile) {
-	        anode['_encoded'] = soundFile;
-	        anode.context.decodeAudioData(soundFile, function (buffer) { return anode['_buffer'] = buffer; });
-	    }); });
+	    var loading = true;
+	    button.find('input').change(function (evt) {
+	        // Trigger asynchronous upload & decode
+	        file.uploadArrayBuffer(evt, function (soundFile) {
+	            anode['_encoded'] = soundFile;
+	            anode.context.decodeAudioData(soundFile, function (buffer) {
+	                anode['_buffer'] = buffer;
+	                loading = false;
+	                //TODO capture errors and report them with popups.alert
+	                popups.close();
+	            });
+	        });
+	        // Open progress popup
+	        setTimeout(function (_) {
+	            if (loading)
+	                popups.progress('Loading and decoding audio data...');
+	        }, 300);
+	    });
 	    return box;
+	}
+	function setComboOptions(combo, names) {
+	    combo.empty();
+	    for (var _i = 0; _i < names.length; _i++) {
+	        var name_1 = names[_i];
+	        combo.append('<option>' + name_1 + '</option>');
+	    }
+	}
+	function renderSoundBank(panel, pdef, anode, param, label) {
+	    var combo = renderCombo(panel, [], '', 'Buffers');
+	    combo.css({
+	        marginBottom: '10px', marginLeft: '-20px',
+	        width: '140px', height: '100px',
+	        overflowX: 'auto'
+	    });
+	    var buttons = $("<div style=\"margin-bottom: -24px\">\n\t\t<span class=\"btn btn-primary upload\">\n\t\t\t<input type=\"file\">\n\t\t\t<span class=\"glyphicon glyphicon-open\" aria-hidden=\"true\"></span>\n\t\t</span>\n\t\t&nbsp;&nbsp;&nbsp;\n\t\t<span class=\"btn btn-danger\">\n\t\t\t<span class=\"glyphicon glyphicon-trash\" aria-hidden=\"true\"></span>\n\t\t</span></div>");
+	    combo.after(buttons);
+	    var bufs = anode['_buffers'];
+	    var encs = anode['_encodedBuffers'];
+	    var names = anode['_names'];
+	    setComboOptions(combo, names);
+	    buttons.find('input').change(function (evt) {
+	        // Trigger asynchronous upload & decode
+	        file.uploadArrayBuffer(evt, function (fileData, file) {
+	            encs.push(fileData);
+	            anode.context.decodeAudioData(fileData, function (buffer) { return bufs.push(buffer); });
+	            names.push(file.name);
+	            setComboOptions(combo, names);
+	        });
+	    });
+	    buttons.find('.btn-danger').click(function (_) {
+	        var idx = names.indexOf(combo.val());
+	        if (idx < 0)
+	            return;
+	        [encs, bufs, names].forEach(function (a) { return a.splice(idx, 1); });
+	        setComboOptions(combo, names);
+	    });
+	    return combo.parent();
 	}
 	//-------------------- Misc utilities --------------------
 	function ucfirst(str) {
