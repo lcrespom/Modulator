@@ -29,9 +29,6 @@
 			- Param 1: select synth from patch list
 			- Param 2: output volume
 		- Add new "Effect In" node in the palette, to allow pure effect patches
-	- Soundbank: multiple samples, one sample per note, ideal for rythm tracks
-		- Consider multi-file upload
-		- Save samples to JSON just like buffer
 	- A proper implementation of a pitch sihfter
 		- See https://github.com/echo66/time-stretch-wac-article/blob/master/ts-ps-wac.pdf
 - Review list of pending audio nodes
@@ -42,6 +39,7 @@
 	- For calculating exponential ramp cut, the
 		[spec](https://webaudio.github.io/web-audio-api/#widl-AudioParam-exponentialRampToValueAtTime-AudioParam-float-value-double-endTime)
 		has the formula.
+- Improve soundbank: multi-file upload
 
 - Make analyzer work also in polyphonic mode
 
