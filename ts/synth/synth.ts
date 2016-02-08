@@ -279,14 +279,14 @@ class SoundBankHandler implements ParamHandler {
 		for (let i = 0; i < json.length; i++) {
 			const item = json[i];
 			names.push(item.name);
-			encs.push(item.data);
-			this.decodeBuffer(anode, item.data, bufs, i);
+			const encoded = file.base64ToArrayBuffer(item.data);
+			encs.push(encoded);
+			this.decodeBuffer(anode, encoded, bufs, i);
 		}
 	}
 
 	decodeBuffer(anode, data, bufs, i) {
-		const encoded = file.base64ToArrayBuffer(data);
-		anode.context.decodeAudioData(encoded, buffer => bufs[i] = buffer);
+		anode.context.decodeAudioData(data, buffer => bufs[i] = buffer);
 	}
-	
+
 }

@@ -324,13 +324,13 @@
 	        for (var i = 0; i < json.length; i++) {
 	            var item = json[i];
 	            names.push(item.name);
-	            encs.push(item.data);
-	            this.decodeBuffer(anode, item.data, bufs, i);
+	            var encoded = file.base64ToArrayBuffer(item.data);
+	            encs.push(encoded);
+	            this.decodeBuffer(anode, encoded, bufs, i);
 	        }
 	    };
 	    SoundBankHandler.prototype.decodeBuffer = function (anode, data, bufs, i) {
-	        var encoded = file.base64ToArrayBuffer(data);
-	        anode.context.decodeAudioData(encoded, function (buffer) { return bufs[i] = buffer; });
+	        anode.context.decodeAudioData(data, function (buffer) { return bufs[i] = buffer; });
 	    };
 	    return SoundBankHandler;
 	})();
