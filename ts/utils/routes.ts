@@ -1,12 +1,14 @@
 var oldPage = null;
+var mainRoute = null;
 
-export function setupRoutes(mainRoute): Promise<void> {
+export function setupRoutes(initialRoute): Promise<void> {
 	window.onhashchange = showPageFromHash;
-	showPageFromHash(mainRoute);
+	mainRoute = initialRoute;
+	showPageFromHash();
 	return loadPages();
 }
 
-function showPageFromHash(mainRoute) {
+function showPageFromHash() {
 	const hash = location.hash || mainRoute;
 	$('#page > div').hide();
 	$(hash).show().css('outline','none').focus();

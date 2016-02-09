@@ -3211,13 +3211,15 @@
 /***/ function(module, exports) {
 
 	var oldPage = null;
-	function setupRoutes(mainRoute) {
+	var mainRoute = null;
+	function setupRoutes(initialRoute) {
 	    window.onhashchange = showPageFromHash;
-	    showPageFromHash(mainRoute);
+	    mainRoute = initialRoute;
+	    showPageFromHash();
 	    return loadPages();
 	}
 	exports.setupRoutes = setupRoutes;
-	function showPageFromHash(mainRoute) {
+	function showPageFromHash() {
 	    var hash = location.hash || mainRoute;
 	    $('#page > div').hide();
 	    $(hash).show().css('outline', 'none').focus();
