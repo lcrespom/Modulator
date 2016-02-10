@@ -29,6 +29,7 @@ export class Part {
 	name: string;
 	voices: number;
 	instrument: Instrument;
+	preset: any;
 	rows: NoteRow[] = [];
 	playRow(rowNum: number, when: number, offDelay = 0) {
 		const row = this.rows[rowNum];

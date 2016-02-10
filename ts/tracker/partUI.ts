@@ -1,6 +1,7 @@
 import { Pianola } from './pianola';
 import { Part, NoteRow, Note } from './song';
 import { Timer } from '../synth/timer';
+import { Instrument } from '../synth/instrument';
 import { ModernAudioContext } from '../utils/modern';
 import { focusable } from '../utils/modern';
 
@@ -13,8 +14,11 @@ export class PartBox {
 	pianola: Pianola;
 	rowNum: number;
 	rowOfs: number;
+	$instCombo: JQuery;
+	presets: any[];
 
-	constructor(ac: ModernAudioContext, $elem: JQuery, part: Part, pianola: Pianola) {
+	constructor(ac: ModernAudioContext, $elem: JQuery, part: Part,
+		pianola: Pianola, presets: any[]) {
 		this.rowNum = 0;
 		this.ac = ac;
 		this.$play = $elem.find('.play');
@@ -25,6 +29,22 @@ export class PartBox {
 		this.registerPianolaScroll();
 		this.pianola.pkh.noteOn = (midi, velocity) => this.editNote(midi, velocity);
 		this.rowOfs = 0;
+		this.$instCombo = $elem.find('.combo-instrument');
+		this.presets = presets;
+		this.refresh();
+		this.registerInstrumentCombo();
+	}
+
+	refresh() {
+		this.$instCombo.empty();
+		let i = 0;
+		for (const preset of this.presets) {
+			const name = preset.name;
+			const selected = this.part.preset == preset ? ' selected' : '';
+			if (preset.nodes.length > 1)
+				this.$instCombo.append(`<option${selected} value="${i}">${name}</option>`);
+			i++;
+		}
 	}
 
 	play() {
@@ -63,6 +83,15 @@ export class PartBox {
 		const classes = $glyph.attr('class').split(/\s+/)
 			.filter(c => !c.match(/glyphicon-/)).concat('glyphicon-' + icon);
 		$glyph.attr('class', classes.join(' '));
+	}
+
+	registerInstrumentCombo() {
+		this.$instCombo.change(_ => {
+			this.part.preset = this.presets[this.$instCombo.val()];
+			const nv = 4; //TODO**** get from "Voices" combo
+			//TODO*** if playing, make an "all notes off" before changing instrument
+			this.part.instrument = new Instrument(this.ac, this.part.preset, nv);
+		});
 	}
 
 	registerPianolaScroll() {

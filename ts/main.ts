@@ -14,8 +14,8 @@ const ac = createAudioContext();
 const synthUI = new SynthUI(ac, graphCanvas,
 	$('#node-params'), $('#audio-graph-fft'), $('#audio-graph-osc'));
 
-setupPanels();
-setupRoutes('#synth').then(_ => setupTracker(ac));
+const presets = setupPanels();
+setupRoutes('#synth').then(_ => setupTracker(ac, presets));
 
 function createAudioContext(): ModernAudioContext {
 	const CtxClass: any = window.AudioContext || window.webkitAudioContext;
@@ -28,6 +28,7 @@ function setupPanels() {
 	const presets = new Presets(synthUI);
 	presets.beforeSave = (json) => $.extend(json, { keyboard: inputs.piano.toJSON() });
 	presets.afterLoad = (json) => inputs.piano.fromJSON(json.keyboard);
+	return presets.presets;
 }
 
 

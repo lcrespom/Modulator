@@ -55,8 +55,8 @@
 	var graphCanvas = $('#graph-canvas')[0];
 	var ac = createAudioContext();
 	var synthUI = new synthUI_1.SynthUI(ac, graphCanvas, $('#node-params'), $('#audio-graph-fft'), $('#audio-graph-osc'));
-	setupPanels();
-	routes_1.setupRoutes('#synth').then(function (_) { return tracker_1.setupTracker(ac); });
+	var presets = setupPanels();
+	routes_1.setupRoutes('#synth').then(function (_) { return tracker_1.setupTracker(ac, presets); });
 	function createAudioContext() {
 	    var CtxClass = window.AudioContext || window.webkitAudioContext;
 	    return new CtxClass();
@@ -67,6 +67,7 @@
 	    var presets = new presets_1.Presets(synthUI);
 	    presets.beforeSave = function (json) { return $.extend(json, { keyboard: inputs.piano.toJSON() }); };
 	    presets.afterLoad = function (json) { return inputs.piano.fromJSON(json.keyboard); };
+	    return presets.presets;
 	}
 	function setupPalette() {
 	    $(function () {
@@ -3297,6 +3298,7 @@
 	            { type: 'Oscillator', params: { frequency: 440, detune: 0, type: 'square' } }
 	        ]
 	    };
+	    //TODO****** replace instrument JSON into existing preset
 	    p.instrument = new instrument_1.Instrument(ac, json, p.voices);
 	    p.name = 'Main theme';
 	    p.rows = createNotes();
@@ -3309,14 +3311,16 @@
 	    return s;
 	}
 	//--------------------------------------------------
-	function setupTracker(ac) {
+	function setupTracker(ac, presets) {
 	    var sw = starWars(ac);
 	    var part = sw.tracks[0].parts[0];
 	    var pianola = new pianola_1.Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
-	    var pbox = new partUI_1.PartBox(ac, $('#part-box'), part, pianola);
+	    var pbox = new partUI_1.PartBox(ac, $('#part-box'), part, pianola, presets);
 	    $(document).on('route:show', function (e, page) {
-	        if (page == '#tracker')
+	        if (page == '#tracker') {
 	            pianola.render(pbox.part, pbox.rowNum);
+	            pbox.refresh();
+	        }
 	    });
 	}
 	exports.setupTracker = setupTracker;
@@ -3574,9 +3578,10 @@
 
 	var song_1 = __webpack_require__(22);
 	var timer_1 = __webpack_require__(17);
+	var instrument_1 = __webpack_require__(18);
 	var modern_1 = __webpack_require__(5);
 	var PartBox = (function () {
-	    function PartBox(ac, $elem, part, pianola) {
+	    function PartBox(ac, $elem, part, pianola, presets) {
 	        var _this = this;
 	        this.playing = false;
 	        this.rowNum = 0;
@@ -3589,7 +3594,23 @@
 	        this.registerPianolaScroll();
 	        this.pianola.pkh.noteOn = function (midi, velocity) { return _this.editNote(midi, velocity); };
 	        this.rowOfs = 0;
+	        this.$instCombo = $elem.find('.combo-instrument');
+	        this.presets = presets;
+	        this.refresh();
+	        this.registerInstrumentCombo();
 	    }
+	    PartBox.prototype.refresh = function () {
+	        this.$instCombo.empty();
+	        var i = 0;
+	        for (var _i = 0, _a = this.presets; _i < _a.length; _i++) {
+	            var preset = _a[_i];
+	            var name_1 = preset.name;
+	            var selected = this.part.preset == preset ? ' selected' : '';
+	            if (preset.nodes.length > 1)
+	                this.$instCombo.append("<option" + selected + " value=\"" + i + "\">" + name_1 + "</option>");
+	            i++;
+	        }
+	    };
 	    PartBox.prototype.play = function () {
 	        var _this = this;
 	        if (!this.part)
@@ -3625,6 +3646,15 @@
 	        var classes = $glyph.attr('class').split(/\s+/)
 	            .filter(function (c) { return !c.match(/glyphicon-/); }).concat('glyphicon-' + icon);
 	        $glyph.attr('class', classes.join(' '));
+	    };
+	    PartBox.prototype.registerInstrumentCombo = function () {
+	        var _this = this;
+	        this.$instCombo.change(function (_) {
+	            _this.part.preset = _this.presets[_this.$instCombo.val()];
+	            var nv = 4; //TODO**** get from "Voices" combo
+	            //TODO*** if playing, make an "all notes off" before changing instrument
+	            _this.part.instrument = new instrument_1.Instrument(_this.ac, _this.part.preset, nv);
+	        });
 	    };
 	    PartBox.prototype.registerPianolaScroll = function () {
 	        var _this = this;
