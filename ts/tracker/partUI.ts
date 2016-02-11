@@ -7,15 +7,16 @@ import { focusable } from '../utils/modern';
 
 export class PartBox {
 	playing = false;
-	$play: JQuery;
 	timer: Timer;
 	ac: ModernAudioContext;
 	part: Part;
 	pianola: Pianola;
 	rowNum: number;
 	rowOfs: number;
-	$instCombo: JQuery;
 	presets: any[];
+	$play: JQuery;
+	$instCombo: JQuery;
+	$nvCombo: JQuery;
 
 	constructor(ac: ModernAudioContext, $elem: JQuery, part: Part,
 		pianola: Pianola, presets: any[]) {
@@ -29,13 +30,16 @@ export class PartBox {
 		this.registerPianolaScroll();
 		this.pianola.pkh.noteOn = (midi, velocity) => this.editNote(midi, velocity);
 		this.rowOfs = 0;
-		this.$instCombo = $elem.find('.combo-instrument');
 		this.presets = presets;
 		this.refresh();
+		this.$instCombo = $elem.find('.combo-instrument');
 		this.registerInstrumentCombo();
+		this.$nvCombo = $elem.find('.combo-voices');
+		this.registerNumVoicesCombo();
 	}
 
 	refresh() {
+		// Fill instrument combo
 		this.$instCombo.empty();
 		let i = 0;
 		for (const preset of this.presets) {
@@ -45,6 +49,8 @@ export class PartBox {
 				this.$instCombo.append(`<option${selected} value="${i}">${name}</option>`);
 			i++;
 		}
+		// Set voices combo
+		this.$nvCombo.val('' + this.part.voices);
 	}
 
 	play() {
@@ -83,39 +89,6 @@ export class PartBox {
 		const classes = $glyph.attr('class').split(/\s+/)
 			.filter(c => !c.match(/glyphicon-/)).concat('glyphicon-' + icon);
 		$glyph.attr('class', classes.join(' '));
-	}
-
-	registerInstrumentCombo() {
-		this.$instCombo.change(_ => {
-			this.part.preset = this.presets[this.$instCombo.val()];
-			const nv = 4; //TODO**** get from "Voices" combo
-			//TODO*** if playing, make an "all notes off" before changing instrument
-			this.part.instrument = new Instrument(this.ac, this.part.preset, nv);
-		});
-	}
-
-	registerPianolaScroll() {
-		this.pianola.parent.on('wheel', evt => {
-			if (this.playing) return;
-			var oe = <any>evt.originalEvent;
-			evt.preventDefault();
-			var dy = oe.deltaY;
-			if (oe.deltaMode == 1) dy *= 100 / 3;
-			this.updateRowOfs(dy / 10);
-		});
-		const $e = focusable(this.pianola.parent[0]);
-		$($e).on('keydown', evt => {
-			let dy = 0;
-			switch (evt.keyCode) {
-				case 33: dy = -4; break;
-				case 34: dy = +4; break;
-				case 38: dy = -1; break;
-				case 40: dy = +1; break;
-				default: return;
-			}
-			this.updateRowOfs(dy);
-		});
-
 	}
 
 	updateRowOfs(dy: number) {
@@ -180,6 +153,50 @@ export class PartBox {
 		if (!this.part.rows[pos])
 			this.part.rows[pos] = new NoteRow();
 		return this.part.rows[pos].notes;
+	}
+
+	getNumVoices() {
+		return parseInt(this.$nvCombo.val());
+	}
+
+	changeInstrument() {
+		if (this.playing) this.part.instrument.allNotesOff();
+		this.part.preset = this.presets[this.$instCombo.val()];
+		this.part.voices = this.getNumVoices();
+		this.part.instrument = new Instrument(this.ac, this.part.preset, this.part.voices);
+	}
+
+	//-------------------- Event handlers --------------------
+
+	registerInstrumentCombo() {
+		this.$instCombo.change(_ => this.changeInstrument());
+	}
+
+	registerNumVoicesCombo() {
+		this.$nvCombo.change(_ => this.changeInstrument());
+	}
+
+	registerPianolaScroll() {
+		this.pianola.parent.on('wheel', evt => {
+			if (this.playing) return;
+			var oe = <any>evt.originalEvent;
+			evt.preventDefault();
+			var dy = oe.deltaY;
+			if (oe.deltaMode == 1) dy *= 100 / 3;
+			this.updateRowOfs(dy / 10);
+		});
+		const $e = focusable(this.pianola.parent[0]);
+		$($e).on('keydown', evt => {
+			let dy = 0;
+			switch (evt.keyCode) {
+				case 33: dy = -4; break;
+				case 34: dy = +4; break;
+				case 38: dy = -1; break;
+				case 40: dy = +1; break;
+				default: return;
+			}
+			this.updateRowOfs(dy);
+		});
 	}
 
 }

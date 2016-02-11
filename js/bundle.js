@@ -3594,12 +3594,15 @@
 	        this.registerPianolaScroll();
 	        this.pianola.pkh.noteOn = function (midi, velocity) { return _this.editNote(midi, velocity); };
 	        this.rowOfs = 0;
-	        this.$instCombo = $elem.find('.combo-instrument');
 	        this.presets = presets;
 	        this.refresh();
+	        this.$instCombo = $elem.find('.combo-instrument');
 	        this.registerInstrumentCombo();
+	        this.$nvCombo = $elem.find('.combo-voices');
+	        this.registerNumVoicesCombo();
 	    }
 	    PartBox.prototype.refresh = function () {
+	        // Fill instrument combo
 	        this.$instCombo.empty();
 	        var i = 0;
 	        for (var _i = 0, _a = this.presets; _i < _a.length; _i++) {
@@ -3610,6 +3613,8 @@
 	                this.$instCombo.append("<option" + selected + " value=\"" + i + "\">" + name_1 + "</option>");
 	            i++;
 	        }
+	        // Set voices combo
+	        this.$nvCombo.val('' + this.part.voices);
 	    };
 	    PartBox.prototype.play = function () {
 	        var _this = this;
@@ -3646,48 +3651,6 @@
 	        var classes = $glyph.attr('class').split(/\s+/)
 	            .filter(function (c) { return !c.match(/glyphicon-/); }).concat('glyphicon-' + icon);
 	        $glyph.attr('class', classes.join(' '));
-	    };
-	    PartBox.prototype.registerInstrumentCombo = function () {
-	        var _this = this;
-	        this.$instCombo.change(function (_) {
-	            _this.part.preset = _this.presets[_this.$instCombo.val()];
-	            var nv = 4; //TODO**** get from "Voices" combo
-	            //TODO*** if playing, make an "all notes off" before changing instrument
-	            _this.part.instrument = new instrument_1.Instrument(_this.ac, _this.part.preset, nv);
-	        });
-	    };
-	    PartBox.prototype.registerPianolaScroll = function () {
-	        var _this = this;
-	        this.pianola.parent.on('wheel', function (evt) {
-	            if (_this.playing)
-	                return;
-	            var oe = evt.originalEvent;
-	            evt.preventDefault();
-	            var dy = oe.deltaY;
-	            if (oe.deltaMode == 1)
-	                dy *= 100 / 3;
-	            _this.updateRowOfs(dy / 10);
-	        });
-	        var $e = modern_1.focusable(this.pianola.parent[0]);
-	        $($e).on('keydown', function (evt) {
-	            var dy = 0;
-	            switch (evt.keyCode) {
-	                case 33:
-	                    dy = -4;
-	                    break;
-	                case 34:
-	                    dy = +4;
-	                    break;
-	                case 38:
-	                    dy = -1;
-	                    break;
-	                case 40:
-	                    dy = +1;
-	                    break;
-	                default: return;
-	            }
-	            _this.updateRowOfs(dy);
-	        });
 	    };
 	    PartBox.prototype.updateRowOfs = function (dy) {
 	        this.rowOfs += dy;
@@ -3748,6 +3711,58 @@
 	        if (!this.part.rows[pos])
 	            this.part.rows[pos] = new song_1.NoteRow();
 	        return this.part.rows[pos].notes;
+	    };
+	    PartBox.prototype.getNumVoices = function () {
+	        return parseInt(this.$nvCombo.val());
+	    };
+	    PartBox.prototype.changeInstrument = function () {
+	        if (this.playing)
+	            this.part.instrument.allNotesOff();
+	        this.part.preset = this.presets[this.$instCombo.val()];
+	        this.part.voices = this.getNumVoices();
+	        this.part.instrument = new instrument_1.Instrument(this.ac, this.part.preset, this.part.voices);
+	    };
+	    //-------------------- Event handlers --------------------
+	    PartBox.prototype.registerInstrumentCombo = function () {
+	        var _this = this;
+	        this.$instCombo.change(function (_) { return _this.changeInstrument(); });
+	    };
+	    PartBox.prototype.registerNumVoicesCombo = function () {
+	        var _this = this;
+	        this.$nvCombo.change(function (_) { return _this.changeInstrument(); });
+	    };
+	    PartBox.prototype.registerPianolaScroll = function () {
+	        var _this = this;
+	        this.pianola.parent.on('wheel', function (evt) {
+	            if (_this.playing)
+	                return;
+	            var oe = evt.originalEvent;
+	            evt.preventDefault();
+	            var dy = oe.deltaY;
+	            if (oe.deltaMode == 1)
+	                dy *= 100 / 3;
+	            _this.updateRowOfs(dy / 10);
+	        });
+	        var $e = modern_1.focusable(this.pianola.parent[0]);
+	        $($e).on('keydown', function (evt) {
+	            var dy = 0;
+	            switch (evt.keyCode) {
+	                case 33:
+	                    dy = -4;
+	                    break;
+	                case 34:
+	                    dy = +4;
+	                    break;
+	                case 38:
+	                    dy = -1;
+	                    break;
+	                case 40:
+	                    dy = +1;
+	                    break;
+	                default: return;
+	            }
+	            _this.updateRowOfs(dy);
+	        });
 	    };
 	    return PartBox;
 	})();
