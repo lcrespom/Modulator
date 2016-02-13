@@ -29,7 +29,6 @@ export class PartBox {
 		this.$play.click(_ => this.play());
 		this.part = part;
 		this.pianola = pianola;
-		this.pianola.render(this.part, this.rowNum);
 		this.registerPianolaScroll();
 		this.pianola.pkh.noteOn = (midi, velocity) => this.editNote(midi, velocity);
 		this.rowOfs = 0;
@@ -45,6 +44,7 @@ export class PartBox {
 	}
 
 	refresh() {
+		this.pianola.render(this.part, this.rowNum);
 		// Fill instrument combo
 		this.$instCombo.empty();
 		let i = 0;

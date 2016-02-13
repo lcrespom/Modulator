@@ -3581,7 +3581,6 @@
 	        this.$play.click(function (_) { return _this.play(); });
 	        this.part = part;
 	        this.pianola = pianola;
-	        this.pianola.render(this.part, this.rowNum);
 	        this.registerPianolaScroll();
 	        this.pianola.pkh.noteOn = function (midi, velocity) { return _this.editNote(midi, velocity); };
 	        this.rowOfs = 0;
@@ -3596,6 +3595,7 @@
 	        this.refresh();
 	    }
 	    PartBox.prototype.refresh = function () {
+	        this.pianola.render(this.part, this.rowNum);
 	        // Fill instrument combo
 	        this.$instCombo.empty();
 	        var i = 0;
