@@ -4,6 +4,7 @@ import { Timer } from '../synth/timer';
 import { Instrument } from '../synth/instrument';
 import { ModernAudioContext } from '../utils/modern';
 import { focusable } from '../utils/modern';
+import * as popups from '../utils/popups';
 
 export class PartBox {
 	playing = false;
@@ -17,6 +18,7 @@ export class PartBox {
 	$play: JQuery;
 	$instCombo: JQuery;
 	$nvCombo: JQuery;
+	$nrCombo: JQuery;
 
 	constructor(ac: ModernAudioContext, $elem: JQuery, part: Part,
 		pianola: Pianola, presets: any[]) {
@@ -31,11 +33,13 @@ export class PartBox {
 		this.pianola.pkh.noteOn = (midi, velocity) => this.editNote(midi, velocity);
 		this.rowOfs = 0;
 		this.presets = presets;
-		this.refresh();
 		this.$instCombo = $elem.find('.combo-instrument');
 		this.registerInstrumentCombo();
 		this.$nvCombo = $elem.find('.combo-voices');
 		this.registerNumVoicesCombo();
+		this.$nrCombo = $elem.find('.combo-rows');
+        this.registerNumRowsCombo();
+		this.refresh();
 	}
 
 	refresh() {
@@ -51,6 +55,8 @@ export class PartBox {
 		}
 		// Set voices combo
 		this.$nvCombo.val('' + this.part.voices);
+		// Set num rows combo
+		this.$nrCombo.val('' + this.part.rows.length);
 	}
 
 	play() {
@@ -174,6 +180,24 @@ export class PartBox {
 
 	registerNumVoicesCombo() {
 		this.$nvCombo.change(_ => this.changeInstrument());
+	}
+
+	registerNumRowsCombo() {
+		this.$nrCombo.change(_ => {
+			const numRows = parseInt(this.$nrCombo.val());
+			if (this.part.rows.length > numRows) {
+				popups.confirm('Reduce part length?', 'Warning', ok => {
+					if (ok)
+						this.part.rows.length = numRows;
+					this.refresh();
+				});
+			}
+			else {
+				for (let i = this.part.rows.length; i < numRows; i++)
+					this.part.rows[i] = new NoteRow();
+				this.refresh();
+			}
+		});
 	}
 
 	registerPianolaScroll() {

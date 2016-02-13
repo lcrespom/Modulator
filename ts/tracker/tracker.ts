@@ -43,21 +43,11 @@ function createNotes(): tracker.NoteRow[] {
 	return rows;
 }
 
-function starWars(ac: ModernAudioContext): tracker.Song {
+function starWars(ac: ModernAudioContext, preset: any): tracker.Song {
 	const p = new tracker.Part();
 	p.voices = 4;
-	const json = {
-		nodes: [
-			{id: 0, inputs: [1]},
-			{id: 1, inputs: []}
-		],
-		nodeData: [
-			{type: 'out', params: {}},
-			{type: 'Oscillator', params: {frequency: 440, detune: 0, type: 'square'}}
-		]
-	};
-	//TODO****** replace instrument JSON into existing preset
-	p.instrument = new Instrument(ac, json, p.voices);
+	p.preset = preset;
+	p.instrument = new Instrument(ac, p.preset, p.voices);
 	p.name = 'Main theme';
 	p.rows = createNotes();
 	const t = new tracker.Track();
@@ -73,7 +63,7 @@ function starWars(ac: ModernAudioContext): tracker.Song {
 //--------------------------------------------------
 
 export function setupTracker(ac: ModernAudioContext, presets: any[]) {
-	const sw = starWars(ac);
+	const sw = starWars(ac, presets[5]);
 	const part = sw.tracks[0].parts[0];
 	const pianola = new Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
 	const pbox = new PartBox(ac, $('#part-box'), part, pianola, presets);
