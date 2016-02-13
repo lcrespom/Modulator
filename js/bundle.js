@@ -3592,6 +3592,7 @@
 	        this.registerNumVoicesCombo();
 	        this.$nrCombo = $elem.find('.combo-rows');
 	        this.registerNumRowsCombo();
+	        this.$nameInput = $elem.find('.part-name');
 	        this.refresh();
 	    }
 	    PartBox.prototype.refresh = function () {
@@ -3610,6 +3611,8 @@
 	        this.$nvCombo.val('' + this.part.voices);
 	        // Set num rows combo
 	        this.$nrCombo.val('' + this.part.rows.length);
+	        // Part name
+	        this.$nameInput.val(this.part.name);
 	    };
 	    PartBox.prototype.play = function () {
 	        var _this = this;

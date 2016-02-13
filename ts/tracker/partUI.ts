@@ -19,6 +19,7 @@ export class PartBox {
 	$instCombo: JQuery;
 	$nvCombo: JQuery;
 	$nrCombo: JQuery;
+	$nameInput: JQuery;
 
 	constructor(ac: ModernAudioContext, $elem: JQuery, part: Part,
 		pianola: Pianola, presets: any[]) {
@@ -39,6 +40,7 @@ export class PartBox {
 		this.registerNumVoicesCombo();
 		this.$nrCombo = $elem.find('.combo-rows');
         this.registerNumRowsCombo();
+		this.$nameInput = $elem.find('.part-name');
 		this.refresh();
 	}
 
@@ -57,6 +59,8 @@ export class PartBox {
 		this.$nvCombo.val('' + this.part.voices);
 		// Set num rows combo
 		this.$nrCombo.val('' + this.part.rows.length);
+		// Part name
+		this.$nameInput.val(this.part.name);
 	}
 
 	play() {
