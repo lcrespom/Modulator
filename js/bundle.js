@@ -3256,8 +3256,7 @@
 	    nr.notes = notes;
 	    return nr;
 	}
-	function createNotes() {
-	    var rows = [];
+	function createNotes(rows) {
 	    var i = 0;
 	    rows[i] = rowWithNotes(tracker.Note.on(48));
 	    i += 4;
@@ -3283,21 +3282,20 @@
 	    rows[i] = rowWithNotes(tracker.Note.off(53), tracker.Note.on(50));
 	    i += 5;
 	    rows[i] = rowWithNotes(tracker.Note.off(50));
-	    return rows;
 	}
 	function starWars(ac, preset) {
-	    var p = new tracker.Part();
-	    p.voices = 4;
+	    var p = new tracker.Part(64);
 	    p.preset = preset;
-	    p.instrument = new instrument_1.Instrument(ac, p.preset, p.voices);
+	    p.instrument = new instrument_1.Instrument(ac, p.preset, 4);
 	    p.name = 'Main theme';
-	    p.rows = createNotes();
+	    createNotes(p.rows);
 	    var t = new tracker.Track();
 	    t.parts.push(p);
 	    var s = new tracker.Song();
 	    s.title = 'Star Wars';
 	    s.bpm = 90;
 	    s.tracks.push(t);
+	    s.parts.push(p);
 	    return s;
 	}
 	//--------------------------------------------------
@@ -3349,8 +3347,10 @@
 	})();
 	exports.NoteRow = NoteRow;
 	var Part = (function () {
-	    function Part() {
+	    function Part(numRows) {
 	        this.rows = [];
+	        for (var i = 0; i < numRows; i++)
+	            this.rows.push(new NoteRow());
 	    }
 	    Part.prototype.playRow = function (rowNum, when, offDelay) {
 	        if (offDelay === void 0) { offDelay = 0; }
@@ -3386,6 +3386,7 @@
 	var Song = (function () {
 	    function Song() {
 	        this.tracks = [];
+	        this.parts = [];
 	    }
 	    Song.prototype.play = function () { };
 	    Song.prototype.stop = function () { };
@@ -3608,7 +3609,7 @@
 	            i++;
 	        }
 	        // Set voices combo
-	        this.$nvCombo.val('' + this.part.voices);
+	        this.$nvCombo.val('' + this.part.instrument.voices.length);
 	        // Set num rows combo
 	        this.$nrCombo.val('' + this.part.rows.length);
 	        // Part name
@@ -3717,8 +3718,7 @@
 	        if (this.playing)
 	            this.part.instrument.allNotesOff();
 	        this.part.preset = this.presets[this.$instCombo.val()];
-	        this.part.voices = this.getNumVoices();
-	        this.part.instrument = new instrument_1.Instrument(this.ac, this.part.preset, this.part.voices);
+	        this.part.instrument = new instrument_1.Instrument(this.ac, this.part.preset, this.getNumVoices());
 	    };
 	    //-------------------- Event handlers --------------------
 	    PartBox.prototype.registerInstrumentCombo = function () {

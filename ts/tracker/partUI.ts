@@ -56,7 +56,7 @@ export class PartBox {
 			i++;
 		}
 		// Set voices combo
-		this.$nvCombo.val('' + this.part.voices);
+		this.$nvCombo.val('' + this.part.instrument.voices.length);
 		// Set num rows combo
 		this.$nrCombo.val('' + this.part.rows.length);
 		// Part name
@@ -172,8 +172,8 @@ export class PartBox {
 	changeInstrument() {
 		if (this.playing) this.part.instrument.allNotesOff();
 		this.part.preset = this.presets[this.$instCombo.val()];
-		this.part.voices = this.getNumVoices();
-		this.part.instrument = new Instrument(this.ac, this.part.preset, this.part.voices);
+		this.part.instrument = new Instrument(
+			this.ac, this.part.preset, this.getNumVoices());
 	}
 
 	//-------------------- Event handlers --------------------

@@ -27,10 +27,16 @@ export class NoteRow {
 
 export class Part {
 	name: string;
-	voices: number;
 	instrument: Instrument;
 	preset: any;
-	rows: NoteRow[] = [];
+	rows: NoteRow[];
+
+	constructor(numRows: number) {
+		this.rows = [];
+		for (let i = 0; i < numRows; i++)
+			this.rows.push(new NoteRow());
+	}
+
 	playRow(rowNum: number, when: number, offDelay = 0) {
 		const row = this.rows[rowNum];
 		if (!row) return;
@@ -44,6 +50,7 @@ export class Part {
 				this.instrument.noteOff(note.midi, note.velocity, when);
 		}
 	}
+
 	playNote(note: Note, when, offDelay = 0.5) {
 		this.instrument.noteOn(note.midi, note.velocity, when);
 		this.instrument.noteOff(note.midi, 1, when + offDelay);
@@ -58,6 +65,7 @@ export class Song {
 	title: string;
 	bpm: number;
 	tracks: Track[] = [];
+	parts: Part[] = [];
 	play() {}
 	stop() {}
 }

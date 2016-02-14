@@ -13,8 +13,7 @@ function rowWithNotes(...notes): tracker.NoteRow {
 	return nr;
 }
 
-function createNotes(): tracker.NoteRow[] {
-	const rows = [];
+function createNotes(rows: tracker.NoteRow[]): void {
 	let i = 0;
 	rows[i] = rowWithNotes(tracker.Note.on(48));
 	i += 4;
@@ -40,22 +39,21 @@ function createNotes(): tracker.NoteRow[] {
 	rows[i] = rowWithNotes(tracker.Note.off(53), tracker.Note.on(50));
 	i += 5;
 	rows[i] = rowWithNotes(tracker.Note.off(50));
-	return rows;
 }
 
 function starWars(ac: ModernAudioContext, preset: any): tracker.Song {
-	const p = new tracker.Part();
-	p.voices = 4;
+	const p = new tracker.Part(64);
 	p.preset = preset;
-	p.instrument = new Instrument(ac, p.preset, p.voices);
+	p.instrument = new Instrument(ac, p.preset, 4);
 	p.name = 'Main theme';
-	p.rows = createNotes();
+	createNotes(p.rows);
 	const t = new tracker.Track();
 	t.parts.push(p);
 	const s = new tracker.Song();
 	s.title = 'Star Wars';
 	s.bpm = 90;
 	s.tracks.push(t);
+	s.parts.push(p);
 	return s;
 }
 
