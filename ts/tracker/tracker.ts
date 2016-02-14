@@ -1,6 +1,7 @@
 import * as tracker from './song';
 import { Pianola } from './pianola';
-import { PartBox } from './partUI';
+import { PartBox } from './partBox';
+import { PartList } from './partList';
 
 import { Instrument } from '../synth/instrument';
 
@@ -61,10 +62,11 @@ function starWars(ac: ModernAudioContext, preset: any): tracker.Song {
 //--------------------------------------------------
 
 export function setupTracker(ac: ModernAudioContext, presets: any[]) {
-	const sw = starWars(ac, presets[5]);
-	const part = sw.tracks[0].parts[0];
+	const song = starWars(ac, presets[5]);
+	const part = song.tracks[0].parts[0];
 	const pianola = new Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
 	const pbox = new PartBox(ac, $('#part-box'), part, pianola, presets);
+	new PartList($('#part-list'), song, pbox);
 	$(document).on('route:show', (e, page) => {
 		if (page == '#tracker') {
 			pianola.render(pbox.part, pbox.rowNum);

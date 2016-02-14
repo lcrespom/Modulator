@@ -3245,7 +3245,8 @@
 
 	var tracker = __webpack_require__(22);
 	var pianola_1 = __webpack_require__(23);
-	var partUI_1 = __webpack_require__(24);
+	var partBox_1 = __webpack_require__(24);
+	var partList_1 = __webpack_require__(25);
 	var instrument_1 = __webpack_require__(18);
 	function rowWithNotes() {
 	    var notes = [];
@@ -3300,10 +3301,11 @@
 	}
 	//--------------------------------------------------
 	function setupTracker(ac, presets) {
-	    var sw = starWars(ac, presets[5]);
-	    var part = sw.tracks[0].parts[0];
+	    var song = starWars(ac, presets[5]);
+	    var part = song.tracks[0].parts[0];
 	    var pianola = new pianola_1.Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
-	    var pbox = new partUI_1.PartBox(ac, $('#part-box'), part, pianola, presets);
+	    var pbox = new partBox_1.PartBox(ac, $('#part-box'), part, pianola, presets);
+	    new partList_1.PartList($('#part-list'), song, pbox);
 	    $(document).on('route:show', function (e, page) {
 	        if (page == '#tracker') {
 	            pianola.render(pbox.part, pbox.rowNum);
@@ -3451,10 +3453,9 @@
 	            nc.renderBar(y);
 	    };
 	    Pianola.prototype.updateNotes = function (row) {
-	        var rowNotes = row && row.notes ? row.notes : [];
 	        var note;
-	        for (var _i = 0; _i < rowNotes.length; _i++) {
-	            note = rowNotes[_i];
+	        for (var _i = 0, _a = row.notes; _i < _a.length; _i++) {
+	            note = _a[_i];
 	            if (note.type == tracker.Note.NoteOn)
 	                this.notes.push(note.midi);
 	            else if (note.type == tracker.Note.NoteOff)
@@ -3783,6 +3784,32 @@
 	    return PartBox;
 	})();
 	exports.PartBox = PartBox;
+
+
+/***/ },
+/* 25 */
+/***/ function(module, exports) {
+
+	var PartList = (function () {
+	    function PartList($elem, song, pbox) {
+	        this.song = song;
+	        this.$parts = $elem.find('select');
+	        this.pbox = pbox;
+	        this.initList();
+	    }
+	    PartList.prototype.initList = function () {
+	        this.$parts.empty();
+	        var i = 0;
+	        for (var _i = 0, _a = this.song.parts; _i < _a.length; _i++) {
+	            var part = _a[_i];
+	            var selected = this.pbox.part == part ? ' selected' : '';
+	            this.$parts.append("<option" + selected + " value=\"" + i + "\">" + part.name + "</option>");
+	            i++;
+	        }
+	    };
+	    return PartList;
+	})();
+	exports.PartList = PartList;
 
 
 /***/ }

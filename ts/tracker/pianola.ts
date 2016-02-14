@@ -60,9 +60,8 @@ export class Pianola {
 	}
 
 	updateNotes(row: tracker.NoteRow) {
-		const rowNotes = row && row.notes ? row.notes : [];
 		let note;
-		for (note of rowNotes) {
+		for (note of row.notes) {
 			if (note.type == tracker.Note.NoteOn)
 				this.notes.push(note.midi);
 			else if (note.type == tracker.Note.NoteOff)
