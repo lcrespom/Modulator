@@ -3579,14 +3579,16 @@
 	        this.playing = false;
 	        this.rowNum = 0;
 	        this.ac = ac;
-	        this.$play = $elem.find('.play');
-	        this.$play.click(function (_) { return _this.play(); });
+	        this.$playBut = $elem.find('.but-play');
+	        this.$delBut = $elem.find('.but-del-part');
+	        this.$newBut = $elem.find('.but-new-part');
 	        this.part = part;
 	        this.pianola = pianola;
 	        this.registerPianolaScroll();
 	        this.pianola.pkh.noteOn = function (midi, velocity) { return _this.editNote(midi, velocity); };
 	        this.rowOfs = 0;
 	        this.presets = presets;
+	        this.registerButtons();
 	        this.$instCombo = $elem.find('.combo-instrument');
 	        this.registerInstrumentCombo();
 	        this.$nvCombo = $elem.find('.combo-voices');
@@ -3622,7 +3624,7 @@
 	            return;
 	        this.playing = !this.playing;
 	        if (this.playing) {
-	            this.setButIcon(this.$play, 'pause');
+	            this.setButIcon(this.$playBut, 'pause');
 	            this.timer = new timer_1.Timer(this.ac, 90);
 	            this.timer.start(function (when) {
 	                _this.part.playRow(_this.rowNum, when);
@@ -3637,7 +3639,7 @@
 	        }
 	    };
 	    PartBox.prototype.pause = function () {
-	        this.setButIcon(this.$play, 'play');
+	        this.setButIcon(this.$playBut, 'play');
 	        this.timer.stop();
 	        this.part.instrument.allNotesOff();
 	    };
@@ -3722,6 +3724,10 @@
 	        this.part.instrument = new instrument_1.Instrument(this.ac, this.part.preset, this.getNumVoices());
 	    };
 	    //-------------------- Event handlers --------------------
+	    PartBox.prototype.registerButtons = function () {
+	        var _this = this;
+	        this.$playBut.click(function (_) { return _this.play(); });
+	    };
 	    PartBox.prototype.registerInstrumentCombo = function () {
 	        var _this = this;
 	        this.$instCombo.change(function (_) { return _this.changeInstrument(); });
@@ -3788,14 +3794,18 @@
 
 /***/ },
 /* 25 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
+	var song_1 = __webpack_require__(22);
+	var popups = __webpack_require__(9);
 	var PartList = (function () {
 	    function PartList($elem, song, pbox) {
 	        this.song = song;
 	        this.$parts = $elem.find('select');
 	        this.pbox = pbox;
-	        this.initList();
+	        this.registerButtons();
+	        this.registerList();
+	        this.refresh();
 	    }
 	    PartList.prototype.initList = function () {
 	        this.$parts.empty();
@@ -3803,9 +3813,53 @@
 	        for (var _i = 0, _a = this.song.parts; _i < _a.length; _i++) {
 	            var part = _a[_i];
 	            var selected = this.pbox.part == part ? ' selected' : '';
+	            if (selected)
+	                this.partNum = i;
 	            this.$parts.append("<option" + selected + " value=\"" + i + "\">" + part.name + "</option>");
 	            i++;
 	        }
+	    };
+	    PartList.prototype.refresh = function () {
+	        this.initList();
+	        this.pbox.$delBut.prop('disabled', this.song.parts.length <= 1);
+	    };
+	    PartList.prototype.registerList = function () {
+	        var _this = this;
+	        this.$parts.change(function (_) {
+	            _this.pbox.stop();
+	            _this.partNum = _this.$parts.val();
+	            _this.pbox.part = _this.song.parts[_this.partNum];
+	            _this.pbox.refresh();
+	        });
+	    };
+	    PartList.prototype.registerButtons = function () {
+	        var _this = this;
+	        this.pbox.$delBut.click(function (_) {
+	            popups.confirm('Delete current part?', 'Confirmation request', function (ok) {
+	                if (!ok)
+	                    return;
+	                _this.pbox.stop();
+	                _this.song.parts = _this.song.parts.filter(function (part) { return part != _this.pbox.part; });
+	                if (_this.partNum >= _this.song.parts.length)
+	                    _this.partNum--;
+	                _this.pbox.part = _this.song.parts[_this.partNum];
+	                //TODO search part in tracks and remove it
+	                _this.refresh();
+	                _this.pbox.refresh();
+	            });
+	        });
+	        this.pbox.$newBut.click(function (_) {
+	            _this.pbox.stop();
+	            var oldPart = _this.pbox.part;
+	            var part = new song_1.Part(oldPart.rows.length);
+	            part.preset = oldPart.preset;
+	            part.instrument = oldPart.instrument;
+	            part.name = 'Part ' + (_this.song.parts.length + 1);
+	            _this.song.parts.push(part);
+	            _this.pbox.part = part;
+	            _this.refresh();
+	            _this.pbox.refresh();
+	        });
 	    };
 	    return PartList;
 	})();

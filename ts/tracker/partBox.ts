@@ -15,7 +15,9 @@ export class PartBox {
 	rowNum: number;
 	rowOfs: number;
 	presets: any[];
-	$play: JQuery;
+	$playBut: JQuery;
+	$delBut: JQuery;
+	$newBut: JQuery;
 	$instCombo: JQuery;
 	$nvCombo: JQuery;
 	$nrCombo: JQuery;
@@ -25,14 +27,16 @@ export class PartBox {
 		pianola: Pianola, presets: any[]) {
 		this.rowNum = 0;
 		this.ac = ac;
-		this.$play = $elem.find('.play');
-		this.$play.click(_ => this.play());
+		this.$playBut = $elem.find('.but-play');
+		this.$delBut = $elem.find('.but-del-part');
+		this.$newBut = $elem.find('.but-new-part');
 		this.part = part;
 		this.pianola = pianola;
 		this.registerPianolaScroll();
 		this.pianola.pkh.noteOn = (midi, velocity) => this.editNote(midi, velocity);
 		this.rowOfs = 0;
 		this.presets = presets;
+		this.registerButtons();
 		this.$instCombo = $elem.find('.combo-instrument');
 		this.registerInstrumentCombo();
 		this.$nvCombo = $elem.find('.combo-voices');
@@ -67,7 +71,7 @@ export class PartBox {
 		if (!this.part) return;
 		this.playing = !this.playing;
 		if (this.playing) {
-			this.setButIcon(this.$play, 'pause');
+			this.setButIcon(this.$playBut, 'pause');
 			this.timer = new Timer(this.ac, 90);
 			this.timer.start(when => {
 				this.part.playRow(this.rowNum, when);
@@ -83,7 +87,7 @@ export class PartBox {
 	}
 
 	pause() {
-		this.setButIcon(this.$play, 'play');
+		this.setButIcon(this.$playBut, 'play');
 		this.timer.stop();
 		this.part.instrument.allNotesOff();
 	}
@@ -177,6 +181,10 @@ export class PartBox {
 	}
 
 	//-------------------- Event handlers --------------------
+
+	registerButtons() {
+		this.$playBut.click(_ => this.play());
+	}
 
 	registerInstrumentCombo() {
 		this.$instCombo.change(_ => this.changeInstrument());
