@@ -3481,7 +3481,11 @@
 	            this.registerKeyClick(i);
 	        // Setup PC keyboard
 	        var kb = new keyboard_1.Keyboard('#tracker');
-	        kb.noteOn = function (midi) { return _this.noteOn(midi, 1); };
+	        kb.noteOn = function (midi) {
+	            if (document.activeElement.nodeName == 'INPUT')
+	                return;
+	            _this.noteOn(midi, 1);
+	        };
 	        // Setup MIDI keyboard
 	        var mk = new midi_1.MidiKeyboard();
 	        mk.noteOn = function (midi, velocity, channel) { return _this.noteOn(midi, velocity); };
@@ -3644,6 +3648,8 @@
 	        this.part.instrument.allNotesOff();
 	    };
 	    PartBox.prototype.stop = function () {
+	        if (!this.playing)
+	            return;
 	        this.pause();
 	        this.playing = false;
 	        this.rowNum = 0;
@@ -3805,6 +3811,7 @@
 	        this.pbox = pbox;
 	        this.registerButtons();
 	        this.registerList();
+	        this.registerPartNameChange();
 	        this.refresh();
 	    }
 	    PartList.prototype.initList = function () {
@@ -3823,18 +3830,36 @@
 	        this.initList();
 	        this.pbox.$delBut.prop('disabled', this.song.parts.length <= 1);
 	    };
+	    PartList.prototype.avoidEmptyPartName = function () {
+	        if (this.pbox.part.name.length == 0) {
+	            this.pbox.part.name = '' + (this.partNum + 1);
+	            return true;
+	        }
+	        return false;
+	    };
 	    PartList.prototype.registerList = function () {
 	        var _this = this;
 	        this.$parts.change(function (_) {
 	            _this.pbox.stop();
+	            var wasEmpty = _this.avoidEmptyPartName();
 	            _this.partNum = _this.$parts.val();
 	            _this.pbox.part = _this.song.parts[_this.partNum];
 	            _this.pbox.refresh();
+	            if (wasEmpty)
+	                _this.refresh();
+	        });
+	    };
+	    PartList.prototype.registerPartNameChange = function () {
+	        var _this = this;
+	        this.pbox.$nameInput.on('input', function (_) {
+	            _this.pbox.part.name = _this.pbox.$nameInput.val();
+	            _this.refresh();
 	        });
 	    };
 	    PartList.prototype.registerButtons = function () {
 	        var _this = this;
 	        this.pbox.$delBut.click(function (_) {
+	            // Delete part
 	            popups.confirm('Delete current part?', 'Confirmation request', function (ok) {
 	                if (!ok)
 	                    return;
@@ -3849,12 +3874,13 @@
 	            });
 	        });
 	        this.pbox.$newBut.click(function (_) {
+	            // Create new part
 	            _this.pbox.stop();
 	            var oldPart = _this.pbox.part;
 	            var part = new song_1.Part(oldPart.rows.length);
 	            part.preset = oldPart.preset;
 	            part.instrument = oldPart.instrument;
-	            part.name = 'Part ' + (_this.song.parts.length + 1);
+	            part.name = '' + (_this.song.parts.length + 1) + ': New part';
 	            _this.song.parts.push(part);
 	            _this.pbox.part = part;
 	            _this.refresh();

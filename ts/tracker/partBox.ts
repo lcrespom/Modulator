@@ -93,6 +93,7 @@ export class PartBox {
 	}
 
 	stop() {
+		if (!this.playing) return;
 		this.pause();
 		this.playing = false;
 		this.rowNum = 0;

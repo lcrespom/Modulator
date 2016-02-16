@@ -88,7 +88,10 @@ class PianoKeyHelper {
 			this.registerKeyClick(i);
 		// Setup PC keyboard
 		const kb = new Keyboard('#tracker');
-		kb.noteOn = midi => this.noteOn(midi, 1);
+		kb.noteOn = midi => {
+			if (document.activeElement.nodeName == 'INPUT') return;
+			this.noteOn(midi, 1);
+		}
 		// Setup MIDI keyboard
 		const mk = new MidiKeyboard();
 		mk.noteOn = (midi, velocity, channel) => this.noteOn(midi, velocity);

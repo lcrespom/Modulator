@@ -16,6 +16,7 @@ export class PartList {
 		this.pbox = pbox;
 		this.registerButtons();
 		this.registerList();
+		this.registerPartNameChange();
 		this.refresh();
 	}
 
@@ -35,17 +36,35 @@ export class PartList {
 		this.pbox.$delBut.prop('disabled', this.song.parts.length <= 1);
 	}
 
+	avoidEmptyPartName() {
+		if (this.pbox.part.name.length == 0) {
+			this.pbox.part.name = '' + (this.partNum + 1);
+			return true;
+		}
+		return false;
+	}
+
 	registerList() {
 		this.$parts.change(_ => {
 			this.pbox.stop();
+			const wasEmpty = this.avoidEmptyPartName();
 			this.partNum = this.$parts.val();
 			this.pbox.part = this.song.parts[this.partNum];
 			this.pbox.refresh();
+			if (wasEmpty) this.refresh();
+		});
+	}
+
+	registerPartNameChange() {
+		this.pbox.$nameInput.on('input', _ => {
+			this.pbox.part.name = this.pbox.$nameInput.val();
+			this.refresh();
 		});
 	}
 
 	registerButtons() {
 		this.pbox.$delBut.click(_ => {
+			// Delete part
 			popups.confirm('Delete current part?', 'Confirmation request', ok => {
 				if (!ok) return;
 				this.pbox.stop();
@@ -58,12 +77,13 @@ export class PartList {
 			});
 		});
 		this.pbox.$newBut.click(_ => {
+			// Create new part
 			this.pbox.stop();
 			const oldPart = this.pbox.part;
 			const part = new Part(oldPart.rows.length);
 			part.preset = oldPart.preset;
 			part.instrument = oldPart.instrument;
-			part.name = 'Part ' + (this.song.parts.length + 1);
+			part.name = '' + (this.song.parts.length + 1) + ': New part';
 			this.song.parts.push(part);
 			this.pbox.part = part;
 			this.refresh();
