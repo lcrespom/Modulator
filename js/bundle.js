@@ -3247,6 +3247,7 @@
 	var pianola_1 = __webpack_require__(23);
 	var partBox_1 = __webpack_require__(24);
 	var partList_1 = __webpack_require__(25);
+	var tracksBox_1 = __webpack_require__(26);
 	var instrument_1 = __webpack_require__(18);
 	function rowWithNotes() {
 	    var notes = [];
@@ -3305,11 +3306,12 @@
 	    var part = song.tracks[0].parts[0];
 	    var pianola = new pianola_1.Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
 	    var pbox = new partBox_1.PartBox(ac, $('#part-box'), part, pianola, presets);
+	    var tbox = new tracksBox_1.TracksBox($('#tracks'), song);
 	    new partList_1.PartList($('#part-list'), song, pbox);
 	    $(document).on('route:show', function (e, page) {
 	        if (page == '#tracker') {
-	            pianola.render(pbox.part, pbox.rowNum);
 	            pbox.refresh();
+	            tbox.refresh();
 	        }
 	    });
 	}
@@ -3890,6 +3892,43 @@
 	    return PartList;
 	})();
 	exports.PartList = PartList;
+
+
+/***/ },
+/* 26 */
+/***/ function(module, exports) {
+
+	var TracksBox = (function () {
+	    function TracksBox($elem, song) {
+	        this.$box = $elem;
+	        this.song = song;
+	        this.refresh();
+	    }
+	    TracksBox.prototype.refresh = function () {
+	        this.$box.empty();
+	        for (var _i = 0, _a = this.song.tracks; _i < _a.length; _i++) {
+	            var track = _a[_i];
+	            this.addTrack(track);
+	        }
+	    };
+	    TracksBox.prototype.addTrack = function (track) {
+	        var $tbox = $('<div>');
+	        $tbox.addClass('track-column');
+	        for (var _i = 0, _a = track.parts; _i < _a.length; _i++) {
+	            var part = _a[_i];
+	            this.addPart($tbox, part);
+	        }
+	        this.$box.append($tbox);
+	    };
+	    TracksBox.prototype.addPart = function ($tbox, part) {
+	        var $pbox = $('<div>');
+	        $pbox.addClass('track-box');
+	        $pbox.text(part.name);
+	        $tbox.append($pbox);
+	    };
+	    return TracksBox;
+	})();
+	exports.TracksBox = TracksBox;
 
 
 /***/ }

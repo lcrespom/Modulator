@@ -2,6 +2,7 @@ import * as tracker from './song';
 import { Pianola } from './pianola';
 import { PartBox } from './partBox';
 import { PartList } from './partList';
+import { TracksBox } from './tracksBox';
 
 import { Instrument } from '../synth/instrument';
 
@@ -66,11 +67,12 @@ export function setupTracker(ac: ModernAudioContext, presets: any[]) {
 	const part = song.tracks[0].parts[0];
 	const pianola = new Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
 	const pbox = new PartBox(ac, $('#part-box'), part, pianola, presets);
+	const tbox = new TracksBox($('#tracks'), song);
 	new PartList($('#part-list'), song, pbox);
 	$(document).on('route:show', (e, page) => {
 		if (page == '#tracker') {
-			pianola.render(pbox.part, pbox.rowNum);
 			pbox.refresh();
+			tbox.refresh();
 		}
 	});
 }

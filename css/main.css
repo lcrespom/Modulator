@@ -323,3 +323,26 @@ input[type=range][orient=vertical] {
 	position: absolute;
 	left: 275px;
 }
+
+
+/*---------------------------------------*/
+/*--------------- Tracker ---------------*/
+/*---------------------------------------*/
+
+.track-column {
+	width: 87px;
+	min-height: 100%;
+	border-right: solid 1px black;
+}
+
+.track-box {
+	width: 100%;
+	height: 50px;
+	padding: 5px;
+	border-bottom: 1px solid black;
+	background-color: #CCC;
+	display: flex;
+	align-content: center;
+	flex-direction: column;
+	justify-content: center;
+}
