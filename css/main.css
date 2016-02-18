@@ -350,6 +350,8 @@ input[type=range][orient=vertical] {
 	justify-content: center;
 	text-align: center;
 	font-size: 9pt;
+	white-space: initial;
+	overflow: hidden;
 }
 
 .track-selected {
