@@ -3297,6 +3297,9 @@
 	    s.title = 'Star Wars';
 	    s.bpm = 90;
 	    s.tracks.push(t);
+	    s.tracks.push(new tracker.Track());
+	    s.tracks.push(new tracker.Track());
+	    s.tracks.push(new tracker.Track());
 	    s.parts.push(p);
 	    return s;
 	}
@@ -3306,7 +3309,7 @@
 	    var part = song.tracks[0].parts[0];
 	    var pianola = new pianola_1.Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
 	    var pbox = new partBox_1.PartBox(ac, $('#part-box'), part, pianola, presets);
-	    var tbox = new tracksBox_1.TracksBox($('#tracks'), song);
+	    var tbox = new tracksBox_1.TracksBox($('#tracks'), song, pbox);
 	    new partList_1.PartList($('#part-list'), song, pbox);
 	    $(document).on('route:show', function (e, page) {
 	        if (page == '#tracker') {
@@ -3586,8 +3589,9 @@
 	        this.rowNum = 0;
 	        this.ac = ac;
 	        this.$playBut = $elem.find('.but-play');
-	        this.$delBut = $elem.find('.but-del-part');
 	        this.$newBut = $elem.find('.but-new-part');
+	        this.$delBut = $elem.find('.but-del-part');
+	        this.$addPartBut = $elem.find('.but-add-part');
 	        this.part = part;
 	        this.pianola = pianola;
 	        this.registerPianolaScroll();
@@ -3602,6 +3606,7 @@
 	        this.$nrCombo = $elem.find('.combo-rows');
 	        this.registerNumRowsCombo();
 	        this.$nameInput = $elem.find('.part-name');
+	        this.registerNameChange();
 	        this.refresh();
 	    }
 	    PartBox.prototype.refresh = function () {
@@ -3795,6 +3800,13 @@
 	            _this.updateRowOfs(dy);
 	        });
 	    };
+	    PartBox.prototype.registerNameChange = function () {
+	        var _this = this;
+	        this.$nameInput.on('input', function (_) {
+	            _this.part.name = _this.$nameInput.val();
+	            $(document).trigger('pbox:name-change', _this.part.name);
+	        });
+	    };
 	    return PartBox;
 	})();
 	exports.PartBox = PartBox;
@@ -3839,6 +3851,7 @@
 	        }
 	        return false;
 	    };
+	    //-------------------- Event handlers --------------------
 	    PartList.prototype.registerList = function () {
 	        var _this = this;
 	        this.$parts.change(function (_) {
@@ -3853,10 +3866,7 @@
 	    };
 	    PartList.prototype.registerPartNameChange = function () {
 	        var _this = this;
-	        this.pbox.$nameInput.on('input', function (_) {
-	            _this.pbox.part.name = _this.pbox.$nameInput.val();
-	            _this.refresh();
-	        });
+	        $(document).on('pbox:name-change', function (_) { return _this.refresh(); });
 	    };
 	    PartList.prototype.registerButtons = function () {
 	        var _this = this;
@@ -3899,16 +3909,24 @@
 /***/ function(module, exports) {
 
 	var TracksBox = (function () {
-	    function TracksBox($elem, song) {
+	    function TracksBox($elem, song, pbox) {
 	        this.$box = $elem;
 	        this.song = song;
+	        this.pbox = pbox;
+	        this.selTrack = 0;
+	        this.registerButtons();
+	        this.registerPartNameChange();
 	        this.refresh();
 	    }
 	    TracksBox.prototype.refresh = function () {
 	        this.$box.empty();
-	        for (var _i = 0, _a = this.song.tracks; _i < _a.length; _i++) {
-	            var track = _a[_i];
-	            this.addTrack(track);
+	        for (var i = 0; i < this.song.tracks.length; i++) {
+	            var $tbox = this.addTrack(this.song.tracks[i]);
+	            this.registerTrackSel($tbox, i);
+	            if (i == this.selTrack)
+	                $tbox.addClass('track-selected');
+	            if (i == this.song.tracks.length - 1)
+	                $tbox.css('border-right', 'initial');
 	        }
 	    };
 	    TracksBox.prototype.addTrack = function (track) {
@@ -3916,15 +3934,44 @@
 	        $tbox.addClass('track-column');
 	        for (var _i = 0, _a = track.parts; _i < _a.length; _i++) {
 	            var part = _a[_i];
-	            this.addPart($tbox, part);
+	            var $pbox = this.addPart($tbox, part);
+	            this.registerPartSel($pbox, part);
 	        }
 	        this.$box.append($tbox);
+	        return $tbox;
 	    };
 	    TracksBox.prototype.addPart = function ($tbox, part) {
 	        var $pbox = $('<div>');
 	        $pbox.addClass('track-box');
+	        //TODO****** set height proportional to number of rows
 	        $pbox.text(part.name);
 	        $tbox.append($pbox);
+	    };
+	    //-------------------- Event handlers --------------------
+	    TracksBox.prototype.registerTrackSel = function ($tbox, i) {
+	        var _this = this;
+	        $tbox.click(function (_) {
+	            $('.track-column').removeClass('track-selected');
+	            $tbox.addClass('track-selected');
+	            _this.selTrack = i;
+	        });
+	    };
+	    TracksBox.prototype.registerPartSel = function ($pbox, part) {
+	        //TODO******* implement
+	        //	Highlight selected part in track
+	        //	Consider also updating part in part box
+	    };
+	    TracksBox.prototype.registerButtons = function () {
+	        var _this = this;
+	        this.pbox.$addPartBut.click(function (_) {
+	            var track = _this.song.tracks[_this.selTrack];
+	            track.parts.push(_this.pbox.part);
+	            _this.refresh();
+	        });
+	    };
+	    TracksBox.prototype.registerPartNameChange = function () {
+	        var _this = this;
+	        $(document).on('pbox:name-change', function (_) { return _this.refresh(); });
 	    };
 	    return TracksBox;
 	})();

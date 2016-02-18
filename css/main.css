@@ -330,9 +330,12 @@ input[type=range][orient=vertical] {
 /*---------------------------------------*/
 
 .track-column {
-	width: 87px;
+	width: 88.5px;
 	min-height: 100%;
-	border-right: solid 1px black;
+	border-right: 1px solid black;
+	display: inline-block;
+	vertical-align: top;
+	background-color: #AAA;
 }
 
 .track-box {
@@ -340,9 +343,19 @@ input[type=range][orient=vertical] {
 	height: 50px;
 	padding: 5px;
 	border-bottom: 1px solid black;
-	background-color: #CCC;
+	background-color: #DDD;
 	display: flex;
 	align-content: center;
 	flex-direction: column;
 	justify-content: center;
+	text-align: center;
+	font-size: 9pt;
+}
+
+.track-selected {
+	background-color: #0AA;
+}
+
+.track-selected > .track-box {
+	background-color: #0DD;
 }

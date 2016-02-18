@@ -44,6 +44,8 @@ export class PartList {
 		return false;
 	}
 
+	//-------------------- Event handlers --------------------
+
 	registerList() {
 		this.$parts.change(_ => {
 			this.pbox.stop();
@@ -56,10 +58,7 @@ export class PartList {
 	}
 
 	registerPartNameChange() {
-		this.pbox.$nameInput.on('input', _ => {
-			this.pbox.part.name = this.pbox.$nameInput.val();
-			this.refresh();
-		});
+		$(document).on('pbox:name-change', _ => this.refresh());
 	}
 
 	registerButtons() {

@@ -16,8 +16,9 @@ export class PartBox {
 	rowOfs: number;
 	presets: any[];
 	$playBut: JQuery;
-	$delBut: JQuery;
 	$newBut: JQuery;
+	$delBut: JQuery;
+	$addPartBut: JQuery;
 	$instCombo: JQuery;
 	$nvCombo: JQuery;
 	$nrCombo: JQuery;
@@ -28,8 +29,9 @@ export class PartBox {
 		this.rowNum = 0;
 		this.ac = ac;
 		this.$playBut = $elem.find('.but-play');
-		this.$delBut = $elem.find('.but-del-part');
 		this.$newBut = $elem.find('.but-new-part');
+		this.$delBut = $elem.find('.but-del-part');
+		this.$addPartBut = $elem.find('.but-add-part');
 		this.part = part;
 		this.pianola = pianola;
 		this.registerPianolaScroll();
@@ -44,6 +46,7 @@ export class PartBox {
 		this.$nrCombo = $elem.find('.combo-rows');
         this.registerNumRowsCombo();
 		this.$nameInput = $elem.find('.part-name');
+		this.registerNameChange();
 		this.refresh();
 	}
 
@@ -233,6 +236,13 @@ export class PartBox {
 				default: return;
 			}
 			this.updateRowOfs(dy);
+		});
+	}
+
+	registerNameChange() {
+		this.$nameInput.on('input', _ => {
+			this.part.name = this.$nameInput.val();
+			$(document).trigger('pbox:name-change', this.part.name);
 		});
 	}
 

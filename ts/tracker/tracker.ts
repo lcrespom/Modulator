@@ -55,6 +55,9 @@ function starWars(ac: ModernAudioContext, preset: any): tracker.Song {
 	s.title = 'Star Wars';
 	s.bpm = 90;
 	s.tracks.push(t);
+	s.tracks.push(new tracker.Track());
+	s.tracks.push(new tracker.Track());
+	s.tracks.push(new tracker.Track());
 	s.parts.push(p);
 	return s;
 }
@@ -67,7 +70,7 @@ export function setupTracker(ac: ModernAudioContext, presets: any[]) {
 	const part = song.tracks[0].parts[0];
 	const pianola = new Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
 	const pbox = new PartBox(ac, $('#part-box'), part, pianola, presets);
-	const tbox = new TracksBox($('#tracks'), song);
+	const tbox = new TracksBox($('#tracks'), song, pbox);
 	new PartList($('#part-list'), song, pbox);
 	$(document).on('route:show', (e, page) => {
 		if (page == '#tracker') {
