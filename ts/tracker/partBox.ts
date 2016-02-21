@@ -1,9 +1,13 @@
 import { Pianola } from './pianola';
 import { Part, NoteRow, Note } from './song';
+
 import { Instrument } from '../synth/instrument';
+
 import { ModernAudioContext } from '../utils/modern';
 import { focusable } from '../utils/modern';
+import { setButIcon } from '../utils/uiUtils';
 import * as popups from '../utils/popups';
+
 
 export class PartBox {
 	playing = false;
@@ -73,7 +77,7 @@ export class PartBox {
 		if (!this.part) return;
 		this.playing = !this.playing;
 		if (this.playing) {
-			this.setButIcon(this.$playBut, 'pause');
+			setButIcon(this.$playBut, 'pause');
 			this.part.play(this.rowNum, bpm, rowNum => {
 				this.pianola.render(this.part, rowNum);
 				this.rowNum = rowNum;
@@ -88,7 +92,7 @@ export class PartBox {
 	}
 
 	pause() {
-		this.setButIcon(this.$playBut, 'play');
+		setButIcon(this.$playBut, 'play');
 		this.part.stop();
 		this.part.instrument.allNotesOff();
 	}
@@ -98,13 +102,6 @@ export class PartBox {
 		this.pause();
 		this.playing = false;
 		this.rowNum = 0;
-	}
-
-	setButIcon($but: JQuery, icon: string) {
-		const $glyph = $but.find('.glyphicon');
-		const classes = $glyph.attr('class').split(/\s+/)
-			.filter(c => !c.match(/glyphicon-/)).concat('glyphicon-' + icon);
-		$glyph.attr('class', classes.join(' '));
 	}
 
 	updateRowOfs(dy: number) {

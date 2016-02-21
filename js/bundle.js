@@ -3246,8 +3246,9 @@
 	var tracker = __webpack_require__(22);
 	var pianola_1 = __webpack_require__(23);
 	var partBox_1 = __webpack_require__(24);
-	var partList_1 = __webpack_require__(25);
-	var tracksBox_1 = __webpack_require__(26);
+	var partList_1 = __webpack_require__(26);
+	var tracksBox_1 = __webpack_require__(27);
+	var songBox_1 = __webpack_require__(28);
 	var instrument_1 = __webpack_require__(18);
 	function rowWithNotes() {
 	    var notes = [];
@@ -3310,6 +3311,7 @@
 	    var pianola = new pianola_1.Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
 	    var pbox = new partBox_1.PartBox(ac, $('#part-box'), part, pianola, presets);
 	    var tbox = new tracksBox_1.TracksBox($('#tracks'), song, pbox);
+	    new songBox_1.SongBox($('#song-box'), song);
 	    new partList_1.PartList($('#part-list'), song, pbox);
 	    $(document).on('route:show', function (e, page) {
 	        if (page == '#tracker') {
@@ -3402,7 +3404,27 @@
 	var Track = (function () {
 	    function Track() {
 	        this.parts = [];
+	        this.reset();
 	    }
+	    Track.prototype.playRow = function (when) {
+	        if (this.partNum >= this.parts.length)
+	            return false;
+	        var part = this.parts[this.partNum];
+	        this.currentInstrument = part.instrument;
+	        part.playRow(this.rowNum, when);
+	        this.rowNum++;
+	        if (this.rowNum >= part.rows.length)
+	            this.partNum++;
+	        return true;
+	    };
+	    Track.prototype.reset = function () {
+	        this.partNum = 0;
+	        this.rowNum = 0;
+	    };
+	    Track.prototype.allNotesOff = function () {
+	        if (this.currentInstrument)
+	            this.currentInstrument.allNotesOff();
+	    };
 	    return Track;
 	})();
 	exports.Track = Track;
@@ -3410,12 +3432,40 @@
 	    function Song(audioCtx) {
 	        this.tracks = [];
 	        this.parts = [];
+	        this.playing = false;
 	        this.audioCtx = audioCtx;
 	    }
-	    Song.prototype.play = function () {
+	    Song.prototype.play = function (cb) {
+	        var _this = this;
 	        this.timer = new timer_1.Timer(this.audioCtx, this.bpm);
+	        this.timer.start(function (when) {
+	            _this.playing = false;
+	            for (var _i = 0, _a = _this.tracks; _i < _a.length; _i++) {
+	                var track = _a[_i];
+	                _this.playing = track.playRow(when) || _this.playing;
+	            }
+	            if (!_this.playing)
+	                _this.stop();
+	            cb();
+	        });
 	    };
-	    Song.prototype.stop = function () { };
+	    Song.prototype.pause = function () {
+	        this.timer.stop();
+	        for (var _i = 0, _a = this.tracks; _i < _a.length; _i++) {
+	            var track = _a[_i];
+	            track.allNotesOff();
+	        }
+	    };
+	    Song.prototype.reset = function () {
+	        for (var _i = 0, _a = this.tracks; _i < _a.length; _i++) {
+	            var track = _a[_i];
+	            track.reset();
+	        }
+	    };
+	    Song.prototype.stop = function () {
+	        this.pause();
+	        this.reset();
+	    };
 	    return Song;
 	})();
 	exports.Song = Song;
@@ -3599,6 +3649,7 @@
 	var song_1 = __webpack_require__(22);
 	var instrument_1 = __webpack_require__(18);
 	var modern_1 = __webpack_require__(5);
+	var uiUtils_1 = __webpack_require__(25);
 	var popups = __webpack_require__(9);
 	var PartBox = (function () {
 	    function PartBox(ac, $elem, part, pianola, presets) {
@@ -3654,7 +3705,7 @@
 	            return;
 	        this.playing = !this.playing;
 	        if (this.playing) {
-	            this.setButIcon(this.$playBut, 'pause');
+	            uiUtils_1.setButIcon(this.$playBut, 'pause');
 	            this.part.play(this.rowNum, bpm, function (rowNum) {
 	                _this.pianola.render(_this.part, rowNum);
 	                _this.rowNum = rowNum;
@@ -3668,7 +3719,7 @@
 	        }
 	    };
 	    PartBox.prototype.pause = function () {
-	        this.setButIcon(this.$playBut, 'play');
+	        uiUtils_1.setButIcon(this.$playBut, 'play');
 	        this.part.stop();
 	        this.part.instrument.allNotesOff();
 	    };
@@ -3678,12 +3729,6 @@
 	        this.pause();
 	        this.playing = false;
 	        this.rowNum = 0;
-	    };
-	    PartBox.prototype.setButIcon = function ($but, icon) {
-	        var $glyph = $but.find('.glyphicon');
-	        var classes = $glyph.attr('class').split(/\s+/)
-	            .filter(function (c) { return !c.match(/glyphicon-/); }).concat('glyphicon-' + icon);
-	        $glyph.attr('class', classes.join(' '));
 	    };
 	    PartBox.prototype.updateRowOfs = function (dy) {
 	        this.rowOfs += dy;
@@ -3832,6 +3877,19 @@
 
 /***/ },
 /* 25 */
+/***/ function(module, exports) {
+
+	function setButIcon($but, icon) {
+	    var $glyph = $but.find('.glyphicon');
+	    var classes = $glyph.attr('class').split(/\s+/)
+	        .filter(function (c) { return !c.match(/glyphicon-/); }).concat('glyphicon-' + icon);
+	    $glyph.attr('class', classes.join(' '));
+	}
+	exports.setButIcon = setButIcon;
+
+
+/***/ },
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var song_1 = __webpack_require__(22);
@@ -3923,7 +3981,7 @@
 
 
 /***/ },
-/* 26 */
+/* 27 */
 /***/ function(module, exports) {
 
 	var TracksBox = (function () {
@@ -3994,6 +4052,53 @@
 	    return TracksBox;
 	})();
 	exports.TracksBox = TracksBox;
+
+
+/***/ },
+/* 28 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var uiUtils_1 = __webpack_require__(25);
+	var SongBox = (function () {
+	    function SongBox($elem, song) {
+	        this.playing = false;
+	        this.song = song;
+	        this.$playBut = $elem.find('.but-play');
+	        this.registerButtons();
+	    }
+	    SongBox.prototype.play = function () {
+	        var _this = this;
+	        this.playing = !this.playing;
+	        if (this.playing) {
+	            uiUtils_1.setButIcon(this.$playBut, 'pause');
+	            this.song.bpm = 90; //TODO******** use BPM from input
+	            this.song.play(function () {
+	                //TODO**** update UI
+	                if (!_this.song.playing)
+	                    _this.stop();
+	            });
+	        }
+	        else {
+	            this.pause();
+	        }
+	    };
+	    SongBox.prototype.pause = function () {
+	        uiUtils_1.setButIcon(this.$playBut, 'play');
+	        this.song.pause();
+	    };
+	    SongBox.prototype.stop = function () {
+	        this.pause();
+	        this.playing = false;
+	    };
+	    SongBox.prototype.registerButtons = function () {
+	        var _this = this;
+	        this.$playBut.click(function (_) {
+	            _this.play();
+	        });
+	    };
+	    return SongBox;
+	})();
+	exports.SongBox = SongBox;
 
 
 /***/ }

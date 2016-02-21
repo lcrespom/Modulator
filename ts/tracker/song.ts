@@ -21,10 +21,12 @@ export class Note {
 	}
 }
 
+
 export class NoteRow {
 	notes: Note[] = [];
 	commands: any[] = [];
 }
+
 
 export class Part {
 	name: string;
@@ -74,26 +76,78 @@ export class Part {
 	}
 }
 
+
 export class Track {
 	parts: Part[] = [];
+	partNum: number;
+	rowNum: number;
+	currentInstrument: Instrument;
+
+	constructor() {
+		this.reset();
+	}
+
+	playRow(when: number) {
+		if (this.partNum >= this.parts.length) return false;
+		const part = this.parts[this.partNum];
+		this.currentInstrument = part.instrument;
+		part.playRow(this.rowNum, when);
+		this.rowNum++;
+		if (this.rowNum >= part.rows.length)
+			this.partNum++;
+		return true;
+	}
+
+	reset() {
+		this.partNum = 0;
+		this.rowNum = 0;
+	}
+
+	allNotesOff() {
+		if (this.currentInstrument)
+			this.currentInstrument.allNotesOff();
+	}
 }
+
 
 export class Song {
 	title: string;
 	bpm: number;
 	tracks: Track[] = [];
 	parts: Part[] = [];
-	timer: Timer;
 	audioCtx: AudioContext;
+	timer: Timer;
+	playing: boolean;
 
 	constructor(audioCtx: AudioContext) {
+		this.playing = false;
 		this.audioCtx = audioCtx;
 	}
 
-	play() {
+	play(cb: () => void) {
 		this.timer = new Timer(this.audioCtx, this.bpm);
+		this.timer.start(when => {
+			this.playing = false;
+			for (const track of this.tracks)
+				this.playing = track.playRow(when) || this.playing;
+			if (!this.playing) this.stop();
+			cb();
+		});
 	}
 
-	stop() {}
+	pause() {
+		this.timer.stop();
+		for (const track of this.tracks)
+			track.allNotesOff();
+	}
+
+	reset() {
+		for (const track of this.tracks) track.reset();
+	}
+
+	stop() {
+		this.pause();
+		this.reset();
+	}
 
 }
