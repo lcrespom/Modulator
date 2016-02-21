@@ -83,6 +83,17 @@ export class Song {
 	bpm: number;
 	tracks: Track[] = [];
 	parts: Part[] = [];
-	play() {}
+	timer: Timer;
+	audioCtx: AudioContext;
+
+	constructor(audioCtx: AudioContext) {
+		this.audioCtx = audioCtx;
+	}
+
+	play() {
+		this.timer = new Timer(this.audioCtx, this.bpm);
+	}
+
 	stop() {}
+
 }

@@ -51,7 +51,7 @@ function starWars(ac: ModernAudioContext, preset: any): tracker.Song {
 	createNotes(p.rows);
 	const t = new tracker.Track();
 	t.parts.push(p);
-	const s = new tracker.Song();
+	const s = new tracker.Song(ac);
 	s.title = 'Star Wars';
 	s.bpm = 90;
 	s.tracks.push(t);

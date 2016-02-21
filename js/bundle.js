@@ -3293,7 +3293,7 @@
 	    createNotes(p.rows);
 	    var t = new tracker.Track();
 	    t.parts.push(p);
-	    var s = new tracker.Song();
+	    var s = new tracker.Song(ac);
 	    s.title = 'Star Wars';
 	    s.bpm = 90;
 	    s.tracks.push(t);
@@ -3407,11 +3407,14 @@
 	})();
 	exports.Track = Track;
 	var Song = (function () {
-	    function Song() {
+	    function Song(audioCtx) {
 	        this.tracks = [];
 	        this.parts = [];
+	        this.audioCtx = audioCtx;
 	    }
-	    Song.prototype.play = function () { };
+	    Song.prototype.play = function () {
+	        this.timer = new timer_1.Timer(this.audioCtx, this.bpm);
+	    };
 	    Song.prototype.stop = function () { };
 	    return Song;
 	})();
