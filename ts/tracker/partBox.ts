@@ -1,5 +1,5 @@
 import { Pianola } from './pianola';
-import { Part, NoteRow, Note } from './song';
+import { Part, Song, NoteRow, Note } from './song';
 
 import { Instrument } from '../synth/instrument';
 
@@ -13,6 +13,7 @@ export class PartBox {
 	playing = false;
 	ac: ModernAudioContext;
 	part: Part;
+	song: Song;
 	pianola: Pianola;
 	rowNum: number;
 	rowOfs: number;
@@ -26,7 +27,7 @@ export class PartBox {
 	$nrCombo: JQuery;
 	$nameInput: JQuery;
 
-	constructor(ac: ModernAudioContext, $elem: JQuery, part: Part,
+	constructor(ac: ModernAudioContext, $elem: JQuery, part: Part, song: Song,
 		pianola: Pianola, presets: any[]) {
 		this.rowNum = 0;
 		this.ac = ac;
@@ -35,6 +36,7 @@ export class PartBox {
 		this.$delBut = $elem.find('.but-del-part');
 		this.$addPartBut = $elem.find('.but-add-part');
 		this.part = part;
+		this.song = song;
 		this.pianola = pianola;
 		this.registerPianolaScroll();
 		this.pianola.pkh.noteOn = (midi, velocity) => this.editNote(midi, velocity);
@@ -73,12 +75,12 @@ export class PartBox {
 	}
 
 	play() {
-		const bpm = 90;		//TODO***** use BPM value from input
 		if (!this.part) return;
 		this.playing = !this.playing;
 		if (this.playing) {
 			setButIcon(this.$playBut, 'pause');
-			this.part.play(this.rowNum, bpm, rowNum => {
+			this.part.play(this.rowNum, this.song.bpm, rowNum => {
+				this.part.timer.bpm = this.song.bpm;
 				this.pianola.render(this.part, rowNum);
 				this.rowNum = rowNum;
 				this.rowOfs = this.rowNum;

@@ -70,7 +70,7 @@ export function setupTracker(ac: ModernAudioContext, presets: any[]) {
 	const song = starWars(ac, presets[5]);
 	const part = song.tracks[0].parts[0];
 	const pianola = new Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
-	const pbox = new PartBox(ac, $('#part-box'), part, pianola, presets);
+	const pbox = new PartBox(ac, $('#part-box'), part, song, pianola, presets);
 	const tbox = new TracksBox($('#tracks'), song, pbox);
 	new SongBox($('#song-box'), song);
 	new PartList($('#part-list'), song, pbox);

@@ -3309,7 +3309,7 @@
 	    var song = starWars(ac, presets[5]);
 	    var part = song.tracks[0].parts[0];
 	    var pianola = new pianola_1.Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
-	    var pbox = new partBox_1.PartBox(ac, $('#part-box'), part, pianola, presets);
+	    var pbox = new partBox_1.PartBox(ac, $('#part-box'), part, song, pianola, presets);
 	    var tbox = new tracksBox_1.TracksBox($('#tracks'), song, pbox);
 	    new songBox_1.SongBox($('#song-box'), song);
 	    new partList_1.PartList($('#part-list'), song, pbox);
@@ -3435,6 +3435,16 @@
 	        this.playing = false;
 	        this.audioCtx = audioCtx;
 	    }
+	    Object.defineProperty(Song.prototype, "bpm", {
+	        get: function () { return this._bpm; },
+	        set: function (v) {
+	            this._bpm = v;
+	            if (this.timer)
+	                this.timer.bpm = v;
+	        },
+	        enumerable: true,
+	        configurable: true
+	    });
 	    Song.prototype.play = function (cb) {
 	        var _this = this;
 	        this.timer = new timer_1.Timer(this.audioCtx, this.bpm);
@@ -3652,7 +3662,7 @@
 	var uiUtils_1 = __webpack_require__(25);
 	var popups = __webpack_require__(9);
 	var PartBox = (function () {
-	    function PartBox(ac, $elem, part, pianola, presets) {
+	    function PartBox(ac, $elem, part, song, pianola, presets) {
 	        var _this = this;
 	        this.playing = false;
 	        this.rowNum = 0;
@@ -3662,6 +3672,7 @@
 	        this.$delBut = $elem.find('.but-del-part');
 	        this.$addPartBut = $elem.find('.but-add-part');
 	        this.part = part;
+	        this.song = song;
 	        this.pianola = pianola;
 	        this.registerPianolaScroll();
 	        this.pianola.pkh.noteOn = function (midi, velocity) { return _this.editNote(midi, velocity); };
@@ -3700,13 +3711,13 @@
 	    };
 	    PartBox.prototype.play = function () {
 	        var _this = this;
-	        var bpm = 90; //TODO***** use BPM value from input
 	        if (!this.part)
 	            return;
 	        this.playing = !this.playing;
 	        if (this.playing) {
 	            uiUtils_1.setButIcon(this.$playBut, 'pause');
-	            this.part.play(this.rowNum, bpm, function (rowNum) {
+	            this.part.play(this.rowNum, this.song.bpm, function (rowNum) {
+	                _this.part.timer.bpm = _this.song.bpm;
 	                _this.pianola.render(_this.part, rowNum);
 	                _this.rowNum = rowNum;
 	                _this.rowOfs = _this.rowNum;
@@ -4065,15 +4076,19 @@
 	        this.song = song;
 	        this.$playBut = $elem.find('.but-play');
 	        this.registerButtons();
+	        this.$bpm = $elem.find('.song-bpm');
+	        this.$bpm.val(song.bpm);
+	        this.registerBPM();
 	    }
 	    SongBox.prototype.play = function () {
 	        var _this = this;
 	        this.playing = !this.playing;
 	        if (this.playing) {
 	            uiUtils_1.setButIcon(this.$playBut, 'pause');
-	            this.song.bpm = 90; //TODO******** use BPM from input
 	            this.song.play(function () {
-	                //TODO**** update UI
+	                //TODO**** update UI:
+	                //	- Pianola shows current part of selected track
+	                //	- TrackBox shows horizontal line with current row
 	                if (!_this.song.playing)
 	                    _this.stop();
 	            });
@@ -4090,10 +4105,15 @@
 	        this.pause();
 	        this.playing = false;
 	    };
+	    //-------------------- Event handlers --------------------
 	    SongBox.prototype.registerButtons = function () {
 	        var _this = this;
-	        this.$playBut.click(function (_) {
-	            _this.play();
+	        this.$playBut.click(function (_) { return _this.play(); });
+	    };
+	    SongBox.prototype.registerBPM = function () {
+	        var _this = this;
+	        this.$bpm.on('input', function (_) {
+	            _this.song.bpm = parseInt(_this.$bpm.val());
 	        });
 	    };
 	    return SongBox;

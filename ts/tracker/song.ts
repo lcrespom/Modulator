@@ -112,7 +112,7 @@ export class Track {
 
 export class Song {
 	title: string;
-	bpm: number;
+	_bpm: number;
 	tracks: Track[] = [];
 	parts: Part[] = [];
 	audioCtx: AudioContext;
@@ -122,6 +122,13 @@ export class Song {
 	constructor(audioCtx: AudioContext) {
 		this.playing = false;
 		this.audioCtx = audioCtx;
+	}
+
+	get bpm() { return this._bpm; }
+
+	set bpm(v) {
+		this._bpm = v;
+		if (this.timer) this.timer.bpm = v;
 	}
 
 	play(cb: () => void) {
