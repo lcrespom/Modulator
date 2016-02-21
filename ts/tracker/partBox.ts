@@ -1,6 +1,5 @@
 import { Pianola } from './pianola';
 import { Part, NoteRow, Note } from './song';
-import { Timer } from '../synth/timer';
 import { Instrument } from '../synth/instrument';
 import { ModernAudioContext } from '../utils/modern';
 import { focusable } from '../utils/modern';
@@ -8,7 +7,6 @@ import * as popups from '../utils/popups';
 
 export class PartBox {
 	playing = false;
-	timer: Timer;
 	ac: ModernAudioContext;
 	part: Part;
 	pianola: Pianola;
@@ -71,16 +69,16 @@ export class PartBox {
 	}
 
 	play() {
+		const bpm = 90;		//TODO***** use BPM value from input
 		if (!this.part) return;
 		this.playing = !this.playing;
 		if (this.playing) {
 			this.setButIcon(this.$playBut, 'pause');
-			this.timer = new Timer(this.ac, 90);
-			this.timer.start(when => {
-				this.part.playRow(this.rowNum, when);
-				this.pianola.render(this.part, this.rowNum++);
+			this.part.play(this.rowNum, bpm, rowNum => {
+				this.pianola.render(this.part, rowNum);
+				this.rowNum = rowNum;
 				this.rowOfs = this.rowNum;
-				if (this.rowNum > this.part.rows.length)
+				if (this.rowNum >= this.part.rows.length)
 					this.stop();
 			});
 		}
@@ -91,7 +89,7 @@ export class PartBox {
 
 	pause() {
 		this.setButIcon(this.$playBut, 'play');
-		this.timer.stop();
+		this.part.stop();
 		this.part.instrument.allNotesOff();
 	}
 

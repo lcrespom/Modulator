@@ -3323,8 +3323,9 @@
 
 /***/ },
 /* 22 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
+	var timer_1 = __webpack_require__(17);
 	var Note = (function () {
 	    function Note(type, midi, velocity) {
 	        if (velocity === void 0) { velocity = 1; }
@@ -3359,6 +3360,21 @@
 	        for (var i = 0; i < numRows; i++)
 	            this.rows.push(new NoteRow());
 	    }
+	    Part.prototype.play = function (rowNum, bpm, cb) {
+	        var _this = this;
+	        var audioCtx = this.instrument.voices[0].synth.ac;
+	        this.timer = new timer_1.Timer(audioCtx, bpm);
+	        this.timer.start(function (when) {
+	            _this.playRow(rowNum, when);
+	            cb(rowNum);
+	            rowNum++;
+	            if (rowNum > _this.rows.length)
+	                _this.timer.stop();
+	        });
+	    };
+	    Part.prototype.stop = function () {
+	        this.timer.stop();
+	    };
 	    Part.prototype.playRow = function (rowNum, when, offDelay) {
 	        if (offDelay === void 0) { offDelay = 0; }
 	        var row = this.rows[rowNum];
@@ -3578,7 +3594,6 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var song_1 = __webpack_require__(22);
-	var timer_1 = __webpack_require__(17);
 	var instrument_1 = __webpack_require__(18);
 	var modern_1 = __webpack_require__(5);
 	var popups = __webpack_require__(9);
@@ -3631,17 +3646,17 @@
 	    };
 	    PartBox.prototype.play = function () {
 	        var _this = this;
+	        var bpm = 90; //TODO***** use BPM value from input
 	        if (!this.part)
 	            return;
 	        this.playing = !this.playing;
 	        if (this.playing) {
 	            this.setButIcon(this.$playBut, 'pause');
-	            this.timer = new timer_1.Timer(this.ac, 90);
-	            this.timer.start(function (when) {
-	                _this.part.playRow(_this.rowNum, when);
-	                _this.pianola.render(_this.part, _this.rowNum++);
+	            this.part.play(this.rowNum, bpm, function (rowNum) {
+	                _this.pianola.render(_this.part, rowNum);
+	                _this.rowNum = rowNum;
 	                _this.rowOfs = _this.rowNum;
-	                if (_this.rowNum > _this.part.rows.length)
+	                if (_this.rowNum >= _this.part.rows.length)
 	                    _this.stop();
 	            });
 	        }
@@ -3651,7 +3666,7 @@
 	    };
 	    PartBox.prototype.pause = function () {
 	        this.setButIcon(this.$playBut, 'play');
-	        this.timer.stop();
+	        this.part.stop();
 	        this.part.instrument.allNotesOff();
 	    };
 	    PartBox.prototype.stop = function () {

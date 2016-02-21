@@ -1,4 +1,5 @@
 import { Instrument } from '../synth/instrument';
+import { Timer } from '../synth/timer';
 
 
 export class Note {
@@ -30,11 +31,27 @@ export class Part {
 	instrument: Instrument;
 	preset: any;
 	rows: NoteRow[];
+	timer: Timer;
 
 	constructor(numRows: number) {
 		this.rows = [];
 		for (let i = 0; i < numRows; i++)
 			this.rows.push(new NoteRow());
+	}
+
+	play(rowNum: number, bpm: number, cb: (rowNum: number) => void) {
+		const audioCtx = this.instrument.voices[0].synth.ac;
+		this.timer = new Timer(audioCtx, bpm);
+		this.timer.start(when => {
+			this.playRow(rowNum, when);
+			cb(rowNum);
+			rowNum++;
+			if (rowNum > this.rows.length) this.timer.stop();
+		});
+	}
+
+	stop() {
+		this.timer.stop();
 	}
 
 	playRow(rowNum: number, when: number, offDelay = 0) {
