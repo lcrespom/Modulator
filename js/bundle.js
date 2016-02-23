@@ -3311,7 +3311,7 @@
 	    var pianola = new pianola_1.Pianola($('#past-notes'), $('#piano'), $('#future-notes'));
 	    var pbox = new partBox_1.PartBox(ac, $('#part-box'), part, song, pianola, presets);
 	    var tbox = new tracksBox_1.TracksBox($('#tracks'), song, pbox);
-	    new songBox_1.SongBox($('#song-box'), song);
+	    new songBox_1.SongBox($('#song-box'), song, tbox);
 	    new partList_1.PartList($('#part-list'), song, pbox);
 	    $(document).on('route:show', function (e, page) {
 	        if (page == '#tracker') {
@@ -4011,6 +4011,8 @@
 	            this.refreshPlaying();
 	        }
 	        else {
+	            //TODO refactor to hideSongPosition()
+	            $('#song-position').css('visibility', 'hidden');
 	            this.refreshEditing();
 	        }
 	    };
@@ -4044,7 +4046,9 @@
 	        $tbox.append($pbox);
 	    };
 	    TracksBox.prototype.refreshPlaying = function () {
-	        //TODO show #song-position, etc.		
+	        //TODO show #song-position, etc.
+	        $('#song-position').css('visibility', 'visible');
+	        //this.$box.css('top', '100px');
 	    };
 	    //-------------------- Event handlers --------------------
 	    TracksBox.prototype.registerTrackSel = function ($tbox, i) {
@@ -4083,9 +4087,10 @@
 
 	var uiUtils_1 = __webpack_require__(25);
 	var SongBox = (function () {
-	    function SongBox($elem, song) {
+	    function SongBox($elem, song, tbox) {
 	        this.playing = false;
 	        this.song = song;
+	        this.tbox = tbox;
 	        this.$playBut = $elem.find('.but-play');
 	        this.registerButtons();
 	        this.$bpm = $elem.find('.song-bpm');
@@ -4101,6 +4106,7 @@
 	                //TODO**** update UI:
 	                //	- Pianola shows current part of selected track
 	                //	- TrackBox shows horizontal line with current row
+	                _this.tbox.refresh();
 	                if (!_this.song.playing)
 	                    _this.stop();
 	            });

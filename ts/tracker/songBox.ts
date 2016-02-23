@@ -1,15 +1,18 @@
 import { Song } from './song';
+import { TracksBox } from './tracksBox';
 import { setButIcon } from '../utils/uiUtils';
 
 export class SongBox {
 	song: Song;
+	tbox: TracksBox;
 	$playBut: JQuery;
 	$bpm: JQuery;
 	playing: boolean;
 
-	constructor($elem: JQuery, song: Song) {
+	constructor($elem: JQuery, song: Song, tbox: TracksBox) {
 		this.playing = false;
 		this.song = song;
+		this.tbox = tbox;
 		this.$playBut = $elem.find('.but-play');
 		this.registerButtons();
 		this.$bpm = $elem.find('.song-bpm');
@@ -25,6 +28,7 @@ export class SongBox {
 				//TODO**** update UI:
 				//	- Pianola shows current part of selected track
 				//	- TrackBox shows horizontal line with current row
+				this.tbox.refresh();
 				if (!this.song.playing)
 					this.stop();
 			});

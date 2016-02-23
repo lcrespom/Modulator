@@ -22,6 +22,8 @@ export class TracksBox {
 			this.refreshPlaying();
 		}
 		else {
+			//TODO refactor to hideSongPosition()
+			$('#song-position').css('visibility', 'hidden');
 			this.refreshEditing();
 		}
 	}
@@ -58,7 +60,9 @@ export class TracksBox {
 	}
 
 	refreshPlaying() {
-		//TODO show #song-position, etc.		
+		//TODO show #song-position, etc.
+		$('#song-position').css('visibility', 'visible');
+		//this.$box.css('top', '100px');
 	}
 
 	//-------------------- Event handlers --------------------
