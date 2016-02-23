@@ -41,6 +41,7 @@ export class SongBox {
 	pause() {
 		setButIcon(this.$playBut, 'play');
 		this.song.pause();
+		this.tbox.refresh();
 	}
 
 	stop() {

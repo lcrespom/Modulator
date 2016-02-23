@@ -4118,6 +4118,7 @@
 	    SongBox.prototype.pause = function () {
 	        uiUtils_1.setButIcon(this.$playBut, 'play');
 	        this.song.pause();
+	        this.tbox.refresh();
 	    };
 	    SongBox.prototype.stop = function () {
 	        this.pause();
