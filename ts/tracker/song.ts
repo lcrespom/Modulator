@@ -146,6 +146,7 @@ export class Song {
 		this.timer.stop();
 		for (const track of this.tracks)
 			track.allNotesOff();
+		this.playing = false;
 	}
 
 	reset() {

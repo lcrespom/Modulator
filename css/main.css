@@ -361,3 +361,12 @@ input[type=range][orient=vertical] {
 .track-selected > .track-box {
 	background-color: #0DD;
 }
+
+#song-position {
+	width: 100%;
+	border-bottom: 1px solid blue;
+	position: absolute;
+	top: 122px;
+	z-index: 10;
+	visibility: hidden;
+}

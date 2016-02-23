@@ -3465,6 +3465,7 @@
 	            var track = _a[_i];
 	            track.allNotesOff();
 	        }
+	        this.playing = false;
 	    };
 	    Song.prototype.reset = function () {
 	        for (var _i = 0, _a = this.tracks; _i < _a.length; _i++) {
@@ -4006,6 +4007,14 @@
 	        this.refresh();
 	    }
 	    TracksBox.prototype.refresh = function () {
+	        if (this.song.playing) {
+	            this.refreshPlaying();
+	        }
+	        else {
+	            this.refreshEditing();
+	        }
+	    };
+	    TracksBox.prototype.refreshEditing = function () {
 	        this.$box.empty();
 	        for (var i = 0; i < this.song.tracks.length; i++) {
 	            var $tbox = this.addTrack(this.song.tracks[i]);
@@ -4033,6 +4042,9 @@
 	        //TODO****** set height proportional to number of rows
 	        $pbox.text(part.name);
 	        $tbox.append($pbox);
+	    };
+	    TracksBox.prototype.refreshPlaying = function () {
+	        //TODO show #song-position, etc.		
 	    };
 	    //-------------------- Event handlers --------------------
 	    TracksBox.prototype.registerTrackSel = function ($tbox, i) {

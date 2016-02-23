@@ -18,6 +18,15 @@ export class TracksBox {
 	}
 
 	refresh() {
+		if (this.song.playing) {
+			this.refreshPlaying();
+		}
+		else {
+			this.refreshEditing();
+		}
+	}
+
+	refreshEditing() {
 		this.$box.empty();
 		for (let i = 0; i < this.song.tracks.length; i++) {
 			const $tbox = this.addTrack(this.song.tracks[i]);
@@ -46,6 +55,10 @@ export class TracksBox {
 		//TODO****** set height proportional to number of rows
 		$pbox.text(part.name);
 		$tbox.append($pbox);
+	}
+
+	refreshPlaying() {
+		//TODO show #song-position, etc.		
 	}
 
 	//-------------------- Event handlers --------------------
