@@ -54,15 +54,24 @@ export class TracksBox {
 	addPart($tbox: JQuery, part: Part) {
 		const $pbox = $('<div>');
 		$pbox.addClass('track-box');
-		//TODO****** set height proportional to number of rows
+		$pbox.css('height', part.rows.length);
 		$pbox.text(part.name);
 		$tbox.append($pbox);
 	}
 
 	refreshPlaying() {
-		//TODO show #song-position, etc.
 		$('#song-position').css('visibility', 'visible');
-		//this.$box.css('top', '100px');
+		this.$box.find('.track-column').each((i, track) => {
+			const yOfs = 122 - this.song.tracks[i].fullRowNum;
+			$(track).css('top', '' + yOfs + 'px');
+		});
+		//TODO refresh pianola of current part of selected track
+		//TODO also update part box
+		/*
+		Improvements:
+		- Disable user scrolling during playing
+		- Problem with scrollbars / horizontal scrollbar displayed after end of play
+		*/
 	}
 
 	//-------------------- Event handlers --------------------

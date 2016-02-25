@@ -336,6 +336,7 @@ input[type=range][orient=vertical] {
 	display: inline-block;
 	vertical-align: top;
 	background-color: #AAA;
+	position: relative;
 }
 
 .track-box {

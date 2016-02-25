@@ -3413,13 +3413,17 @@
 	        this.currentInstrument = part.instrument;
 	        part.playRow(this.rowNum, when);
 	        this.rowNum++;
-	        if (this.rowNum >= part.rows.length)
+	        this.fullRowNum++;
+	        if (this.rowNum >= part.rows.length) {
 	            this.partNum++;
+	            this.rowNum = 0;
+	        }
 	        return true;
 	    };
 	    Track.prototype.reset = function () {
 	        this.partNum = 0;
 	        this.rowNum = 0;
+	        this.fullRowNum = 0;
 	    };
 	    Track.prototype.allNotesOff = function () {
 	        if (this.currentInstrument)
@@ -4041,14 +4045,24 @@
 	    TracksBox.prototype.addPart = function ($tbox, part) {
 	        var $pbox = $('<div>');
 	        $pbox.addClass('track-box');
-	        //TODO****** set height proportional to number of rows
+	        $pbox.css('height', part.rows.length);
 	        $pbox.text(part.name);
 	        $tbox.append($pbox);
 	    };
 	    TracksBox.prototype.refreshPlaying = function () {
-	        //TODO show #song-position, etc.
+	        var _this = this;
 	        $('#song-position').css('visibility', 'visible');
-	        //this.$box.css('top', '100px');
+	        this.$box.find('.track-column').each(function (i, track) {
+	            var yOfs = 122 - _this.song.tracks[i].fullRowNum;
+	            $(track).css('top', '' + yOfs + 'px');
+	        });
+	        //TODO refresh pianola of current part of selected track
+	        //TODO also update part box
+	        /*
+	        Improvements:
+	        - Disable user scrolling during playing
+	        - Problem with scrollbars / horizontal scrollbar displayed after end of play
+	        */
 	    };
 	    //-------------------- Event handlers --------------------
 	    TracksBox.prototype.registerTrackSel = function ($tbox, i) {

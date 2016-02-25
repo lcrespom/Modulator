@@ -81,6 +81,7 @@ export class Track {
 	parts: Part[] = [];
 	partNum: number;
 	rowNum: number;
+	fullRowNum: number;
 	currentInstrument: Instrument;
 
 	constructor() {
@@ -93,14 +94,18 @@ export class Track {
 		this.currentInstrument = part.instrument;
 		part.playRow(this.rowNum, when);
 		this.rowNum++;
-		if (this.rowNum >= part.rows.length)
+		this.fullRowNum++;
+		if (this.rowNum >= part.rows.length) {
 			this.partNum++;
+			this.rowNum = 0;
+		}
 		return true;
 	}
 
 	reset() {
 		this.partNum = 0;
 		this.rowNum = 0;
+		this.fullRowNum = 0;
 	}
 
 	allNotesOff() {
