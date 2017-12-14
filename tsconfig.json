@@ -1,13 +1,13 @@
 {
 	"compilerOptions": {
-		"target": "ES5",
-		"module": "commonjs",
+		"target": "es2015",
+		"module": "es2015",
 		"sourceMap": true,
-		"outDir": "build"
+		"outDir": "build",
+		"noImplicitAny": true,
+		"strictNullChecks": true
 	},
-	"exclude": [
-		".", ".git",
-		"js", "build", "node_modules",
-		"css", "img", "templates"
+	"include": [
+		"ts/**/*"
 	]
 }

@@ -1,6 +1,6 @@
 //-------------------- Encoding / decoding --------------------
 
-export function arrayBufferToBase64(buffer) {
+export function arrayBufferToBase64(buffer: number[]) {
 	var binary = '';
 	var bytes = new Uint8Array(buffer);
 	var len = bytes.byteLength;
@@ -10,7 +10,7 @@ export function arrayBufferToBase64(buffer) {
 	return window.btoa(binary);
 }
 
-export function base64ToArrayBuffer(base64) {
+export function base64ToArrayBuffer(base64: string) {
 	var binary_string = window.atob(base64);
 	var len = binary_string.length;
 	var bytes = new Uint8Array(len);
@@ -27,7 +27,7 @@ export function browserSupportsDownload(): boolean {
 	return !(<any>window).externalHost && 'download' in $('<a>')[0];
 }
 
-export function download(fileName, fileData) {
+export function download(fileName: string, fileData: string) {
 	const a = $('<a>');
 	a.attr('download', fileName);
 	a.attr('href',

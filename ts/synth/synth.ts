@@ -1,6 +1,6 @@
 import { NoteHandler, NoteHandlers } from './notes';
 import { NodeDef, NodeParamDef, NodePalette, palette } from './palette';
-import { ModernAudioContext, ModernAudioNode, removeArrayElement } from '../utils/modern';
+import { ModernAudioNode, removeArrayElement } from '../utils/modern';
 import * as custom from './customNodes';
 import * as file from '../utils/file';
 
@@ -45,7 +45,7 @@ interface ParamHandler {
 	uiRender: string;
 	initialize(anode: AudioNode, def: NodeDef): void;
 	param2json(anode: AudioNode): any;
-	json2param(anode: AudioNode, json: any);
+	json2param(anode: AudioNode, json: any): any;
 }
 
 /**
@@ -54,14 +54,14 @@ interface ParamHandler {
  * - Distributes MIDI keyboard events to NoteHandlers
  */
 export class Synth {
-	ac: ModernAudioContext;
+	ac: AudioContext;
 	customNodes: { [key: string]: Function } = {};
 	paramHandlers: { [key: string]: ParamHandler } = {};
 	palette: NodePalette;
 	noteHandlers: NoteHandler[] = [];
 	portamento = new Portamento();
 
-	constructor(ac: ModernAudioContext) {
+	constructor(ac: AudioContext) {
 		this.ac = ac;
 		this.palette = palette;
 		this.registerCustomNode('createADSR', custom.ADSR);
@@ -73,7 +73,7 @@ export class Synth {
 		this.registerParamHandler('SoundBankHandler', new SoundBankHandler());
 	}
 
-	createAudioNode(type: string): AudioNode {
+	createAudioNode(type: string): AudioNode | null {
 		const def: NodeDef = palette[type];
 		if (!def) return null;
 		const factory = def.custom ? this.customNodes : this.ac;

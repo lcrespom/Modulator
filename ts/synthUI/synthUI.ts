@@ -1,6 +1,6 @@
 import { Graph, Node, GraphHandler } from './graph';
 import { Synth, NodeData } from '../synth/synth';
-import { ModernAudioContext, ModernAudioNode, focusable } from '../utils/modern';
+import { ModernAudioNode, focusable } from '../utils/modern';
 import * as popups from '../utils/popups';
 
 /**
@@ -14,7 +14,7 @@ export class SynthUI {
 	nh: number;
 	outNode: ModernAudioNode;
 
-	constructor(ac: ModernAudioContext, graphCanvas: HTMLCanvasElement, jqParams: JQuery, jqFFT: JQuery, jqOsc: JQuery) {
+	constructor(ac: AudioContext, graphCanvas: HTMLCanvasElement, jqParams: JQuery, jqFFT: JQuery, jqOsc: JQuery) {
 		this.gr = new Graph(graphCanvas);
 		this.gr.handler = new SynthGraphHandler(this, jqParams, jqFFT, jqOsc);
 		this.synth = new Synth(ac);

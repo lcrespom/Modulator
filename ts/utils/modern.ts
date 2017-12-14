@@ -10,11 +10,6 @@ export interface ModernWindow extends Window {
 	webkitAudioContext: AudioContext;
 }
 
-export interface ModernAudioContext extends AudioContext {
-	suspend: () => void;
-	resume: () => void;
-}
-
 export interface ModernAudioNode extends AudioNode {
 	disconnect(output?: number | AudioNode | AudioParam): void
 }
@@ -43,8 +38,9 @@ export function log2linear(value: number, min: number, max: number): number {
 	return min + Math.pow(LOG_BASE, value * logRange) - 1;
 }
 
-export function focusable(elem) {
-	while (elem.tabIndex < 0 && elem.nodeName.toLowerCase() != 'body')
+export function focusable(elem: HTMLElement | null) {
+	while (elem != null && elem.tabIndex < 0 &&
+		elem.nodeName.toLowerCase() != 'body')
 		elem = elem.parentElement;
 	return elem;
 }
