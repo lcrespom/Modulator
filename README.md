@@ -1,11 +1,11 @@
-#Modulator
+# Modulator
 A graphical modular synthesizer, using the
 [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API).
 
 Modulator is a totally static HTML/JS app. It requires a modern browser such as Chrome,
 FireFox or Safari, but has no server-side code.
 
-##Usage
+## Usage
 - Click any synth node from the palette at the right to add it to the canvas
 - Use regular drag & drop to move audio nodes around in the canvas
 - To connect two nodes:
@@ -20,7 +20,7 @@ FireFox or Safari, but has no server-side code.
 
 You can directly try it out [here](//lcrespom.github.io/synth/).
 
-##Contributing
+## Contributing
 Contributions are welcome. You can reach me via [@lcrespom](https://twitter.com/lcrespom)
 on Twitter, or directly within GitHub.
 
@@ -40,11 +40,11 @@ on Twitter, or directly within GitHub.
 	just check out the ToDo list below. The code is in TypeScript, but ES6/ES2015 and
 	plain old JavaScript are compatible with it.
 
-##ToDo
+## ToDo
 Check the [ToDo list](https://github.com/lcrespom/Modulator/blob/master/TODO.md)
 	for pending bugs, new features, UI improvements, and more.
 
-##SynthLib
+## SynthLib
 The sound generation code of the application is also available as a UI-independent
 JavaScript library called
 [SynthLib](https://github.com/lcrespom/Modulator/blob/master/synthlib.md).
@@ -52,7 +52,7 @@ With it, you can load instruments that have
 been previously designed with Modulator and play notes on them.
 
 
-##Browser limitations
+## Browser limitations
 1. Modulator has been tested to work in Chrome, FireFox and Safari.
 	Although Web Audio is available in most mobile platforms, only the desktop
 	version has been tested. Node drag & drop and connection will probably not work
@@ -65,7 +65,7 @@ been previously designed with Modulator and play notes on them.
 a consequence of how Web Audio is implemented in FF.
 
 
-##References
+## References
 - Chris Lowis (@chrislowis)
 	- His [blog](http://blog.chrislowis.co.uk/) and web audio weekly newsletter
 	- His talk about [synth history and web audio](http://blog.chrislowis.co.uk/2015/06/26/a-brief-history-of-synthesis.html)
@@ -86,6 +86,6 @@ a consequence of how Web Audio is implemented in FF.
 - Soledad Penades
 	- [Hands On Web Audio](http://soledadpenades.com/files/t/2015_howa/#0) presentation
 
-##Acknowledgements
+## Acknowledgements
 The *Modulator* logo and application favicon are a design by
 [Marta Quer Bach](mailto:querbach.marta@gmail.com) 

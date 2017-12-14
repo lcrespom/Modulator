@@ -1,4 +1,4 @@
-#ToDo
+# ToDo
 
 ## Relaunch plan
 - [x] Tracker branch
@@ -6,7 +6,7 @@
 - [ ] Upgrade dependencies (typescript, webpack, etc.)
 - [ ] Live coding branch
 
-##Bugs
+## Bugs
 - ADSR needs more testing & refining
 	- Probable memory leaks in Pew! instrument
 	- Also see http://www.soundonsound.com/sos/nov99/articles/synthsecrets.htm
@@ -20,7 +20,7 @@
 	draws arrows incorrectly
 
 
-##Functionality
+## Functionality
 
 - For demo purposes, enable arpeggio and portamento in some patches,
 	or create new ones if required.
@@ -87,7 +87,7 @@
 		so they are internally connected to a gain node.
 
 
-##UI
+## UI
 - Review the following audio front-end libraries, especially for the
 	node parameters area:
 	- http://nexusosc.com/
@@ -106,7 +106,7 @@
 - Naming
 
 
-##Tracker
+## Tracker
 - Tracks
 	- display track rows and content
 	- add / remove track
@@ -120,7 +120,7 @@
 	also emit MIDI events to external devices
 
 
-##Long term
+## Long term
 - Rethink control nodes:
 	- It's not about control nodes, it's about control connections
 	- Any node output can be connected either to another node input or
@@ -148,7 +148,7 @@
 - 100% responsive & mobile / tablet friendly
 - Mobile app
 
-##Code
+## Code
 - Provide an interface that predefines the very common noteOn / noteOff methods
 - Decoupling
 	- The *piano* module group should not contain UI code. Therefore,
