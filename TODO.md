@@ -1,5 +1,11 @@
 #ToDo
 
+## Relaunch plan
+- [x] Tracker branch
+- [x] Remove tracker (too big)
+- [ ] Upgrade dependencies (typescript, webpack, etc.)
+- [ ] Live coding branch
+
 ##Bugs
 - ADSR needs more testing & refining
 	- Probable memory leaks in Pew! instrument
