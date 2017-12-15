@@ -100,7 +100,8 @@ export class Arpeggiator {
 
 
 class NoteData {
-	constructor(public note, public noteToPlay, public velocity) {}
+	constructor(public note: number,
+		public noteToPlay: number, public velocity: number) {}
 }
 
 class NoteTable {

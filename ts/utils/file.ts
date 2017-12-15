@@ -40,17 +40,17 @@ export function download(fileName: string, fileData: string) {
 
 //-------------------- Uploading --------------------
 
-type UploadCallback = (buf: any, file: string) => void
+type UploadCallback = (buf: any, file: any) => void
 
-export function uploadText(event: Event, cb: UploadCallback) {
+export function uploadText(event: JQuery.Event, cb: UploadCallback) {
 	upload(event, cb, 'readAsText');
 }
 
-export function uploadArrayBuffer(event: Event, cb: UploadCallback) {
+export function uploadArrayBuffer(event: JQuery.Event, cb: UploadCallback) {
 	upload(event, cb, 'readAsArrayBuffer');
 }
 
-function upload(event: Event, cb: UploadCallback, readFunc: string) {
+function upload(event: JQuery.Event, cb: UploadCallback, readFunc: string) {
 	let files = (<any>event.target).files
 	if (!files || files.length <= 0) return cb('', '');
 	const file = files[0];

@@ -20,8 +20,8 @@ export class PianoKeys {
 
 	createKeys(panel: JQuery): JQuery[] {
 		const keys = [];
-		const pw = panel.width();
-		const ph = panel.height();
+		const pw = panel.width() || 0;
+		const ph = panel.height() || 0;
 		const fromX = parseFloat(panel.css('padding-left'));
 		const fromY = parseFloat(panel.css('padding-top'));
 		const kw = pw / this.numWhites + 1;
@@ -128,7 +128,7 @@ export class PianoKeyboard {
 		const arpeggioSlider = panel.find('.arpeggio-box input');
 		arpeggioSlider.on('input',_ => {
 			this.arpeggio.bpm =
-				log2linear(parseFloat(arpeggioSlider.val()), ARPEGGIO_MIN, ARPEGGIO_MAX);
+				log2linear(parseFloat('' + arpeggioSlider.val()), ARPEGGIO_MIN, ARPEGGIO_MAX);
 				// ARPEGGIO_MIN + parseFloat(arpeggioSlider.val()) * (ARPEGGIO_MAX - ARPEGGIO_MIN);
 			this.triggerArpeggioChange();
 		});
@@ -148,7 +148,7 @@ export class PianoKeyboard {
 		this.octaveChanged(this.baseNote);
 	}
 
-	displayKeyDown(key): void {
+	displayKeyDown(key: any): void {
 		if (typeof key == 'number') key = this.midi2key(key);
 		if (!key) return;
 		if (!this.poly && this.arpeggio.mode == 0 && this.lastKey)
@@ -158,7 +158,7 @@ export class PianoKeyboard {
 		this.lastKey = key;
 	}
 
-	displayKeyUp(key, immediate?) {
+	displayKeyUp(key: any, immediate?: boolean) {
 		if (typeof key == 'number') key = this.midi2key(key);
 		if (!key) return;
 		const release = immediate ? 0 : this.envelope.release;
@@ -170,7 +170,7 @@ export class PianoKeyboard {
 		return this.keys[midi - this.baseNote];
 	}
 
-	setEnvelope(adsr) {
+	setEnvelope(adsr: any) {
 		this.envelope = adsr;
 	}
 
@@ -182,19 +182,19 @@ export class PianoKeyboard {
 				'Synth editing is disabled in polyphonic mode</p>');
 			$('body').append(cover);
 			$('#poly-but').text('Poly');
-			popups.isOpen = true;
+			popups.setOpen(true);
 			this.polyOn();
 		}
 		else {
 			$('.editor-cover').remove();
 			$('#poly-but').text('Mono');
-			popups.isOpen = false;
+			popups.setOpen(false);
 			this.polyOff();
 		}
 	}
 
 	getPortamento(): number {
-		const sv = parseFloat(this.portaSlider.val());;
+		const sv = parseFloat('' + this.portaSlider.val());;
 		return log2linear(sv, PORTAMENTO_MIN, PORTAMENTO_MAX);
 	}
 
@@ -231,7 +231,7 @@ export class PianoKeyboard {
 		}
 	}
 
-	fromJSON(json): void {
+	fromJSON(json: any): void {
 		if (!json) return;
 		if (json.portamento) {
 			this.portaSlider.val(
@@ -258,6 +258,6 @@ export class PianoKeyboard {
 	noteOff(midi: number): void {}
 	polyOn() {}
 	polyOff() {}
-	octaveChanged(baseNote) {}
+	octaveChanged(baseNote: number) {}
 	arpeggioChanged(bpm: number, mode: string, octaves: number) {}
 }

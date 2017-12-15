@@ -121,8 +121,10 @@ class SynthLoader {
 			this.nodes[i++] = new VoiceNodeData(jn.id);
 		// Then set their list of inputs
 		for (let i = 0; i < json.nodes.length; i++)
-			for (const inum of json.nodes[i].inputs)
-				this.nodes[i].inputs.push(this.nodeById(inum));
+			for (const inum of json.nodes[i].inputs) {
+				let input = this.nodeById(inum);
+				if (input) this.nodes[i].inputs.push();
+			}
 		// Then set their data
 		for (let i = 0; i < json.nodes.length; i++) {
 			const type = json.nodeData[i].type;
@@ -141,7 +143,7 @@ class SynthLoader {
 		return synth;
 	}
 
-	nodeById(id: number): VoiceNodeData {
+	nodeById(id: number): VoiceNodeData | null {
 		for (const node of this.nodes)
 			if (node.id === id) return node;
 		return null;

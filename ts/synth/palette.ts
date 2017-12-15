@@ -11,7 +11,7 @@ export interface NodeParamDef {
 
 /** Configuration data for an AudioNode */
 export interface NodeDef {
-	constructor: string;
+	constructor: string | null;
 	custom?: boolean;
 	noteHandler?: string;
 	control?: boolean;

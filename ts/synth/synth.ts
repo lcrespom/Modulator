@@ -18,7 +18,7 @@ export class NodeData {
 	nodeDef: NodeDef;
 	// Used by control nodes
 	controlParam: string;
-	controlParams: string[];
+	controlParams: string[] | null;
 	controlTarget: ModernAudioNode;
 	// Used by source audio nodes
 	noteHandler: NoteHandler;
@@ -76,8 +76,8 @@ export class Synth {
 	createAudioNode(type: string): AudioNode | null {
 		const def: NodeDef = palette[type];
 		if (!def) return null;
-		const factory = def.custom ? this.customNodes : this.ac;
-		if (!factory[def.constructor]) return null;
+		const factory: any = def.custom ? this.customNodes : this.ac;
+		if (!def.constructor || !factory[def.constructor]) return null;
 		const anode = factory[def.constructor]();
 		if (!anode.context) anode.context = this.ac;
 		this.initNodeParams(anode, def, type);
@@ -87,13 +87,14 @@ export class Synth {
 	initNodeData(ndata: NodeData, type: string): void {
 		ndata.synth = this;
 		ndata.type = type;
-		ndata.anode = this.createAudioNode(type);
-		if (!ndata.anode)
+		let anode = this.createAudioNode(type);
+		if (!anode)
 			return console.error(`No AudioNode found for '${type}'`);
+		ndata.anode = anode;
 		ndata.nodeDef = this.palette[type];
 		const nh = ndata.nodeDef.noteHandler;
 		if (nh) {
-			ndata.noteHandler = new NoteHandlers[nh](ndata);
+			ndata.noteHandler = new (<any>NoteHandlers)[nh](ndata);
 			this.addNoteHandler(ndata.noteHandler);
 		}
 	}
@@ -114,11 +115,12 @@ export class Synth {
 
 	connectNodes(srcData: NodeData, dstData: NodeData): void {
 		if (srcData.nodeDef.control && !dstData.nodeDef.control) {
+			let anode: any = dstData.anode;
 			srcData.controlParams = Object.keys(dstData.nodeDef.params)
-				.filter(pname => dstData.anode[pname] instanceof AudioParam);
+				.filter(pname => anode[pname] instanceof AudioParam);
 			srcData.controlParam = srcData.controlParams[0];
 			srcData.controlTarget = dstData.anode;
-			srcData.anode.connect(dstData.anode[srcData.controlParam]);
+			srcData.anode.connect(anode[srcData.controlParam]);
 		}
 		else srcData.anode.connect(dstData.anode);
 	}
@@ -126,37 +128,38 @@ export class Synth {
 	disconnectNodes(srcData: NodeData, dstData: NodeData): void {
 		if (srcData.nodeDef.control && !dstData.nodeDef.control) {
 			srcData.controlParams = null;
-			srcData.anode.disconnect(dstData.anode[srcData.controlParam]);
+			srcData.anode.disconnect((<any>dstData.anode)[srcData.controlParam]);
 		}
 		else
 			srcData.anode.disconnect(dstData.anode);
 	}
 
 	json2NodeData(json: any, data: NodeData): void {
+		let anydata: any = data;
 		for (const pname of Object.keys(json.params)) {
-			const pvalue = data.anode[pname];
+			const pvalue = anydata.anode[pname];
 			const jv = json.params[pname];
-			if (data.nodeDef.params[pname].handler)
-				this.paramHandlers[data.nodeDef.params[pname].handler]
-					.json2param(data.anode, jv);
+			if (anydata.nodeDef.params[pname].handler)
+				this.paramHandlers[anydata.nodeDef.params[pname].handler]
+					.json2param(anydata.anode, jv);
 			else if (pvalue instanceof AudioParam) {
 				pvalue.value = jv;
-				pvalue['_value'] = jv;
+				(<any>pvalue)['_value'] = jv;
 			}
-			else data.anode[pname] = jv;
+			else anydata.anode[pname] = jv;
 		}
 	}
 
-	nodeData2json(data: NodeData): any {
-		const params = {};
+	nodeData2json(data: any): any {
+		const params: any = {};
 		for (const pname of Object.keys(data.nodeDef.params)) {
 			const pvalue = data.anode[pname];
 			if (data.nodeDef.params[pname].handler)
 				params[pname] = this.paramHandlers[data.nodeDef.params[pname].handler]
 					.param2json(data.anode);
 			else if (pvalue instanceof AudioParam)
-				if (pvalue['_value'] === undefined) params[pname] = pvalue.value;
-				else params[pname] = pvalue['_value'];
+				if ((<any>pvalue)['_value'] === undefined) params[pname] = pvalue.value;
+				else params[pname] = (<any>pvalue)['_value'];
 			else params[pname] = pvalue;
 		}
 		return {
@@ -207,17 +210,18 @@ export class Synth {
 	}
 
 	initNodeParams(anode: AudioNode, def: NodeDef, type: string): void {
+		let anynode: any = anode;
 		for (const param of Object.keys(def.params || {}))
-			if (anode[param] === undefined)
+			if (anynode[param] === undefined)
 				console.warn(`Parameter '${param}' not found for node '${type}'`)
-			else if (anode[param] instanceof AudioParam)
-				anode[param].value = def.params[param].initial;
+			else if (anynode[param] instanceof AudioParam)
+				anynode[param].value = def.params[param].initial;
 			else if (def.params[param].handler) {
-				def.params[param].phandler = this.paramHandlers[def.params[param].handler];
-				def.params[param].phandler.initialize(anode, def);
+				def.params[param].phandler = this.paramHandlers[def.params[param].handler || ''];
+				def.params[param].phandler.initialize(anynode, def);
 			}
 			else
-				anode[param] = def.params[param].initial;
+				anynode[param] = def.params[param].initial;
 	}
 
 	registerCustomNode(constructorName: string, nodeClass: any): void {
@@ -234,33 +238,41 @@ export class Synth {
 
 //-------------------- Parameter handlers --------------------
 
+interface BufferAudioNode extends AudioNode {
+	_encoded: any;
+	_buffer: AudioBuffer;
+	_buffers: AudioBuffer[];
+	_encodedBuffers: any[];
+	_names: string[];
+}
+
 class BufferDataHandler implements ParamHandler {
 	uiRender = 'renderBufferData';
 	initialize(anode: AudioNode, def: NodeDef): void {}
 
-	param2json(anode: AudioNode): any {
-		return file.arrayBufferToBase64(anode['_encoded']);
+	param2json(anode: BufferAudioNode): any {
+		return file.arrayBufferToBase64(anode._encoded);
 	}
 
-	json2param(anode: AudioNode, json: any) {
+	json2param(anode: BufferAudioNode, json: any) {
 		const encoded = file.base64ToArrayBuffer(json);
-		anode['_encoded'] = encoded;
-		anode.context.decodeAudioData(encoded, buffer => anode['_buffer'] = buffer);
+		anode._encoded = encoded;
+		anode.context.decodeAudioData(encoded, buffer => anode._buffer = buffer);
 	}
 }
 
 class SoundBankHandler implements ParamHandler {
 	uiRender = 'renderSoundBank';
-	initialize(anode: AudioNode, def: NodeDef): void {
-		anode['_buffers'] = [];
-		anode['_encodedBuffers'] = [];
-		anode['_names'] = [];
+	initialize(anode: BufferAudioNode, def: NodeDef): void {
+		anode._buffers = [];
+		anode._encodedBuffers = [];
+		anode._names = [];
 	}
 
-	param2json(anode: AudioNode): any {
+	param2json(anode: BufferAudioNode): any {
 		const files = [];
-		const encs = anode['_encodedBuffers'];
-		const names = anode['_names'];
+		const encs = anode._encodedBuffers;
+		const names = anode._names;
 		for (let i = 0; i < names.length; i++)
 			files.push({
 				name: names[i],
@@ -269,12 +281,12 @@ class SoundBankHandler implements ParamHandler {
 		return files;
 	}
 
-	json2param(anode: AudioNode, json: any) {
-		const bufs = anode['_buffers'];
+	json2param(anode: BufferAudioNode, json: any) {
+		const bufs = anode._buffers;
 		bufs.length = 0;
-		const encs = anode['_encodedBuffers'];
+		const encs = anode._encodedBuffers;
 		encs.length = 0;
-		const names = anode['_names'];
+		const names = anode._names;
 		names.length = 0;
 		for (let i = 0; i < json.length; i++) {
 			const item = json[i];
@@ -285,7 +297,8 @@ class SoundBankHandler implements ParamHandler {
 		}
 	}
 
-	decodeBuffer(anode, data, bufs, i) {
+	decodeBuffer(anode: AudioNode, data: ArrayBuffer,
+		bufs: any[], i: number) {
 		anode.context.decodeAudioData(data, buffer => bufs[i] = buffer);
 	}
 

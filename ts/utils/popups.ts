@@ -4,6 +4,9 @@ interface JQueryWithModal extends JQuery {
 
 /** Informs whether a popup is open or not */
 export let isOpen: boolean = false;
+export function setOpen(open: boolean) {
+	isOpen = open;
+}
 
 /** Bootstrap-based equivalent of standard alert function */
 export function alert(msg: string, title?: string, hideClose?: boolean, options?: any): void {
@@ -61,7 +64,7 @@ export function confirm(msg: string, title: string,
 
 /** Bootstrap-based equivalent of standard prompt function */
 export function prompt(msg: string, title: string,
-	initialValue: string, cb: (s: any) => void): void {
+	initialValue: string, cb: ((s: any) => void) | null): void {
 	const input = popup.find('.popup-prompt > input');
 	confirm(msg, title, confirmed => {
 		if (!cb) return;

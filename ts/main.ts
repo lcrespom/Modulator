@@ -31,7 +31,8 @@ function setupPanels() {
 
 function setupPalette() {
 	$(function() {
-		$('.nano')['nanoScroller']({ preventPageScrolling: true });
+		let nano: any = $('.nano');
+		nano.nanoScroller({ preventPageScrolling: true });
 	});
 }
 
