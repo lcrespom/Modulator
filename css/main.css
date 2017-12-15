@@ -27,6 +27,10 @@ input.rounded {
 
 /*----- General -----*/
 
+.mod-no-outline {
+	outline: none;
+}
+
 .graph {
 	padding: 0; margin: 0;
 }

@@ -5,7 +5,7 @@
 import { SynthUI } from './synthUI/synthUI';
 import { NoteInputs } from './piano/noteInputs'
 import { Presets } from './synthUI/presets';
-import { ModernWindow, ModernAudioContext } from './utils/modern';
+import { ModernWindow } from './utils/modern';
 
 const graphCanvas = <HTMLCanvasElement>$('#graph-canvas')[0];
 const ac = createAudioContext();
@@ -14,7 +14,7 @@ const synthUI = new SynthUI(ac, graphCanvas,
 
 const presets = setupPanels();
 
-function createAudioContext(): ModernAudioContext {
+function createAudioContext(): AudioContext {
 	const CtxClass: any = window.AudioContext || window.webkitAudioContext;
 	return new CtxClass();
 }
@@ -25,13 +25,16 @@ function setupPanels() {
 	const presets = new Presets(synthUI);
 	presets.beforeSave = (json) => $.extend(json, { keyboard: inputs.piano.toJSON() });
 	presets.afterLoad = (json) => inputs.piano.fromJSON(json.keyboard);
+	$(function() {
+		$('#synth').focus();
+	});
 	return presets.presets;
 }
 
 
 function setupPalette() {
 	$(function() {
-		$('.nano')['nanoScroller']({ preventPageScrolling: true });
+		(<any>$('.nano')).nanoScroller({ preventPageScrolling: true });
 	});
 }
 
