@@ -46,7 +46,7 @@ export class Presets {
 		};
 	}
 
-	registerListeners(elem) {
+	registerListeners(elem: HTMLElement) {
 		$('#save-but').click(_ => this.savePreset());
 		$('#load-file').on('change', evt  => this.loadPreset(evt));
 		$('#prev-preset-but').click(_ => this.changePreset(this.presetNum - 1));
@@ -117,7 +117,7 @@ export class Presets {
 		if (n) this.synthUI.gr.selectNode(n);
 	}
 
-	loadPreset(evt) {
+	loadPreset(evt: Event) {
 		file.uploadText(evt, data => {
 			try {
 				const json = JSON.parse(data);

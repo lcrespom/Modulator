@@ -40,18 +40,21 @@ export function download(fileName: string, fileData: string) {
 
 //-------------------- Uploading --------------------
 
-export function uploadText(event, cb: (text, file) => void) {
+type UploadCallback = (buf: any, file: string) => void
+
+export function uploadText(event: Event, cb: UploadCallback) {
 	upload(event, cb, 'readAsText');
 }
 
-export function uploadArrayBuffer(event, cb: (ab, file) => void) {
+export function uploadArrayBuffer(event: Event, cb: UploadCallback) {
 	upload(event, cb, 'readAsArrayBuffer');
 }
 
-function upload(event, cb, readFunc: string) {
-	if (!event.target.files || event.target.files.length <= 0) return cb(null);
-	const file = event.target.files[0];
+function upload(event: Event, cb: UploadCallback, readFunc: string) {
+	let files = (<any>event.target).files
+	if (!files || files.length <= 0) return cb('', '');
+	const file = files[0];
 	const reader = new FileReader();
 	reader.onload = (loadEvt: any)  => cb(loadEvt.target.result, file);
-	reader[readFunc](file);
+	(<any>reader)[readFunc](file);
 }
