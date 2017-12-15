@@ -200,6 +200,7 @@ class ADSRNoteHandler extends BaseNoteHandler {
 		const adsr = this.getADSR();
 		return adsr.release;
 	}
+	set releaseTime(relTime: number) {}
 
 	noteOn(midi: number, gain: number, ratio: number, when: number):void {
 		this.lastNote = midi;
