@@ -1,4 +1,4 @@
-import { ModernAudioContext, ModernAudioNode } from '../utils/modern';
+import { ModernAudioNode } from '../utils/modern';
 
 /**
  * Base class to derive all custom nodes from it
@@ -93,13 +93,13 @@ export class NoiseGenerator extends ScriptProcessor {
  * It uses sample & hold in order to implement the 'frequency' parameter.
  */
 export class NoiseCtrlGenerator extends ScriptProcessor {
-	ac: ModernAudioContext;
+	ac: AudioContext;
 	frequency: number;
 	depth: number;
 	sct: number;
 	v: number;
 
-	constructor(ac: ModernAudioContext) {
+	constructor(ac: AudioContext) {
 		super(ac);
 		this.ac = ac;
 		this.frequency = 4;

@@ -1,4 +1,3 @@
-import { ModernAudioContext } from '../utils/modern';
 import { Synth, NodeData, Portamento } from './synth';
 
 
@@ -11,7 +10,7 @@ export class Instrument {
 	released: number[];
 	portamento: Portamento;
 
-	constructor(ac: ModernAudioContext, json: any, numVoices: number, dest?: AudioNode) {
+	constructor(ac: AudioContext, json: any, numVoices: number, dest?: AudioNode) {
 		// Setup voices
 		this.pressed = [];
 		this.released = [];
@@ -74,7 +73,7 @@ export class Voice {
 	lastNote: number;
 	loader: SynthLoader;
 
-	constructor(ac: ModernAudioContext, json: any, dest?: AudioNode) {
+	constructor(ac: AudioContext, json: any, dest?: AudioNode) {
 		this.loader = new SynthLoader();
 		this.synth = this.loader.load(ac, json, dest || ac.destination);
 		this.lastNote = 0;
@@ -114,7 +113,7 @@ class SynthLoader {
 	nodes: VoiceNodeData[] = [];
 	synth: Synth;
 
-	load(ac: ModernAudioContext, json: any, dest: AudioNode): Synth {
+	load(ac: AudioContext, json: any, dest: AudioNode): Synth {
 		const synth = new Synth(ac);
 		// Add nodes into id-based table
 		let i = 0;
@@ -142,7 +141,7 @@ class SynthLoader {
 		return synth;
 	}
 
-	nodeById(id: number): VoiceNodeData {
+	nodeById(id: number): VoiceNodeData | null {
 		for (const node of this.nodes)
 			if (node.id === id) return node;
 		return null;
