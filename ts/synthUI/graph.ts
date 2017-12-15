@@ -239,7 +239,7 @@ class GraphInteraction {
 	}
 
 	registerNode(n: Node) {
-		n.element.draggable({
+		(<any>n.element).draggable({
 			containment: 'parent',
 			distance: 5,
 			stack: '.node',
@@ -302,7 +302,8 @@ class GraphInteraction {
 	}
 
 	setGrid(grid: any): void {
-		$(this.graph.nodeCanvas).find('.node').draggable( "option", "grid", grid);
+		let $node: any = $(this.graph.nodeCanvas).find('.node');
+		$node.draggable( "option", "grid", grid);
 	}
 
 	connectOrDisconnect(srcn: Node, dstn: Node) {

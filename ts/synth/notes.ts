@@ -178,7 +178,7 @@ class ADSRNoteHandler extends BaseNoteHandler {
 
 	constructor(ndata: NodeData) {
 		super(ndata);
-		const adsr: ADSR = <ADSR>ndata.anode;
+		const adsr = this.getADSR();
 		const oldMethod = adsr.disconnect;
 		adsr.disconnect = (dest: AudioParam) => {
 			this.loopParams(param => {
@@ -189,14 +189,18 @@ class ADSRNoteHandler extends BaseNoteHandler {
 		}
 	}
 
+	getADSR(): ADSR {
+		return <any>this.ndata.anode;
+	}
+
 	get releaseTime() {
-		const adsr: ADSR = <ADSR>this.ndata.anode;
+		const adsr = this.getADSR();
 		return adsr.release;
 	}
 
 	noteOn(midi: number, gain: number, ratio: number, when: number):void {
 		this.lastNote = midi;
-		const adsr: ADSR = <ADSR>this.ndata.anode;
+		const adsr = this.getADSR();
 		this.loopParams(param => {
 			const v = this.getParamValue(param);
 			const initial = (1 - adsr.depth) * v;
@@ -214,7 +218,7 @@ class ADSRNoteHandler extends BaseNoteHandler {
 
 	noteOff(midi: number, gain: number, when: number): void {
 		if (midi != this.lastNote) return;	// Avoid multple keys artifacts in mono mode
-		const adsr: ADSR = <ADSR>this.ndata.anode;
+		const adsr = this.getADSR();
 		this.loopParams(param => {
 			let v = this.getRampValueAtTime(param, when);
 			if (v === null)

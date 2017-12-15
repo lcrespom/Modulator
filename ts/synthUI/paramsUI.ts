@@ -54,7 +54,7 @@ function renderParamControl(ndata: NodeData, panel: JQuery): JQuery {
 	combo.change(_ => {
 		if (ndata.controlParam)
 			ndata.anode.disconnect(ndata.controlTarget[ndata.controlParam]);
-		ndata.controlParam = combo.val();
+		ndata.controlParam = '' + combo.val();
 		ndata.anode.connect(ndata.controlTarget[ndata.controlParam]);
 	});
 	return combo.parent();
@@ -100,12 +100,12 @@ function renderSlider(panel: JQuery, pdef: NodeParamDef,
 	sliderBox.append($('<span><br/>' + ucfirst(param) + '</span>'));
 	panel.append(sliderBox);
 	slider.on('input', _ => {
-		const value = slider2param(parseFloat(slider.val()), pdef);
+		const value = slider2param(parseFloat('' + slider.val()), pdef);
 		numInput.val(truncateFloat(value, 5));
 		setValue(value);
 	});
 	numInput.on('input', _ => {
-		const value = parseFloat(numInput.val());
+		const value = parseFloat('' + numInput.val());
 		if (isNaN(value)) return;
 		slider.val(param2slider(value, pdef));
 		setValue(value);

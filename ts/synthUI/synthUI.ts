@@ -228,7 +228,7 @@ class SynthGraphHandler implements GraphHandler {
 }
 
 
-function getCssFromClass(className, propName) {
+function getCssFromClass(className: string, propName: string) {
 	const tmp = $('<div>').addClass(className);
 	$('body').append(tmp);
 	const propValue = tmp.css(propName);

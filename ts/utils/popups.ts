@@ -1,5 +1,8 @@
 /** Informs whether a popup is open or not */
 export let isOpen: boolean = false;
+export function setOpen(open: boolean) {
+	isOpen = open;
+}
 
 /** Bootstrap-based equivalent of standard alert function */
 export function alert(msg: string, title?: string, hideClose?: boolean, options?: any): void {
@@ -13,7 +16,7 @@ export function alert(msg: string, title?: string, hideClose?: boolean, options?
 	popup.find('.popup-prompt > input').hide();
 	isOpen = true;
 	popup.one('hidden.bs.modal', _ => isOpen = false);
-	popup.modal(options);
+	(<any>popup).modal(options);
 }
 
 /** Like an alert, but without a close button */
@@ -52,7 +55,7 @@ export function confirm(msg: string, title: string,
 		cbClose(result);
 	});
 	isOpen = true;
-	popup.modal();
+	(<any>popup).modal();
 }
 
 /** Bootstrap-based equivalent of standard prompt function */

@@ -11,8 +11,8 @@ export interface ModernWindow extends Window {
 }
 
 export interface ModernAudioContext extends AudioContext {
-	suspend: () => void;
-	resume: () => void;
+	//suspend: () => void;
+	//resume: () => void;
 }
 
 export interface ModernAudioNode extends AudioNode {

@@ -128,7 +128,7 @@ export class PianoKeyboard {
 		const arpeggioSlider = panel.find('.arpeggio-box input');
 		arpeggioSlider.on('input',_ => {
 			this.arpeggio.bpm =
-				log2linear(parseFloat(arpeggioSlider.val()), ARPEGGIO_MIN, ARPEGGIO_MAX);
+				log2linear(parseFloat('' + arpeggioSlider.val()), ARPEGGIO_MIN, ARPEGGIO_MAX);
 				// ARPEGGIO_MIN + parseFloat(arpeggioSlider.val()) * (ARPEGGIO_MAX - ARPEGGIO_MIN);
 			this.triggerArpeggioChange();
 		});
@@ -182,19 +182,19 @@ export class PianoKeyboard {
 				'Synth editing is disabled in polyphonic mode</p>');
 			$('body').append(cover);
 			$('#poly-but').text('Poly');
-			popups.isOpen = true;
+			popups.setOpen(true);
 			this.polyOn();
 		}
 		else {
 			$('.editor-cover').remove();
 			$('#poly-but').text('Mono');
-			popups.isOpen = false;
+			popups.setOpen(false);
 			this.polyOff();
 		}
 	}
 
 	getPortamento(): number {
-		const sv = parseFloat(this.portaSlider.val());;
+		const sv = parseFloat('' + this.portaSlider.val());;
 		return log2linear(sv, PORTAMENTO_MIN, PORTAMENTO_MAX);
 	}
 

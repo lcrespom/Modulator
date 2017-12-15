@@ -59,8 +59,8 @@ export class Presets {
 		$('#preset-num').click(_ => this.togglePresetSelector());
 		const preSel = $('.preset-selector select');
 		preSel.change(_ => {
-			const sel = preSel.val().split(':')[0];
-			this.changePreset(sel - 1);
+			const sel = ('' + preSel.val()).split(':')[0];
+			this.changePreset(parseFloat(sel) - 1);
 		});
 	}
 
@@ -92,7 +92,7 @@ export class Presets {
 
 	synth2preset() {
 		const json = this.synthUI.gr.toJSON();
-		json.name = $('#preset-name').val().trim();
+		json.name = ('' + $('#preset-name').val()).trim();
 		json.modulatorType = 'synth';
 		this.beforeSave(json);
 		this.presets[this.presetNum] = json;

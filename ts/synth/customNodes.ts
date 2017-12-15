@@ -6,13 +6,18 @@ import { ModernAudioContext, ModernAudioNode } from '../utils/modern';
 class CustomNodeBase implements ModernAudioNode {
 	custom = true;
 	channelCount = 2;
-	channelCountMode = 'max';
-	channelInterpretation = 'speakers';
+	channelCountMode: ChannelCountMode = 'max';
+	channelInterpretation: ChannelInterpretation = 'speakers';
 	context: AudioContext;
 	numberOfInputs = 0;
 	numberOfOutputs = 1;
-	connect(param: AudioParam | AudioNode) {}
-	disconnect(dest: AudioNode | AudioParam) {}
+	// Connect - disconnect
+	connect(destination: AudioNode | AudioParam,
+		output?: number, input?: number): AudioNode {
+			return <AudioNode>destination;
+		}
+	disconnect(destination: AudioNode | AudioParam,
+		output?: number, input?: number): void {}
 	// Required for extending EventTarget
 	addEventListener(){}
 	dispatchEvent(evt: Event): boolean { return false; }
@@ -50,7 +55,7 @@ class ScriptProcessor extends CustomNodeBase {
 	}
 
 	connect(node: AudioNode) {
-		this.anode.connect(node);
+		return this.anode.connect(node);
 	}
 
 	disconnect() {
@@ -104,7 +109,7 @@ export class NoiseCtrlGenerator extends ScriptProcessor {
 	}
 
 	connect(param: any) {
-		this.anode.connect(param);
+		return this.anode.connect(param);
 	}
 
 	processAudio(evt: AudioProcessingEvent) {
@@ -160,7 +165,7 @@ export class LineInNode extends CustomNodeBase {
 		if (this.srcNode) {
 			this.srcNode.connect(anode);
 			this.dstNode = anode;
-			return;
+			return anode;
 		}
 		const navigator: any = window.navigator;
 		navigator.getUserMedia = (navigator.getUserMedia ||
