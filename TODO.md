@@ -5,7 +5,7 @@
 - [x] Remove tracker (too big)
 - [x] Upgrade development dependencies (typescript, webpack, etc.)
 - [x] Reorganize paths to more conventional src/, web/, etc.
-- [ ] Upgrade .gitignore
+- [x] Upgrade .gitignore
 - [ ] Apply tslint, update code when required
 - [ ] Upgrade runtime dependencies (...if required?)
 - [ ] Live coding branch
