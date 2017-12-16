@@ -11,9 +11,9 @@
 - [ ] Live coding branch
 
 ## Bugs
-- Beatbox fails after switching back&forth from empty preset
+- Buffered audio nodes fail after switching back&forth from empty preset
 	- Uncaught (in promise) DOMException: Unable to decode audio data
-	- See function decodeBuffer in synth.ts
+	- See lines 260 and 302 in synth.ts
 - ADSR needs more testing & refining
 	- Probable memory leaks in Pew! instrument
 	- Also see http://www.soundonsound.com/sos/nov99/articles/synthsecrets.htm

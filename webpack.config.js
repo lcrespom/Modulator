@@ -30,8 +30,8 @@ module.exports = function(env) {
 	return {
 		devtool: 'source-map',
 		entry: {
-			'bundle': ['./ts/main.ts'],
-			'synthlib': ['./ts/synthlib.ts']
+			'bundle': ['./src/main.ts'],
+			'synthlib': ['./src/synthlib.ts']
 		},
 		resolve: {
 			extensions: ['.webpack.js', '.ts', '.js']
