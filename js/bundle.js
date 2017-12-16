@@ -2581,19 +2581,21 @@ class Keyboard {
         const pressedKeys = {};
         $(kbTarget)
             .on('keydown', evt => {
-            if (pressedKeys[evt.keyCode])
+            let kcode = evt.keyCode || 0;
+            if (pressedKeys[kcode])
                 return; // Skip repetitions
             if (evt.metaKey || evt.altKey || evt.ctrlKey)
                 return; // Skip browser shortcuts
-            pressedKeys[evt.keyCode] = true;
-            const midi = this.key2midi(evt.keyCode);
+            pressedKeys[kcode] = true;
+            const midi = this.key2midi(kcode);
             if (midi < 0)
                 return;
             this.noteOn(midi);
         })
             .on('keyup', evt => {
-            pressedKeys[evt.keyCode] = false;
-            const midi = this.key2midi(evt.keyCode);
+            let kcode = evt.keyCode || 0;
+            pressedKeys[kcode] = false;
+            const midi = this.key2midi(kcode);
             if (midi < 0)
                 return;
             this.noteOff(midi);
@@ -2622,13 +2624,14 @@ class MidiKeyboard {
         this.connected = false;
         if (!navigator.requestMIDIAccess)
             return;
-        navigator.requestMIDIAccess({ sysex: false }).then(midiAccess => {
+        navigator.requestMIDIAccess({ sysex: false })
+            .then((midiAccess) => {
             if (midiAccess.inputs.size <= 0)
                 return;
             const input = midiAccess.inputs.values().next().value;
             if (!input)
                 return;
-            input.onmidimessage = msg => this.midiMessage(msg);
+            input.onmidimessage = (msg) => this.midiMessage(msg);
             this.connected = true;
         });
     }
@@ -2679,8 +2682,8 @@ class PianoKeys {
     }
     createKeys(panel) {
         const keys = [];
-        const pw = panel.width();
-        const ph = panel.height();
+        const pw = panel.width() || 0;
+        const ph = panel.height() || 0;
         const fromX = parseFloat(panel.css('padding-left'));
         const fromY = parseFloat(panel.css('padding-top'));
         const kw = pw / this.numWhites + 1;

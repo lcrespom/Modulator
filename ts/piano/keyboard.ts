@@ -14,20 +14,22 @@ export class Keyboard {
 		this.baseNote = BASE_NOTE;
 	}
 
-	setupHandler(kbTarget) {
-		const pressedKeys = {};
+	setupHandler(kbTarget: string) {
+		const pressedKeys: any = {};
 		$(kbTarget)
 		.on('keydown', evt => {
-			if (pressedKeys[evt.keyCode]) return;					// Skip repetitions
+			let kcode = evt.keyCode || 0;
+			if (pressedKeys[kcode]) return;					// Skip repetitions
 			if (evt.metaKey || evt.altKey || evt.ctrlKey) return;	// Skip browser shortcuts
-			pressedKeys[evt.keyCode] = true;
-			const midi = this.key2midi(evt.keyCode);
+			pressedKeys[kcode] = true;
+			const midi = this.key2midi(kcode);
 			if (midi < 0) return;
 			this.noteOn(midi);
 		})
 		.on('keyup', evt => {
-			pressedKeys[evt.keyCode] = false;
-			const midi = this.key2midi(evt.keyCode);
+			let kcode = evt.keyCode || 0;
+			pressedKeys[kcode] = false;
+			const midi = this.key2midi(kcode);
 			if (midi < 0) return;
 			this.noteOff(midi);
 		});

@@ -20,8 +20,8 @@ export class PianoKeys {
 
 	createKeys(panel: JQuery): JQuery[] {
 		const keys = [];
-		const pw = panel.width();
-		const ph = panel.height();
+		const pw = panel.width() || 0;
+		const ph = panel.height() || 0;
 		const fromX = parseFloat(panel.css('padding-left'));
 		const fromY = parseFloat(panel.css('padding-top'));
 		const kw = pw / this.numWhites + 1;
@@ -148,7 +148,7 @@ export class PianoKeyboard {
 		this.octaveChanged(this.baseNote);
 	}
 
-	displayKeyDown(key): void {
+	displayKeyDown(key: any): void {
 		if (typeof key == 'number') key = this.midi2key(key);
 		if (!key) return;
 		if (!this.poly && this.arpeggio.mode == 0 && this.lastKey)
@@ -158,7 +158,7 @@ export class PianoKeyboard {
 		this.lastKey = key;
 	}
 
-	displayKeyUp(key, immediate?) {
+	displayKeyUp(key: any, immediate?: boolean) {
 		if (typeof key == 'number') key = this.midi2key(key);
 		if (!key) return;
 		const release = immediate ? 0 : this.envelope.release;
@@ -170,7 +170,7 @@ export class PianoKeyboard {
 		return this.keys[midi - this.baseNote];
 	}
 
-	setEnvelope(adsr) {
+	setEnvelope(adsr: any) {
 		this.envelope = adsr;
 	}
 
@@ -231,7 +231,7 @@ export class PianoKeyboard {
 		}
 	}
 
-	fromJSON(json): void {
+	fromJSON(json: any): void {
 		if (!json) return;
 		if (json.portamento) {
 			this.portaSlider.val(
@@ -258,6 +258,6 @@ export class PianoKeyboard {
 	noteOff(midi: number): void {}
 	polyOn() {}
 	polyOff() {}
-	octaveChanged(baseNote) {}
+	octaveChanged(baseNote: number) {}
 	arpeggioChanged(bpm: number, mode: string, octaves: number) {}
 }
