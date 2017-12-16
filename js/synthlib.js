@@ -98,9 +98,10 @@ function log2linear(value, min, max) {
     return min + Math.pow(LOG_BASE, value * logRange) - 1;
 }
 function focusable(elem) {
-    while (elem.tabIndex < 0 && elem.nodeName.toLowerCase() != 'body')
+    while (elem != null && elem.tabIndex < 0 &&
+        elem.nodeName.toLowerCase() != 'body')
         elem = elem.parentElement;
-    return elem;
+    return elem || document.body;
 }
 
 
@@ -145,7 +146,6 @@ function download(fileName, fileData) {
     const clickEvent = new MouseEvent('click', { view: window, bubbles: true, cancelable: false });
     a[0].dispatchEvent(clickEvent);
 }
-//-------------------- Uploading --------------------
 function uploadText(event, cb) {
     upload(event, cb, 'readAsText');
 }
@@ -153,9 +153,10 @@ function uploadArrayBuffer(event, cb) {
     upload(event, cb, 'readAsArrayBuffer');
 }
 function upload(event, cb, readFunc) {
-    if (!event.target.files || event.target.files.length <= 0)
-        return cb(null);
-    const file = event.target.files[0];
+    let files = event.target.files;
+    if (!files || files.length <= 0)
+        return cb('', '');
+    const file = files[0];
     const reader = new FileReader();
     reader.onload = (loadEvt) => cb(loadEvt.target.result, file);
     reader[readFunc](file);

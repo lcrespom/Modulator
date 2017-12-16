@@ -11,22 +11,27 @@ import * as popups from '../utils/popups';
 export function renderParams(ndata: NodeData, panel: JQuery): void {
 	panel.empty();
 	const boxes: JQuery[] = [];
-	if (ndata.nodeDef.control && ndata.controlParams)
-		boxes.push(renderParamControl(ndata, panel));
+	if (ndata.nodeDef.control && ndata.controlParams) {
+		let box = renderParamControl(ndata, panel);
+		if (box) boxes.push();
+	}
 	const params = Object.keys(ndata.nodeDef.params || {});
 	if (params.length <= 0) return;
 	for (const param of params)
-		if (ndata.anode[param] instanceof AudioParam)
+		if ((<any>ndata.anode)[param] instanceof AudioParam) {
 			boxes.push(renderAudioParam(ndata.anode, ndata.nodeDef, param, panel));
-		else
-			boxes.push(renderOtherParam(ndata.anode, ndata.nodeDef, param, panel));
+		}
+		else {
+			let box = renderOtherParam(ndata.anode, ndata.nodeDef, param, panel);
+			if (box) boxes.push();
+		}
 	positionBoxes(panel, boxes);
 }
 
 
 function positionBoxes(panel: JQuery, boxes: JQuery[]) {
-	const pw = panel.width();
-	const bw = boxes[0].width();
+	const pw = panel.width() || 0;
+	const bw = boxes[0].width() || 0;
 	const sep = (pw - boxes.length * bw) / (boxes.length + 1);
 	let x = sep;
 	for (const box of boxes) {
@@ -40,7 +45,7 @@ function positionBoxes(panel: JQuery, boxes: JQuery[]) {
 
 function renderAudioParam(anode: AudioNode, ndef: NodeDef, param: string, panel: JQuery): JQuery {
 	const pdef: NodeParamDef = ndef.params[param];
-	const aparam: AudioParam = anode[param];
+	const aparam: any = (<any>anode)[param];
 	if (aparam['_value']) aparam.value = aparam['_value'];
 	return renderSlider(panel, pdef, param, aparam.value, value => {
 		aparam.value = value;
@@ -48,14 +53,14 @@ function renderAudioParam(anode: AudioNode, ndef: NodeDef, param: string, panel:
 	});
 }
 
-function renderParamControl(ndata: NodeData, panel: JQuery): JQuery {
-	if (!ndata.controlParams) return;
+function renderParamControl(ndata: NodeData, panel: JQuery): JQuery | null {
+	if (!ndata.controlParams) return null;
 	const combo = renderCombo(panel, ndata.controlParams, ndata.controlParam, 'Controlling');
 	combo.change(_ => {
 		if (ndata.controlParam)
-			ndata.anode.disconnect(ndata.controlTarget[ndata.controlParam]);
+			ndata.anode.disconnect((<any>ndata.controlTarget)[ndata.controlParam]);
 		ndata.controlParam = '' + combo.val();
-		ndata.anode.connect(ndata.controlTarget[ndata.controlParam]);
+		ndata.anode.connect((<any>ndata.controlTarget)[ndata.controlParam]);
 	});
 	return combo.parent();
 }
@@ -65,7 +70,8 @@ const customRenderMethods = {
 	renderSoundBank
 };
 
-function renderOtherParam(anode: AudioNode, ndef: NodeDef, param: string, panel: JQuery): JQuery {
+function renderOtherParam(anode: any, ndef: NodeDef,
+	param: string, panel: JQuery): JQuery | null {
 	const pdef: NodeParamDef = ndef.params[param];
 	if (pdef.choices) {
 		const combo = renderCombo(panel, pdef.choices, anode[param], ucfirst(param));
@@ -79,7 +85,8 @@ function renderOtherParam(anode: AudioNode, ndef: NodeDef, param: string, panel:
 	else if (typeof pdef.initial == 'boolean')
 		return renderBoolean(panel, pdef, param, anode, ucfirst(param));
 	else if (pdef.phandler)
-		return customRenderMethods[pdef.phandler.uiRender](panel, pdef, anode, param, ucfirst(param));
+		return (<any>customRenderMethods)[pdef.phandler.uiRender](panel, pdef, anode, param, ucfirst(param));
+	return null;
 }
 
 
@@ -92,8 +99,8 @@ function renderSlider(panel: JQuery, pdef: NodeParamDef,
 		.attr('step', 0.001)
 		.attr('value', param2slider(value, pdef))
 	const numInput = $('<input type="number">')
-		.attr('min', pdef.min)
-		.attr('max', pdef.max)
+		.attr('min', pdef.min || 0)
+		.attr('max', pdef.max || 1)
 		.attr('value', truncateFloat(value, 5));
 	sliderBox.append(numInput);
 	sliderBox.append(slider);
@@ -127,7 +134,8 @@ function renderCombo(panel: JQuery, choices: string[], selected: string, label: 
 	return combo;
 }
 
-function renderBoolean(panel: JQuery, pdef: NodeParamDef, param: string, anode: AudioNode, label: string): JQuery {
+function renderBoolean(panel: JQuery, pdef: NodeParamDef, param: string,
+	anode: any, label: string): JQuery {
 	const box = $('<div class="choice-box">');
 	const button = $('<button class="btn btn-info" data-toggle="button" aria-pressed="false">');
 	box.append(button);
@@ -152,24 +160,28 @@ function renderBoolean(panel: JQuery, pdef: NodeParamDef, param: string, anode: 
 
 
 function param2slider(paramValue: number, pdef: NodeParamDef): number {
+	let min = pdef.min || 0;
+	let max = pdef.max || 1;
 	if (pdef.linear)
-		return (paramValue - pdef.min) / (pdef.max - pdef.min);
+		return (paramValue - min) / (max - min);
 	else
-		return linear2log(paramValue, pdef.min, pdef.max);
+		return linear2log(paramValue, min, max);
 }
 
 function slider2param(sliderValue: number, pdef: NodeParamDef): number {
+	let min = pdef.min || 0;
+	let max = pdef.max || 1;
 	if (pdef.linear)
-		return pdef.min + sliderValue * (pdef.max - pdef.min);
+		return min + sliderValue * (max - min);
 	else
-		return log2linear(sliderValue, pdef.min, pdef.max);
+		return log2linear(sliderValue, min, max);
 }
 
 
 //-------------------- Custom parameter rendering --------------------
 
 function renderBufferData(panel: JQuery, pdef: NodeParamDef,
-	anode: AudioNode, param: string, label: string): JQuery {
+	anode: any, param: string, label: string): JQuery {
 	const box = $('<div class="choice-box">');
 	const button = $(`
 		<span class="btn btn-primary upload">
@@ -185,7 +197,7 @@ function renderBufferData(panel: JQuery, pdef: NodeParamDef,
 		// Trigger asynchronous upload & decode
 		file.uploadArrayBuffer(evt, soundFile => {
 			anode['_encoded'] = soundFile;
-			anode.context.decodeAudioData(soundFile, buffer => {
+			anode.context.decodeAudioData(soundFile, (buffer: any) => {
 				anode['_buffer'] = buffer;
 				loading = false;
 				//TODO capture errors and report them with popups.alert
@@ -201,14 +213,14 @@ function renderBufferData(panel: JQuery, pdef: NodeParamDef,
 	return box;
 }
 
-function setComboOptions(combo, names) {
+function setComboOptions(combo: JQuery, names: string[]) {
 	combo.empty();
 	for (const name of names)
 		combo.append('<option>' + name + '</option>');
 }
 
 function renderSoundBank(panel: JQuery, pdef: NodeParamDef,
-	anode: AudioNode, param: string, label: string): JQuery {
+	anode: any, param: string, label: string): JQuery {
 	const combo = renderCombo(panel, [], '', 'Buffers');
 	combo.css({
 		marginBottom: '10px', marginLeft: '-20px',
@@ -233,7 +245,8 @@ function renderSoundBank(panel: JQuery, pdef: NodeParamDef,
 		// Trigger asynchronous upload & decode
 		file.uploadArrayBuffer(evt, (fileData, file) => {
 			encs.push(fileData);
-			anode.context.decodeAudioData(fileData, buffer => bufs.push(buffer));
+			anode.context.decodeAudioData(fileData,
+				(buffer: any) => bufs.push(buffer));
 			names.push(file.name);
 			setComboOptions(combo, names);
 		});

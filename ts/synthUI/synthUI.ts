@@ -35,9 +35,12 @@ export class SynthUI {
 	registerPaletteHandler() {
 		var self = this;	// JQuery sets 'this' in event handlers
 		$('.palette .node').click(function(evt) {
-			const elem = $(this);
-			const classes = elem.attr('class').split(/\s+/).filter(c => c != 'node');
-			self.addNode(elem.attr('data-type'),
+			let elem = $(this);
+			let classAttr = elem.attr('class') || '';
+			let classes = classAttr.split(/\s+/).filter(c => c != 'node');
+			let type = elem.attr('data-type');
+			if (!type) return;
+			self.addNode(type,
 				elem.find('.node-text').html(), classes.join(' '));
 		});
 	}
@@ -100,9 +103,9 @@ export class SynthUI {
 		return minDist;
 	}
 
-	initNodeDimensions(n) {
-		this.nw = n.element.outerWidth();
-		this.nh = n.element.outerHeight();
+	initNodeDimensions(n: Node) {
+		this.nw = n.element.outerWidth() || 0;
+		this.nh = n.element.outerHeight() || 0;
 	}
 
 }
@@ -146,8 +149,8 @@ class SynthGraphHandler implements GraphHandler {
 		this.analyzer = new AudioAnalyzer(jqFFT, jqOsc);
 	}
 
-	registerNodeDelete(elem) {
-		$(focusable(elem)).keydown(evt => {
+	registerNodeDelete(elem: HTMLElement) {
+		$(focusable(elem)).keydown((evt: any) => {
 			if (!(evt.keyCode == 46 || (evt.keyCode == 8 && evt.metaKey))) return;
 			if (popups.isOpen) return;
 			const selectedNode = this.getSelectedNode();
@@ -162,7 +165,7 @@ class SynthGraphHandler implements GraphHandler {
 		});
 	}
 
-	getSelectedNode(): Node {
+	getSelectedNode(): Node | null {
 		for (const node of this.synthUI.gr.nodes)
 			if (node.element.hasClass('selected')) return node;
 		return null;
@@ -170,7 +173,7 @@ class SynthGraphHandler implements GraphHandler {
 
 	hasAudioParams(ndata: NodeData) {
 		const aparams = Object.keys(ndata.nodeDef.params)
-			.filter(pname => ndata.anode[pname] instanceof AudioParam);
+			.filter(pname => (<any>ndata).anode[pname] instanceof AudioParam);
 		return aparams.length > 0;
 	}
 

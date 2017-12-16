@@ -4,12 +4,12 @@ import { ModernAudioNode } from '../utils/modern';
  * Displays FFT and Oscilloscope graphs from the output of a given AudioNode
  */
 export class AudioAnalyzer {
-	input: ModernAudioNode;
+	input: ModernAudioNode | null;
 	anode: AnalyserNode;
 	canvasFFT: HTMLCanvasElement;
-	gcFFT: CanvasRenderingContext2D;
+	gcFFT: CanvasRenderingContext2D | null;
 	canvasOsc: HTMLCanvasElement;
-	gcOsc: CanvasRenderingContext2D;
+	gcOsc: CanvasRenderingContext2D | null;
 	oscData: Uint8Array;
 	fftData: Uint8Array;
 
@@ -53,12 +53,15 @@ export class AudioAnalyzer {
 	}
 	updateCanvas() {
 		if (!this.input) return;
-		this.drawFFT(this.gcFFT, this.canvasFFT, this.fftData, '#00FF00');
-		this.drawOsc(this.gcOsc, this.canvasOsc, this.oscData, '#FFFF00');
+		if (this.gcFFT)
+			this.drawFFT(this.gcFFT, this.canvasFFT, this.fftData, '#00FF00');
+		if (this.gcOsc)
+			this.drawOsc(this.gcOsc, this.canvasOsc, this.oscData, '#FFFF00');
 		this.requestAnimationFrame();
 	}
 
-	drawFFT(gc, canvas, data, color) {
+	drawFFT(gc: CanvasRenderingContext2D, canvas: HTMLCanvasElement,
+			data: Uint8Array, color: string) {
 		const [w, h] = this.setupDraw(gc, canvas, data, color);
 		this.anode.getByteFrequencyData(data);
 		const dx = (data.length / 2) / canvas.width;
@@ -74,7 +77,8 @@ export class AudioAnalyzer {
 		gc.closePath();
 	}
 
-	drawOsc(gc, canvas, data, color) {
+	drawOsc(gc: CanvasRenderingContext2D, canvas: HTMLCanvasElement,
+		data: Uint8Array, color: string) {
 		const [w, h] = this.setupDraw(gc, canvas, data, color);
 		this.anode.getByteTimeDomainData(data);
 		gc.moveTo(0, h / 2);
@@ -91,7 +95,8 @@ export class AudioAnalyzer {
 		gc.closePath();
 	}
 
-	setupDraw(gc, canvas, data, color) {
+	setupDraw(gc: CanvasRenderingContext2D, canvas: HTMLCanvasElement,
+		data: Uint8Array, color: string) {
 		const w = canvas.width;
 		const h = canvas.height;
 		gc.clearRect(0, 0, w, h);

@@ -2,6 +2,7 @@ import { SynthUI } from './synthUI';
 import * as popups from '../utils/popups';
 import * as file from '../utils/file';
 import { focusable } from '../utils/modern';
+import { Node } from './graph';
 
 const MAX_PRESETS = 20;
 
@@ -46,9 +47,9 @@ export class Presets {
 		};
 	}
 
-	registerListeners(elem) {
+	registerListeners(elem: HTMLElement) {
 		$('#save-but').click(_ => this.savePreset());
-		$('#load-file').on('change', evt  => this.loadPreset(evt));
+		$('#load-file').on('change', evt => this.loadPreset(evt));
 		$('#prev-preset-but').click(_ => this.changePreset(this.presetNum - 1));
 		$('#next-preset-but').click(_ => this.changePreset(this.presetNum + 1));
 		$(focusable(elem)).keydown(evt => {
@@ -59,8 +60,10 @@ export class Presets {
 		$('#preset-num').click(_ => this.togglePresetSelector());
 		const preSel = $('.preset-selector select');
 		preSel.change(_ => {
-			const sel = ('' + preSel.val()).split(':')[0];
-			this.changePreset(parseFloat(sel) - 1);
+			let val = preSel.val();
+			if (!val) return;
+			const sel = val.toString().split(':')[0];
+			this.changePreset(parseInt(sel, 10) - 1);
 		});
 	}
 
@@ -92,7 +95,8 @@ export class Presets {
 
 	synth2preset() {
 		const json = this.synthUI.gr.toJSON();
-		json.name = ('' + $('#preset-name').val()).trim();
+		let val = '' + $('#preset-name').val();
+		json.name = val.trim();
 		json.modulatorType = 'synth';
 		this.beforeSave(json);
 		this.presets[this.presetNum] = json;
@@ -110,14 +114,17 @@ export class Presets {
 	}
 
 	selectBestNode() {
-		const getFirstNode = (isGood) => this.synthUI.gr.nodes.filter(isGood)[0];
+		type Predicate = (n: Node) => boolean;
+		const getFirstNode =
+			(isGood: Predicate) => this.synthUI.gr.nodes.filter(isGood)[0];
 		let n = getFirstNode(n => n.data.type == 'Filter');
 		if (!n) n = getFirstNode(n => n.data.type == 'ADSR');
 		if (!n) n = getFirstNode(n => n.data.anode.numberOfInputs == 0);
 		if (n) this.synthUI.gr.selectNode(n);
 	}
 
-	loadPreset(evt) {
+	loadPreset(evt: JQuery.Event) {
+		if (!evt) return;
 		file.uploadText(evt, data => {
 			try {
 				const json = JSON.parse(data);

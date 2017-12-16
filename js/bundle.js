@@ -98,9 +98,10 @@ function log2linear(value, min, max) {
     return min + Math.pow(LOG_BASE, value * logRange) - 1;
 }
 function focusable(elem) {
-    while (elem.tabIndex < 0 && elem.nodeName.toLowerCase() != 'body')
+    while (elem != null && elem.tabIndex < 0 &&
+        elem.nodeName.toLowerCase() != 'body')
         elem = elem.parentElement;
-    return elem;
+    return elem || document.body;
 }
 
 
@@ -145,7 +146,6 @@ function download(fileName, fileData) {
     const clickEvent = new MouseEvent('click', { view: window, bubbles: true, cancelable: false });
     a[0].dispatchEvent(clickEvent);
 }
-//-------------------- Uploading --------------------
 function uploadText(event, cb) {
     upload(event, cb, 'readAsText');
 }
@@ -153,9 +153,10 @@ function uploadArrayBuffer(event, cb) {
     upload(event, cb, 'readAsArrayBuffer');
 }
 function upload(event, cb, readFunc) {
-    if (!event.target.files || event.target.files.length <= 0)
-        return cb(null);
-    const file = event.target.files[0];
+    let files = event.target.files;
+    if (!files || files.length <= 0)
+        return cb('', '');
+    const file = files[0];
     const reader = new FileReader();
     reader.onload = (loadEvt) => cb(loadEvt.target.result, file);
     reader[readFunc](file);
@@ -1501,9 +1502,13 @@ class SynthUI {
     registerPaletteHandler() {
         var self = this; // JQuery sets 'this' in event handlers
         $('.palette .node').click(function (evt) {
-            const elem = $(this);
-            const classes = elem.attr('class').split(/\s+/).filter(c => c != 'node');
-            self.addNode(elem.attr('data-type'), elem.find('.node-text').html(), classes.join(' '));
+            let elem = $(this);
+            let classAttr = elem.attr('class') || '';
+            let classes = classAttr.split(/\s+/).filter(c => c != 'node');
+            let type = elem.attr('data-type');
+            if (!type)
+                return;
+            self.addNode(type, elem.find('.node-text').html(), classes.join(' '));
         });
     }
     addNode(type, text, classes) {
@@ -1559,8 +1564,8 @@ class SynthUI {
         return minDist;
     }
     initNodeDimensions(n) {
-        this.nw = n.element.outerWidth();
-        this.nh = n.element.outerHeight();
+        this.nw = n.element.outerWidth() || 0;
+        this.nh = n.element.outerHeight() || 0;
     }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = SynthUI;
@@ -1589,7 +1594,7 @@ class SynthGraphHandler {
         this.analyzer = new __WEBPACK_IMPORTED_MODULE_5__analyzer__["a" /* AudioAnalyzer */](jqFFT, jqOsc);
     }
     registerNodeDelete(elem) {
-        $(Object(__WEBPACK_IMPORTED_MODULE_2__utils_modern__["a" /* focusable */])(elem)).keydown(evt => {
+        $(Object(__WEBPACK_IMPORTED_MODULE_2__utils_modern__["a" /* focusable */])(elem)).keydown((evt) => {
             if (!(evt.keyCode == 46 || (evt.keyCode == 8 && evt.metaKey)))
                 return;
             if (__WEBPACK_IMPORTED_MODULE_3__utils_popups__["d" /* isOpen */])
@@ -1683,9 +1688,13 @@ class Graph {
     constructor(canvas) {
         this.nodes = [];
         this.lastId = 0;
+        if (!canvas.parentElement)
+            return;
         this.nodeCanvas = $(canvas.parentElement);
         this.canvas = canvas;
         const gc = canvas.getContext('2d');
+        if (!gc)
+            return;
         this.graphDraw = new GraphDraw(this, gc, canvas);
         this.graphInteract = new GraphInteraction(this, gc);
         this.handler = new DefaultGraphHandler();
@@ -1779,7 +1788,8 @@ class Graph {
         for (let i = 0; i < json.nodes.length; i++) {
             for (const inum of json.nodes[i].inputs) {
                 const src = this.nodeById(inum);
-                this.connect(src, this.nodes[i]);
+                if (src)
+                    this.connect(src, this.nodes[i]);
             }
         }
         this.handler = gh; // Restore graph handler
@@ -1901,10 +1911,15 @@ class GraphInteraction {
         this.graph.handler.nodeSelected(n);
     }
     setupConnectHandler(elem) {
+        if (!elem)
+            return;
         let srcn;
         let connecting = false;
-        while (elem.tabIndex < 0 && elem.nodeName.toLowerCase() != 'body')
+        while (elem != null && elem.tabIndex < 0
+            && elem.nodeName.toLowerCase() != 'body')
             elem = elem.parentElement;
+        if (!elem)
+            return;
         $(elem).keydown(evt => {
             if (evt.keyCode == CAPS_LOCK)
                 return this.setGrid([20, 20]);
@@ -1930,13 +1945,13 @@ class GraphInteraction {
             const dstn = this.getNodeFromDOM(this.getElementUnderMouse());
             if (!dstn || srcn == dstn)
                 return;
-            this.connectOrDisconnect(srcn, dstn);
+            if (srcn)
+                this.connectOrDisconnect(srcn, dstn);
             this.graph.draw();
         });
     }
     setGrid(grid) {
-        let $node = $(this.graph.nodeCanvas).find('.node');
-        $node.draggable("option", "grid", grid);
+        $(this.graph.nodeCanvas).find('.node').draggable("option", "grid", grid);
     }
     connectOrDisconnect(srcn, dstn) {
         if (this.graph.disconnect(srcn, dstn))
@@ -1957,12 +1972,18 @@ class GraphInteraction {
     }
     registerRubberBanding(srcn) {
         const ofs = this.graph.nodeCanvas.offset();
+        if (!ofs)
+            return;
         const dstn = new Node(0, 0, '');
         dstn.w = 0;
         dstn.h = 0;
         $(this.graph.nodeCanvas).on('mousemove', evt => {
-            dstn.x = evt.clientX - ofs.left;
-            dstn.y = evt.clientY - ofs.top + $('body').scrollTop();
+            if (!evt)
+                return;
+            let cltx = evt.clientX || 0;
+            let clty = evt.clientY || 0;
+            dstn.x = cltx - ofs.left;
+            dstn.y = clty - ofs.top + ($('body').scrollTop() || 0);
             this.graph.draw();
             this.gc.save();
             this.gc.setLineDash([10]);
@@ -2034,8 +2055,8 @@ class GraphDraw {
         this.gc.lineTo(mx - this.arrowHeadLen * Math.cos(angle + Math.PI / 6), my - this.arrowHeadLen * Math.sin(angle + Math.PI / 6));
     }
     getNodeCenter(n) {
-        n.w = n.w !== undefined ? n.w : n.element.outerWidth();
-        n.h = n.h !== undefined ? n.h : n.element.outerHeight();
+        n.w = n.w !== undefined ? n.w : n.element.outerWidth() || 0;
+        n.h = n.h !== undefined ? n.h : n.element.outerHeight() || 0;
         return { x: n.x + n.w / 2, y: n.y + n.h / 2 };
     }
 }
@@ -2059,21 +2080,28 @@ class GraphDraw {
 function renderParams(ndata, panel) {
     panel.empty();
     const boxes = [];
-    if (ndata.nodeDef.control && ndata.controlParams)
-        boxes.push(renderParamControl(ndata, panel));
+    if (ndata.nodeDef.control && ndata.controlParams) {
+        let box = renderParamControl(ndata, panel);
+        if (box)
+            boxes.push();
+    }
     const params = Object.keys(ndata.nodeDef.params || {});
     if (params.length <= 0)
         return;
     for (const param of params)
-        if (ndata.anode[param] instanceof AudioParam)
+        if (ndata.anode[param] instanceof AudioParam) {
             boxes.push(renderAudioParam(ndata.anode, ndata.nodeDef, param, panel));
-        else
-            boxes.push(renderOtherParam(ndata.anode, ndata.nodeDef, param, panel));
+        }
+        else {
+            let box = renderOtherParam(ndata.anode, ndata.nodeDef, param, panel);
+            if (box)
+                boxes.push();
+        }
     positionBoxes(panel, boxes);
 }
 function positionBoxes(panel, boxes) {
-    const pw = panel.width();
-    const bw = boxes[0].width();
+    const pw = panel.width() || 0;
+    const bw = boxes[0].width() || 0;
     const sep = (pw - boxes.length * bw) / (boxes.length + 1);
     let x = sep;
     for (const box of boxes) {
@@ -2096,7 +2124,7 @@ function renderAudioParam(anode, ndef, param, panel) {
 }
 function renderParamControl(ndata, panel) {
     if (!ndata.controlParams)
-        return;
+        return null;
     const combo = renderCombo(panel, ndata.controlParams, ndata.controlParam, 'Controlling');
     combo.change(_ => {
         if (ndata.controlParam)
@@ -2125,6 +2153,7 @@ function renderOtherParam(anode, ndef, param, panel) {
         return renderBoolean(panel, pdef, param, anode, ucfirst(param));
     else if (pdef.phandler)
         return customRenderMethods[pdef.phandler.uiRender](panel, pdef, anode, param, ucfirst(param));
+    return null;
 }
 function renderSlider(panel, pdef, param, value, setValue) {
     const sliderBox = $('<div class="slider-box">');
@@ -2134,8 +2163,8 @@ function renderSlider(panel, pdef, param, value, setValue) {
         .attr('step', 0.001)
         .attr('value', param2slider(value, pdef));
     const numInput = $('<input type="number">')
-        .attr('min', pdef.min)
-        .attr('max', pdef.max)
+        .attr('min', pdef.min || 0)
+        .attr('max', pdef.max || 1)
         .attr('value', truncateFloat(value, 5));
     sliderBox.append(numInput);
     sliderBox.append(slider);
@@ -2192,16 +2221,20 @@ function renderBoolean(panel, pdef, param, anode, label) {
     return box;
 }
 function param2slider(paramValue, pdef) {
+    let min = pdef.min || 0;
+    let max = pdef.max || 1;
     if (pdef.linear)
-        return (paramValue - pdef.min) / (pdef.max - pdef.min);
+        return (paramValue - min) / (max - min);
     else
-        return Object(__WEBPACK_IMPORTED_MODULE_0__utils_modern__["b" /* linear2log */])(paramValue, pdef.min, pdef.max);
+        return Object(__WEBPACK_IMPORTED_MODULE_0__utils_modern__["b" /* linear2log */])(paramValue, min, max);
 }
 function slider2param(sliderValue, pdef) {
+    let min = pdef.min || 0;
+    let max = pdef.max || 1;
     if (pdef.linear)
-        return pdef.min + sliderValue * (pdef.max - pdef.min);
+        return min + sliderValue * (max - min);
     else
-        return Object(__WEBPACK_IMPORTED_MODULE_0__utils_modern__["c" /* log2linear */])(sliderValue, pdef.min, pdef.max);
+        return Object(__WEBPACK_IMPORTED_MODULE_0__utils_modern__["c" /* log2linear */])(sliderValue, min, max);
 }
 //-------------------- Custom parameter rendering --------------------
 function renderBufferData(panel, pdef, anode, param, label) {
@@ -2220,7 +2253,7 @@ function renderBufferData(panel, pdef, anode, param, label) {
         // Trigger asynchronous upload & decode
         __WEBPACK_IMPORTED_MODULE_1__utils_file__["e" /* uploadArrayBuffer */](evt, soundFile => {
             anode['_encoded'] = soundFile;
-            anode.context.decodeAudioData(soundFile, buffer => {
+            anode.context.decodeAudioData(soundFile, (buffer) => {
                 anode['_buffer'] = buffer;
                 loading = false;
                 //TODO capture errors and report them with popups.alert
@@ -2265,7 +2298,7 @@ function renderSoundBank(panel, pdef, anode, param, label) {
         // Trigger asynchronous upload & decode
         __WEBPACK_IMPORTED_MODULE_1__utils_file__["e" /* uploadArrayBuffer */](evt, (fileData, file) => {
             encs.push(fileData);
-            anode.context.decodeAudioData(fileData, buffer => bufs.push(buffer));
+            anode.context.decodeAudioData(fileData, (buffer) => bufs.push(buffer));
             names.push(file.name);
             setComboOptions(combo, names);
         });
@@ -2340,8 +2373,10 @@ class AudioAnalyzer {
     updateCanvas() {
         if (!this.input)
             return;
-        this.drawFFT(this.gcFFT, this.canvasFFT, this.fftData, '#00FF00');
-        this.drawOsc(this.gcOsc, this.canvasOsc, this.oscData, '#FFFF00');
+        if (this.gcFFT)
+            this.drawFFT(this.gcFFT, this.canvasFFT, this.fftData, '#00FF00');
+        if (this.gcOsc)
+            this.drawOsc(this.gcOsc, this.canvasOsc, this.oscData, '#FFFF00');
         this.requestAnimationFrame();
     }
     drawFFT(gc, canvas, data, color) {
@@ -3055,8 +3090,11 @@ class Presets {
         $('#preset-num').click(_ => this.togglePresetSelector());
         const preSel = $('.preset-selector select');
         preSel.change(_ => {
-            const sel = ('' + preSel.val()).split(':')[0];
-            this.changePreset(parseFloat(sel) - 1);
+            let val = preSel.val();
+            if (!val)
+                return;
+            const sel = val.toString().split(':')[0];
+            this.changePreset(parseInt(sel, 10) - 1);
         });
     }
     togglePresetSelector() {
@@ -3088,7 +3126,8 @@ class Presets {
     }
     synth2preset() {
         const json = this.synthUI.gr.toJSON();
-        json.name = ('' + $('#preset-name').val()).trim();
+        let val = '' + $('#preset-name').val();
+        json.name = val.trim();
         json.modulatorType = 'synth';
         this.beforeSave(json);
         this.presets[this.presetNum] = json;
@@ -3114,6 +3153,8 @@ class Presets {
             this.synthUI.gr.selectNode(n);
     }
     loadPreset(evt) {
+        if (!evt)
+            return;
         __WEBPACK_IMPORTED_MODULE_1__utils_file__["f" /* uploadText */](evt, data => {
             try {
                 const json = JSON.parse(data);

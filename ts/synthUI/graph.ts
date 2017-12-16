@@ -15,9 +15,11 @@ export class Graph {
 	lastId: number = 0;
 
 	constructor(canvas: HTMLCanvasElement) {
+		if (!canvas.parentElement) return;
 		this.nodeCanvas = $(canvas.parentElement);
 		this.canvas = canvas;
 		const gc = canvas.getContext('2d');
+		if (!gc) return;
 		this.graphDraw = new GraphDraw(this, gc, canvas);
 		this.graphInteract = new GraphInteraction(this, gc);
 		this.handler = new DefaultGraphHandler();
@@ -116,7 +118,7 @@ export class Graph {
 		for (let i = 0; i < json.nodes.length; i++) {
 			for (const inum of json.nodes[i].inputs) {
 				const src = this.nodeById(inum);
-				this.connect(src, this.nodes[i]);
+				if (src) this.connect(src, this.nodes[i]);
 			}
 		}
 		this.handler = gh;	// Restore graph handler
@@ -133,7 +135,7 @@ export class Graph {
 		this.handler.graphLoaded();
 	}
 
-	nodeById(id: number): Node {
+	nodeById(id: number): Node | null {
 		for (const node of this.nodes)
 			if (node.id === id) return node;
 		return null;
@@ -243,16 +245,16 @@ class GraphInteraction {
 			containment: 'parent',
 			distance: 5,
 			stack: '.node',
-			drag: (event, ui) => {
+			drag: (event: Event, ui: any) => {
 				n.x = ui.position.left;
 				n.y = ui.position.top;
 				this.graph.draw();
 			},
-			start: (event, ui) => {
+			start: (event: Event, ui: any) => {
 				this.dragging = true;
 				ui.helper.css('cursor', 'move');
 			},
-			stop: (event, ui) => {
+			stop: (event: Event, ui: any) => {
 				ui.helper.css('cursor', 'default');
 				this.dragging = false;
 			}
@@ -272,11 +274,14 @@ class GraphInteraction {
 		this.graph.handler.nodeSelected(n);
 	}
 
-	setupConnectHandler(elem: HTMLElement) {
-		let srcn: Node;
+	setupConnectHandler(elem: HTMLElement | null) {
+		if (!elem) return;
+		let srcn: Node | null;
 		let connecting = false;
-		while (elem.tabIndex < 0 && elem.nodeName.toLowerCase() != 'body')
+		while (elem != null && elem.tabIndex < 0
+			&& elem.nodeName.toLowerCase() != 'body')
 			elem = elem.parentElement;
+		if (!elem) return;
 		$(elem).keydown(evt => {
 			if (evt.keyCode == CAPS_LOCK) return this.setGrid([20, 20]);
 			if (evt.keyCode != SHIFT_KEY || connecting) return;
@@ -296,14 +301,13 @@ class GraphInteraction {
 			this.deregisterRubberBanding();
 			const dstn = this.getNodeFromDOM(this.getElementUnderMouse());
 			if (!dstn || srcn == dstn) return;
-			this.connectOrDisconnect(srcn, dstn);
+			if (srcn) this.connectOrDisconnect(srcn, dstn);
 			this.graph.draw();
 		});
 	}
 
 	setGrid(grid: any): void {
-		let $node: any = $(this.graph.nodeCanvas).find('.node');
-		$node.draggable( "option", "grid", grid);
+		$(this.graph.nodeCanvas).find('.node').draggable( "option", "grid", grid);
 	}
 
 	connectOrDisconnect(srcn: Node, dstn: Node) {
@@ -311,7 +315,7 @@ class GraphInteraction {
 		else this.graph.connect(srcn, dstn);
 	}
 
-	getElementUnderMouse(): JQuery {
+	getElementUnderMouse(): JQuery | null {
 		const hovered = $(':hover');
 		if (hovered.length <= 0) return null;
 		const jqNode = $(hovered.get(hovered.length - 1));
@@ -322,12 +326,16 @@ class GraphInteraction {
 
 	registerRubberBanding(srcn: Node) {
 		const ofs = this.graph.nodeCanvas.offset();
+		if (!ofs) return;
 		const dstn = new Node(0, 0, '');
 		dstn.w = 0;
 		dstn.h = 0;
 		$(this.graph.nodeCanvas).on('mousemove', evt => {
-			dstn.x = evt.clientX - ofs.left;
-			dstn.y = evt.clientY - ofs.top + $('body').scrollTop();
+			if (!evt) return;
+			let cltx = evt.clientX || 0;
+			let clty = evt.clientY || 0;
+			dstn.x = cltx - ofs.left;
+			dstn.y = clty - ofs.top + ($('body').scrollTop() || 0);
 			this.graph.draw();
 			this.gc.save();
 			this.gc.setLineDash([10]);
@@ -349,7 +357,7 @@ class GraphInteraction {
 		this.graph.graphDraw.draw();
 	}
 
-	getNodeFromDOM(jqNode: JQuery) {
+	getNodeFromDOM(jqNode: JQuery | null) {
 		if (!jqNode) return null;
 		for (const n of this.graph.nodes)
 			if (n.element[0] == jqNode[0]) return n;
@@ -424,8 +432,8 @@ class GraphDraw {
 	}
 
 	getNodeCenter(n: Node): Point {
-		n.w = n.w !== undefined ? n.w : n.element.outerWidth();
-		n.h = n.h !== undefined ? n.h : n.element.outerHeight();
+		n.w = n.w !== undefined ? n.w : n.element.outerWidth() || 0;
+		n.h = n.h !== undefined ? n.h : n.element.outerHeight() || 0;
 		return { x: n.x + n.w / 2, y: n.y + n.h / 2 };
 	}
 }
