@@ -31,12 +31,14 @@ class BaseNoteHandler implements NoteHandler {
 	noteOn(midi: number, gain: number, ratio: number, when: number):void {}
 	noteOff(midi: number, gain: number, when: number): void {}
 
-	clone(): AudioNode {
+	clone(): AudioNode | null {
 		// Create clone
-		const anode = this.ndata.anode.context[this.ndata.nodeDef.constructor]();
+		let ctor = this.ndata.nodeDef.constructor;
+		if (!ctor) return null;
+		const anode = (<any>this.ndata.anode.context)[ctor]();
 		// Copy parameters
 		for (const pname of Object.keys(this.ndata.nodeDef.params)) {
-			const param = this.ndata.anode[pname];
+			const param = (<any>this.ndata.anode)[pname];
 			if (param instanceof AudioParam)
 				anode[pname].value = param.value;
 			else if (param !== null && param !== undefined)
@@ -63,7 +65,7 @@ class BaseNoteHandler implements NoteHandler {
 			anode.disconnect(out);
 		// Disconnect control inputs
 		for (const inData of this.ndata.getInputs()) {
-			inData.anode.disconnect(anode[inData.controlParam]);
+			inData.anode.disconnect((<any>anode)[inData.controlParam]);
 		}
 	}
 
@@ -123,7 +125,7 @@ class BufferNoteHandler extends BaseNoteHandler {
 	noteOn(midi: number, gain: number, ratio: number, when: number):void {
 		if (this.absn)
 			this.absn.stop(when);
-		const buf = this.ndata.anode['_buffer'];
+		const buf = (<any>this.ndata.anode)._buffer;
 		if (!buf) return;	// Buffer still loading or failed
 		this.absn = <AudioBufferSourceNode>this.clone();
 		this.absn.buffer = buf;
@@ -190,7 +192,8 @@ class ADSRNoteHandler extends BaseNoteHandler {
 	}
 
 	getADSR(): ADSR {
-		return <any>this.ndata.anode;
+		let anode: any = this.ndata.anode;
+		return anode;
 	}
 
 	get releaseTime() {
@@ -243,7 +246,7 @@ class ADSRNoteHandler extends BaseNoteHandler {
 		return false;
 	}
 
-	getRampValueAtTime(param: MAudioParam, t: number): number {
+	getRampValueAtTime(param: MAudioParam, t: number): number | null {
 		let ramp;
 		if (param._attack && param._attack.inside(t))
 			return param._attack.cut(t).v2;
@@ -294,14 +297,14 @@ class RestartableNoteHandler extends BaseNoteHandler {
  */
 class SoundBankNoteHandler extends BaseNoteHandler {
 
-	noteOn(midi: number, gain: number, ratio: number, when: number):void {
-		const bufs = this.ndata.anode['_buffers'];
+	noteOn(midi: number, gain: number, ratio: number, when: number) {
+		const bufs = (<any>this.ndata.anode)['_buffers'];
 		const absn = <AudioBufferSourceNode>this.clone();
 		absn.buffer = bufs[midi % bufs.length];
 		absn.start(when);
 	}
 
-	noteOff(midi: number, gain: number, when: number): void {}
+	noteOff(midi: number, gain: number, when: number) {}
 }
 
 //-------------------- Exported note handlers --------------------
@@ -337,15 +340,16 @@ class OutputTracker {
 		this.onBefore(anode, 'disconnect', this.disconnect);
 	}
 
-	connect(np) {
+	connect(np: AudioParam) {
 		this.outputs.push(np);
 	}
 
-	disconnect(np) {
+	disconnect(np: AudioParam) {
 		removeArrayElement(this.outputs, np);
 	}
 
-	onBefore(obj: any, fname: string, funcToCall: Function, cb?: (oldf, obj, args) => void): void {
+	onBefore(obj: any, fname: string, funcToCall: Function,
+		cb?: (oldf: Function, obj: any, args: any) => void): void {
 		const oldf = obj[fname];
 		const self = this;
 		obj[fname] = function() {

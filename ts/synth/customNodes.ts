@@ -19,9 +19,9 @@ class CustomNodeBase implements ModernAudioNode {
 	disconnect(destination: AudioNode | AudioParam,
 		output?: number, input?: number): void {}
 	// Required for extending EventTarget
-	addEventListener(){}
+	addEventListener() {}
 	dispatchEvent(evt: Event): boolean { return false; }
-	removeEventListener(){}
+	removeEventListener() {}
 }
 
 
@@ -161,7 +161,7 @@ export class LineInNode extends CustomNodeBase {
 	dstNode: ModernAudioNode;
 	stream: any;
 
-	connect(anode: AudioNode) {
+	connect(anode: any) {
 		if (this.srcNode) {
 			this.srcNode.connect(anode);
 			this.dstNode = anode;
@@ -172,7 +172,7 @@ export class LineInNode extends CustomNodeBase {
 			navigator.webkitGetUserMedia ||
 			navigator.mozGetUserMedia ||
 			navigator.msGetUserMedia);
-		navigator.getUserMedia({ audio: true }, stream => {
+		navigator.getUserMedia({ audio: true }, (stream: any) => {
 			const ac: any = anode.context;
 			this.srcNode = ac.createMediaStreamSource(stream);
 			let a2: any = anode;
@@ -180,7 +180,7 @@ export class LineInNode extends CustomNodeBase {
 			this.srcNode.connect(a2);
 			this.dstNode = anode;
 			this.stream = stream;
-		}, error => console.error(error));
+		}, (error: any) => console.error(error));
 	}
 
 	disconnect() {
