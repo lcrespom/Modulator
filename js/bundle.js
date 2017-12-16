@@ -2094,7 +2094,7 @@ function renderParams(ndata, panel) {
     if (ndata.nodeDef.control && ndata.controlParams) {
         let box = renderParamControl(ndata, panel);
         if (box)
-            boxes.push();
+            boxes.push(box);
     }
     const params = Object.keys(ndata.nodeDef.params || {});
     if (params.length <= 0)
@@ -2106,7 +2106,7 @@ function renderParams(ndata, panel) {
         else {
             let box = renderOtherParam(ndata.anode, ndata.nodeDef, param, panel);
             if (box)
-                boxes.push();
+                boxes.push(box);
         }
     positionBoxes(panel, boxes);
 }

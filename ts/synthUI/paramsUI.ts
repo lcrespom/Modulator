@@ -13,7 +13,7 @@ export function renderParams(ndata: NodeData, panel: JQuery): void {
 	const boxes: JQuery[] = [];
 	if (ndata.nodeDef.control && ndata.controlParams) {
 		let box = renderParamControl(ndata, panel);
-		if (box) boxes.push();
+		if (box) boxes.push(box);
 	}
 	const params = Object.keys(ndata.nodeDef.params || {});
 	if (params.length <= 0) return;
@@ -23,7 +23,7 @@ export function renderParams(ndata: NodeData, panel: JQuery): void {
 		}
 		else {
 			let box = renderOtherParam(ndata.anode, ndata.nodeDef, param, panel);
-			if (box) boxes.push();
+			if (box) boxes.push(box);
 		}
 	positionBoxes(panel, boxes);
 }
