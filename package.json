@@ -8,7 +8,7 @@
 		"build": "webpack --env.target=PROD",
 		"dev": "webpack --env.target=DEV",
 		"watch": "npm run serve",
-		"serve": "webpack-dev-server --env.target=DEV --content-base ./",
+		"serve": "webpack-dev-server --env.target=DEV --content-base ./web",
 		"publish:html": "cp *.html ../lcrespom.github.io/synth",
 		"publish:css": "cp -R css ../lcrespom.github.io/synth",
 		"publish:js": "cp -R js ../lcrespom.github.io/synth",

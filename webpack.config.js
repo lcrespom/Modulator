@@ -45,7 +45,7 @@ module.exports = function(env) {
 		},
 		plugins,
 		output: {
-			path: path.resolve(__dirname, 'js'),
+			path: path.resolve(__dirname, 'web/js'),
 			filename: '[name].js'
 		}
 	};
