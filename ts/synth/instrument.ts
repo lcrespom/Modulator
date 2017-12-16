@@ -123,7 +123,7 @@ class SynthLoader {
 		for (let i = 0; i < json.nodes.length; i++)
 			for (const inum of json.nodes[i].inputs) {
 				let input = this.nodeById(inum);
-				if (input) this.nodes[i].inputs.push();
+				if (input) this.nodes[i].inputs.push(input);
 			}
 		// Then set their data
 		for (let i = 0; i < json.nodes.length; i++) {

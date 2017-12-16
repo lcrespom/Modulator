@@ -25,6 +25,9 @@ function setupPanels() {
 	const presets = new Presets(synthUI);
 	presets.beforeSave = (json) => $.extend(json, { keyboard: inputs.piano.toJSON() });
 	presets.afterLoad = (json) => inputs.piano.fromJSON(json.keyboard);
+	$(function() {
+		$('#synth').focus();
+	});
 	return presets.presets;
 }
 

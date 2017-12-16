@@ -4,8 +4,8 @@
 		"module": "es2015",
 		"sourceMap": true,
 		"outDir": "build",
-		"noImplicitAny": true,
-		"strictNullChecks": true
+		//"noImplicitAny": true,
+		//"strictNullChecks": true
 	},
 	"include": [
 		"ts/**/*"

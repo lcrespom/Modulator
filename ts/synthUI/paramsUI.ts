@@ -30,6 +30,7 @@ export function renderParams(ndata: NodeData, panel: JQuery): void {
 
 
 function positionBoxes(panel: JQuery, boxes: JQuery[]) {
+	if (boxes.length < 1) return;
 	const pw = panel.width() || 0;
 	const bw = boxes[0].width() || 0;
 	const sep = (pw - boxes.length * bw) / (boxes.length + 1);

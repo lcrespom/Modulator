@@ -728,9 +728,7 @@ class ADSRNoteHandler extends BaseNoteHandler {
         const adsr = this.getADSR();
         return adsr.release;
     }
-    set releaseTime(relTime) {
-        //this.releaseTime = relTime;
-    }
+    set releaseTime(relTime) { }
     noteOn(midi, gain, ratio, when) {
         this.lastNote = midi;
         const adsr = this.getADSR();
@@ -1394,7 +1392,7 @@ class SynthLoader {
             for (const inum of json.nodes[i].inputs) {
                 let input = this.nodeById(inum);
                 if (input)
-                    this.nodes[i].inputs.push();
+                    this.nodes[i].inputs.push(input);
             }
         // Then set their data
         for (let i = 0; i < json.nodes.length; i++) {
@@ -1463,6 +1461,9 @@ function setupPanels() {
     const presets = new __WEBPACK_IMPORTED_MODULE_2__synthUI_presets__["a" /* Presets */](synthUI);
     presets.beforeSave = (json) => $.extend(json, { keyboard: inputs.piano.toJSON() });
     presets.afterLoad = (json) => inputs.piano.fromJSON(json.keyboard);
+    $(function () {
+        $('#synth').focus();
+    });
     return presets.presets;
 }
 function setupPalette() {
@@ -2110,6 +2111,8 @@ function renderParams(ndata, panel) {
     positionBoxes(panel, boxes);
 }
 function positionBoxes(panel, boxes) {
+    if (boxes.length < 1)
+        return;
     const pw = panel.width() || 0;
     const bw = boxes[0].width() || 0;
     const sep = (pw - boxes.length * bw) / (boxes.length + 1);

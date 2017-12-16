@@ -614,9 +614,7 @@ class ADSRNoteHandler extends BaseNoteHandler {
         const adsr = this.getADSR();
         return adsr.release;
     }
-    set releaseTime(relTime) {
-        //this.releaseTime = relTime;
-    }
+    set releaseTime(relTime) { }
     noteOn(midi, gain, ratio, when) {
         this.lastNote = midi;
         const adsr = this.getADSR();
@@ -1280,7 +1278,7 @@ class SynthLoader {
             for (const inum of json.nodes[i].inputs) {
                 let input = this.nodeById(inum);
                 if (input)
-                    this.nodes[i].inputs.push();
+                    this.nodes[i].inputs.push(input);
             }
         // Then set their data
         for (let i = 0; i < json.nodes.length; i++) {
