@@ -6,7 +6,7 @@
 - [x] Upgrade development dependencies (typescript, webpack, etc.)
 - [x] Reorganize paths to more conventional src/, web/, etc.
 - [x] Upgrade .gitignore
-- [ ] Apply tslint, update code when required
+- [x] Apply tslint, update code when required
 - [ ] Upgrade runtime dependencies (...if required?)
 - [ ] Live coding branch
 

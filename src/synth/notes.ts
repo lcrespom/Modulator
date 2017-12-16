@@ -1,6 +1,6 @@
-import { NodeData } from './synth';
-import { ADSR } from './customNodes';
-import { ModernAudioNode, removeArrayElement } from '../utils/modern';
+import { NodeData } from './synth'
+import { ADSR } from './customNodes'
+import { ModernAudioNode, removeArrayElement } from '../utils/modern'
 
 
 /**
@@ -8,78 +8,78 @@ import { ModernAudioNode, removeArrayElement } from '../utils/modern';
  * updating the node status accordingly.
  */
 export interface NoteHandler {
-	noteOn(midi: number, gain: number, ratio: number, when: number):void;
-	noteOff(midi: number, gain: number, when: number): void;
-	kbTrigger: boolean;
-	releaseTime: number;
+	kbTrigger: boolean
+	releaseTime: number
+	noteOn(midi: number, gain: number, ratio: number, when: number): void
+	noteOff(midi: number, gain: number, when: number): void
 }
 
 /**
  * Handles common AudioNode cloning, used by oscillator and buffered data nodes.
  */
 class BaseNoteHandler implements NoteHandler {
-	ndata: NodeData;
-	outTracker: OutputTracker;
-	kbTrigger = false;
-	releaseTime = 0;
+	ndata: NodeData
+	outTracker: OutputTracker
+	kbTrigger = false
+	releaseTime = 0
 
 	constructor(ndata: NodeData) {
-		this.ndata = ndata;
-		this.outTracker = new OutputTracker(ndata.anode);
+		this.ndata = ndata
+		this.outTracker = new OutputTracker(ndata.anode)
 	}
 
-	noteOn(midi: number, gain: number, ratio: number, when: number):void {}
+	noteOn(midi: number, gain: number, ratio: number, when: number): void {}
 	noteOff(midi: number, gain: number, when: number): void {}
 
 	clone(): AudioNode | null {
 		// Create clone
-		let ctor = this.ndata.nodeDef.constructor;
-		if (!ctor) return null;
-		const anode = (<any>this.ndata.anode.context)[ctor]();
+		let ctor = this.ndata.nodeDef.constructor
+		if (!ctor) return null
+		const anode = (<any>this.ndata.anode.context)[ctor]()
 		// Copy parameters
 		for (const pname of Object.keys(this.ndata.nodeDef.params)) {
-			const param = (<any>this.ndata.anode)[pname];
+			const param = (<any>this.ndata.anode)[pname]
 			if (param instanceof AudioParam)
-				anode[pname].value = param.value;
+				anode[pname].value = param.value
 			else if (param !== null && param !== undefined)
-				anode[pname] = param;
+				anode[pname] = param
 		}
 		// Copy output connections
 		for (const out of this.outTracker.outputs) {
-			let o2: any = out;
-			if (o2.custom && o2.anode) o2 = o2.anode;
-			anode.connect(o2);
+			let o2: any = out
+			if (o2.custom && o2.anode) o2 = o2.anode
+			anode.connect(o2)
 		}
 		// Copy control input connections
 		for (const inData of this.ndata.getInputs()) {
-			inData.anode.connect(anode[inData.controlParam]);
+			inData.anode.connect(anode[inData.controlParam])
 		}
-		//TODO should copy snapshot of list of inputs and outputs
-		//...in case user connects or disconnects during playback
-		return anode;
+		// TODO should copy snapshot of list of inputs and outputs
+		// ...in case user connects or disconnects during playback
+		return anode
 	}
 
 	disconnect(anode: ModernAudioNode): void {
 		// Disconnect outputs
 		for (const out of this.outTracker.outputs)
-			anode.disconnect(out);
+			anode.disconnect(out)
 		// Disconnect control inputs
 		for (const inData of this.ndata.getInputs()) {
-			inData.anode.disconnect((<any>anode)[inData.controlParam]);
+			inData.anode.disconnect((<any>anode)[inData.controlParam])
 		}
 	}
 
 	rampParam(param: MAudioParam, ratio: number, when: number): void {
-		const portamento = this.ndata.synth.portamento;
-		const newv = param.value * ratio;
-		param._value = newv;	// Required for ADSR to capture the correct value
+		const portamento = this.ndata.synth.portamento
+		const newv = param.value * ratio
+		param._value = newv	// Required for ADSR to capture the correct value
 		if (portamento.time > 0 && portamento.ratio > 0) {
-			const oldv = param.value * portamento.ratio;
-			param.cancelScheduledValues(when);
-			param.linearRampToValueAtTime(oldv, when);
-			param.exponentialRampToValueAtTime(newv, when + portamento.time);
+			const oldv = param.value * portamento.ratio
+			param.cancelScheduledValues(when)
+			param.linearRampToValueAtTime(oldv, when)
+			param.exponentialRampToValueAtTime(newv, when + portamento.time)
 		}
-		else param.setValueAtTime(newv, when);
+		else param.setValueAtTime(newv, when)
 	}
 }
 
@@ -87,20 +87,20 @@ class BaseNoteHandler implements NoteHandler {
  * Handles note events for an OscillatorNode
  */
 class OscNoteHandler extends BaseNoteHandler {
-	oscClone: OscillatorNode;
-	lastNote: number;
+	oscClone: OscillatorNode
+	lastNote: number
 
-	noteOn(midi: number, gain: number, ratio: number, when: number):void {
-		if (this.oscClone) this.oscClone.stop(when);
-		this.oscClone = <OscillatorNode>this.clone();
-		this.rampParam(<MAudioParam>this.oscClone.frequency, ratio, when);
-		this.oscClone.start(when);
-		this.lastNote = midi;
+	noteOn(midi: number, gain: number, ratio: number, when: number): void {
+		if (this.oscClone) this.oscClone.stop(when)
+		this.oscClone = <OscillatorNode>this.clone()
+		this.rampParam(<MAudioParam>this.oscClone.frequency, ratio, when)
+		this.oscClone.start(when)
+		this.lastNote = midi
 	}
 
 	noteOff(midi: number, gain: number, when: number): void {
-		if (midi != this.lastNote) return;	// Avoid multple keys artifacts in mono mode
-		this.oscClone.stop(when + this.releaseTime);
+		if (midi != this.lastNote) return	// Avoid multple keys artifacts in mono mode
+		this.oscClone.stop(when + this.releaseTime)
 	}
 }
 
@@ -111,7 +111,7 @@ class OscNoteHandler extends BaseNoteHandler {
 class LFONoteHandler extends OscNoteHandler {
 	rampParam(param: AudioParam, ratio: number, when: number) {
 		// Disable portamento for LFO
-		param.setValueAtTime(param.value, when);
+		param.setValueAtTime(param.value, when)
 	}
 }
 
@@ -119,26 +119,26 @@ class LFONoteHandler extends OscNoteHandler {
  * Handles note events for an AudioBufferSourceNode
  */
 class BufferNoteHandler extends BaseNoteHandler {
-	absn: AudioBufferSourceNode;
-	lastNote: number;
+	absn: AudioBufferSourceNode
+	lastNote: number
 
-	noteOn(midi: number, gain: number, ratio: number, when: number):void {
+	noteOn(midi: number, gain: number, ratio: number, when: number): void {
 		if (this.absn)
-			this.absn.stop(when);
-		const buf = (<any>this.ndata.anode)._buffer;
-		if (!buf) return;	// Buffer still loading or failed
-		this.absn = <AudioBufferSourceNode>this.clone();
-		this.absn.buffer = buf;
-		const pbr = this.absn.playbackRate;
-		const newRate = pbr.value * ratio;
-		this.rampParam(<MAudioParam>pbr, pbr.value * ratio, when);
-		this.absn.start(when);
-		this.lastNote = midi;
+			this.absn.stop(when)
+		const buf = (<any>this.ndata.anode)._buffer
+		if (!buf) return	// Buffer still loading or failed
+		this.absn = <AudioBufferSourceNode>this.clone()
+		this.absn.buffer = buf
+		const pbr = this.absn.playbackRate
+		const newRate = pbr.value * ratio
+		this.rampParam(<MAudioParam>pbr, pbr.value * ratio, when)
+		this.absn.start(when)
+		this.lastNote = midi
 	}
 
 	noteOff(midi: number, gain: number, when: number): void {
-		if (midi != this.lastNote) return;
-		this.absn.stop(when + this.releaseTime);
+		if (midi != this.lastNote) return
+		this.absn.stop(when + this.releaseTime)
 	}
 }
 
@@ -148,122 +148,123 @@ class BufferNoteHandler extends BaseNoteHandler {
 class Ramp {
 	constructor(public v1: number, public v2: number, public t1: number, public t2: number) {}
 	inside(t: number) {
-		return this.t1 < this.t2 && this.t1 <= t && t <= this.t2;
+		return this.t1 < this.t2 && this.t1 <= t && t <= this.t2
 	}
 	cut(t: number) {
-		const newv = this.v1 + (this.v2 - this.v1) * (t - this.t1) / (this.t2 - this.t1);
-		return new Ramp(this.v1, newv, this.t1, t);
+		const newv = this.v1 + (this.v2 - this.v1) * (t - this.t1) / (this.t2 - this.t1)
+		return new Ramp(this.v1, newv, this.t1, t)
 	}
-	run(p: AudioParam, follow: boolean = false) {
+	run(p: AudioParam, follow = false) {
 		if (this.t2 - this.t1 <= 0) {
-			p.setValueAtTime(this.v2, this.t2);
+			p.setValueAtTime(this.v2, this.t2)
 		}
 		else {
-			if (!follow) p.setValueAtTime(this.v1, this.t1);
-			p.linearRampToValueAtTime(this.v2, this.t2);
+			if (!follow) p.setValueAtTime(this.v1, this.t1)
+			p.linearRampToValueAtTime(this.v2, this.t2)
 		}
 	}
 }
 
 interface MAudioParam extends AudioParam {
-	_attack: Ramp;
-	_decay: Ramp;
-	_release: Ramp;
-	_value: number;
+	_attack: Ramp
+	_decay: Ramp
+	_release: Ramp
+	_value: number
 }
 /**
  * Handles note events for a custom ADSR node
  */
 class ADSRNoteHandler extends BaseNoteHandler {
-	lastNote: number;
-	kbTrigger = true;
+	lastNote: number
+	kbTrigger = true
 
 	constructor(ndata: NodeData) {
-		super(ndata);
-		const adsr = this.getADSR();
-		const oldMethod = adsr.disconnect;
+		super(ndata)
+		const adsr = this.getADSR()
+		const oldMethod = adsr.disconnect
 		adsr.disconnect = (dest: AudioParam) => {
 			this.loopParams(param => {
 				if (param == dest)
-					param.setValueAtTime(param._value, adsr.context.currentTime);
-			});
-			oldMethod(dest);
+					param.setValueAtTime(param._value, adsr.context.currentTime)
+			})
+			oldMethod(dest)
 		}
 	}
 
 	getADSR(): ADSR {
-		let anode: any = this.ndata.anode;
-		return anode;
+		let anode: any = this.ndata.anode
+		return anode
 	}
 
 	get releaseTime() {
-		const adsr = this.getADSR();
-		return adsr.release;
+		const adsr = this.getADSR()
+		return adsr.release
 	}
 	set releaseTime(relTime: number) {}
 
-	noteOn(midi: number, gain: number, ratio: number, when: number):void {
-		this.lastNote = midi;
-		const adsr = this.getADSR();
+	noteOn(midi: number, gain: number, ratio: number, when: number): void {
+		this.lastNote = midi
+		const adsr = this.getADSR()
 		this.loopParams(param => {
-			const v = this.getParamValue(param);
-			const initial = (1 - adsr.depth) * v;
-			const sustain = v * adsr.sustain + initial * (1 - adsr.sustain);
-			const now = adsr.context.currentTime;
-			param.cancelScheduledValues(now);
+			const v = this.getParamValue(param)
+			const initial = (1 - adsr.depth) * v
+			const sustain = v * adsr.sustain + initial * (1 - adsr.sustain)
+			const now = adsr.context.currentTime
+			param.cancelScheduledValues(now)
 			if (when > now)
-				this.rescheduleRamp(param, param._release, now);
-			param._attack = new Ramp(initial, v, when, when + adsr.attack);
-			param._decay = new Ramp(v, sustain, when + adsr.attack, when + adsr.attack + adsr.decay);
-			param._attack.run(param);
-			param._decay.run(param, true);
-		});
+				this.rescheduleRamp(param, param._release, now)
+			param._attack = new Ramp(initial, v, when, when + adsr.attack)
+			param._decay = new Ramp(v, sustain, when + adsr.attack, when + adsr.attack + adsr.decay)
+			param._attack.run(param)
+			param._decay.run(param, true)
+		})
 	}
 
 	noteOff(midi: number, gain: number, when: number): void {
-		if (midi != this.lastNote) return;	// Avoid multple keys artifacts in mono mode
-		const adsr = this.getADSR();
+		if (midi != this.lastNote) return	// Avoid multple keys artifacts in mono mode
+		const adsr = this.getADSR()
 		this.loopParams(param => {
-			let v = this.getRampValueAtTime(param, when);
+			let v = this.getRampValueAtTime(param, when)
 			if (v === null)
-				v = this.getParamValue(param) * adsr.sustain;
-			const finalv = (1 - adsr.depth) * v;
-			param.cancelScheduledValues(when);
-			const now = adsr.context.currentTime;
+				v = this.getParamValue(param) * adsr.sustain
+			const finalv = (1 - adsr.depth) * v
+			param.cancelScheduledValues(when)
+			const now = adsr.context.currentTime
 			if (when > now)
+				// tslint:disable-next-line:no-unused-expression
 				this.rescheduleRamp(param, param._attack, now) ||
-				this.rescheduleRamp(param, param._decay, now);
-			param._release = new Ramp(v, finalv, when, when + adsr.release);
-			param._release.run(param);
-		});
+				this.rescheduleRamp(param, param._decay, now)
+			param._release = new Ramp(v, finalv, when, when + adsr.release)
+			param._release.run(param)
+		})
 	}
 
 	rescheduleRamp(param: MAudioParam, ramp: Ramp, now: number): boolean {
 		if (ramp && ramp.inside(now)) {
-			ramp.cut(now).run(param);
-			return true;
+			ramp.cut(now).run(param)
+			return true
 		}
-		return false;
+		return false
 	}
 
 	getRampValueAtTime(param: MAudioParam, t: number): number | null {
-		let ramp;
+		let ramp
 		if (param._attack && param._attack.inside(t))
-			return param._attack.cut(t).v2;
+			return param._attack.cut(t).v2
 		if (param._decay && param._decay.inside(t))
-			return param._decay.cut(t).v2;
-		return null;
+			return param._decay.cut(t).v2
+		return null
 	}
 
 	loopParams(cb: (out: MAudioParam) => void): void {
 		for (const out of this.outTracker.outputs)
 			if (out instanceof AudioParam)
-				cb(<MAudioParam>out);
+				cb(<MAudioParam>out)
 	}
 
 	getParamValue(p: MAudioParam): number {
-		if (p._value === undefined) p._value = p.value;
-		return p._value;
+		if (p._value === undefined) p._value = p.value
+		return p._value
 	}
 }
 
@@ -272,23 +273,23 @@ class ADSRNoteHandler extends BaseNoteHandler {
  * such as custom nodes.
  */
 class RestartableNoteHandler extends BaseNoteHandler {
-	lastNote: number;
-	playing = false;
+	lastNote: number
+	playing = false
 
-	noteOn(midi: number, gain: number, ratio: number, when: number):void {
-		const anode: any = this.ndata.anode;
+	noteOn(midi: number, gain: number, ratio: number, when: number): void {
+		const anode: any = this.ndata.anode
 		if (this.playing)
-			anode.stop(when);
-		this.playing = true;
-		anode.start(when);
-		this.lastNote = midi;
+			anode.stop(when)
+		this.playing = true
+		anode.start(when)
+		this.lastNote = midi
 	}
 
 	noteOff(midi: number, gain: number, when: number): void {
-		if (midi != this.lastNote) return;
-		this.playing = false;
-		const anode: any = this.ndata.anode;
-		anode.stop(when + this.releaseTime);
+		if (midi != this.lastNote) return
+		this.playing = false
+		const anode: any = this.ndata.anode
+		anode.stop(when + this.releaseTime)
 	}
 }
 
@@ -298,16 +299,16 @@ class RestartableNoteHandler extends BaseNoteHandler {
 class SoundBankNoteHandler extends BaseNoteHandler {
 
 	noteOn(midi: number, gain: number, ratio: number, when: number) {
-		const bufs = (<any>this.ndata.anode)['_buffers'];
-		const absn = <AudioBufferSourceNode>this.clone();
-		absn.buffer = bufs[midi % bufs.length];
-		absn.start(when);
+		const bufs = (<any>this.ndata.anode)['_buffers']
+		const absn = <AudioBufferSourceNode>this.clone()
+		absn.buffer = bufs[midi % bufs.length]
+		absn.start(when)
 	}
 
 	noteOff(midi: number, gain: number, when: number) {}
 }
 
-//-------------------- Exported note handlers --------------------
+// -------------------- Exported note handlers --------------------
 
 /**
  * Exports available note handlers so they are used by their respective
@@ -320,42 +321,42 @@ export const NoteHandlers = {
 	'LFO': LFONoteHandler,
 	'restartable': RestartableNoteHandler,
 	'soundBank': SoundBankNoteHandler
-};
+}
 
 
-//-------------------- Private classes --------------------
+// -------------------- Private classes --------------------
 
 /**
  * Tracks a node output connections and disconnections, to be used
  * when cloning, removing or controlling nodes.
  */
 class OutputTracker {
-	outputs: (AudioNode | AudioParam) [] = [];
+	outputs: (AudioNode | AudioParam) [] = []
 
 	constructor(anode: AudioNode) {
 		this.onBefore(anode, 'connect', this.connect, (oldf, obj, args) => {
-			if (args[0].custom && args[0].anode) args[0] = args[0].anode;
-			oldf.apply(obj, args);
-		});
-		this.onBefore(anode, 'disconnect', this.disconnect);
+			if (args[0].custom && args[0].anode) args[0] = args[0].anode
+			oldf.apply(obj, args)
+		})
+		this.onBefore(anode, 'disconnect', this.disconnect)
 	}
 
 	connect(np: AudioParam) {
-		this.outputs.push(np);
+		this.outputs.push(np)
 	}
 
 	disconnect(np: AudioParam) {
-		removeArrayElement(this.outputs, np);
+		removeArrayElement(this.outputs, np)
 	}
 
 	onBefore(obj: any, fname: string, funcToCall: Function,
 		cb?: (oldf: Function, obj: any, args: any) => void): void {
-		const oldf = obj[fname];
-		const self = this;
+		const oldf = obj[fname]
+		const self = this
 		obj[fname] = function() {
-			funcToCall.apply(self, arguments);
+			funcToCall.apply(self, arguments)
 			if (cb) cb(oldf, obj, arguments)
-			else oldf.apply(obj, arguments);
+			else oldf.apply(obj, arguments)
 		}
 	}
 }

@@ -1,42 +1,42 @@
 /** Configuration data for an AudioNode parameter */
 export interface NodeParamDef {
-	initial: any;
-	min?: number;
-	max?: number;
-	linear?: boolean;
-	choices?: string[];
-	handler?: string;
-	phandler?: any;
+	initial: any
+	min?: number
+	max?: number
+	linear?: boolean
+	choices?: string[]
+	handler?: string
+	phandler?: any
 }
 
 /** Configuration data for an AudioNode */
 export interface NodeDef {
-	constructor: string | null;
-	custom?: boolean;
-	noteHandler?: string;
-	control?: boolean;
-	params: { [key: string]: NodeParamDef };
+	constructor: string | null
+	custom?: boolean
+	noteHandler?: string
+	control?: boolean
+	params: { [key: string]: NodeParamDef }
 }
 
 /** A set of AudioNode configuration elements */
 export interface NodePalette {
-	[key: string]: NodeDef;
+	[key: string]: NodeDef
 }
 
-//-------------------- Node palette definition --------------------
+// -------------------- Node palette definition --------------------
 
 const OCTAVE_DETUNE: NodeParamDef = {
 	initial: 0,
 	min: -1200,
 	max: 1200,
 	linear: true
-};
+}
 
 /**
  * The set of AudioNodes available to the application, along with
  * their configuration.
  */
-export var palette: NodePalette = {
+export let palette: NodePalette = {
 	// Sources
 	Oscillator: {
 		constructor: 'createOscillator',
@@ -86,7 +86,7 @@ export var palette: NodePalette = {
 				initial: null,
 				handler: 'SoundBankHandler'
 			}
-		}	
+		}
 	},
 	// Effects
 	Gain: {
@@ -187,4 +187,4 @@ export var palette: NodePalette = {
 		constructor: null,
 		params: {}
 	}
-};
+}

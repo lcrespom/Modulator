@@ -116,26 +116,26 @@ function focusable(elem) {
 /* harmony export (immutable) */ __webpack_exports__["d"] = download;
 /* harmony export (immutable) */ __webpack_exports__["f"] = uploadText;
 /* harmony export (immutable) */ __webpack_exports__["e"] = uploadArrayBuffer;
-//-------------------- Encoding / decoding --------------------
+// -------------------- Encoding / decoding --------------------
 function arrayBufferToBase64(buffer) {
-    var binary = '';
-    var bytes = new Uint8Array(buffer);
-    var len = bytes.byteLength;
-    for (var i = 0; i < len; i++) {
+    let binary = '';
+    let bytes = new Uint8Array(buffer);
+    let len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
         binary += String.fromCharCode(bytes[i]);
     }
     return window.btoa(binary);
 }
 function base64ToArrayBuffer(base64) {
-    var binary_string = window.atob(base64);
-    var len = binary_string.length;
-    var bytes = new Uint8Array(len);
-    for (var i = 0; i < len; i++) {
+    let binary_string = window.atob(base64);
+    let len = binary_string.length;
+    let bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
         bytes[i] = binary_string.charCodeAt(i);
     }
     return bytes.buffer;
 }
-//-------------------- Downloading --------------------
+// -------------------- Downloading --------------------
 function browserSupportsDownload() {
     return !window.externalHost && 'download' in $('<a>')[0];
 }
@@ -482,8 +482,8 @@ class BaseNoteHandler {
         for (const inData of this.ndata.getInputs()) {
             inData.anode.connect(anode[inData.controlParam]);
         }
-        //TODO should copy snapshot of list of inputs and outputs
-        //...in case user connects or disconnects during playback
+        // TODO should copy snapshot of list of inputs and outputs
+        // ...in case user connects or disconnects during playback
         return anode;
     }
     disconnect(anode) {
@@ -644,6 +644,7 @@ class ADSRNoteHandler extends BaseNoteHandler {
             param.cancelScheduledValues(when);
             const now = adsr.context.currentTime;
             if (when > now)
+                // tslint:disable-next-line:no-unused-expression
                 this.rescheduleRamp(param, param._attack, now) ||
                     this.rescheduleRamp(param, param._decay, now);
             param._release = new Ramp(v, finalv, when, when + adsr.release);
@@ -713,7 +714,7 @@ class SoundBankNoteHandler extends BaseNoteHandler {
     }
     noteOff(midi, gain, when) { }
 }
-//-------------------- Exported note handlers --------------------
+// -------------------- Exported note handlers --------------------
 /**
  * Exports available note handlers so they are used by their respective
  * nodes from the palette.
@@ -728,7 +729,7 @@ const NoteHandlers = {
 };
 /* harmony export (immutable) */ __webpack_exports__["a"] = NoteHandlers;
 
-//-------------------- Private classes --------------------
+// -------------------- Private classes --------------------
 /**
  * Tracks a node output connections and disconnections, to be used
  * when cloning, removing or controlling nodes.
@@ -769,7 +770,7 @@ class OutputTracker {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return palette; });
-//-------------------- Node palette definition --------------------
+// -------------------- Node palette definition --------------------
 const OCTAVE_DETUNE = {
     initial: 0,
     min: -1200,
@@ -780,7 +781,7 @@ const OCTAVE_DETUNE = {
  * The set of AudioNodes available to the application, along with
  * their configuration.
  */
-var palette = {
+let palette = {
     // Sources
     Oscillator: {
         constructor: 'createOscillator',
@@ -974,7 +975,7 @@ class ADSR extends CustomNodeBase {
         this.sustain = 0.5;
         this.release = 1;
         this.depth = 1;
-        //TODO linear / exponential
+        // TODO linear / exponential
     }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = ADSR;
@@ -1042,7 +1043,7 @@ class NoiseCtrlGenerator extends ScriptProcessor {
                 this.sct++;
                 if (this.sct > samplesPerCycle) {
                     this.v = this.depth * (Math.random() * 2 - 1);
-                    this.sct = 0; //this.sct - Math.floor(this.sct);
+                    this.sct = 0; // this.sct - Math.floor(this.sct);
                 }
                 out[sample] = this.v;
             }
@@ -1216,7 +1217,7 @@ class Instrument {
         else if (this.pressed.length > 0)
             voices = this.pressed;
         else
-            throw "This should never happen";
+            throw 'This should never happen';
         return voices.splice(0, 1)[0];
     }
     close() {
@@ -1252,7 +1253,7 @@ class Voice {
 }
 /* harmony export (immutable) */ __webpack_exports__["b"] = Voice;
 
-//-------------------- Private --------------------
+// -------------------- Private --------------------
 class VoiceNodeData extends __WEBPACK_IMPORTED_MODULE_0__synth__["a" /* NodeData */] {
     constructor(id) {
         super();
@@ -1270,9 +1271,9 @@ class SynthLoader {
     load(ac, json, dest) {
         const synth = new __WEBPACK_IMPORTED_MODULE_0__synth__["b" /* Synth */](ac);
         // Add nodes into id-based table
-        let i = 0;
+        let j = 0;
         for (const jn of json.nodes)
-            this.nodes[i++] = new VoiceNodeData(jn.id);
+            this.nodes[j++] = new VoiceNodeData(jn.id);
         // Then set their list of inputs
         for (let i = 0; i < json.nodes.length; i++)
             for (const inum of json.nodes[i].inputs) {

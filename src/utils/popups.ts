@@ -1,85 +1,85 @@
 interface JQueryWithModal extends JQuery {
-	modal(options?: any): void;
+	modal(options?: any): void
 }
 
 /** Informs whether a popup is open or not */
-export let isOpen: boolean = false;
+export let isOpen = false
 export function setOpen(open: boolean) {
-	isOpen = open;
+	isOpen = open
 }
 
 /** Bootstrap-based equivalent of standard alert function */
 export function alert(msg: string, title?: string, hideClose?: boolean, options?: any): void {
-	popup.find('.popup-message').html(msg);
-	popup.find('.modal-title').text(title || 'Alert');
-	popup.find('.popup-ok').hide();
+	popup.find('.popup-message').html(msg)
+	popup.find('.modal-title').text(title || 'Alert')
+	popup.find('.popup-ok').hide()
 	if (hideClose)
-		popup.find('.popup-close').hide();
+		popup.find('.popup-close').hide()
 	else
-		popup.find('.popup-close').html('Close');
-	popup.find('.popup-prompt > input').hide();
-	isOpen = true;
-	popup.one('hidden.bs.modal', _ => isOpen = false);
-	popup.modal(options);
+		popup.find('.popup-close').html('Close')
+	popup.find('.popup-prompt > input').hide()
+	isOpen = true
+	popup.one('hidden.bs.modal', _ => isOpen = false)
+	popup.modal(options)
 }
 
 /** Like an alert, but without a close button */
 export function progress(msg: string, title?: string): void {
-	alert(msg, title, true, { keyboard: false });
+	alert(msg, title, true, { keyboard: false })
 }
 
 /** Closes a popup in case it is open */
 export function close() {
-	if (!isOpen) return;
-	popup.find('.popup-ok').click();
+	if (!isOpen) return
+	popup.find('.popup-ok').click()
 }
 
 /** Bootstrap-based equivalent of standard confirm function */
 export function confirm(msg: string, title: string,
 	cbClose: (b: boolean) => void, cbOpen?: () => void) {
-	let result = false;
-	popup.find('.popup-message').html(msg);
-	popup.find('.modal-title').text(title || 'Please confirm');
-	const okButton = popup.find('.popup-ok');
-	okButton.show().click(_ => result = true);
-	popup.find('.popup-prompt > input').hide();
-	popup.find('.popup-close').text('Cancel');
+	let result = false
+	popup.find('.popup-message').html(msg)
+	popup.find('.modal-title').text(title || 'Please confirm')
+	const okButton = popup.find('.popup-ok')
+	okButton.show().click(_ => result = true)
+	popup.find('.popup-prompt > input').hide()
+	popup.find('.popup-close').text('Cancel')
 	popup.one('shown.bs.modal', _ => {
-		okButton.focus();
-		if (cbOpen) cbOpen();
-	});
+		okButton.focus()
+		if (cbOpen) cbOpen()
+	})
 	popup.find('form').one('submit', _ => {
-		result = true;
-		okButton.click();
-		return false;
-	});
+		result = true
+		okButton.click()
+		return false
+	})
 	popup.one('hide.bs.modal', _ => {
-		okButton.off('click');
-		isOpen = false;
-		cbClose(result);
-	});
-	isOpen = true;
-	popup.modal();
+		okButton.off('click')
+		isOpen = false
+		cbClose(result)
+	})
+	isOpen = true
+	popup.modal()
 }
 
 /** Bootstrap-based equivalent of standard prompt function */
 export function prompt(msg: string, title: string,
 	initialValue: string, cb: ((s: any) => void) | null): void {
-	const input = popup.find('.popup-prompt > input');
+	const input = popup.find('.popup-prompt > input')
 	confirm(msg, title, confirmed => {
-		if (!cb) return;
-		if (!confirmed) cb(null);
-		else cb(input.val());
+		if (!cb) return
+		if (!confirmed) cb(null)
+		else cb(input.val())
 	}, () => {
-		input.show();
-		input.focus();
+		input.show()
+		input.focus()
 		if (initialValue) {
-			input.val(initialValue);
-			const hinput: HTMLInputElement = <HTMLInputElement>input[0];
-			hinput.select();
+			input.val(initialValue)
+			const hinput: HTMLInputElement = <HTMLInputElement>input[0]
+			hinput.select()
 		}
-		else input.val('');
-	});
+		else input.val('')
+	})
 }
 
 
@@ -104,7 +104,7 @@ const popup = <JQueryWithModal> $(`
 		</div>
 	</div>
 	</div>
-`);
+`)
 
-$('body').append(popup);
+$('body').append(popup)
 

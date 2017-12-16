@@ -116,26 +116,26 @@ function focusable(elem) {
 /* harmony export (immutable) */ __webpack_exports__["d"] = download;
 /* harmony export (immutable) */ __webpack_exports__["f"] = uploadText;
 /* harmony export (immutable) */ __webpack_exports__["e"] = uploadArrayBuffer;
-//-------------------- Encoding / decoding --------------------
+// -------------------- Encoding / decoding --------------------
 function arrayBufferToBase64(buffer) {
-    var binary = '';
-    var bytes = new Uint8Array(buffer);
-    var len = bytes.byteLength;
-    for (var i = 0; i < len; i++) {
+    let binary = '';
+    let bytes = new Uint8Array(buffer);
+    let len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
         binary += String.fromCharCode(bytes[i]);
     }
     return window.btoa(binary);
 }
 function base64ToArrayBuffer(base64) {
-    var binary_string = window.atob(base64);
-    var len = binary_string.length;
-    var bytes = new Uint8Array(len);
-    for (var i = 0; i < len; i++) {
+    let binary_string = window.atob(base64);
+    let len = binary_string.length;
+    let bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
         bytes[i] = binary_string.charCodeAt(i);
     }
     return bytes.buffer;
 }
-//-------------------- Downloading --------------------
+// -------------------- Downloading --------------------
 function browserSupportsDownload() {
     return !window.externalHost && 'download' in $('<a>')[0];
 }
@@ -596,8 +596,8 @@ class BaseNoteHandler {
         for (const inData of this.ndata.getInputs()) {
             inData.anode.connect(anode[inData.controlParam]);
         }
-        //TODO should copy snapshot of list of inputs and outputs
-        //...in case user connects or disconnects during playback
+        // TODO should copy snapshot of list of inputs and outputs
+        // ...in case user connects or disconnects during playback
         return anode;
     }
     disconnect(anode) {
@@ -758,6 +758,7 @@ class ADSRNoteHandler extends BaseNoteHandler {
             param.cancelScheduledValues(when);
             const now = adsr.context.currentTime;
             if (when > now)
+                // tslint:disable-next-line:no-unused-expression
                 this.rescheduleRamp(param, param._attack, now) ||
                     this.rescheduleRamp(param, param._decay, now);
             param._release = new Ramp(v, finalv, when, when + adsr.release);
@@ -827,7 +828,7 @@ class SoundBankNoteHandler extends BaseNoteHandler {
     }
     noteOff(midi, gain, when) { }
 }
-//-------------------- Exported note handlers --------------------
+// -------------------- Exported note handlers --------------------
 /**
  * Exports available note handlers so they are used by their respective
  * nodes from the palette.
@@ -842,7 +843,7 @@ const NoteHandlers = {
 };
 /* harmony export (immutable) */ __webpack_exports__["a"] = NoteHandlers;
 
-//-------------------- Private classes --------------------
+// -------------------- Private classes --------------------
 /**
  * Tracks a node output connections and disconnections, to be used
  * when cloning, removing or controlling nodes.
@@ -883,7 +884,7 @@ class OutputTracker {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return palette; });
-//-------------------- Node palette definition --------------------
+// -------------------- Node palette definition --------------------
 const OCTAVE_DETUNE = {
     initial: 0,
     min: -1200,
@@ -894,7 +895,7 @@ const OCTAVE_DETUNE = {
  * The set of AudioNodes available to the application, along with
  * their configuration.
  */
-var palette = {
+let palette = {
     // Sources
     Oscillator: {
         constructor: 'createOscillator',
@@ -1088,7 +1089,7 @@ class ADSR extends CustomNodeBase {
         this.sustain = 0.5;
         this.release = 1;
         this.depth = 1;
-        //TODO linear / exponential
+        // TODO linear / exponential
     }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = ADSR;
@@ -1156,7 +1157,7 @@ class NoiseCtrlGenerator extends ScriptProcessor {
                 this.sct++;
                 if (this.sct > samplesPerCycle) {
                     this.v = this.depth * (Math.random() * 2 - 1);
-                    this.sct = 0; //this.sct - Math.floor(this.sct);
+                    this.sct = 0; // this.sct - Math.floor(this.sct);
                 }
                 out[sample] = this.v;
             }
@@ -1330,7 +1331,7 @@ class Instrument {
         else if (this.pressed.length > 0)
             voices = this.pressed;
         else
-            throw "This should never happen";
+            throw 'This should never happen';
         return voices.splice(0, 1)[0];
     }
     close() {
@@ -1366,7 +1367,7 @@ class Voice {
 }
 /* harmony export (immutable) */ __webpack_exports__["b"] = Voice;
 
-//-------------------- Private --------------------
+// -------------------- Private --------------------
 class VoiceNodeData extends __WEBPACK_IMPORTED_MODULE_0__synth__["a" /* NodeData */] {
     constructor(id) {
         super();
@@ -1384,9 +1385,9 @@ class SynthLoader {
     load(ac, json, dest) {
         const synth = new __WEBPACK_IMPORTED_MODULE_0__synth__["b" /* Synth */](ac);
         // Add nodes into id-based table
-        let i = 0;
+        let j = 0;
         for (const jn of json.nodes)
-            this.nodes[i++] = new VoiceNodeData(jn.id);
+            this.nodes[j++] = new VoiceNodeData(jn.id);
         // Then set their list of inputs
         for (let i = 0; i < json.nodes.length; i++)
             for (const inum of json.nodes[i].inputs) {
@@ -1458,13 +1459,13 @@ function createAudioContext() {
 function setupPanels() {
     setupPalette();
     const inputs = new __WEBPACK_IMPORTED_MODULE_1__piano_noteInputs__["a" /* NoteInputs */](synthUI);
-    const presets = new __WEBPACK_IMPORTED_MODULE_2__synthUI_presets__["a" /* Presets */](synthUI);
-    presets.beforeSave = (json) => $.extend(json, { keyboard: inputs.piano.toJSON() });
-    presets.afterLoad = (json) => inputs.piano.fromJSON(json.keyboard);
+    const prsts = new __WEBPACK_IMPORTED_MODULE_2__synthUI_presets__["a" /* Presets */](synthUI);
+    prsts.beforeSave = (json) => $.extend(json, { keyboard: inputs.piano.toJSON() });
+    prsts.afterLoad = (json) => inputs.piano.fromJSON(json.keyboard);
     $(function () {
         $('#synth').focus();
     });
-    return presets.presets;
+    return prsts.presets;
 }
 function setupPalette() {
     $(function () {
@@ -1490,8 +1491,8 @@ function setupPalette() {
 
 
 /**
- * Customizes the generic graph editor in order to manipulate and control a graph of
- * AudioNodes
+ * Customizes the generic graph editor in order to manipulate and control
+ * a graph of AudioNodes
  */
 class SynthUI {
     constructor(ac, graphCanvas, jqParams, jqFFT, jqOsc) {
@@ -1502,7 +1503,7 @@ class SynthUI {
         this.addOutputNode();
     }
     addOutputNode() {
-        //TODO avoid using hardcoded position
+        // TODO avoid using hardcoded position
         const out = new __WEBPACK_IMPORTED_MODULE_0__graph__["b" /* Node */](500, 210, 'Out');
         out.data = new GraphNodeData(out);
         this.synth.initOutputNodeData(out.data, this.synth.ac.destination);
@@ -1511,7 +1512,7 @@ class SynthUI {
         this.initNodeDimensions(out);
     }
     registerPaletteHandler() {
-        var self = this; // JQuery sets 'this' in event handlers
+        let self = this; // JQuery sets 'this' in event handlers
         $('.palette .node').click(function (evt) {
             let elem = $(this);
             let classAttr = elem.attr('class') || '';
@@ -1544,7 +1545,7 @@ class SynthUI {
         else
             this.synth.initNodeData(n.data, type);
     }
-    //----- Rest of methods are used to find a free spot in the canvas -----
+    // ----- Rest of methods are used to find a free spot in the canvas -----
     findFreeSpot() {
         let maxDist = 0;
         const canvasW = this.gr.canvas.width;
@@ -1634,7 +1635,7 @@ class SynthGraphHandler {
             .filter(pname => ndata.anode[pname] instanceof AudioParam);
         return aparams.length > 0;
     }
-    //-------------------- Implementation of the GraphHandler interface --------------------
+    // --------------- Implementation of the GraphHandler interface ---------------
     canBeSource(n) {
         const data = n.data;
         return data.anode != this.synthUI.outNode;
@@ -1648,7 +1649,7 @@ class SynthGraphHandler {
     }
     connected(src, dst) {
         this.synthUI.synth.connectNodes(src.data, dst.data);
-        //TODO update paramsUI in case selected node is src
+        // TODO update paramsUI in case selected node is src
     }
     disconnected(src, dst) {
         this.synthUI.synth.disconnectNodes(src.data, dst.data);
@@ -1861,7 +1862,7 @@ class Node {
 }
 /* harmony export (immutable) */ __webpack_exports__["b"] = Node;
 
-//------------------------- Privates -------------------------
+// ------------------------- Privates -------------------------
 /** Default, do-nothing GraphHandler implementation */
 class DefaultGraphHandler {
     canBeSource(n) { return true; }
@@ -1870,7 +1871,7 @@ class DefaultGraphHandler {
     disconnected(src, dst) { }
     nodeSelected(n) { }
     nodeRemoved(n) { }
-    getArrowColor(src, dst) { return "black"; }
+    getArrowColor(src, dst) { return 'black'; }
     data2json(n) { return {}; }
     json2data(n, json) { }
     graphLoaded() { }
@@ -1962,7 +1963,7 @@ class GraphInteraction {
         });
     }
     setGrid(grid) {
-        $(this.graph.nodeCanvas).find('.node').draggable("option", "grid", grid);
+        $(this.graph.nodeCanvas).find('.node').draggable('option', 'grid', grid);
     }
     connectOrDisconnect(srcn, dstn) {
         if (this.graph.disconnect(srcn, dstn))
@@ -2059,7 +2060,7 @@ class GraphDraw {
         const posCoef = 0.6;
         const mx = src.x + (dst.x - src.x) * posCoef;
         const my = src.y + (dst.y - src.y) * posCoef;
-        var angle = Math.atan2(dst.y - src.y, dst.x - src.x);
+        let angle = Math.atan2(dst.y - src.y, dst.x - src.x);
         this.gc.moveTo(mx, my);
         this.gc.lineTo(mx - this.arrowHeadLen * Math.cos(angle - Math.PI / 6), my - this.arrowHeadLen * Math.sin(angle - Math.PI / 6));
         this.gc.moveTo(mx, my);
@@ -2184,16 +2185,16 @@ function renderSlider(panel, pdef, param, value, setValue) {
     sliderBox.append($('<span><br/>' + ucfirst(param) + '</span>'));
     panel.append(sliderBox);
     slider.on('input', _ => {
-        const value = slider2param(parseFloat('' + slider.val()), pdef);
-        numInput.val(truncateFloat(value, 5));
-        setValue(value);
+        const v = slider2param(parseFloat('' + slider.val()), pdef);
+        numInput.val(truncateFloat(v, 5));
+        setValue(v);
     });
     numInput.on('input', _ => {
-        const value = parseFloat('' + numInput.val());
-        if (isNaN(value))
+        const v = parseFloat('' + numInput.val());
+        if (isNaN(v))
             return;
-        slider.val(param2slider(value, pdef));
-        setValue(value);
+        slider.val(param2slider(v, pdef));
+        setValue(v);
     });
     return sliderBox;
 }
@@ -2249,7 +2250,7 @@ function slider2param(sliderValue, pdef) {
     else
         return Object(__WEBPACK_IMPORTED_MODULE_0__utils_modern__["c" /* log2linear */])(sliderValue, min, max);
 }
-//-------------------- Custom parameter rendering --------------------
+// -------------------- Custom parameter rendering --------------------
 function renderBufferData(panel, pdef, anode, param, label) {
     const box = $('<div class="choice-box">');
     const button = $(`
@@ -2269,7 +2270,7 @@ function renderBufferData(panel, pdef, anode, param, label) {
             anode.context.decodeAudioData(soundFile, (buffer) => {
                 anode['_buffer'] = buffer;
                 loading = false;
-                //TODO capture errors and report them with popups.alert
+                // TODO capture errors and report them with popups.alert
                 __WEBPACK_IMPORTED_MODULE_2__utils_popups__["b" /* close */]();
             });
         });
@@ -2309,10 +2310,10 @@ function renderSoundBank(panel, pdef, anode, param, label) {
     setComboOptions(combo, names);
     buttons.find('input').change(evt => {
         // Trigger asynchronous upload & decode
-        __WEBPACK_IMPORTED_MODULE_1__utils_file__["e" /* uploadArrayBuffer */](evt, (fileData, file) => {
+        __WEBPACK_IMPORTED_MODULE_1__utils_file__["e" /* uploadArrayBuffer */](evt, (fileData, f) => {
             encs.push(fileData);
             anode.context.decodeAudioData(fileData, (buffer) => bufs.push(buffer));
-            names.push(file.name);
+            names.push(f.name);
             setComboOptions(combo, names);
         });
     });
@@ -2325,7 +2326,7 @@ function renderSoundBank(panel, pdef, anode, param, label) {
     });
     return combo.parent();
 }
-//-------------------- Misc utilities --------------------
+// -------------------- Misc utilities --------------------
 function ucfirst(str) {
     return str[0].toUpperCase() + str.substring(1);
 }
@@ -2397,7 +2398,7 @@ class AudioAnalyzer {
         this.anode.getByteFrequencyData(data);
         const dx = (data.length / 2) / canvas.width;
         let x = 0;
-        //TODO calculate average of all samples from x to x + dx - 1
+        // TODO calculate average of all samples from x to x + dx - 1
         for (let i = 0; i < w; i++) {
             let y = data[Math.floor(x)];
             x += dx;
@@ -2466,7 +2467,7 @@ class NoteInputs {
         this.synthUI = synthUI;
         this.poly = false;
         // Setup piano panel
-        var piano = new __WEBPACK_IMPORTED_MODULE_2__piano__["a" /* PianoKeyboard */]($('#piano'));
+        let piano = new __WEBPACK_IMPORTED_MODULE_2__piano__["a" /* PianoKeyboard */]($('#piano'));
         this.piano = piano;
         piano.noteOn = (midi) => this.arpeggiator.sendNoteOn(midi, 1);
         piano.noteOff = (midi) => this.arpeggiator.sendNoteOff(midi, 1);
@@ -2474,7 +2475,7 @@ class NoteInputs {
         piano.polyOn = () => this.polyOn();
         piano.polyOff = () => this.polyOff();
         // Setup PC keyboard
-        var kb = this.setupPCKeyboard(piano);
+        let kb = this.setupPCKeyboard(piano);
         // Bind piano octave with PC keyboard
         kb.baseNote = piano.baseNote;
         piano.octaveChanged = baseNote => kb.baseNote = baseNote;
@@ -2485,7 +2486,7 @@ class NoteInputs {
         this.setupMidiKeyboard(piano);
     }
     setupPCKeyboard(piano) {
-        var kb = new __WEBPACK_IMPORTED_MODULE_0__keyboard__["a" /* Keyboard */]('#synth');
+        let kb = new __WEBPACK_IMPORTED_MODULE_0__keyboard__["a" /* Keyboard */]('#synth');
         kb.noteOn = (midi) => {
             if (document.activeElement.nodeName == 'INPUT' &&
                 document.activeElement.getAttribute('type') != 'range')
@@ -2500,14 +2501,14 @@ class NoteInputs {
         return kb;
     }
     setupMidiKeyboard(piano) {
-        var midi = new __WEBPACK_IMPORTED_MODULE_1__midi__["a" /* MidiKeyboard */]();
-        midi.noteOn = (midi, velocity, channel) => {
-            this.arpeggiator.sendNoteOn(midi, 1);
-            piano.displayKeyDown(midi);
+        let midi = new __WEBPACK_IMPORTED_MODULE_1__midi__["a" /* MidiKeyboard */]();
+        midi.noteOn = (note, velocity, channel) => {
+            this.arpeggiator.sendNoteOn(note, 1);
+            piano.displayKeyDown(note);
         };
-        midi.noteOff = (midi, velocity, channel) => {
-            this.arpeggiator.sendNoteOff(midi, 1);
-            piano.displayKeyUp(midi);
+        midi.noteOff = (note, velocity, channel) => {
+            this.arpeggiator.sendNoteOff(note, 1);
+            piano.displayKeyUp(note);
         };
     }
     setupEnvelopeAnimation(piano) {
@@ -2854,7 +2855,6 @@ class PianoKeyboard {
     }
     getPortamento() {
         const sv = parseFloat('' + this.portaSlider.val());
-        ;
         return Object(__WEBPACK_IMPORTED_MODULE_1__utils_modern__["c" /* log2linear */])(sv, PORTAMENTO_MIN, PORTAMENTO_MAX);
     }
     changeArpeggioMode(button) {
@@ -3160,11 +3160,11 @@ class Presets {
     }
     selectBestNode() {
         const getFirstNode = (isGood) => this.synthUI.gr.nodes.filter(isGood)[0];
-        let n = getFirstNode(n => n.data.type == 'Filter');
+        let n = getFirstNode(nn => nn.data.type == 'Filter');
         if (!n)
-            n = getFirstNode(n => n.data.type == 'ADSR');
+            n = getFirstNode(nn => nn.data.type == 'ADSR');
         if (!n)
-            n = getFirstNode(n => n.data.anode.numberOfInputs == 0);
+            n = getFirstNode(nn => nn.data.anode.numberOfInputs == 0);
         if (n)
             this.synthUI.gr.selectNode(n);
     }
