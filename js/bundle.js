@@ -2100,6 +2100,8 @@ function renderParams(ndata, panel) {
     positionBoxes(panel, boxes);
 }
 function positionBoxes(panel, boxes) {
+    if (boxes.length < 1)
+        return;
     const pw = panel.width() || 0;
     const bw = boxes[0].width() || 0;
     const sep = (pw - boxes.length * bw) / (boxes.length + 1);
