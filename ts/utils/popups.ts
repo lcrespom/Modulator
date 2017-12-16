@@ -1,3 +1,7 @@
+interface JQueryWithModal extends JQuery {
+	modal(options?: any): void;
+}
+
 /** Informs whether a popup is open or not */
 export let isOpen: boolean = false;
 export function setOpen(open: boolean) {
@@ -16,7 +20,7 @@ export function alert(msg: string, title?: string, hideClose?: boolean, options?
 	popup.find('.popup-prompt > input').hide();
 	isOpen = true;
 	popup.one('hidden.bs.modal', _ => isOpen = false);
-	(<any>popup).modal(options);
+	popup.modal(options);
 }
 
 /** Like an alert, but without a close button */
@@ -32,7 +36,7 @@ export function close() {
 
 /** Bootstrap-based equivalent of standard confirm function */
 export function confirm(msg: string, title: string,
-	cbClose: (boolean) => void, cbOpen?: () => void) {
+	cbClose: (b: boolean) => void, cbOpen?: () => void) {
 	let result = false;
 	popup.find('.popup-message').html(msg);
 	popup.find('.modal-title').text(title || 'Please confirm');
@@ -55,12 +59,12 @@ export function confirm(msg: string, title: string,
 		cbClose(result);
 	});
 	isOpen = true;
-	(<any>popup).modal();
+	popup.modal();
 }
 
 /** Bootstrap-based equivalent of standard prompt function */
 export function prompt(msg: string, title: string,
-	initialValue: string, cb: (string) => void): void {
+	initialValue: string, cb: ((s: any) => void) | null): void {
 	const input = popup.find('.popup-prompt > input');
 	confirm(msg, title, confirmed => {
 		if (!cb) return;
@@ -79,7 +83,7 @@ export function prompt(msg: string, title: string,
 }
 
 
-const popup = $(`
+const popup = <JQueryWithModal> $(`
 	<div class="normal-font modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">

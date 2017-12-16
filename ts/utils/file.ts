@@ -1,6 +1,6 @@
 //-------------------- Encoding / decoding --------------------
 
-export function arrayBufferToBase64(buffer) {
+export function arrayBufferToBase64(buffer: number[]) {
 	var binary = '';
 	var bytes = new Uint8Array(buffer);
 	var len = bytes.byteLength;
@@ -10,7 +10,7 @@ export function arrayBufferToBase64(buffer) {
 	return window.btoa(binary);
 }
 
-export function base64ToArrayBuffer(base64) {
+export function base64ToArrayBuffer(base64: string) {
 	var binary_string = window.atob(base64);
 	var len = binary_string.length;
 	var bytes = new Uint8Array(len);
@@ -27,7 +27,7 @@ export function browserSupportsDownload(): boolean {
 	return !(<any>window).externalHost && 'download' in $('<a>')[0];
 }
 
-export function download(fileName, fileData) {
+export function download(fileName: string, fileData: string) {
 	const a = $('<a>');
 	a.attr('download', fileName);
 	a.attr('href',
@@ -40,18 +40,21 @@ export function download(fileName, fileData) {
 
 //-------------------- Uploading --------------------
 
-export function uploadText(event, cb: (text, file) => void) {
+type UploadCallback = (buf: any, file: any) => void
+
+export function uploadText(event: JQuery.Event, cb: UploadCallback) {
 	upload(event, cb, 'readAsText');
 }
 
-export function uploadArrayBuffer(event, cb: (ab, file) => void) {
+export function uploadArrayBuffer(event: JQuery.Event, cb: UploadCallback) {
 	upload(event, cb, 'readAsArrayBuffer');
 }
 
-function upload(event, cb, readFunc: string) {
-	if (!event.target.files || event.target.files.length <= 0) return cb(null);
-	const file = event.target.files[0];
+function upload(event: JQuery.Event, cb: UploadCallback, readFunc: string) {
+	let files = (<any>event.target).files
+	if (!files || files.length <= 0) return cb('', '');
+	const file = files[0];
 	const reader = new FileReader();
 	reader.onload = (loadEvt: any)  => cb(loadEvt.target.result, file);
-	reader[readFunc](file);
+	(<any>reader)[readFunc](file);
 }
