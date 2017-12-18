@@ -28,7 +28,6 @@ export function createEditor() {
 			renderLineHighlight: 'none',
 			minimap: { enabled: false }
 		})
-		editor.focus()
 		handleEditorResize(editorElem)
 		registerActions()
 	})
@@ -123,7 +122,7 @@ function doRunCode() {
 		if (location) {
 			currentError = e
 			currentError.line = location.line
-			currentError.column = location.column
+			currentError.column = location.column > 1 ? location.column : 4
 			showError(e.message, location.line, location.column)
 		}
 	}
