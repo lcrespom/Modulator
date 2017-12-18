@@ -5,6 +5,8 @@ import { SynthUI } from './synthUI/synthUI'
 import { NoteInputs } from './piano/noteInputs'
 import { Presets } from './synthUI/presets'
 import { ModernWindow } from './utils/modern'
+import { createEditor } from './live-coding/editor'
+
 
 const graphCanvas = <HTMLCanvasElement>$('#graph-canvas')[0]
 const ac = createAudioContext()
@@ -27,6 +29,7 @@ function setupPanels() {
 	$(function() {
 		$('#synth').focus()
 	})
+	createEditor()
 	return prsts.presets
 }
 
