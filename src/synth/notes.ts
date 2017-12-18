@@ -17,7 +17,7 @@ export interface NoteHandler {
 /**
  * Handles common AudioNode cloning, used by oscillator and buffered data nodes.
  */
-class BaseNoteHandler implements NoteHandler {
+export class BaseNoteHandler implements NoteHandler {
 	ndata: NodeData
 	outTracker: OutputTracker
 	kbTrigger = false
@@ -86,7 +86,7 @@ class BaseNoteHandler implements NoteHandler {
 /**
  * Handles note events for an OscillatorNode
  */
-class OscNoteHandler extends BaseNoteHandler {
+export class OscNoteHandler extends BaseNoteHandler {
 	oscClone: OscillatorNode
 	lastNote: number
 
@@ -108,7 +108,7 @@ class OscNoteHandler extends BaseNoteHandler {
  * Handles note events for an LFO node. This is identical to a regular
  * oscillator node, but the note does not affect the oscillator frequency
  */
-class LFONoteHandler extends OscNoteHandler {
+export class LFONoteHandler extends OscNoteHandler {
 	rampParam(param: AudioParam, ratio: number, when: number) {
 		// Disable portamento for LFO
 		param.setValueAtTime(param.value, when)
@@ -118,7 +118,7 @@ class LFONoteHandler extends OscNoteHandler {
 /**
  * Handles note events for an AudioBufferSourceNode
  */
-class BufferNoteHandler extends BaseNoteHandler {
+export class BufferNoteHandler extends BaseNoteHandler {
 	absn: AudioBufferSourceNode
 	lastNote: number
 
@@ -145,7 +145,7 @@ class BufferNoteHandler extends BaseNoteHandler {
 /**
  * Performs computations about ramps so they can be easily rescheduled
  */
-class Ramp {
+export class Ramp {
 	constructor(public v1: number, public v2: number, public t1: number, public t2: number) {}
 	inside(t: number) {
 		return this.t1 < this.t2 && this.t1 <= t && t <= this.t2
@@ -165,7 +165,7 @@ class Ramp {
 	}
 }
 
-interface MAudioParam extends AudioParam {
+export interface MAudioParam extends AudioParam {
 	_attack: Ramp
 	_decay: Ramp
 	_release: Ramp
@@ -174,7 +174,7 @@ interface MAudioParam extends AudioParam {
 /**
  * Handles note events for a custom ADSR node
  */
-class ADSRNoteHandler extends BaseNoteHandler {
+export class ADSRNoteHandler extends BaseNoteHandler {
 	lastNote: number
 	kbTrigger = true
 
@@ -272,7 +272,7 @@ class ADSRNoteHandler extends BaseNoteHandler {
  * Handles note events for any node that allows calling start() after stop(),
  * such as custom nodes.
  */
-class RestartableNoteHandler extends BaseNoteHandler {
+export class RestartableNoteHandler extends BaseNoteHandler {
 	lastNote: number
 	playing = false
 
@@ -296,7 +296,7 @@ class RestartableNoteHandler extends BaseNoteHandler {
 /**
  * Handles note events for the SoundBank source node
  */
-class SoundBankNoteHandler extends BaseNoteHandler {
+export class SoundBankNoteHandler extends BaseNoteHandler {
 
 	noteOn(midi: number, gain: number, ratio: number, when: number) {
 		const bufs = (<any>this.ndata.anode)['_buffers']
@@ -330,7 +330,7 @@ export const NoteHandlers = {
  * Tracks a node output connections and disconnections, to be used
  * when cloning, removing or controlling nodes.
  */
-class OutputTracker {
+export class OutputTracker {
 	outputs: (AudioNode | AudioParam) [] = []
 
 	constructor(anode: AudioNode) {

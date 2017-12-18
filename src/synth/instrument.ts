@@ -99,7 +99,7 @@ export class Voice {
 
 // -------------------- Private --------------------
 
-class VoiceNodeData extends NodeData {
+export class VoiceNodeData extends NodeData {
 	inputs: NodeData[] = []
 	constructor(public id: number) {
 		super()
@@ -109,7 +109,7 @@ class VoiceNodeData extends NodeData {
 	}
 }
 
-class SynthLoader {
+export class SynthLoader {
 	nodes: VoiceNodeData[] = []
 	synth: Synth
 

@@ -227,7 +227,7 @@ class DefaultGraphHandler implements GraphHandler {
  * Handles all UI interaction with graph in order to move, select, connect
  * and disconnect nodes.
  */
-class GraphInteraction {
+export class GraphInteraction {
 
 	graph: Graph
 	gc: CanvasRenderingContext2D
@@ -366,7 +366,7 @@ class GraphInteraction {
 }
 
 
-interface Point {
+export interface Point {
 	x: number,
 	y: number
 }
@@ -375,7 +375,7 @@ interface Point {
 /**
  * Handles graph drawing by rendering arrows in a canvas.
  */
-class GraphDraw {
+export class GraphDraw {
 
 	graph: Graph
 	gc: CanvasRenderingContext2D

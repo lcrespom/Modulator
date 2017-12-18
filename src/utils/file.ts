@@ -40,7 +40,7 @@ export function download(fileName: string, fileData: string) {
 
 // -------------------- Uploading --------------------
 
-type UploadCallback = (buf: any, file: any) => void
+export type UploadCallback = (buf: any, file: any) => void
 
 export function uploadText(event: JQuery.Event, cb: UploadCallback) {
 	upload(event, cb, 'readAsText')

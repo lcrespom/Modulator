@@ -3,7 +3,7 @@ import { ModernAudioNode } from '../utils/modern'
 /**
  * Base class to derive all custom nodes from it
  */
-class CustomNodeBase implements ModernAudioNode {
+export class CustomNodeBase implements ModernAudioNode {
 	custom = true
 	channelCount = 2
 	channelCountMode: ChannelCountMode = 'max'
@@ -43,7 +43,7 @@ export class ADSR extends CustomNodeBase {
 /**
  * Base ScriptProcessor, to derive all custom audio processing nodes from it.
  */
-class ScriptProcessor extends CustomNodeBase {
+export class ScriptProcessor extends CustomNodeBase {
 	gain = 1
 	anode: ScriptProcessorNode
 	playing = false

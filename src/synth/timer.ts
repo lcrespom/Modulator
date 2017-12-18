@@ -1,4 +1,4 @@
-interface TimerCallback {
+export interface TimerCallback {
 	(time: number): void
 }
 

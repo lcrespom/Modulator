@@ -41,7 +41,7 @@ export class Portamento {
 }
 
 // TODO *** refactor & decouple from UI
-interface ParamHandler {
+export interface ParamHandler {
 	uiRender: string
 	initialize(anode: AudioNode, def: NodeDef): void
 	param2json(anode: AudioNode): any

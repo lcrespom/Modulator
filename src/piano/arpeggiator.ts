@@ -99,12 +99,12 @@ export class Arpeggiator {
 }
 
 
-class NoteData {
+export class NoteData {
 	constructor(public note: number,
 		public noteToPlay: number, public velocity: number) {}
 }
 
-class NoteTable {
+export class NoteTable {
 	private notes: NoteData[] = []
 
 	length(): number { return this.notes.length }
