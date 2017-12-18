@@ -1,5 +1,5 @@
 {
-	"name": "modulator",
+	"name": "modulator-synth",
 	"version": "2.0.0",
 	"description": "Modular Synth using Web Audio",
 	"main": "index.html",
