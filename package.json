@@ -1,14 +1,14 @@
 {
 	"name": "modulator-synth",
-	"version": "2.0.1",
+	"version": "2.0.3",
 	"description": "Modular Synth using Web Audio",
 	"main": "web/js/synthlib.js",
+	"types": "index.d.ts",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"build": "webpack --env.target=PROD",
 		"dev": "webpack --env.target=DEV",
 		"watch": "npm run serve",
-		"types": "tsc src/synthlib --declaration --out index.js --target es2015 --module system",
 		"serve": "webpack-dev-server --env.target=DEV --content-base web/",
 		"publish:html": "cp *.html ../lcrespom.github.io/synth",
 		"publish:css": "cp -R css ../lcrespom.github.io/synth",
