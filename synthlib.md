@@ -1,4 +1,4 @@
-#SynthLib
+# SynthLib
 SynthLib is a standalone, UI-independent library that can load and play instruments
 created with [Modulator](https://github.com/lcrespom/Modulator).
 Synthlib is small: it takes 19 kb minified and 5kb gzipped.
@@ -12,11 +12,11 @@ can be instantiated and used by the application:
 - **Timer**: a high precision timer, to be used by the application for triggering
 	notes at specific times
 
-##Voice class
+## Voice class
 A voice object is responsible for loading a Modulator patch into a
 monophonic synthetizer, and then sending note events to it.
 
-####constructor(ac, json, dest)
+#### constructor(ac, json, dest)
 Creates a new Voice object, loading the synthesizer definition from
 a parsed JSON object, obtained from a previously-saved Modulator patch.
 
@@ -26,7 +26,7 @@ a parsed JSON object, obtained from a previously-saved Modulator patch.
 - **dest**: an optional destination AudioNode. If not specified, the
 	*destination* property of the *ac* parameter will be used.
 
-####noteOn(midi, velocity, when)
+#### noteOn(midi, velocity, when)
 Sends a noteOn event to the synthesizer, equivalent to pressing a
 key in the synthesizer keyboard.
 
@@ -38,7 +38,7 @@ key in the synthesizer keyboard.
 - **when**: the AudioContext time when the note event should be executed.
 	If not specified, the note will be played immediately.
 
-####noteOff(midi, velocity, when)
+#### noteOff(midi, velocity, when)
 Sends a noteOff event to the synthesizer, equivalent to releasing a key
 in the synthesizer keyboard.
 
@@ -50,15 +50,15 @@ in the synthesizer keyboard.
 - **when**: the AudioContext time when the note event should be executed.
 	If not specified, the note will be stopped immediately.
 
-####close()
+#### close()
 To be called upon shutdown in order to ensure that all sounds are stopped.
 
 
-##Instrument class
+## Instrument class
 An instrument object is handles an array of voices, and forwards *noteOn* / *noteOff*
 calls to them in order to implement a polyphonic synthesizer.
 
-####constructor(ac, json, numVoices, dest)
+#### constructor(ac, json, numVoices, dest)
 Creates a new Instrument object, loading a patch from a parsed JSON
 object into each of its voices.
 
@@ -69,26 +69,26 @@ object into each of its voices.
 - **dest**: an optional destination AudioNode. If not specified, the
 	*destination* property of the *ac* parameter will be used.
 
-####noteOn(midi, velocity, when)
+#### noteOn(midi, velocity, when)
 Forwards the *noteOn* call to one of the voices. The parameters are the same as with the
 Voice class *noteOn* method.
 
-####noteOff(midi, velocity, when)
+#### noteOff(midi, velocity, when)
 Forwards the *noteOff* call to the voice that was selected for the corresponding
 *noteOn* call. The parameters are the same as with the Voice class *noteOff* method.
 
-####close()
+#### close()
 To be called upon shutdown in order to ensure that all sounds are stopped. It will
 forward the close call to all its voices.
 
 
-##Timer class
+## Timer class
 This timer uses the technique documented by Chris Wilson in his article
 *[A Tale of Two Clocks](http://www.html5rocks.com/en/tutorials/audio/scheduling/)*,
 in order to ensure notes are played at the precise time according to a specified
 tempo.
 
-####constructor(ac, bpm = 60, interval = 0.025, ahead = 0.1)
+#### constructor(ac, bpm = 60, interval = 0.025, ahead = 0.1)
 Creates a timer object, using a specified AudioContext and tempo. The additional
 timing precision parameters *interval* and *ahead* can be safely left out, and
 the timer will use good defaults. For an understanding of how those timing parameters
@@ -104,7 +104,7 @@ are used, refer to the article mentioned above.
 - **ahead**: an optional time gap to schedule future note events. If not specified,
 	it will default to 100 milliseconds.
 
-####start(callback)
+#### start(callback)
 Starts the timer, which will periodically invoke the provided callback function.
 
 - **callback**: a user function that will be invoked once for every note frame.
@@ -121,7 +121,7 @@ If not specified, later calls to start() will use the previously specified callb
 
 A call to *start()* when the timer is already started has no effect.
 
-####stop()
+#### stop()
 Stops the timer, so that the callback is no longer invoked periodically. As described
 above, the *start()* and *stop()* methods can be invoked several times, and the timer
 will start / stop / resume / stop again / etc. accordingly.
@@ -129,7 +129,7 @@ Calls to *stop()* when the timer is already stopped has no effect.
 
 
 
-##Example
+## Example
 ```JavaScript
 function playSynthDemo() {
 	// Setup a instrument made of 4 voices
