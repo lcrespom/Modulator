@@ -3276,7 +3276,11 @@ function createEditor() {
         });
         handleEditorResize(editorElem);
         registerActions();
+        preventParentScroll(editorElem);
     });
+}
+function preventParentScroll(elem) {
+    $(elem).bind('mousewheel', e => e.preventDefault());
 }
 function registerActions() {
     editor.addAction({
@@ -3338,6 +3342,8 @@ function getErrorLocation(e) {
 function showError(msg, line, col) {
     console.log(`Runtime error: "${msg}" at line ${line}, column ${col}`);
     editor.revealLineInCenter(line);
+    if (col <= 1)
+        col = getFirstWordEnd(editor.getModel().getLineContent(line));
     decorations = editor.deltaDecorations(decorations, [{
             range: new monaco.Range(line, 1, line, col),
             options: {
@@ -3345,6 +3351,13 @@ function showError(msg, line, col) {
                 className: 'walc-error-line'
             }
         }]);
+}
+function getFirstWordEnd(s) {
+    let m = s.match(/\s*\w+/);
+    let pos = m && m.index !== undefined && m[0] ? m.index + m[0].length + 1 : 0;
+    if (pos <= 1)
+        pos = s.length + 1;
+    return pos;
 }
 // -------------------- Code execution --------------------
 function doRunCode() {
@@ -3360,7 +3373,7 @@ function doRunCode() {
         if (location) {
             currentError = e;
             currentError.line = location.line;
-            currentError.column = location.column;
+            currentError.column = location.column > 1 ? location.column : 4;
             showError(e.message, location.line, location.column);
         }
     }
