@@ -53,9 +53,10 @@ function setupDefinitions() {
 	interface LiveCoding {
 		/** Creates an instrument from a preset name or number */
 		instrument(preset: string | number, numVoices?: number): Instrument;
-		/** Creates a named track to be used */
+		/** Creates a named track */
 		track(name: string, cb?: TrackCallback): Track;
-	}
+		/** Creates a looping track */
+		loop_track(name: string, cb?: TrackCallback): Track;
 
 	interface Track {
 		/** Sets the instrument to play in the track */

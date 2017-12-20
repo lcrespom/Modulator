@@ -21,15 +21,21 @@ export class LiveCoding {
 		let prst = getPreset(this.presets, preset)
 		let instr = <LCInstrument> new Instrument(this.ac, prst, numVoices)
 		instr.name = prst.name
-		instr.duration = findDuration(prst)
+		instr.duration = findNoteDuration(prst)
 		return instr
 	}
 
 	track(name: string, cb?: TrackCallback) {
 		let t = new Track()
-		t.time = this.ac.currentTime + 0.1
+		t.time = this.ac.currentTime
 		tracks[name] = t
 		if (cb) cb(t)
+		return t
+	}
+
+	loop_track(name: string, cb?: TrackCallback) {
+		let t = this.track(name, cb)
+		t.loop = true
 		return t
 	}
 }
@@ -47,6 +53,7 @@ export class Track {
 	notect = 0
 	notes: NoteInfo[] = []
 	time = 0
+	loop = false
 	private inst: LCInstrument
 	private velocity = 1
 
@@ -98,6 +105,19 @@ function getPreset(presets: Presets, preset: string | number) {
 	throw new Error(`Preset "${preset}" does not exist`)
 }
 
+function findNoteDuration(preset: any) {
+	let duration = 0
+	for (let node of preset.nodeData) {
+		if (node.type == 'ADSR') {
+			let d = node.params.attack + node.params.decay
+			if (d > duration)
+				duration = d
+		}
+	}
+	if (duration) duration += 0.01
+	return duration
+}
+
 function timerCB(timer: Timer, time: number) {
 	let deltaT = time - timer.ac.currentTime
 	let tnames = Object.getOwnPropertyNames(tracks)
@@ -109,7 +129,10 @@ function playTrack(timer: Timer, track: Track, deltaT: number) {
 	let played
 	do {
 		played = false
-		if (track.notect >= track.notes.length) break
+		if (track.notect >= track.notes.length) {
+			if (track.loop) loopTrack(track)
+			else break
+		}
 		let note = track.notes[track.notect]
 		if (note.time < timer.nextNoteTime) {
 			note.instrument.noteOn(
@@ -124,15 +147,9 @@ function playTrack(timer: Timer, track: Track, deltaT: number) {
 	} while (played)
 }
 
-function findDuration(preset: any) {
-	let duration = 0
-	for (let node of preset.nodeData) {
-		if (node.type == 'ADSR') {
-			let d = node.params.attack + node.params.decay
-			if (d > duration)
-				duration = d
-		}
+function loopTrack(track: Track) {
+	track.notect = 0
+	for (let note of track.notes) {
+		note.time += 0
 	}
-	if (duration) duration += 0.01
-	return duration
 }
