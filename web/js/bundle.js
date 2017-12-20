@@ -3269,6 +3269,7 @@ function createEditor(ac, presets) {
     loadMonaco(function () {
         registerHoverHandler();
         let editorElem = byId('walc-code-editor');
+        setupDefinitions();
         editor = monaco.editor.create(editorElem, {
             value: '',
             language: 'typescript',
@@ -3280,6 +3281,35 @@ function createEditor(ac, presets) {
         registerActions();
         preventParentScroll(editorElem);
     });
+}
+function setupDefinitions() {
+    monaco.languages.typescript.typescriptDefaults.addExtraLib(`
+	interface Instrument {
+		name: string
+	}
+
+	type TrackCallback = (t: Track) => void;
+
+	interface LiveCoding {
+		/** Creates an instrument from a preset name or number */
+		instrument(preset: string | number, numVoices?: number): Instrument;
+		/** Creates a named track to be used */
+		track(name: string, cb?: TrackCallback): Track;
+	}
+
+	interface Track {
+		/** Sets the instrument to play in the track */
+		instrument(inst: Instrument): this;
+		/** Sets the volume to use in the track */
+		volume(v: number): void;
+		/** Plays a given note */
+		play(note: number, options?: any): this;
+		/** Waits the specified time in seconds before playing the next note */
+		sleep(time: number): this;
+	}
+
+	declare let lc: LiveCoding
+	`);
 }
 function preventParentScroll(elem) {
     $(elem).bind('mousewheel', e => e.preventDefault());
@@ -3400,13 +3430,18 @@ class LiveCoding {
     }
     instrument(preset, numVoices = 4) {
         let prst = getPreset(this.presets, preset);
-        return new __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /* Instrument */](this.ac, prst, numVoices);
+        let instr = new __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /* Instrument */](this.ac, prst, numVoices);
+        let i = instr;
+        i.name = prst.name;
+        return instr;
     }
     track(name, cb) {
         let t = new Track();
         t.time = this.ac.currentTime;
         tracks[name] = t;
-        cb(t);
+        if (cb)
+            cb(t);
+        return t;
     }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = LiveCoding;
@@ -3415,8 +3450,8 @@ class Track {
     constructor() {
         this.notect = 0;
         this.notes = [];
-        this.velocity = 1;
         this.time = 0;
+        this.velocity = 1;
     }
     instrument(inst) {
         this.inst = inst;

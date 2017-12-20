@@ -2,7 +2,7 @@ import { Instrument } from '../synth/instrument'
 import { Presets } from '../synthUI/presets'
 import { Timer } from '../synth/timer'
 
-type TrackCallback = (t: Track) => void
+export type TrackCallback = (t: Track) => void
 
 
 export class LiveCoding {
@@ -13,18 +13,22 @@ export class LiveCoding {
 
 	instrument(preset: string | number, numVoices = 4) {
 		let prst = getPreset(this.presets, preset)
-		return new Instrument(this.ac, prst, numVoices)
+		let instr = new Instrument(this.ac, prst, numVoices)
+		let i: any = instr
+		i.name = prst.name
+		return instr
 	}
 
-	track(name: string, cb: TrackCallback) {
+	track(name: string, cb?: TrackCallback) {
 		let t = new Track()
 		t.time = this.ac.currentTime
 		tracks[name] = t
-		cb(t)
+		if (cb) cb(t)
+		return t
 	}
 }
 
-interface NoteInfo {
+export interface NoteInfo {
 	instrument: Instrument
 	number: number
 	time: number
@@ -35,9 +39,9 @@ interface NoteInfo {
 export class Track {
 	notect = 0
 	notes: NoteInfo[] = []
-	inst: Instrument
-	velocity = 1
 	time = 0
+	private inst: Instrument
+	private velocity = 1
 
 	instrument(inst: Instrument) {
 		this.inst = inst

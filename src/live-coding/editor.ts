@@ -25,9 +25,10 @@ export function createEditor(ac: AudioContext, presets: Presets) {
 	loadMonaco(function() {
 		registerHoverHandler()
 		let editorElem = byId('walc-code-editor')
+		setupDefinitions()
 		editor = monaco.editor.create(editorElem, {
 			value: '',
-			language: 'javascript',
+			language: 'typescript',
 			lineNumbers: false,
 			renderLineHighlight: 'none',
 			minimap: { enabled: false }
@@ -36,6 +37,36 @@ export function createEditor(ac: AudioContext, presets: Presets) {
 		registerActions()
 		preventParentScroll(editorElem)
 	})
+}
+
+function setupDefinitions() {
+	monaco.languages.typescript.typescriptDefaults.addExtraLib(`
+	interface Instrument {
+		name: string
+	}
+
+	type TrackCallback = (t: Track) => void;
+
+	interface LiveCoding {
+		/** Creates an instrument from a preset name or number */
+		instrument(preset: string | number, numVoices?: number): Instrument;
+		/** Creates a named track to be used */
+		track(name: string, cb?: TrackCallback): Track;
+	}
+
+	interface Track {
+		/** Sets the instrument to play in the track */
+		instrument(inst: Instrument): this;
+		/** Sets the volume to use in the track */
+		volume(v: number): void;
+		/** Plays a given note */
+		play(note: number, options?: any): this;
+		/** Waits the specified time in seconds before playing the next note */
+		sleep(time: number): this;
+	}
+
+	declare let lc: LiveCoding
+	`)
 }
 
 function preventParentScroll(elem: HTMLElement) {
