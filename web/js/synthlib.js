@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 22);
+/******/ 	return __webpack_require__(__webpack_require__.s = 23);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -168,10 +168,10 @@ function upload(event, cb, readFunc) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__notes__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__palette__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__notes__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__palette__ = __webpack_require__(6);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_modern__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__customNodes__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__customNodes__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_file__ = __webpack_require__(1);
 
 
@@ -440,6 +440,161 @@ class SoundBankHandler {
 /***/ }),
 /* 3 */,
 /* 4 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth__ = __webpack_require__(2);
+
+/**
+ * A polyphonic synth controlling an array of voices
+ */
+class Instrument {
+    constructor(ac, json, numVoices, dest) {
+        // Setup voices
+        this.pressed = [];
+        this.released = [];
+        this.voices = [];
+        for (let i = 0; i < numVoices; i++) {
+            this.voices.push(new Voice(ac, json, dest));
+            this.released.push(i);
+        }
+        // Setup synth params by having a common instance for all voices
+        this.portamento = this.voices[0].synth.portamento;
+        if (json.keyboard && json.keyboard.portamento)
+            this.portamento.time = json.keyboard.portamento;
+        for (let i = 1; i < numVoices; i++)
+            this.voices[i].synth.portamento = this.portamento;
+    }
+    noteOn(midi, velocity = 1, when) {
+        const vnum = this.findVoice();
+        const voice = this.voices[vnum];
+        this.pressed.push(vnum);
+        voice.noteOn(midi, velocity, when);
+    }
+    noteOff(midi, velocity = 1, when) {
+        for (let i = 0; i < this.voices.length; i++) {
+            const voice = this.voices[i];
+            if (voice.lastNote == midi) {
+                voice.noteOff(midi, velocity, when);
+                this.released.push(i);
+                break;
+            }
+        }
+    }
+    allNotesOff() {
+        for (const voice of this.voices) {
+            if (voice.lastNote)
+                voice.noteOff(voice.lastNote);
+        }
+    }
+    findVoice() {
+        let voices;
+        if (this.released.length > 0)
+            voices = this.released;
+        else if (this.pressed.length > 0)
+            voices = this.pressed;
+        else
+            throw 'This should never happen';
+        return voices.splice(0, 1)[0];
+    }
+    close() {
+        for (const voice of this.voices)
+            voice.close();
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Instrument;
+
+/**
+ * An independent monophonic synth
+ */
+class Voice {
+    constructor(ac, json, dest) {
+        this.loader = new SynthLoader();
+        this.synth = this.loader.load(ac, json, dest || ac.destination);
+        this.lastNote = 0;
+    }
+    noteOn(midi, velocity = 1, when) {
+        this.synth.noteOn(midi, velocity, when);
+        this.lastNote = midi;
+    }
+    noteOff(midi, velocity = 1, when) {
+        this.synth.noteOff(midi, velocity, when);
+        this.lastNote = 0;
+    }
+    close() {
+        // This method must be called to avoid memory leaks at the Web Audio level
+        if (this.lastNote)
+            this.noteOff(this.lastNote, 1);
+        this.loader.close();
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["b"] = Voice;
+
+// -------------------- Private --------------------
+class VoiceNodeData extends __WEBPACK_IMPORTED_MODULE_0__synth__["a" /* NodeData */] {
+    constructor(id) {
+        super();
+        this.id = id;
+        this.inputs = [];
+    }
+    getInputs() {
+        return this.inputs;
+    }
+}
+/* unused harmony export VoiceNodeData */
+
+class SynthLoader {
+    constructor() {
+        this.nodes = [];
+    }
+    load(ac, json, dest) {
+        const synth = new __WEBPACK_IMPORTED_MODULE_0__synth__["b" /* Synth */](ac);
+        // Add nodes into id-based table
+        let j = 0;
+        for (const jn of json.nodes)
+            this.nodes[j++] = new VoiceNodeData(jn.id);
+        // Then set their list of inputs
+        for (let i = 0; i < json.nodes.length; i++)
+            for (const inum of json.nodes[i].inputs) {
+                let input = this.nodeById(inum);
+                if (input)
+                    this.nodes[i].inputs.push(input);
+            }
+        // Then set their data
+        for (let i = 0; i < json.nodes.length; i++) {
+            const type = json.nodeData[i].type;
+            if (type == 'out')
+                synth.initOutputNodeData(this.nodes[i], dest);
+            else
+                synth.initNodeData(this.nodes[i], type);
+            synth.json2NodeData(json.nodeData[i], this.nodes[i]);
+        }
+        // Then notify connections to handler
+        for (const dst of this.nodes)
+            for (const src of dst.inputs)
+                synth.connectNodes(src, dst);
+        // Finally, return the newly created synth
+        this.synth = synth;
+        return synth;
+    }
+    nodeById(id) {
+        for (const node of this.nodes)
+            if (node.id === id)
+                return node;
+        return null;
+    }
+    close() {
+        for (const node of this.nodes)
+            for (const input of node.inputs)
+                this.synth.disconnectNodes(input, node);
+    }
+}
+/* unused harmony export SynthLoader */
+
+
+
+/***/ }),
+/* 5 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -783,7 +938,7 @@ class OutputTracker {
 
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -954,7 +1109,7 @@ let palette = {
 
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1136,7 +1291,7 @@ class LineInNode extends CustomNodeBase {
 
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1184,161 +1339,6 @@ class Timer {
 
 
 /***/ }),
-/* 8 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth__ = __webpack_require__(2);
-
-/**
- * A polyphonic synth controlling an array of voices
- */
-class Instrument {
-    constructor(ac, json, numVoices, dest) {
-        // Setup voices
-        this.pressed = [];
-        this.released = [];
-        this.voices = [];
-        for (let i = 0; i < numVoices; i++) {
-            this.voices.push(new Voice(ac, json, dest));
-            this.released.push(i);
-        }
-        // Setup synth params by having a common instance for all voices
-        this.portamento = this.voices[0].synth.portamento;
-        if (json.keyboard && json.keyboard.portamento)
-            this.portamento.time = json.keyboard.portamento;
-        for (let i = 1; i < numVoices; i++)
-            this.voices[i].synth.portamento = this.portamento;
-    }
-    noteOn(midi, velocity = 1, when) {
-        const vnum = this.findVoice();
-        const voice = this.voices[vnum];
-        this.pressed.push(vnum);
-        voice.noteOn(midi, velocity, when);
-    }
-    noteOff(midi, velocity = 1, when) {
-        for (let i = 0; i < this.voices.length; i++) {
-            const voice = this.voices[i];
-            if (voice.lastNote == midi) {
-                voice.noteOff(midi, velocity, when);
-                this.released.push(i);
-                break;
-            }
-        }
-    }
-    allNotesOff() {
-        for (const voice of this.voices) {
-            if (voice.lastNote)
-                voice.noteOff(voice.lastNote);
-        }
-    }
-    findVoice() {
-        let voices;
-        if (this.released.length > 0)
-            voices = this.released;
-        else if (this.pressed.length > 0)
-            voices = this.pressed;
-        else
-            throw 'This should never happen';
-        return voices.splice(0, 1)[0];
-    }
-    close() {
-        for (const voice of this.voices)
-            voice.close();
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = Instrument;
-
-/**
- * An independent monophonic synth
- */
-class Voice {
-    constructor(ac, json, dest) {
-        this.loader = new SynthLoader();
-        this.synth = this.loader.load(ac, json, dest || ac.destination);
-        this.lastNote = 0;
-    }
-    noteOn(midi, velocity = 1, when) {
-        this.synth.noteOn(midi, velocity, when);
-        this.lastNote = midi;
-    }
-    noteOff(midi, velocity = 1, when) {
-        this.synth.noteOff(midi, velocity, when);
-        this.lastNote = 0;
-    }
-    close() {
-        // This method must be called to avoid memory leaks at the Web Audio level
-        if (this.lastNote)
-            this.noteOff(this.lastNote, 1);
-        this.loader.close();
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["b"] = Voice;
-
-// -------------------- Private --------------------
-class VoiceNodeData extends __WEBPACK_IMPORTED_MODULE_0__synth__["a" /* NodeData */] {
-    constructor(id) {
-        super();
-        this.id = id;
-        this.inputs = [];
-    }
-    getInputs() {
-        return this.inputs;
-    }
-}
-/* unused harmony export VoiceNodeData */
-
-class SynthLoader {
-    constructor() {
-        this.nodes = [];
-    }
-    load(ac, json, dest) {
-        const synth = new __WEBPACK_IMPORTED_MODULE_0__synth__["b" /* Synth */](ac);
-        // Add nodes into id-based table
-        let j = 0;
-        for (const jn of json.nodes)
-            this.nodes[j++] = new VoiceNodeData(jn.id);
-        // Then set their list of inputs
-        for (let i = 0; i < json.nodes.length; i++)
-            for (const inum of json.nodes[i].inputs) {
-                let input = this.nodeById(inum);
-                if (input)
-                    this.nodes[i].inputs.push(input);
-            }
-        // Then set their data
-        for (let i = 0; i < json.nodes.length; i++) {
-            const type = json.nodeData[i].type;
-            if (type == 'out')
-                synth.initOutputNodeData(this.nodes[i], dest);
-            else
-                synth.initNodeData(this.nodes[i], type);
-            synth.json2NodeData(json.nodeData[i], this.nodes[i]);
-        }
-        // Then notify connections to handler
-        for (const dst of this.nodes)
-            for (const src of dst.inputs)
-                synth.connectNodes(src, dst);
-        // Finally, return the newly created synth
-        this.synth = synth;
-        return synth;
-    }
-    nodeById(id) {
-        for (const node of this.nodes)
-            if (node.id === id)
-                return node;
-        return null;
-    }
-    close() {
-        for (const node of this.nodes)
-            for (const input of node.inputs)
-                this.synth.disconnectNodes(input, node);
-    }
-}
-/* unused harmony export SynthLoader */
-
-
-
-/***/ }),
 /* 9 */,
 /* 10 */,
 /* 11 */,
@@ -1352,20 +1352,21 @@ class SynthLoader {
 /* 19 */,
 /* 20 */,
 /* 21 */,
-/* 22 */
+/* 22 */,
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(23);
+module.exports = __webpack_require__(24);
 
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_instrument__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__synth_timer__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_instrument__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__synth_timer__ = __webpack_require__(8);
 /**
  * Library that exports the Instrument and Voice classes
  */

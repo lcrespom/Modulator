@@ -168,10 +168,10 @@ function upload(event, cb, readFunc) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__notes__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__palette__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__notes__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__palette__ = __webpack_require__(6);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_modern__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__customNodes__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__customNodes__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_file__ = __webpack_require__(1);
 
 
@@ -557,6 +557,161 @@ $('body').append(popup);
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth__ = __webpack_require__(2);
+
+/**
+ * A polyphonic synth controlling an array of voices
+ */
+class Instrument {
+    constructor(ac, json, numVoices, dest) {
+        // Setup voices
+        this.pressed = [];
+        this.released = [];
+        this.voices = [];
+        for (let i = 0; i < numVoices; i++) {
+            this.voices.push(new Voice(ac, json, dest));
+            this.released.push(i);
+        }
+        // Setup synth params by having a common instance for all voices
+        this.portamento = this.voices[0].synth.portamento;
+        if (json.keyboard && json.keyboard.portamento)
+            this.portamento.time = json.keyboard.portamento;
+        for (let i = 1; i < numVoices; i++)
+            this.voices[i].synth.portamento = this.portamento;
+    }
+    noteOn(midi, velocity = 1, when) {
+        const vnum = this.findVoice();
+        const voice = this.voices[vnum];
+        this.pressed.push(vnum);
+        voice.noteOn(midi, velocity, when);
+    }
+    noteOff(midi, velocity = 1, when) {
+        for (let i = 0; i < this.voices.length; i++) {
+            const voice = this.voices[i];
+            if (voice.lastNote == midi) {
+                voice.noteOff(midi, velocity, when);
+                this.released.push(i);
+                break;
+            }
+        }
+    }
+    allNotesOff() {
+        for (const voice of this.voices) {
+            if (voice.lastNote)
+                voice.noteOff(voice.lastNote);
+        }
+    }
+    findVoice() {
+        let voices;
+        if (this.released.length > 0)
+            voices = this.released;
+        else if (this.pressed.length > 0)
+            voices = this.pressed;
+        else
+            throw 'This should never happen';
+        return voices.splice(0, 1)[0];
+    }
+    close() {
+        for (const voice of this.voices)
+            voice.close();
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Instrument;
+
+/**
+ * An independent monophonic synth
+ */
+class Voice {
+    constructor(ac, json, dest) {
+        this.loader = new SynthLoader();
+        this.synth = this.loader.load(ac, json, dest || ac.destination);
+        this.lastNote = 0;
+    }
+    noteOn(midi, velocity = 1, when) {
+        this.synth.noteOn(midi, velocity, when);
+        this.lastNote = midi;
+    }
+    noteOff(midi, velocity = 1, when) {
+        this.synth.noteOff(midi, velocity, when);
+        this.lastNote = 0;
+    }
+    close() {
+        // This method must be called to avoid memory leaks at the Web Audio level
+        if (this.lastNote)
+            this.noteOff(this.lastNote, 1);
+        this.loader.close();
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["b"] = Voice;
+
+// -------------------- Private --------------------
+class VoiceNodeData extends __WEBPACK_IMPORTED_MODULE_0__synth__["a" /* NodeData */] {
+    constructor(id) {
+        super();
+        this.id = id;
+        this.inputs = [];
+    }
+    getInputs() {
+        return this.inputs;
+    }
+}
+/* unused harmony export VoiceNodeData */
+
+class SynthLoader {
+    constructor() {
+        this.nodes = [];
+    }
+    load(ac, json, dest) {
+        const synth = new __WEBPACK_IMPORTED_MODULE_0__synth__["b" /* Synth */](ac);
+        // Add nodes into id-based table
+        let j = 0;
+        for (const jn of json.nodes)
+            this.nodes[j++] = new VoiceNodeData(jn.id);
+        // Then set their list of inputs
+        for (let i = 0; i < json.nodes.length; i++)
+            for (const inum of json.nodes[i].inputs) {
+                let input = this.nodeById(inum);
+                if (input)
+                    this.nodes[i].inputs.push(input);
+            }
+        // Then set their data
+        for (let i = 0; i < json.nodes.length; i++) {
+            const type = json.nodeData[i].type;
+            if (type == 'out')
+                synth.initOutputNodeData(this.nodes[i], dest);
+            else
+                synth.initNodeData(this.nodes[i], type);
+            synth.json2NodeData(json.nodeData[i], this.nodes[i]);
+        }
+        // Then notify connections to handler
+        for (const dst of this.nodes)
+            for (const src of dst.inputs)
+                synth.connectNodes(src, dst);
+        // Finally, return the newly created synth
+        this.synth = synth;
+        return synth;
+    }
+    nodeById(id) {
+        for (const node of this.nodes)
+            if (node.id === id)
+                return node;
+        return null;
+    }
+    close() {
+        for (const node of this.nodes)
+            for (const input of node.inputs)
+                this.synth.disconnectNodes(input, node);
+    }
+}
+/* unused harmony export SynthLoader */
+
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_modern__ = __webpack_require__(0);
 
 /**
@@ -897,7 +1052,7 @@ class OutputTracker {
 
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1068,7 +1223,7 @@ let palette = {
 
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1250,7 +1405,7 @@ class LineInNode extends CustomNodeBase {
 
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1298,161 +1453,6 @@ class Timer {
 
 
 /***/ }),
-/* 8 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth__ = __webpack_require__(2);
-
-/**
- * A polyphonic synth controlling an array of voices
- */
-class Instrument {
-    constructor(ac, json, numVoices, dest) {
-        // Setup voices
-        this.pressed = [];
-        this.released = [];
-        this.voices = [];
-        for (let i = 0; i < numVoices; i++) {
-            this.voices.push(new Voice(ac, json, dest));
-            this.released.push(i);
-        }
-        // Setup synth params by having a common instance for all voices
-        this.portamento = this.voices[0].synth.portamento;
-        if (json.keyboard && json.keyboard.portamento)
-            this.portamento.time = json.keyboard.portamento;
-        for (let i = 1; i < numVoices; i++)
-            this.voices[i].synth.portamento = this.portamento;
-    }
-    noteOn(midi, velocity = 1, when) {
-        const vnum = this.findVoice();
-        const voice = this.voices[vnum];
-        this.pressed.push(vnum);
-        voice.noteOn(midi, velocity, when);
-    }
-    noteOff(midi, velocity = 1, when) {
-        for (let i = 0; i < this.voices.length; i++) {
-            const voice = this.voices[i];
-            if (voice.lastNote == midi) {
-                voice.noteOff(midi, velocity, when);
-                this.released.push(i);
-                break;
-            }
-        }
-    }
-    allNotesOff() {
-        for (const voice of this.voices) {
-            if (voice.lastNote)
-                voice.noteOff(voice.lastNote);
-        }
-    }
-    findVoice() {
-        let voices;
-        if (this.released.length > 0)
-            voices = this.released;
-        else if (this.pressed.length > 0)
-            voices = this.pressed;
-        else
-            throw 'This should never happen';
-        return voices.splice(0, 1)[0];
-    }
-    close() {
-        for (const voice of this.voices)
-            voice.close();
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = Instrument;
-
-/**
- * An independent monophonic synth
- */
-class Voice {
-    constructor(ac, json, dest) {
-        this.loader = new SynthLoader();
-        this.synth = this.loader.load(ac, json, dest || ac.destination);
-        this.lastNote = 0;
-    }
-    noteOn(midi, velocity = 1, when) {
-        this.synth.noteOn(midi, velocity, when);
-        this.lastNote = midi;
-    }
-    noteOff(midi, velocity = 1, when) {
-        this.synth.noteOff(midi, velocity, when);
-        this.lastNote = 0;
-    }
-    close() {
-        // This method must be called to avoid memory leaks at the Web Audio level
-        if (this.lastNote)
-            this.noteOff(this.lastNote, 1);
-        this.loader.close();
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["b"] = Voice;
-
-// -------------------- Private --------------------
-class VoiceNodeData extends __WEBPACK_IMPORTED_MODULE_0__synth__["a" /* NodeData */] {
-    constructor(id) {
-        super();
-        this.id = id;
-        this.inputs = [];
-    }
-    getInputs() {
-        return this.inputs;
-    }
-}
-/* unused harmony export VoiceNodeData */
-
-class SynthLoader {
-    constructor() {
-        this.nodes = [];
-    }
-    load(ac, json, dest) {
-        const synth = new __WEBPACK_IMPORTED_MODULE_0__synth__["b" /* Synth */](ac);
-        // Add nodes into id-based table
-        let j = 0;
-        for (const jn of json.nodes)
-            this.nodes[j++] = new VoiceNodeData(jn.id);
-        // Then set their list of inputs
-        for (let i = 0; i < json.nodes.length; i++)
-            for (const inum of json.nodes[i].inputs) {
-                let input = this.nodeById(inum);
-                if (input)
-                    this.nodes[i].inputs.push(input);
-            }
-        // Then set their data
-        for (let i = 0; i < json.nodes.length; i++) {
-            const type = json.nodeData[i].type;
-            if (type == 'out')
-                synth.initOutputNodeData(this.nodes[i], dest);
-            else
-                synth.initNodeData(this.nodes[i], type);
-            synth.json2NodeData(json.nodeData[i], this.nodes[i]);
-        }
-        // Then notify connections to handler
-        for (const dst of this.nodes)
-            for (const src of dst.inputs)
-                synth.connectNodes(src, dst);
-        // Finally, return the newly created synth
-        this.synth = synth;
-        return synth;
-    }
-    nodeById(id) {
-        for (const node of this.nodes)
-            if (node.id === id)
-                return node;
-        return null;
-    }
-    close() {
-        for (const node of this.nodes)
-            for (const input of node.inputs)
-                this.synth.disconnectNodes(input, node);
-    }
-}
-/* unused harmony export SynthLoader */
-
-
-
-/***/ }),
 /* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1493,7 +1493,7 @@ function setupPanels() {
     $(function () {
         $('#synth').focus();
     });
-    Object(__WEBPACK_IMPORTED_MODULE_3__live_coding_editor__["a" /* createEditor */])();
+    Object(__WEBPACK_IMPORTED_MODULE_3__live_coding_editor__["a" /* createEditor */])(ac, prsts);
     return prsts.presets;
 }
 function setupPalette() {
@@ -2481,7 +2481,7 @@ class AudioAnalyzer {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__midi__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__piano__ = __webpack_require__(18);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__arpeggiator__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__synth_instrument__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__synth_instrument__ = __webpack_require__(4);
 
 
 
@@ -2955,7 +2955,7 @@ class PianoKeyboard {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_timer__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_timer__ = __webpack_require__(8);
 
 class Arpeggiator {
     constructor(ac) {
@@ -3250,6 +3250,8 @@ class Presets {
 "use strict";
 /* unused harmony export byId */
 /* harmony export (immutable) */ __webpack_exports__["a"] = createEditor;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__live_coding__ = __webpack_require__(22);
+
 let sinkDiv = document.createElement('div');
 function byId(id) {
     return document.getElementById(id) || sinkDiv;
@@ -3263,7 +3265,8 @@ function loadMonaco(cb) {
     monacoRequire.config({ paths: { 'vs': 'js/vendor/monaco/min/vs' } });
     monacoRequire(['vs/editor/editor.main'], cb);
 }
-function createEditor() {
+function createEditor(ac, presets) {
+    window.lc = new __WEBPACK_IMPORTED_MODULE_0__live_coding__["a" /* LiveCoding */](ac, presets);
     loadMonaco(function () {
         registerHoverHandler();
         let editorElem = byId('walc-code-editor');
@@ -3360,10 +3363,44 @@ function doRunCode() {
         if (location) {
             currentError = e;
             currentError.line = location.line;
-            currentError.column = location.column;
+            currentError.column = location.column > 1 ? location.column : 4;
             showError(e.message, location.line, location.column);
         }
     }
+}
+
+
+/***/ }),
+/* 22 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_instrument__ = __webpack_require__(4);
+
+class LiveCoding {
+    constructor(ac, presets) {
+        this.ac = ac;
+        this.presets = presets;
+    }
+    instrument(preset, numVoices = 4) {
+        let prst = getPreset(this.presets, preset);
+        return new __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /* Instrument */](this.ac, prst, numVoices);
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = LiveCoding;
+
+// -------------------- Privates --------------------
+function getPreset(presets, preset) {
+    if (typeof preset == 'number') {
+        let maxPrst = presets.presets.length;
+        if (preset < 1 || preset > maxPrst)
+            throw new Error(`The preset number should be between 1 and ${maxPrst}`);
+        return presets.presets[preset - 1];
+    }
+    for (let prs of presets.presets)
+        if (prs.name == preset)
+            return prs;
+    throw new Error(`Preset "${preset}" does not exist`);
 }
 
 

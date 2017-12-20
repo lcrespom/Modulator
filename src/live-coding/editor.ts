@@ -1,3 +1,6 @@
+import { Presets } from '../synthUI/presets'
+import { LiveCoding } from './live-coding';
+
 let sinkDiv = document.createElement('div')
 
 export function byId(id: string) {
@@ -17,7 +20,8 @@ function loadMonaco(cb: () => void) {
 	monacoRequire(['vs/editor/editor.main'], cb)
 }
 
-export function createEditor() {
+export function createEditor(ac: AudioContext, presets: Presets) {
+	(<any>window).lc = new LiveCoding(ac, presets)
 	loadMonaco(function() {
 		registerHoverHandler()
 		let editorElem = byId('walc-code-editor')
