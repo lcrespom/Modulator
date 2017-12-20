@@ -3339,7 +3339,7 @@ function handleEditorResize(elem) {
 }
 // -------------------- Error handling --------------------
 function registerHoverHandler() {
-    monaco.languages.registerHoverProvider('javascript', {
+    monaco.languages.registerHoverProvider('typescript', {
         provideHover: function (model, position) {
             // TODO: make it dynamic
             // 		call editor.getLineDecorations to get current error position
@@ -3437,7 +3437,7 @@ class LiveCoding {
     }
     track(name, cb) {
         let t = new Track();
-        t.time = this.ac.currentTime;
+        t.time = this.ac.currentTime + 0.1;
         tracks[name] = t;
         if (cb)
             cb(t);
@@ -3493,11 +3493,12 @@ function getPreset(presets, preset) {
     throw new Error(`Preset "${preset}" does not exist`);
 }
 function timerCB(timer, time) {
+    let deltaT = time - timer.ac.currentTime;
     let tnames = Object.getOwnPropertyNames(tracks);
     for (let tname of tnames)
-        playTrack(timer, tracks[tname], time);
+        playTrack(timer, tracks[tname], deltaT);
 }
-function playTrack(timer, track, time) {
+function playTrack(timer, track, deltaT) {
     let played;
     do {
         played = false;
@@ -3505,9 +3506,9 @@ function playTrack(timer, track, time) {
             break;
         let note = track.notes[track.notect];
         if (note.time < timer.nextNoteTime) {
-            note.instrument.noteOn(note.number, note.velocity, note.time);
+            note.instrument.noteOn(note.number, note.velocity, note.time + deltaT);
             let duration = note.duration || timer.noteDuration;
-            note.instrument.noteOff(note.number, note.velocity, note.time + duration);
+            note.instrument.noteOff(note.number, note.velocity, note.time + duration + deltaT);
             played = true;
             track.notect++;
         }

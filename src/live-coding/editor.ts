@@ -102,7 +102,7 @@ function handleEditorResize(elem: HTMLElement) {
 // -------------------- Error handling --------------------
 
 function registerHoverHandler() {
-	monaco.languages.registerHoverProvider('javascript', {
+	monaco.languages.registerHoverProvider('typescript', {
 		provideHover: function(model: any, position: any) {
 			// TODO: make it dynamic
 			// 		call editor.getLineDecorations to get current error position

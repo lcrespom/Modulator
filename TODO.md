@@ -10,6 +10,23 @@
 - [ ] Upgrade runtime dependencies (...if required?)
 - [ ] Live coding branch
 
+## Live Coding
+- [ ] Get note duration by searching for attack times
+- [ ] Synth API
+	- [ ] Tracks with loops
+- [x] Detect errors in code:
+	- [x] Let Monaco editor detect syntax errors.
+		Use https://github.com/rich-harris/eval2 only if really necessary.
+	- [ ] When running, provide warning if syntax error
+	- [x] Capture runtime errors and highlight line number.
+	- [x] Display error message on line hover
+- [ ] Multiple editors / buffers
+- Show sound in graphs (osc and fft)
+- [ ] Quick fix errors (upon enter or alt+enter, look only at current line)
+	- [ ] Add function `()` and `,`
+	- [ ] Add array and object `,`
+
+
 ## Bugs
 - Buffered audio nodes fail after switching back&forth from empty preset
 	- Uncaught (in promise) DOMException: Unable to decode audio data

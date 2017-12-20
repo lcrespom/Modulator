@@ -21,7 +21,7 @@ export class LiveCoding {
 
 	track(name: string, cb?: TrackCallback) {
 		let t = new Track()
-		t.time = this.ac.currentTime
+		t.time = this.ac.currentTime + 0.1
 		tracks[name] = t
 		if (cb) cb(t)
 		return t
@@ -93,11 +93,13 @@ function getPreset(presets: Presets, preset: string | number) {
 }
 
 function timerCB(timer: Timer, time: number) {
+	let deltaT = time - timer.ac.currentTime
 	let tnames = Object.getOwnPropertyNames(tracks)
-	for (let tname of tnames) playTrack(timer, tracks[tname], time)
+	for (let tname of tnames)
+		playTrack(timer, tracks[tname], deltaT)
 }
 
-function playTrack(timer: Timer, track: Track, time: number) {
+function playTrack(timer: Timer, track: Track, deltaT: number) {
 	let played
 	do {
 		played = false
@@ -105,10 +107,10 @@ function playTrack(timer: Timer, track: Track, time: number) {
 		let note = track.notes[track.notect]
 		if (note.time < timer.nextNoteTime) {
 			note.instrument.noteOn(
-				note.number, note.velocity, note.time)
+				note.number, note.velocity, note.time + deltaT)
 			let duration = note.duration || timer.noteDuration
 			note.instrument.noteOff(
-				note.number, note.velocity, note.time + duration)
+				note.number, note.velocity, note.time + duration + deltaT)
 			played = true
 			track.notect++
 		}
