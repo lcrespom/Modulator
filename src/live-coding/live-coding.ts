@@ -141,6 +141,7 @@ function playTrack(timer: Timer, track: Track, deltaT: number) {
 	do {
 		played = false
 		if (shouldTrackEnd(track)) break
+		track = tracks[track.name]
 		let note = track.notes[track.notect]
 		if (note.time < timer.nextNoteTime) {
 			playNote(note, timer, deltaT)
@@ -159,7 +160,7 @@ function playNote(note: NoteInfo, timer: Timer, deltaT: number) {
 		note.number, note.velocity, note.time + duration + deltaT)
 }
 
-function loopTrack(track: Track) {
+function updateTrackTimes(track: Track) {
 	track.notect = 0
 	for (let note of track.notes)
 		note.time += track.duration
@@ -167,8 +168,14 @@ function loopTrack(track: Track) {
 
 function shouldTrackEnd(track: Track) {
 	if (track.notect < track.notes.length) return false
+	if (nextTracks[track.name]) {
+		track = nextTracks[track.name]
+		tracks[track.name] = track
+		updateTrackTimes(track)
+		return false
+	}
 	if (track.loop) {
-		loopTrack(track)
+		updateTrackTimes(track)
 		return false
 	}
 	else {
