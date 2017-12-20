@@ -13,6 +13,7 @@
 ## Live Coding
 - [ ] Synth API
 	- [x] Tracks with loops & loop update after end of current
+	- [ ] Track volume is being ignored, because synth ignores velocity
 	- [ ] Sample loading + playing API
 	- [ ] Effects API
 	- [ ] Control preset node parameters

@@ -3474,6 +3474,7 @@ class Track {
     }
     volume(v) {
         this.velocity = v;
+        return this;
     }
     play(note = 64, duration, options) {
         if (!this.inst)
@@ -3543,6 +3544,7 @@ function playTrack(timer, track, deltaT) {
     } while (played);
 }
 function playNote(note, timer, deltaT) {
+    console.log(`noteOn: ${note.number} - ${note.velocity}`);
     note.instrument.noteOn(note.number, note.velocity, note.time + deltaT);
     let duration = note.duration
         || note.instrument.duration || timer.noteDuration;

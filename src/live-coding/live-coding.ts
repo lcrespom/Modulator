@@ -72,6 +72,7 @@ export class Track {
 
 	volume(v: number) {
 		this.velocity = v
+		return this
 	}
 
 	play(note = 64, duration?: number, options?: any) {
