@@ -33,6 +33,7 @@ export interface NoteInfo {
 	number: number
 	time: number
 	velocity: number
+	duration?: number
 	options?: any	// TODO proper options
 }
 
@@ -52,14 +53,15 @@ export class Track {
 		this.velocity = v
 	}
 
-	play(note = 64, options: any) {
+	play(note = 64, duration?: number, options?: any) {
 		if (!this.inst)
 			throw new Error(`Must call instrument before playing a note`)
 		this.notes.push({
 			instrument: this.inst,
 			number: note,
 			time: this.time,
-			velocity: this.velocity
+			velocity: this.velocity,
+			duration
 		})
 		return this
 	}
@@ -104,8 +106,9 @@ function playTrack(timer: Timer, track: Track, time: number) {
 		if (note.time < timer.nextNoteTime) {
 			note.instrument.noteOn(
 				note.number, note.velocity, note.time)
+			let duration = note.duration || timer.noteDuration
 			note.instrument.noteOff(
-				note.number, note.velocity, note.time + timer.noteDuration)
+				note.number, note.velocity, note.time + duration)
 			played = true
 			track.notect++
 		}

@@ -3303,7 +3303,7 @@ function setupDefinitions() {
 		/** Sets the volume to use in the track */
 		volume(v: number): void;
 		/** Plays a given note */
-		play(note: number, options?: any): this;
+		play(note: number, duration?: number, options?: any): this;
 		/** Waits the specified time in seconds before playing the next note */
 		sleep(time: number): this;
 	}
@@ -3460,14 +3460,15 @@ class Track {
     volume(v) {
         this.velocity = v;
     }
-    play(note = 64, options) {
+    play(note = 64, duration, options) {
         if (!this.inst)
             throw new Error(`Must call instrument before playing a note`);
         this.notes.push({
             instrument: this.inst,
             number: note,
             time: this.time,
-            velocity: this.velocity
+            velocity: this.velocity,
+            duration
         });
         return this;
     }
@@ -3505,7 +3506,8 @@ function playTrack(timer, track, time) {
         let note = track.notes[track.notect];
         if (note.time < timer.nextNoteTime) {
             note.instrument.noteOn(note.number, note.velocity, note.time);
-            note.instrument.noteOff(note.number, note.velocity, note.time + timer.noteDuration);
+            let duration = note.duration || timer.noteDuration;
+            note.instrument.noteOff(note.number, note.velocity, note.time + duration);
             played = true;
             track.notect++;
         }

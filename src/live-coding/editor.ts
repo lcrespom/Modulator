@@ -60,7 +60,7 @@ function setupDefinitions() {
 		/** Sets the volume to use in the track */
 		volume(v: number): void;
 		/** Plays a given note */
-		play(note: number, options?: any): this;
+		play(note: number, duration?: number, options?: any): this;
 		/** Waits the specified time in seconds before playing the next note */
 		sleep(time: number): this;
 	}
