@@ -12,7 +12,7 @@
 
 ## Live Coding
 - [ ] Synth API
-	- [ ] Tracks with loops => loop update after end of current
+	- [x] Tracks with loops & loop update after end of current
 	- [ ] Sample loading + playing API
 	- [ ] Effects API
 	- [ ] Control preset node parameters
