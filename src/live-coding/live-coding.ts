@@ -27,7 +27,7 @@ export class LiveCoding {
 
 	track(name: string, cb?: TrackCallback) {
 		let t = new Track()
-		t.time = this.ac.currentTime
+		t.time = this.ac.currentTime + 0.1
 		tracks[name] = t
 		if (cb) cb(t)
 		return t
@@ -53,6 +53,7 @@ export class Track {
 	notect = 0
 	notes: NoteInfo[] = []
 	time = 0
+	duration = 0
 	loop = false
 	private inst: LCInstrument
 	private velocity = 1
@@ -81,6 +82,7 @@ export class Track {
 
 	sleep(time: number) {
 		this.time += time
+		this.duration += time
 		return this
 	}
 }
@@ -135,21 +137,24 @@ function playTrack(timer: Timer, track: Track, deltaT: number) {
 		}
 		let note = track.notes[track.notect]
 		if (note.time < timer.nextNoteTime) {
-			note.instrument.noteOn(
-				note.number, note.velocity, note.time + deltaT)
-			let duration = note.duration
-				|| note.instrument.duration || timer.noteDuration
-			note.instrument.noteOff(
-				note.number, note.velocity, note.time + duration + deltaT)
+			playNote(note, timer, deltaT)
 			played = true
 			track.notect++
 		}
 	} while (played)
 }
 
+function playNote(note: NoteInfo, timer: Timer, deltaT: number) {
+	note.instrument.noteOn(
+		note.number, note.velocity, note.time + deltaT)
+	let duration = note.duration
+		|| note.instrument.duration || timer.noteDuration
+	note.instrument.noteOff(
+		note.number, note.velocity, note.time + duration + deltaT)
+}
+
 function loopTrack(track: Track) {
 	track.notect = 0
-	for (let note of track.notes) {
-		note.time += 0
-	}
+	for (let note of track.notes)
+		note.time += track.duration
 }

@@ -3296,9 +3296,10 @@ function setupDefinitions() {
 	interface LiveCoding {
 		/** Creates an instrument from a preset name or number */
 		instrument(preset: string | number, numVoices?: number): Instrument;
-		/** Creates a named track to be used */
+		/** Creates a named track */
 		track(name: string, cb?: TrackCallback): Track;
-	}
+		/** Creates a looping track */
+		loop_track(name: string, cb?: TrackCallback): Track;
 
 	interface Track {
 		/** Sets the instrument to play in the track */
@@ -3435,7 +3436,7 @@ class LiveCoding {
         let prst = getPreset(this.presets, preset);
         let instr = new __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /* Instrument */](this.ac, prst, numVoices);
         instr.name = prst.name;
-        instr.duration = findDuration(prst);
+        instr.duration = findNoteDuration(prst);
         return instr;
     }
     track(name, cb) {
@@ -3446,6 +3447,11 @@ class LiveCoding {
             cb(t);
         return t;
     }
+    loop_track(name, cb) {
+        let t = this.track(name, cb);
+        t.loop = true;
+        return t;
+    }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = LiveCoding;
 
@@ -3454,6 +3460,8 @@ class Track {
         this.notect = 0;
         this.notes = [];
         this.time = 0;
+        this.duration = 0;
+        this.loop = false;
         this.velocity = 1;
     }
     instrument(inst) {
@@ -3477,6 +3485,7 @@ class Track {
     }
     sleep(time) {
         this.time += time;
+        this.duration += time;
         return this;
     }
 }
@@ -3495,30 +3504,7 @@ function getPreset(presets, preset) {
             return prs;
     throw new Error(`Preset "${preset}" does not exist`);
 }
-function timerCB(timer, time) {
-    let deltaT = time - timer.ac.currentTime;
-    let tnames = Object.getOwnPropertyNames(tracks);
-    for (let tname of tnames)
-        playTrack(timer, tracks[tname], deltaT);
-}
-function playTrack(timer, track, deltaT) {
-    let played;
-    do {
-        played = false;
-        if (track.notect >= track.notes.length)
-            break;
-        let note = track.notes[track.notect];
-        if (note.time < timer.nextNoteTime) {
-            note.instrument.noteOn(note.number, note.velocity, note.time + deltaT);
-            let duration = note.duration
-                || note.instrument.duration || timer.noteDuration;
-            note.instrument.noteOff(note.number, note.velocity, note.time + duration + deltaT);
-            played = true;
-            track.notect++;
-        }
-    } while (played);
-}
-function findDuration(preset) {
+function findNoteDuration(preset) {
     let duration = 0;
     for (let node of preset.nodeData) {
         if (node.type == 'ADSR') {
@@ -3530,6 +3516,41 @@ function findDuration(preset) {
     if (duration)
         duration += 0.01;
     return duration;
+}
+function timerCB(timer, time) {
+    let deltaT = time - timer.ac.currentTime;
+    let tnames = Object.getOwnPropertyNames(tracks);
+    for (let tname of tnames)
+        playTrack(timer, tracks[tname], deltaT);
+}
+function playTrack(timer, track, deltaT) {
+    let played;
+    do {
+        played = false;
+        if (track.notect >= track.notes.length) {
+            if (track.loop)
+                loopTrack(track);
+            else
+                break;
+        }
+        let note = track.notes[track.notect];
+        if (note.time < timer.nextNoteTime) {
+            playNote(note, timer, deltaT);
+            played = true;
+            track.notect++;
+        }
+    } while (played);
+}
+function playNote(note, timer, deltaT) {
+    note.instrument.noteOn(note.number, note.velocity, note.time + deltaT);
+    let duration = note.duration
+        || note.instrument.duration || timer.noteDuration;
+    note.instrument.noteOff(note.number, note.velocity, note.time + duration + deltaT);
+}
+function loopTrack(track) {
+    track.notect = 0;
+    for (let note of track.notes)
+        note.time += track.duration;
 }
 
 
