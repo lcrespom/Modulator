@@ -28,6 +28,10 @@ export class LiveCoding {
 	track(name: string, cb?: TrackCallback) {
 		let t = new Track()
 		t.time = this.ac.currentTime + 0.1
+		t.name = name
+		// if (tracks[name])
+		// 	nextTracks[name] = t
+		// else
 		tracks[name] = t
 		if (cb) cb(t)
 		return t
@@ -40,6 +44,7 @@ export class LiveCoding {
 	}
 }
 
+
 export interface NoteInfo {
 	instrument: LCInstrument
 	number: number
@@ -49,12 +54,14 @@ export interface NoteInfo {
 	options?: any	// TODO proper options
 }
 
+
 export class Track {
 	notect = 0
 	notes: NoteInfo[] = []
 	time = 0
 	duration = 0
 	loop = false
+	name: string
 	private inst: LCInstrument
 	private velocity = 1
 
@@ -94,6 +101,8 @@ interface TrackTable {
 }
 
 let tracks: TrackTable = {}
+let nextTracks: TrackTable = {}
+
 
 function getPreset(presets: Presets, preset: string | number) {
 	if (typeof preset == 'number') {
@@ -131,10 +140,7 @@ function playTrack(timer: Timer, track: Track, deltaT: number) {
 	let played
 	do {
 		played = false
-		if (track.notect >= track.notes.length) {
-			if (track.loop) loopTrack(track)
-			else break
-		}
+		if (shouldTrackEnd(track)) break
 		let note = track.notes[track.notect]
 		if (note.time < timer.nextNoteTime) {
 			playNote(note, timer, deltaT)
@@ -157,4 +163,16 @@ function loopTrack(track: Track) {
 	track.notect = 0
 	for (let note of track.notes)
 		note.time += track.duration
+}
+
+function shouldTrackEnd(track: Track) {
+	if (track.notect < track.notes.length) return false
+	if (track.loop) {
+		loopTrack(track)
+		return false
+	}
+	else {
+		delete tracks[track.name]
+		return true
+	}
 }

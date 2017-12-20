@@ -3442,6 +3442,10 @@ class LiveCoding {
     track(name, cb) {
         let t = new Track();
         t.time = this.ac.currentTime + 0.1;
+        t.name = name;
+        // if (tracks[name])
+        // 	nextTracks[name] = t
+        // else
         tracks[name] = t;
         if (cb)
             cb(t);
@@ -3492,6 +3496,7 @@ class Track {
 /* unused harmony export Track */
 
 let tracks = {};
+let nextTracks = {};
 function getPreset(presets, preset) {
     if (typeof preset == 'number') {
         let maxPrst = presets.presets.length;
@@ -3527,12 +3532,8 @@ function playTrack(timer, track, deltaT) {
     let played;
     do {
         played = false;
-        if (track.notect >= track.notes.length) {
-            if (track.loop)
-                loopTrack(track);
-            else
-                break;
-        }
+        if (shouldTrackEnd(track))
+            break;
         let note = track.notes[track.notect];
         if (note.time < timer.nextNoteTime) {
             playNote(note, timer, deltaT);
@@ -3551,6 +3552,18 @@ function loopTrack(track) {
     track.notect = 0;
     for (let note of track.notes)
         note.time += track.duration;
+}
+function shouldTrackEnd(track) {
+    if (track.notect < track.notes.length)
+        return false;
+    if (track.loop) {
+        loopTrack(track);
+        return false;
+    }
+    else {
+        delete tracks[track.name];
+        return true;
+    }
 }
 
 
