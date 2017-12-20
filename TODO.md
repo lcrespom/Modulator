@@ -8,7 +8,7 @@
 - [x] Upgrade .gitignore
 - [x] Apply tslint, update code when required
 - [ ] Upgrade runtime dependencies (...if required?)
-- [ ] Live coding branch
+- [x] Live coding branch
 
 ## Live Coding
 - [ ] Synth API
