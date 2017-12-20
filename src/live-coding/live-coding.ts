@@ -29,10 +29,10 @@ export class LiveCoding {
 		let t = new Track()
 		t.time = this.ac.currentTime + 0.1
 		t.name = name
-		// if (tracks[name])
-		// 	nextTracks[name] = t
-		// else
-		tracks[name] = t
+		if (tracks[name])
+			nextTracks[name] = t
+		else
+			tracks[name] = t
 		if (cb) cb(t)
 		return t
 	}
@@ -170,6 +170,7 @@ function shouldTrackEnd(track: Track) {
 	if (track.notect < track.notes.length) return false
 	if (nextTracks[track.name]) {
 		track = nextTracks[track.name]
+		delete nextTracks[track.name]
 		tracks[track.name] = track
 		updateTrackTimes(track)
 		return false

@@ -3443,10 +3443,10 @@ class LiveCoding {
         let t = new Track();
         t.time = this.ac.currentTime + 0.1;
         t.name = name;
-        // if (tracks[name])
-        // 	nextTracks[name] = t
-        // else
-        tracks[name] = t;
+        if (tracks[name])
+            nextTracks[name] = t;
+        else
+            tracks[name] = t;
         if (cb)
             cb(t);
         return t;
@@ -3534,6 +3534,7 @@ function playTrack(timer, track, deltaT) {
         played = false;
         if (shouldTrackEnd(track))
             break;
+        track = tracks[track.name];
         let note = track.notes[track.notect];
         if (note.time < timer.nextNoteTime) {
             playNote(note, timer, deltaT);
@@ -3548,7 +3549,7 @@ function playNote(note, timer, deltaT) {
         || note.instrument.duration || timer.noteDuration;
     note.instrument.noteOff(note.number, note.velocity, note.time + duration + deltaT);
 }
-function loopTrack(track) {
+function updateTrackTimes(track) {
     track.notect = 0;
     for (let note of track.notes)
         note.time += track.duration;
@@ -3556,8 +3557,15 @@ function loopTrack(track) {
 function shouldTrackEnd(track) {
     if (track.notect < track.notes.length)
         return false;
+    if (nextTracks[track.name]) {
+        track = nextTracks[track.name];
+        delete nextTracks[track.name];
+        tracks[track.name] = track;
+        updateTrackTimes(track);
+        return false;
+    }
     if (track.loop) {
-        loopTrack(track);
+        updateTrackTimes(track);
         return false;
     }
     else {
