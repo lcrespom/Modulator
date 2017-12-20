@@ -42,7 +42,10 @@ export function createEditor(ac: AudioContext, presets: Presets) {
 function setupDefinitions() {
 	monaco.languages.typescript.typescriptDefaults.addExtraLib(`
 	interface Instrument {
+		/** Name of the preset used to create the instrument */
 		name: string
+		/** Default note duration, in seconds */
+		duration: number
 	}
 
 	type TrackCallback = (t: Track) => void;

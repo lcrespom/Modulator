@@ -3285,7 +3285,10 @@ function createEditor(ac, presets) {
 function setupDefinitions() {
     monaco.languages.typescript.typescriptDefaults.addExtraLib(`
 	interface Instrument {
+		/** Name of the preset used to create the instrument */
 		name: string
+		/** Default note duration, in seconds */
+		duration: number
 	}
 
 	type TrackCallback = (t: Track) => void;
@@ -3425,14 +3428,14 @@ class LiveCoding {
     constructor(ac, presets) {
         this.ac = ac;
         this.presets = presets;
-        let timer = new __WEBPACK_IMPORTED_MODULE_1__synth_timer__["a" /* Timer */](ac);
+        let timer = new __WEBPACK_IMPORTED_MODULE_1__synth_timer__["a" /* Timer */](ac, 60, 0.2);
         timer.start(time => timerCB(timer, time));
     }
     instrument(preset, numVoices = 4) {
         let prst = getPreset(this.presets, preset);
         let instr = new __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /* Instrument */](this.ac, prst, numVoices);
-        let i = instr;
-        i.name = prst.name;
+        instr.name = prst.name;
+        instr.duration = findDuration(prst);
         return instr;
     }
     track(name, cb) {
@@ -3507,12 +3510,26 @@ function playTrack(timer, track, deltaT) {
         let note = track.notes[track.notect];
         if (note.time < timer.nextNoteTime) {
             note.instrument.noteOn(note.number, note.velocity, note.time + deltaT);
-            let duration = note.duration || timer.noteDuration;
+            let duration = note.duration
+                || note.instrument.duration || timer.noteDuration;
             note.instrument.noteOff(note.number, note.velocity, note.time + duration + deltaT);
             played = true;
             track.notect++;
         }
     } while (played);
+}
+function findDuration(preset) {
+    let duration = 0;
+    for (let node of preset.nodeData) {
+        if (node.type == 'ADSR') {
+            let d = node.params.attack + node.params.decay;
+            if (d > duration)
+                duration = d;
+        }
+    }
+    if (duration)
+        duration += 0.01;
+    return duration;
 }
 
 

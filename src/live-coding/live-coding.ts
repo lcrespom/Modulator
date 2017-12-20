@@ -1,21 +1,27 @@
 import { Instrument } from '../synth/instrument'
 import { Presets } from '../synthUI/presets'
 import { Timer } from '../synth/timer'
+import { NodeData } from '../synth/synth';
 
 export type TrackCallback = (t: Track) => void
+
+interface LCInstrument extends Instrument {
+	name: string
+	duration: number
+}
 
 
 export class LiveCoding {
 	constructor(public ac: AudioContext, public presets: Presets) {
-		let timer = new Timer(ac)
+		let timer = new Timer(ac, 60, 0.2)
 		timer.start(time => timerCB(timer, time))
 	}
 
 	instrument(preset: string | number, numVoices = 4) {
 		let prst = getPreset(this.presets, preset)
-		let instr = new Instrument(this.ac, prst, numVoices)
-		let i: any = instr
-		i.name = prst.name
+		let instr = <LCInstrument> new Instrument(this.ac, prst, numVoices)
+		instr.name = prst.name
+		instr.duration = findDuration(prst)
 		return instr
 	}
 
@@ -29,7 +35,7 @@ export class LiveCoding {
 }
 
 export interface NoteInfo {
-	instrument: Instrument
+	instrument: LCInstrument
 	number: number
 	time: number
 	velocity: number
@@ -41,10 +47,10 @@ export class Track {
 	notect = 0
 	notes: NoteInfo[] = []
 	time = 0
-	private inst: Instrument
+	private inst: LCInstrument
 	private velocity = 1
 
-	instrument(inst: Instrument) {
+	instrument(inst: LCInstrument) {
 		this.inst = inst
 		return this
 	}
@@ -108,11 +114,25 @@ function playTrack(timer: Timer, track: Track, deltaT: number) {
 		if (note.time < timer.nextNoteTime) {
 			note.instrument.noteOn(
 				note.number, note.velocity, note.time + deltaT)
-			let duration = note.duration || timer.noteDuration
+			let duration = note.duration
+				|| note.instrument.duration || timer.noteDuration
 			note.instrument.noteOff(
 				note.number, note.velocity, note.time + duration + deltaT)
 			played = true
 			track.notect++
 		}
 	} while (played)
+}
+
+function findDuration(preset: any) {
+	let duration = 0
+	for (let node of preset.nodeData) {
+		if (node.type == 'ADSR') {
+			let d = node.params.attack + node.params.decay
+			if (d > duration)
+				duration = d
+		}
+	}
+	if (duration) duration += 0.01
+	return duration
 }
