@@ -168,10 +168,10 @@ function upload(event, cb, readFunc) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__notes__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__palette__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__notes__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__palette__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_modern__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__customNodes__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__customNodes__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_file__ = __webpack_require__(1);
 
 
@@ -443,6 +443,54 @@ class SoundBankHandler {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+class Timer {
+    constructor(ac, bpm = 60, ahead = 0.1) {
+        this.running = false;
+        this.ac = ac;
+        this.noteDuration = 0;
+        this.nextNoteTime = 0;
+        this.bpm = bpm;
+        this.ahead = ahead;
+    }
+    get bpm() { return this._bpm; }
+    set bpm(v) {
+        this._bpm = v;
+        this.nextNoteTime -= this.noteDuration;
+        this.noteDuration = (1 / 4) * 60 / this._bpm;
+        this.nextNoteTime += this.noteDuration;
+    }
+    start(cb) {
+        if (this.running)
+            return;
+        this.running = true;
+        if (cb)
+            this.cb = cb;
+        this.nextNoteTime = this.ac.currentTime;
+        this.tick();
+    }
+    stop() {
+        this.running = false;
+    }
+    tick() {
+        if (!this.running)
+            return;
+        requestAnimationFrame(this.tick.bind(this));
+        while (this.nextNoteTime < this.ac.currentTime + this.ahead) {
+            if (this.cb)
+                this.cb(this.nextNoteTime);
+            this.nextNoteTime += this.noteDuration;
+        }
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Timer;
+
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth__ = __webpack_require__(2);
 
 /**
@@ -594,7 +642,7 @@ class SynthLoader {
 
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -938,7 +986,7 @@ class OutputTracker {
 
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1109,7 +1157,7 @@ let palette = {
 
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1291,54 +1339,6 @@ class LineInNode extends CustomNodeBase {
 
 
 /***/ }),
-/* 8 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-class Timer {
-    constructor(ac, bpm = 60, ahead = 0.1) {
-        this.running = false;
-        this.ac = ac;
-        this.noteDuration = 0;
-        this.nextNoteTime = 0;
-        this.bpm = bpm;
-        this.ahead = ahead;
-    }
-    get bpm() { return this._bpm; }
-    set bpm(v) {
-        this._bpm = v;
-        this.nextNoteTime -= this.noteDuration;
-        this.noteDuration = (1 / 4) * 60 / this._bpm;
-        this.nextNoteTime += this.noteDuration;
-    }
-    start(cb) {
-        if (this.running)
-            return;
-        this.running = true;
-        if (cb)
-            this.cb = cb;
-        this.nextNoteTime = this.ac.currentTime;
-        this.tick();
-    }
-    stop() {
-        this.running = false;
-    }
-    tick() {
-        if (!this.running)
-            return;
-        requestAnimationFrame(this.tick.bind(this));
-        while (this.nextNoteTime < this.ac.currentTime + this.ahead) {
-            if (this.cb)
-                this.cb(this.nextNoteTime);
-            this.nextNoteTime += this.noteDuration;
-        }
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = Timer;
-
-
-
-/***/ }),
 /* 9 */,
 /* 10 */,
 /* 11 */,
@@ -1365,8 +1365,8 @@ module.exports = __webpack_require__(24);
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_instrument__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__synth_timer__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_instrument__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__synth_timer__ = __webpack_require__(4);
 /**
  * Library that exports the Instrument and Voice classes
  */

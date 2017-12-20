@@ -168,10 +168,10 @@ function upload(event, cb, readFunc) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__notes__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__palette__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__notes__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__palette__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_modern__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__customNodes__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__customNodes__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_file__ = __webpack_require__(1);
 
 
@@ -557,6 +557,54 @@ $('body').append(popup);
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+class Timer {
+    constructor(ac, bpm = 60, ahead = 0.1) {
+        this.running = false;
+        this.ac = ac;
+        this.noteDuration = 0;
+        this.nextNoteTime = 0;
+        this.bpm = bpm;
+        this.ahead = ahead;
+    }
+    get bpm() { return this._bpm; }
+    set bpm(v) {
+        this._bpm = v;
+        this.nextNoteTime -= this.noteDuration;
+        this.noteDuration = (1 / 4) * 60 / this._bpm;
+        this.nextNoteTime += this.noteDuration;
+    }
+    start(cb) {
+        if (this.running)
+            return;
+        this.running = true;
+        if (cb)
+            this.cb = cb;
+        this.nextNoteTime = this.ac.currentTime;
+        this.tick();
+    }
+    stop() {
+        this.running = false;
+    }
+    tick() {
+        if (!this.running)
+            return;
+        requestAnimationFrame(this.tick.bind(this));
+        while (this.nextNoteTime < this.ac.currentTime + this.ahead) {
+            if (this.cb)
+                this.cb(this.nextNoteTime);
+            this.nextNoteTime += this.noteDuration;
+        }
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Timer;
+
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth__ = __webpack_require__(2);
 
 /**
@@ -708,7 +756,7 @@ class SynthLoader {
 
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1052,7 +1100,7 @@ class OutputTracker {
 
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1223,7 +1271,7 @@ let palette = {
 
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1401,54 +1449,6 @@ class LineInNode extends CustomNodeBase {
     }
 }
 /* harmony export (immutable) */ __webpack_exports__["c"] = LineInNode;
-
-
-
-/***/ }),
-/* 8 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-class Timer {
-    constructor(ac, bpm = 60, ahead = 0.1) {
-        this.running = false;
-        this.ac = ac;
-        this.noteDuration = 0;
-        this.nextNoteTime = 0;
-        this.bpm = bpm;
-        this.ahead = ahead;
-    }
-    get bpm() { return this._bpm; }
-    set bpm(v) {
-        this._bpm = v;
-        this.nextNoteTime -= this.noteDuration;
-        this.noteDuration = (1 / 4) * 60 / this._bpm;
-        this.nextNoteTime += this.noteDuration;
-    }
-    start(cb) {
-        if (this.running)
-            return;
-        this.running = true;
-        if (cb)
-            this.cb = cb;
-        this.nextNoteTime = this.ac.currentTime;
-        this.tick();
-    }
-    stop() {
-        this.running = false;
-    }
-    tick() {
-        if (!this.running)
-            return;
-        requestAnimationFrame(this.tick.bind(this));
-        while (this.nextNoteTime < this.ac.currentTime + this.ahead) {
-            if (this.cb)
-                this.cb(this.nextNoteTime);
-            this.nextNoteTime += this.noteDuration;
-        }
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = Timer;
 
 
 
@@ -2481,7 +2481,7 @@ class AudioAnalyzer {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__midi__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__piano__ = __webpack_require__(18);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__arpeggiator__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__synth_instrument__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__synth_instrument__ = __webpack_require__(5);
 
 
 
@@ -2955,7 +2955,7 @@ class PianoKeyboard {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_timer__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_timer__ = __webpack_require__(4);
 
 class Arpeggiator {
     constructor(ac) {
@@ -3248,7 +3248,6 @@ class Presets {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* unused harmony export byId */
 /* harmony export (immutable) */ __webpack_exports__["a"] = createEditor;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__live_coding__ = __webpack_require__(22);
 
@@ -3272,7 +3271,7 @@ function createEditor(ac, presets) {
         let editorElem = byId('walc-code-editor');
         editor = monaco.editor.create(editorElem, {
             value: '',
-            language: 'javascript',
+            language: 'typescript',
             lineNumbers: false,
             renderLineHighlight: 'none',
             minimap: { enabled: false }
@@ -3388,21 +3387,63 @@ function doRunCode() {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_instrument__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_instrument__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__synth_timer__ = __webpack_require__(4);
+
 
 class LiveCoding {
     constructor(ac, presets) {
         this.ac = ac;
         this.presets = presets;
+        let timer = new __WEBPACK_IMPORTED_MODULE_1__synth_timer__["a" /* Timer */](ac);
+        timer.start(time => timerCB(timer, time));
     }
     instrument(preset, numVoices = 4) {
         let prst = getPreset(this.presets, preset);
         return new __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /* Instrument */](this.ac, prst, numVoices);
     }
+    track(name, cb) {
+        let t = new Track();
+        t.time = this.ac.currentTime;
+        tracks[name] = t;
+        cb(t);
+    }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = LiveCoding;
 
-// -------------------- Privates --------------------
+class Track {
+    constructor() {
+        this.notect = 0;
+        this.notes = [];
+        this.velocity = 1;
+        this.time = 0;
+    }
+    instrument(inst) {
+        this.inst = inst;
+        return this;
+    }
+    volume(v) {
+        this.velocity = v;
+    }
+    play(note = 64, options) {
+        if (!this.inst)
+            throw new Error(`Must call instrument before playing a note`);
+        this.notes.push({
+            instrument: this.inst,
+            number: note,
+            time: this.time,
+            velocity: this.velocity
+        });
+        return this;
+    }
+    sleep(time) {
+        this.time += time;
+        return this;
+    }
+}
+/* unused harmony export Track */
+
+let tracks = {};
 function getPreset(presets, preset) {
     if (typeof preset == 'number') {
         let maxPrst = presets.presets.length;
@@ -3414,6 +3455,26 @@ function getPreset(presets, preset) {
         if (prs.name == preset)
             return prs;
     throw new Error(`Preset "${preset}" does not exist`);
+}
+function timerCB(timer, time) {
+    let tnames = Object.getOwnPropertyNames(tracks);
+    for (let tname of tnames)
+        playTrack(timer, tracks[tname], time);
+}
+function playTrack(timer, track, time) {
+    let played;
+    do {
+        played = false;
+        if (track.notect >= track.notes.length)
+            break;
+        let note = track.notes[track.notect];
+        if (note.time < timer.nextNoteTime) {
+            note.instrument.noteOn(note.number, note.velocity, note.time);
+            note.instrument.noteOff(note.number, note.velocity, note.time + timer.noteDuration);
+            played = true;
+            track.notect++;
+        }
+    } while (played);
 }
 
 
