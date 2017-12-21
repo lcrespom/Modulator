@@ -1,7 +1,8 @@
 import { Instrument } from '../synth/instrument'
 import { Presets } from '../synthUI/presets'
 import { Timer } from '../synth/timer'
-import { NodeData } from '../synth/synth';
+import { NodeData } from '../synth/synth'
+import { SynthUI } from '../synthUI/synthUI'
 
 export type TrackCallback = (t: Track) => void
 
@@ -12,14 +13,18 @@ interface LCInstrument extends Instrument {
 
 
 export class LiveCoding {
-	constructor(public ac: AudioContext, public presets: Presets) {
+	constructor(
+		public ac: AudioContext,
+		public presets: Presets,
+		public synthUI: SynthUI) {
 		let timer = new Timer(ac, 60, 0.2)
 		timer.start(time => timerCB(timer, time))
 	}
 
 	instrument(preset: string | number, numVoices = 4) {
 		let prst = getPreset(this.presets, preset)
-		let instr = <LCInstrument> new Instrument(this.ac, prst, numVoices)
+		let instr = <LCInstrument> new Instrument(
+			this.ac, prst, numVoices, this.synthUI.outNode)
 		instr.name = prst.name
 		instr.duration = findNoteDuration(prst)
 		return instr

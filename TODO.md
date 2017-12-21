@@ -18,10 +18,10 @@
 	- [ ] Effects API
 	- [ ] Control preset node parameters
 - [ ] Multiple editors / buffers
-- [ ] Show sound in graphs (osc and fft)
 - [ ] Quick fix errors (upon enter or alt+enter, look only at current line)
 	- [ ] Add function `()` and `,`
 	- [ ] Add array and object `,`
+- [x] Show sound in graphs (osc and fft)
 - [x] Get note duration by searching for attack/decay times
 - [x] Detect errors in code:
 	- [x] Let Monaco editor detect syntax errors.

@@ -1493,7 +1493,7 @@ function setupPanels() {
     $(function () {
         $('#synth').focus();
     });
-    Object(__WEBPACK_IMPORTED_MODULE_3__live_coding_editor__["a" /* createEditor */])(ac, prsts);
+    Object(__WEBPACK_IMPORTED_MODULE_3__live_coding_editor__["a" /* createEditor */])(ac, prsts, synthUI);
     return prsts.presets;
 }
 function setupPalette() {
@@ -3264,8 +3264,8 @@ function loadMonaco(cb) {
     monacoRequire.config({ paths: { 'vs': 'js/vendor/monaco/min/vs' } });
     monacoRequire(['vs/editor/editor.main'], cb);
 }
-function createEditor(ac, presets) {
-    window.lc = new __WEBPACK_IMPORTED_MODULE_0__live_coding__["a" /* LiveCoding */](ac, presets);
+function createEditor(ac, presets, synthUI) {
+    window.lc = new __WEBPACK_IMPORTED_MODULE_0__live_coding__["a" /* LiveCoding */](ac, presets, synthUI);
     loadMonaco(function () {
         registerHoverHandler();
         let editorElem = byId('walc-code-editor');
@@ -3426,15 +3426,16 @@ function doRunCode() {
 
 
 class LiveCoding {
-    constructor(ac, presets) {
+    constructor(ac, presets, synthUI) {
         this.ac = ac;
         this.presets = presets;
+        this.synthUI = synthUI;
         let timer = new __WEBPACK_IMPORTED_MODULE_1__synth_timer__["a" /* Timer */](ac, 60, 0.2);
         timer.start(time => timerCB(timer, time));
     }
     instrument(preset, numVoices = 4) {
         let prst = getPreset(this.presets, preset);
-        let instr = new __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /* Instrument */](this.ac, prst, numVoices);
+        let instr = new __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /* Instrument */](this.ac, prst, numVoices, this.synthUI.outNode);
         instr.name = prst.name;
         instr.duration = findNoteDuration(prst);
         return instr;
