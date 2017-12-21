@@ -29,7 +29,7 @@ function setupPanels() {
 	$(function() {
 		$('#synth').focus()
 	})
-	createEditor(ac, prsts)
+	createEditor(ac, prsts, synthUI)
 	return prsts.presets
 }
 
