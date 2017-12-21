@@ -3544,7 +3544,6 @@ function playTrack(timer, track, deltaT) {
     } while (played);
 }
 function playNote(note, timer, deltaT) {
-    console.log(`noteOn: ${note.number} - ${note.velocity}`);
     note.instrument.noteOn(note.number, note.velocity, note.time + deltaT);
     let duration = note.duration
         || note.instrument.duration || timer.noteDuration;

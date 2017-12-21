@@ -12,18 +12,14 @@ interface LCInstrument extends Instrument {
 
 
 export class LiveCoding {
-	constructor(
-		public ac: AudioContext,
-		public presets: Presets,
-		public outNode: AudioNode) {
+	constructor(public ac: AudioContext, public presets: Presets) {
 		let timer = new Timer(ac, 60, 0.2)
 		timer.start(time => timerCB(timer, time))
 	}
 
 	instrument(preset: string | number, numVoices = 4) {
 		let prst = getPreset(this.presets, preset)
-		let instr = <LCInstrument> new Instrument(
-			this.ac, prst, numVoices, this.outNode)
+		let instr = <LCInstrument> new Instrument(this.ac, prst, numVoices)
 		instr.name = prst.name
 		instr.duration = findNoteDuration(prst)
 		return instr
