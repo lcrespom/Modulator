@@ -36,6 +36,7 @@ export function createEditor(
 			minimap: { enabled: false }
 		})
 		handleEditorResize(editorElem)
+		handleEditorFocus(editorElem)
 		registerActions()
 		preventParentScroll(editorElem)
 	})
@@ -104,6 +105,12 @@ function handleEditorResize(elem: HTMLElement) {
 	}, 1000)
 }
 
+function handleEditorFocus(elem: HTMLElement) {
+	editor.onDidFocusEditor(() => {
+		if (elem.parentElement)
+			elem.parentElement.scrollIntoView()
+	})
+}
 
 // -------------------- Error handling --------------------
 

@@ -18,9 +18,6 @@
 	- [ ] Effects API
 	- [ ] Control preset node parameters
 - [ ] Multiple editors / buffers
-- [ ] Quick fix errors (upon enter or alt+enter, look only at current line)
-	- [ ] Add function `()` and `,`
-	- [ ] Add array and object `,`
 - [x] Show sound in graphs (osc and fft)
 - [x] Get note duration by searching for attack/decay times
 - [x] Detect errors in code:
@@ -29,6 +26,10 @@
 	- [ ] Fine tune error marker location (start and end columns)
 	- [x] Capture runtime errors and highlight line number.
 	- [x] Display error message on line hover
+- [ ] Quick fix errors (upon enter or alt+enter, look only at current line)
+	- [ ] Add function `()` and `,`
+	- [ ] Add array and object `,`
+	- [ ] Avoid lines inside comments or strings
 
 
 ## Bugs

@@ -3278,6 +3278,7 @@ function createEditor(ac, presets, synthUI) {
             minimap: { enabled: false }
         });
         handleEditorResize(editorElem);
+        handleEditorFocus(editorElem);
         registerActions();
         preventParentScroll(editorElem);
     });
@@ -3340,6 +3341,12 @@ function handleEditorResize(elem) {
             editor.layout();
         }
     }, 1000);
+}
+function handleEditorFocus(elem) {
+    editor.onDidFocusEditor(() => {
+        if (elem.parentElement)
+            elem.parentElement.scrollIntoView();
+    });
 }
 // -------------------- Error handling --------------------
 function registerHoverHandler() {
