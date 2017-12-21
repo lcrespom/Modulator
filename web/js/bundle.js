@@ -2595,7 +2595,7 @@ class NoteInputs {
             this.noteOff(this.lastNote, 1);
         this.poly = true;
         const json = this.synthUI.gr.toJSON();
-        this.instrument = new __WEBPACK_IMPORTED_MODULE_4__synth_instrument__["a" /* Instrument */](this.synthUI.synth.ac, json, NUM_VOICES);
+        this.instrument = new __WEBPACK_IMPORTED_MODULE_4__synth_instrument__["a" /* Instrument */](this.synthUI.synth.ac, json, NUM_VOICES, this.synthUI.outNode);
     }
     polyOff() {
         this.poly = false;
