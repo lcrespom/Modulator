@@ -47,6 +47,10 @@ export class LiveCoding {
 		t.loop = true
 		return t
 	}
+
+	use_log(flag = true) {
+		logEnabled = flag
+	}
 }
 
 
@@ -107,7 +111,12 @@ interface TrackTable {
 
 let tracks: TrackTable = {}
 let nextTracks: TrackTable = {}
+let logEnabled = false
 
+function log(...args: any[]) {
+	if (!logEnabled) return
+	console.log(...args)
+}
 
 function getPreset(presets: Presets, preset: string | number) {
 	if (typeof preset == 'number') {
@@ -157,6 +166,7 @@ function playTrack(timer: Timer, track: Track, deltaT: number) {
 }
 
 function playNote(note: NoteInfo, timer: Timer, deltaT: number) {
+	log(`Note: ${note.number} - ${note.instrument.name}`)
 	note.instrument.noteOn(
 		note.number, note.velocity, note.time + deltaT)
 	let duration = note.duration
