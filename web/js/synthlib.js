@@ -257,7 +257,8 @@ class Synth {
     initOutputNodeData(ndata, dst) {
         ndata.synth = this;
         ndata.type = 'out';
-        ndata.anode = this.ac.createGain();
+        this.outGainNode = this.ac.createGain();
+        ndata.anode = this.outGainNode;
         ndata.anode.connect(dst);
         ndata.nodeDef = this.palette['Speaker'];
         ndata.isOut = true;
@@ -330,6 +331,7 @@ class Synth {
     noteOn(midi, gain, when) {
         if (!when)
             when = this.ac.currentTime;
+        this.outGainNode.gain.value = gain;
         const ratio = this.midi2freqRatio(midi);
         this.setupNoteHandlers();
         for (const nh of this.noteHandlers)

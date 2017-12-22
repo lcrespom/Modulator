@@ -60,6 +60,7 @@ export class Synth {
 	palette: NodePalette
 	noteHandlers: NoteHandler[] = []
 	portamento = new Portamento()
+	outGainNode: GainNode
 
 	constructor(ac: AudioContext) {
 		this.ac = ac
@@ -102,7 +103,8 @@ export class Synth {
 	initOutputNodeData(ndata: NodeData, dst: AudioNode): void {
 		ndata.synth = this
 		ndata.type = 'out'
-		ndata.anode = this.ac.createGain()
+		this.outGainNode = this.ac.createGain()
+		ndata.anode = this.outGainNode
 		ndata.anode.connect(dst)
 		ndata.nodeDef = this.palette['Speaker']
 		ndata.isOut = true
@@ -176,6 +178,7 @@ export class Synth {
 
 	noteOn(midi: number, gain: number, when?: number): void {
 		if (!when) when = this.ac.currentTime
+		this.outGainNode.gain.value = gain
 		const ratio = this.midi2freqRatio(midi)
 		this.setupNoteHandlers()
 		for (const nh of this.noteHandlers)
