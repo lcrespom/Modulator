@@ -9,14 +9,19 @@
 - [x] Apply tslint, update code when required
 - [ ] Upgrade runtime dependencies (...if required?)
 - [x] Live coding branch
+- [ ] Fix deprecation warnings
 
 ## Live Coding
 - [ ] Synth API
 	- [x] Tracks with loops & loop update after end of current
 	- [x] Make synth use the velocity parameter in noteOn
-	- [ ] Sample loading + playing API
 	- [ ] Effects API
+	- [ ] Sample loading + playing API
 	- [ ] Control preset node parameters
+	- [ ] Copy from Sonic Pi
+		- [ ] Notes and scales
+		- [ ] Lists/rings
+		- [ ] Random helpers (shuffle, etc => use deterministic seed)
 - [ ] Multiple editors / buffers
 - [x] Show sound in graphs (osc and fft)
 - [x] Get note duration by searching for attack/decay times
