@@ -31,7 +31,7 @@
 - [x] Get note duration by searching for attack/decay times
 - [x] Detect errors in code:
 	- [x] Let Monaco editor detect syntax errors
-	- [ ] Fine tune error marker colors
+	- [x] Fine tune error marker colors
 	- [x] Fine tune error marker location (start and end columns)
 	- [x] Add hover message to error marker
 	- [x] Capture runtime errors and highlight line number

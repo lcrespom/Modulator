@@ -3278,6 +3278,7 @@ function createEditor(ac, presets, synthUI) {
             lineNumbers: false,
             renderLineHighlight: 'none',
             minimap: { enabled: false }
+            // fontSize: 15
         });
         handleEditorResize(editorElem);
         handleEditorFocus(editorElem);
@@ -3380,6 +3381,7 @@ function doRunCode() {
         let location = getErrorLocation(e);
         if (location) {
             showError(e.message, location.line, location.column);
+            console.log(editor.getLineDecorations(location.line));
         }
     }
 }

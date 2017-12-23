@@ -348,5 +348,9 @@ input[type=range][orient=vertical] {
 }
 
 .walc-error-line {
-	background-color: lightcoral;
+	background-color: #FA9;
 }
+
+/*.redsquiggly {
+	background-color: #FDB !important;
+}*/
