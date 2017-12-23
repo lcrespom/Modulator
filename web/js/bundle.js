@@ -3411,8 +3411,11 @@ class LiveCoding {
         instr.duration = findNoteDuration(prst);
         return instr;
     }
+    effect(name, options) {
+        return new Effect(this.ac, name, options);
+    }
     track(name, cb) {
-        let t = new Track();
+        let t = new Track(this.ac, this.synthUI.outNode);
         t.startTime = this.ac.currentTime + 0.1;
         t.name = name;
         if (tracks[name])
@@ -3435,20 +3438,34 @@ class LiveCoding {
 /* harmony export (immutable) */ __webpack_exports__["a"] = LiveCoding;
 
 class Track {
-    constructor() {
+    constructor(ac, out) {
+        this.ac = ac;
+        this.out = out;
         this.notect = 0;
         this.notes = [];
         this.time = 0;
         this.startTime = 0;
         this.loop = false;
         this.velocity = 1;
+        this.gain = ac.createGain();
+        this.gain.connect(out);
     }
     instrument(inst) {
+        for (let v of inst.voices) {
+            v.synth.outGainNode.disconnect();
+            v.synth.outGainNode.connect(this.gain);
+        }
         this.inst = inst;
         return this;
     }
     volume(v) {
         this.velocity = v;
+        return this;
+    }
+    effect(e) {
+        this.gain.disconnect();
+        this.gain.connect(e.node);
+        e.node.connect(this.out);
         return this;
     }
     play(note = 64, duration, options) {
@@ -3470,14 +3487,21 @@ class Track {
 }
 /* unused harmony export Track */
 
-let tracks = {};
-let nextTracks = {};
-let logEnabled = false;
-function log(...args) {
-    if (!logEnabled)
-        return;
-    console.log(...args);
+class Effect {
+    constructor(ac, name, options) {
+        this.name = name;
+        let methodName = 'create' + name;
+        this.node = ac[methodName]();
+    }
+    param(name, value) {
+        let prm = this.node[name];
+        if (!prm)
+            throw new Error(`Parameter ${name} not found in effect ${this.name}`);
+        prm.value = value;
+    }
 }
+/* unused harmony export Effect */
+
 function getPreset(presets, preset) {
     if (typeof preset == 'number') {
         let maxPrst = presets.presets.length;
@@ -3502,6 +3526,15 @@ function findNoteDuration(preset) {
     if (duration)
         duration += 0.01;
     return duration;
+}
+// ---------- Track playback ----------
+let tracks = {};
+let nextTracks = {};
+let logEnabled = false;
+function log(...args) {
+    if (!logEnabled)
+        return;
+    console.log(...args);
 }
 function timerCB(timer, time) {
     let deltaT = time - timer.ac.currentTime;

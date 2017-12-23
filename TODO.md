@@ -48,6 +48,7 @@
 	- [ ] Multiple editors / buffers
 	- [ ] Button row
 		- [ ] Run code / Run line / Run selection / Stop sound
+			- Use window.editor.getModel().getValueInRange(window.editor.getSelection()) to get selected code
 		- [ ] Increase / decrease font
 		- [ ] Help / live coding API / tutorial
 		- [ ] Load / save code

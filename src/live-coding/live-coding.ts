@@ -30,8 +30,12 @@ export class LiveCoding {
 		return instr
 	}
 
+	effect(name: string, options: any) {
+		return new Effect(this.ac, name, options)
+	}
+
 	track(name: string, cb?: TrackCallback) {
-		let t = new Track()
+		let t = new Track(this.ac, this.synthUI.outNode)
 		t.startTime = this.ac.currentTime + 0.1
 		t.name = name
 		if (tracks[name])
@@ -71,16 +75,34 @@ export class Track {
 	startTime = 0
 	loop = false
 	name: string
-	private inst: LCInstrument
-	private velocity = 1
+	inst: LCInstrument
+	velocity = 1
+	gain: GainNode
+	eff: Effect
+
+	constructor(public ac: AudioContext, public out: AudioNode) {
+		this.gain = ac.createGain()
+		this.gain.connect(out)
+	}
 
 	instrument(inst: LCInstrument) {
+		for (let v of inst.voices) {
+			v.synth.outGainNode.disconnect()
+			v.synth.outGainNode.connect(this.gain)
+		}
 		this.inst = inst
 		return this
 	}
 
 	volume(v: number) {
 		this.velocity = v
+		return this
+	}
+
+	effect(e: Effect) {
+		this.gain.disconnect()
+		this.gain.connect(e.node)
+		e.node.connect(this.out)
 		return this
 	}
 
@@ -103,19 +125,32 @@ export class Track {
 	}
 }
 
-// -------------------- Privates --------------------
+export class Effect {
+	name: string
+	node: AudioNode
+
+	constructor(ac: AudioContext, name: string, options: any) {
+		this.name = name
+		let methodName = 'create' + name
+		this.node = (<any>ac)[methodName]()
+	}
+
+	param(name: string, value: number) {
+		let prm: AudioParam = (<any>this.node)[name];
+		if (!prm) throw new Error(
+			`Parameter ${name} not found in effect ${this.name}`)
+		prm.value = value
+	}
+
+}
+
+
+// ------------------------- Privates -------------------------
+
+// ---------- Helpers -----
 
 interface TrackTable {
 	[trackName: string]: Track
-}
-
-let tracks: TrackTable = {}
-let nextTracks: TrackTable = {}
-let logEnabled = false
-
-function log(...args: any[]) {
-	if (!logEnabled) return
-	console.log(...args)
 }
 
 function getPreset(presets: Presets, preset: string | number) {
@@ -141,6 +176,18 @@ function findNoteDuration(preset: any) {
 	}
 	if (duration) duration += 0.01
 	return duration
+}
+
+
+// ---------- Track playback ----------
+
+let tracks: TrackTable = {}
+let nextTracks: TrackTable = {}
+let logEnabled = false
+
+function log(...args: any[]) {
+	if (!logEnabled) return
+	console.log(...args)
 }
 
 function timerCB(timer: Timer, time: number) {
