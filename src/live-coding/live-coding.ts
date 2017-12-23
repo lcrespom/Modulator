@@ -30,8 +30,8 @@ export class LiveCoding {
 		return instr
 	}
 
-	effect(name: string, options: any) {
-		return new Effect(this.ac, name, options)
+	effect(name: string) {
+		return new Effect(this.ac, name)
 	}
 
 	track(name: string, cb?: TrackCallback) {
@@ -100,9 +100,11 @@ export class Track {
 	}
 
 	effect(e: Effect) {
-		this.gain.disconnect()
-		this.gain.connect(e.node)
-		e.node.connect(this.out)
+		let dst = this.eff ? this.eff.out : this.gain
+		dst.disconnect()
+		dst.connect(e.in)
+		e.out.connect(this.out)
+		this.eff = e
 		return this
 	}
 
@@ -127,19 +129,25 @@ export class Track {
 
 export class Effect {
 	name: string
-	node: AudioNode
+	in: AudioNode
+	out: AudioNode
 
-	constructor(ac: AudioContext, name: string, options: any) {
+	constructor(ac: AudioContext, name: string) {
 		this.name = name
 		let methodName = 'create' + name
-		this.node = (<any>ac)[methodName]()
+		let anyac: any = ac
+		if (!anyac[methodName])
+			throw new Error(`Effect "${name}" does not exist`)
+		this.in = (<any>ac)[methodName]()
+		this.out = this.in
 	}
 
 	param(name: string, value: number) {
-		let prm: AudioParam = (<any>this.node)[name];
+		let prm: AudioParam = (<any>this.in)[name]
 		if (!prm) throw new Error(
-			`Parameter ${name} not found in effect ${this.name}`)
+			`Parameter "${name}" not found in effect "${this.name}"`)
 		prm.value = value
+		return this
 	}
 
 }

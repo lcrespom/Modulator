@@ -32,6 +32,8 @@
 ## Live Coding
 - Synth API
 	- [ ] Effects API
+		- [x] Standard AudioContext nodes
+		- [ ] Effect network library
 	- [ ] Sample loading + playing API
 	- [ ] Control preset node parameters
 	- [ ] Track stop / global stop command

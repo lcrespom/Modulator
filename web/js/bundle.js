@@ -3411,8 +3411,8 @@ class LiveCoding {
         instr.duration = findNoteDuration(prst);
         return instr;
     }
-    effect(name, options) {
-        return new Effect(this.ac, name, options);
+    effect(name) {
+        return new Effect(this.ac, name);
     }
     track(name, cb) {
         let t = new Track(this.ac, this.synthUI.outNode);
@@ -3463,9 +3463,11 @@ class Track {
         return this;
     }
     effect(e) {
-        this.gain.disconnect();
-        this.gain.connect(e.node);
-        e.node.connect(this.out);
+        let dst = this.eff ? this.eff.out : this.gain;
+        dst.disconnect();
+        dst.connect(e.in);
+        e.out.connect(this.out);
+        this.eff = e;
         return this;
     }
     play(note = 64, duration, options) {
@@ -3488,16 +3490,21 @@ class Track {
 /* unused harmony export Track */
 
 class Effect {
-    constructor(ac, name, options) {
+    constructor(ac, name) {
         this.name = name;
         let methodName = 'create' + name;
-        this.node = ac[methodName]();
+        let anyac = ac;
+        if (!anyac[methodName])
+            throw new Error(`Effect "${name}" does not exist`);
+        this.in = ac[methodName]();
+        this.out = this.in;
     }
     param(name, value) {
-        let prm = this.node[name];
+        let prm = this.in[name];
         if (!prm)
-            throw new Error(`Parameter ${name} not found in effect ${this.name}`);
+            throw new Error(`Parameter "${name}" not found in effect "${this.name}"`);
         prm.value = value;
+        return this;
     }
 }
 /* unused harmony export Effect */
@@ -3599,11 +3606,20 @@ interface Instrument {
 	duration: number
 }
 
+interface Effect {
+	/** Effect name */
+	name: string
+	/** Sets the value of a parameter */
+	param(name: string, value: number): this
+}
+
 type TrackCallback = (t: Track) => void;
 
 interface LiveCoding {
 	/** Creates an instrument from a preset name or number */
 	instrument(preset: string | number, numVoices?: number): Instrument
+	/** Creates an effect */
+	effect(name: string): Effect
 	/** Creates a named track */
 	track(name: string, cb?: TrackCallback): Track
 	/** Creates a looping track */
@@ -3615,6 +3631,8 @@ interface LiveCoding {
 interface Track {
 	/** Sets the instrument to play in the track */
 	instrument(inst: Instrument): this
+	/** Adds an effect to the track. All sound played in the track will be altered by the effect */
+	effect(e: Effect): this
 	/** Sets the volume to use in the track */
 	volume(v: number): this
 	/** Plays a given note */
@@ -3622,6 +3640,7 @@ interface Track {
 	/** Waits the specified time in seconds before playing the next note */
 	sleep(time: number): this
 }
+
 
 declare let lc: LiveCoding
 `;
