@@ -6,9 +6,23 @@ import { SynthUI } from '../synthUI/synthUI'
 
 export type TrackCallback = (t: Track) => void
 
-interface LCInstrument extends Instrument {
+class LCInstrument extends Instrument {
 	name: string
 	duration: number
+
+	param(node: string, name: string, value?: number) {
+		if (value === undefined) {
+			let prm = this.voices[0].getParameterNode(node, name)
+			return prm ? prm.value : NaN
+		}
+		for (let v of this.voices) {
+			let prm = v.getParameterNode(node, name)
+			if (!prm) throw new Error(
+				`Parameter "{name"} not found in node "${node}" of instrument "${this.name}"`)
+			prm.value = value
+		}
+		return this
+	}
 }
 
 
@@ -23,7 +37,7 @@ export class LiveCoding {
 
 	instrument(preset: string | number, numVoices = 4) {
 		let prst = getPreset(this.presets, preset)
-		let instr = <LCInstrument> new Instrument(
+		let instr = new LCInstrument(
 			this.ac, prst, numVoices, this.synthUI.outNode)
 		instr.name = prst.name
 		instr.duration = findNoteDuration(prst)
@@ -142,10 +156,11 @@ export class Effect {
 		this.out = this.in
 	}
 
-	param(name: string, value: number) {
+	param(name: string, value?: number) {
 		let prm: AudioParam = (<any>this.in)[name]
 		if (!prm) throw new Error(
 			`Parameter "${name}" not found in effect "${this.name}"`)
+		if (value === undefined) return prm.value
 		prm.value = value
 		return this
 	}

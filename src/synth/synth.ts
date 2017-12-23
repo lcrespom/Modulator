@@ -85,12 +85,12 @@ export class Synth {
 		return anode
 	}
 
-	initNodeData(ndata: NodeData, type: string): void {
+	initNodeData(ndata: NodeData, type: string) {
 		ndata.synth = this
 		ndata.type = type
 		let anode = this.createAudioNode(type)
 		if (!anode)
-			return console.error(`No AudioNode found for '${type}'`)
+			throw new Error(`No AudioNode found for "${type}"`)
 		ndata.anode = anode
 		ndata.nodeDef = this.palette[type]
 		const nh = ndata.nodeDef.noteHandler
@@ -98,9 +98,10 @@ export class Synth {
 			ndata.noteHandler = new (<any>NoteHandlers)[nh](ndata)
 			this.addNoteHandler(ndata.noteHandler)
 		}
+		return anode
 	}
 
-	initOutputNodeData(ndata: NodeData, dst: AudioNode): void {
+	initOutputNodeData(ndata: NodeData, dst: AudioNode) {
 		ndata.synth = this
 		ndata.type = 'out'
 		this.outGainNode = this.ac.createGain()
@@ -108,6 +109,7 @@ export class Synth {
 		ndata.anode.connect(dst)
 		ndata.nodeDef = this.palette['Speaker']
 		ndata.isOut = true
+		return ndata.anode
 	}
 
 	removeNodeData(data: NodeData) {

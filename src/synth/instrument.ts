@@ -72,10 +72,12 @@ export class Voice {
 	synth: Synth
 	lastNote: number
 	loader: SynthLoader
+	nodes: NodeTable
 
 	constructor(ac: AudioContext, json: any, dest?: AudioNode) {
+		this.nodes = {}
 		this.loader = new SynthLoader()
-		this.synth = this.loader.load(ac, json, dest || ac.destination)
+		this.synth = this.loader.load(ac, json, dest || ac.destination, this.nodes)
 		this.lastNote = 0
 	}
 
@@ -89,6 +91,13 @@ export class Voice {
 		this.lastNote = 0
 	}
 
+	getParameterNode(nname: string, pname: string): AudioParam {
+		let n = this.nodes[nname]
+		if (!n)
+			throw new Error(`Node "${nname}" not found in synth`)
+		return (<any>n)[pname]
+	}
+
 	close(): void {
 		// This method must be called to avoid memory leaks at the Web Audio level
 		if (this.lastNote) this.noteOff(this.lastNote, 1)
@@ -99,7 +108,7 @@ export class Voice {
 
 // -------------------- Private --------------------
 
-export class VoiceNodeData extends NodeData {
+class VoiceNodeData extends NodeData {
 	inputs: NodeData[] = []
 	constructor(public id: number) {
 		super()
@@ -109,11 +118,15 @@ export class VoiceNodeData extends NodeData {
 	}
 }
 
-export class SynthLoader {
+interface NodeTable {
+	[k: string]: AudioNode
+}
+
+class SynthLoader {
 	nodes: VoiceNodeData[] = []
 	synth: Synth
 
-	load(ac: AudioContext, json: any, dest: AudioNode): Synth {
+	load(ac: AudioContext, json: any, dest: AudioNode, nodes: NodeTable): Synth {
 		const synth = new Synth(ac)
 		// Add nodes into id-based table
 		let j = 0
@@ -128,11 +141,13 @@ export class SynthLoader {
 		// Then set their data
 		for (let i = 0; i < json.nodes.length; i++) {
 			const type = json.nodeData[i].type
+			let anode: AudioNode
 			if (type == 'out')
-				synth.initOutputNodeData(this.nodes[i], dest)
+				anode = synth.initOutputNodeData(this.nodes[i], dest)
 			else
-				synth.initNodeData(this.nodes[i], type)
+				anode = synth.initNodeData(this.nodes[i], type)
 			synth.json2NodeData(json.nodeData[i], this.nodes[i])
+			this.registerNode(anode, nodes, json.nodes[i].name)
 		}
 		// Then notify connections to handler
 		for (const dst of this.nodes)
@@ -147,6 +162,10 @@ export class SynthLoader {
 		for (const node of this.nodes)
 			if (node.id === id) return node
 		return null
+	}
+
+	registerNode(anode: AudioNode, nodes: NodeTable, name: string) {
+		nodes[name] = anode
 	}
 
 	close() {

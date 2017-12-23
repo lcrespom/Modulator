@@ -144,9 +144,7 @@ function doRunCode() {
 		eval(code)
 	} catch (e) {
 		let location = getErrorLocation(e)
-		if (location) {
+		if (location)
 			showError(e.message, location.line, location.column)
-			console.log(editor.getLineDecorations(location.line))
-		}
 	}
 }

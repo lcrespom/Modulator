@@ -31,20 +31,27 @@
 
 ## Live Coding
 - Synth API
-	- [ ] Effects API
-		- [x] Standard AudioContext nodes
-		- [ ] Effect network library
+	- [ ] Custom effect support: predefined and user-defined
+	- [ ] Improve parameter API
+		- [ ] Smarter code completion
+		- [ ] Single name: "node/param"
 	- [ ] Sample loading + playing API
-	- [ ] Control preset node parameters
 	- [ ] Track stop / global stop command
 	- [ ] Display live coding parameters in "Node Parameters" box (or new box)
 	- [ ] Copy from Sonic Pi
 		- [ ] Notes and scales
 		- [ ] Lists/rings
 		- [ ] Random helpers (shuffle, etc => use deterministic seed)
+	- [ ] Set effect and instrument parameters according to track time
+		- Use the options parameter of the play method
+	- [x] Effects API
+	- [x] Set instrument parameters
 	- [x] Tracks with loops & loop update after end of current
 	- [x] Make synth use the velocity parameter in noteOn
 - Editor
+	- [ ] Do as with tracker
+		- [ ] Use separate route and independent pages
+		- [ ] Add more panels: diagram, log, tutorial, etc
 	- [ ] Run current line
 	- [ ] Run selection
 	- [ ] Multiple editors / buffers

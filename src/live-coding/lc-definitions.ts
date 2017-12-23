@@ -4,13 +4,15 @@ interface Instrument {
 	name: string
 	/** Default note duration, in seconds */
 	duration: number
+	/** Gets or sets the value of a parameter */
+	param(node: string, name: string, value?: number): number | this
 }
 
 interface Effect {
 	/** Effect name */
 	name: string
-	/** Sets the value of a parameter */
-	param(name: string, value: number): this
+	/** Gets or sets the value of a parameter */
+	param(name: string, value?: number): number | this
 }
 
 type TrackCallback = (t: Track) => void;

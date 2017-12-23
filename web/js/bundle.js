@@ -245,7 +245,7 @@ class Synth {
         ndata.type = type;
         let anode = this.createAudioNode(type);
         if (!anode)
-            return console.error(`No AudioNode found for '${type}'`);
+            throw new Error(`No AudioNode found for "${type}"`);
         ndata.anode = anode;
         ndata.nodeDef = this.palette[type];
         const nh = ndata.nodeDef.noteHandler;
@@ -253,6 +253,7 @@ class Synth {
             ndata.noteHandler = new __WEBPACK_IMPORTED_MODULE_0__notes__["a" /* NoteHandlers */][nh](ndata);
             this.addNoteHandler(ndata.noteHandler);
         }
+        return anode;
     }
     initOutputNodeData(ndata, dst) {
         ndata.synth = this;
@@ -262,6 +263,7 @@ class Synth {
         ndata.anode.connect(dst);
         ndata.nodeDef = this.palette['Speaker'];
         ndata.isOut = true;
+        return ndata.anode;
     }
     removeNodeData(data) {
         if (data.noteHandler)
@@ -673,8 +675,9 @@ class Instrument {
  */
 class Voice {
     constructor(ac, json, dest) {
+        this.nodes = {};
         this.loader = new SynthLoader();
-        this.synth = this.loader.load(ac, json, dest || ac.destination);
+        this.synth = this.loader.load(ac, json, dest || ac.destination, this.nodes);
         this.lastNote = 0;
     }
     noteOn(midi, velocity = 1, when) {
@@ -684,6 +687,12 @@ class Voice {
     noteOff(midi, velocity = 1, when) {
         this.synth.noteOff(midi, velocity, when);
         this.lastNote = 0;
+    }
+    getParameterNode(nname, pname) {
+        let n = this.nodes[nname];
+        if (!n)
+            throw new Error(`Node "${nname}" not found in synth`);
+        return n[pname];
     }
     close() {
         // This method must be called to avoid memory leaks at the Web Audio level
@@ -705,13 +714,11 @@ class VoiceNodeData extends __WEBPACK_IMPORTED_MODULE_0__synth__["a" /* NodeData
         return this.inputs;
     }
 }
-/* unused harmony export VoiceNodeData */
-
 class SynthLoader {
     constructor() {
         this.nodes = [];
     }
-    load(ac, json, dest) {
+    load(ac, json, dest, nodes) {
         const synth = new __WEBPACK_IMPORTED_MODULE_0__synth__["b" /* Synth */](ac);
         // Add nodes into id-based table
         let j = 0;
@@ -727,11 +734,13 @@ class SynthLoader {
         // Then set their data
         for (let i = 0; i < json.nodes.length; i++) {
             const type = json.nodeData[i].type;
+            let anode;
             if (type == 'out')
-                synth.initOutputNodeData(this.nodes[i], dest);
+                anode = synth.initOutputNodeData(this.nodes[i], dest);
             else
-                synth.initNodeData(this.nodes[i], type);
+                anode = synth.initNodeData(this.nodes[i], type);
             synth.json2NodeData(json.nodeData[i], this.nodes[i]);
+            this.registerNode(anode, nodes, json.nodes[i].name);
         }
         // Then notify connections to handler
         for (const dst of this.nodes)
@@ -747,14 +756,15 @@ class SynthLoader {
                 return node;
         return null;
     }
+    registerNode(anode, nodes, name) {
+        nodes[name] = anode;
+    }
     close() {
         for (const node of this.nodes)
             for (const input of node.inputs)
                 this.synth.disconnectNodes(input, node);
     }
 }
-/* unused harmony export SynthLoader */
-
 
 
 /***/ }),
@@ -3379,10 +3389,8 @@ function doRunCode() {
     }
     catch (e) {
         let location = getErrorLocation(e);
-        if (location) {
+        if (location)
             showError(e.message, location.line, location.column);
-            console.log(editor.getLineDecorations(location.line));
-        }
     }
 }
 
@@ -3396,6 +3404,21 @@ function doRunCode() {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__synth_timer__ = __webpack_require__(4);
 
 
+class LCInstrument extends __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /* Instrument */] {
+    param(node, name, value) {
+        if (value === undefined) {
+            let prm = this.voices[0].getParameterNode(node, name);
+            return prm ? prm.value : NaN;
+        }
+        for (let v of this.voices) {
+            let prm = v.getParameterNode(node, name);
+            if (!prm)
+                throw new Error(`Parameter "{name"} not found in node "${node}" of instrument "${this.name}"`);
+            prm.value = value;
+        }
+        return this;
+    }
+}
 class LiveCoding {
     constructor(ac, presets, synthUI) {
         this.ac = ac;
@@ -3406,7 +3429,7 @@ class LiveCoding {
     }
     instrument(preset, numVoices = 4) {
         let prst = getPreset(this.presets, preset);
-        let instr = new __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /* Instrument */](this.ac, prst, numVoices, this.synthUI.outNode);
+        let instr = new LCInstrument(this.ac, prst, numVoices, this.synthUI.outNode);
         instr.name = prst.name;
         instr.duration = findNoteDuration(prst);
         return instr;
@@ -3503,6 +3526,8 @@ class Effect {
         let prm = this.in[name];
         if (!prm)
             throw new Error(`Parameter "${name}" not found in effect "${this.name}"`);
+        if (value === undefined)
+            return prm.value;
         prm.value = value;
         return this;
     }
@@ -3604,13 +3629,15 @@ interface Instrument {
 	name: string
 	/** Default note duration, in seconds */
 	duration: number
+	/** Gets or sets the value of a parameter */
+	param(node: string, name: string, value?: number): number | this
 }
 
 interface Effect {
 	/** Effect name */
 	name: string
-	/** Sets the value of a parameter */
-	param(name: string, value: number): this
+	/** Gets or sets the value of a parameter */
+	param(name: string, value?: number): number | this
 }
 
 type TrackCallback = (t: Track) => void;

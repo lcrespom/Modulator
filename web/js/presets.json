@@ -27,7 +27,7 @@
 				"id": 2,
 				"x": 100,
 				"y": 120,
-				"name": "Osc",
+				"name": "Osc 1",
 				"inputs": [],
 				"classes": "node node-src"
 			},
@@ -35,7 +35,7 @@
 				"id": 3,
 				"x": 100,
 				"y": 240,
-				"name": "Osc",
+				"name": "Osc 2",
 				"inputs": [],
 				"classes": "node node-src"
 			},
@@ -274,7 +274,7 @@
 				"id": 2,
 				"x": 140,
 				"y": 100,
-				"name": "Osc",
+				"name": "Osc 1",
 				"inputs": [],
 				"classes": "node node-src"
 			},
@@ -282,7 +282,7 @@
 				"id": 3,
 				"x": 140,
 				"y": 220,
-				"name": "Osc",
+				"name": "Osc 2",
 				"inputs": [],
 				"classes": "node node-src"
 			},
@@ -540,7 +540,7 @@
 				"id": 2,
 				"x": 380,
 				"y": 160,
-				"name": "Gain",
+				"name": "Gain 2",
 				"inputs": [
 					4,
 					5
@@ -587,7 +587,7 @@
 				"id": 7,
 				"x": 80,
 				"y": 160,
-				"name": "Gain",
+				"name": "Gain 1",
 				"inputs": [
 					1,
 					6
@@ -944,7 +944,7 @@
 				"id": 2,
 				"x": 140,
 				"y": 160,
-				"name": "Osc",
+				"name": "Osc 1",
 				"inputs": [],
 				"classes": "node node-src"
 			},
@@ -952,7 +952,7 @@
 				"id": 3,
 				"x": 140,
 				"y": 260,
-				"name": "Osc",
+				"name": "Osc 2",
 				"inputs": [],
 				"classes": "node node-src"
 			},
