@@ -1,5 +1,23 @@
 # ToDo
 
+## Bugs
+- [ ] When app window is scrolled down, node connection draws arrows incorrectly
+- [ ] Piano notes get stuck. How to reproduce:
+	- Click on a piano note, keep the mouse button pressed
+	- Move mouse away from piano key
+	- Release mouse button
+- [ ] Buffered audio nodes fail after switching back&forth from empty preset
+	- Uncaught (in promise) DOMException: Unable to decode audio data
+	- See lines 260 and 302 in synth.ts
+- [ ] ADSR needs more testing & refining
+	- Probable memory leaks in Pew! instrument
+	- Also see http://www.soundonsound.com/sos/nov99/articles/synthsecrets.htm
+		for explanations on how to improve quality, especially the paragraph
+		about instruments swallowing its tongue.
+- [ ] Popping sound at note on/off (improved after adding adsr depth parameter)
+- [ ]Analyzer should detect when no sound is playing and clean osc and fft graphs
+	- Only visible in synths without ADSR
+
 ## Relaunch plan
 - [x] Tracker branch
 - [x] Remove tracker (too big)
@@ -13,20 +31,30 @@
 
 ## Live Coding
 - Synth API
-	- [x] Tracks with loops & loop update after end of current
-	- [x] Make synth use the velocity parameter in noteOn
 	- [ ] Effects API
 	- [ ] Sample loading + playing API
 	- [ ] Control preset node parameters
 	- [ ] Track stop / global stop command
+	- [ ] Display live coding parameters in "Node Parameters" box (or new box)
 	- [ ] Copy from Sonic Pi
 		- [ ] Notes and scales
 		- [ ] Lists/rings
 		- [ ] Random helpers (shuffle, etc => use deterministic seed)
-	- Editor
-		- [ ] Run current line
-		- [ ] Run selection
-		- [ ] Multiple editors / buffers
+	- [x] Tracks with loops & loop update after end of current
+	- [x] Make synth use the velocity parameter in noteOn
+- Editor
+	- [ ] Run current line
+	- [ ] Run selection
+	- [ ] Multiple editors / buffers
+	- [ ] Button row
+		- [ ] Run code / Run line / Run selection / Stop sound
+		- [ ] Increase / decrease font
+		- [ ] Help / live coding API / tutorial
+		- [ ] Load / save code
+		- [ ] Enlarge editor
+- [ ] Background canvas
+	- Canvas API
+	- WebGL / 3D Canvas
 - [x] Show sound in graphs (osc and fft)
 - [x] Get note duration by searching for attack/decay times
 - [x] Detect errors in code:
@@ -42,24 +70,9 @@
 	- [ ] Avoid lines inside comments or strings
 
 
-## Bugs
-- Buffered audio nodes fail after switching back&forth from empty preset
-	- Uncaught (in promise) DOMException: Unable to decode audio data
-	- See lines 260 and 302 in synth.ts
-- ADSR needs more testing & refining
-	- Probable memory leaks in Pew! instrument
-	- Also see http://www.soundonsound.com/sos/nov99/articles/synthsecrets.htm
-		for explanations on how to improve quality, especially the paragraph
-		about instruments swallowing its tongue.
-- Popping sound at note on/off (improved after adding adsr depth parameter)
-- Analyzer should detect when no sound is playing and clean osc and fft graphs
-	- Only visible in synths without ADSR
-- Review TODO items inside code
-- In FireFox, when app window is scrolled down, node connection
-	draws arrows incorrectly
-
-
 ## Functionality
+
+- Review TODO items inside code
 
 - For demo purposes, enable arpeggio and portamento in some patches,
 	or create new ones if required.
