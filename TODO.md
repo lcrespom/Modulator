@@ -12,23 +12,28 @@
 - [ ] Fix deprecation warnings
 
 ## Live Coding
-- [ ] Synth API
+- Synth API
 	- [x] Tracks with loops & loop update after end of current
 	- [x] Make synth use the velocity parameter in noteOn
 	- [ ] Effects API
 	- [ ] Sample loading + playing API
 	- [ ] Control preset node parameters
+	- [ ] Track stop / global stop command
 	- [ ] Copy from Sonic Pi
 		- [ ] Notes and scales
 		- [ ] Lists/rings
 		- [ ] Random helpers (shuffle, etc => use deterministic seed)
-- [ ] Multiple editors / buffers
+	- Editor
+		- [ ] Run current line
+		- [ ] Run selection
+		- [ ] Multiple editors / buffers
 - [x] Show sound in graphs (osc and fft)
 - [x] Get note duration by searching for attack/decay times
 - [x] Detect errors in code:
 	- [x] Let Monaco editor detect syntax errors.
 		Use https://github.com/rich-harris/eval2 only if really necessary.
-	- [ ] Fine tune error marker location (start and end columns)
+	- [x] Fine tune error marker location (start and end columns)
+	- [ ] Get error location from decoration position
 	- [x] Capture runtime errors and highlight line number.
 	- [x] Display error message on line hover
 - [ ] Quick fix errors (upon enter or alt+enter, look only at current line)

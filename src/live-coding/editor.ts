@@ -86,6 +86,8 @@ function handleEditorFocus(elem: HTMLElement) {
 
 // -------------------- Error handling --------------------
 
+type LineRange = { from: number, to: number }
+
 function registerHoverHandler() {
 	monaco.languages.registerHoverProvider('typescript', {
 		provideHover: function(model: any, position: any) {
@@ -93,7 +95,8 @@ function registerHoverHandler() {
 			// 		call editor.getLineDecorations to get current error position
 			if (!currentError ||
 				position.lineNumber != currentError.line ||
-				position.column > currentError.column) return
+				position.column < currentError.range.from ||
+				position.column > currentError.range.to) return
 			return {
 				contents: [
 					'**Runtime Error**',
@@ -123,22 +126,24 @@ function getErrorLocation(e: any) {
 function showError(msg: string, line: number, col: number) {
 	console.log(`Runtime error: "${msg}" at line ${line}, column ${col}`)
 	editor.revealLineInCenter(line)
-	if (col <= 1)
-		col = getFirstWordEnd(editor.getModel().getLineContent(line))
+	let errorRange = getErrorRange(editor.getModel().getLineContent(line), col)
 	decorations = editor.deltaDecorations(decorations, [{
-		range: new monaco.Range(line, 1, line, col),
+		range: new monaco.Range(line, errorRange.from, line, errorRange.to),
 		options: {
 			isWholeLine: false,
 			className: 'walc-error-line'
 		}
 	}])
+	return errorRange
 }
 
-function getFirstWordEnd(s: string): number {
-	let m = s.match(/\s*\w+/)
-	let pos = m && m.index !== undefined && m[0] ? m.index + m[0].length + 1 : 0
-	if (pos <= 1) pos = s.length + 1
-	return pos
+function getErrorRange(s: string, col: number): LineRange {
+	s = s.substring(col - 1)
+	let m = s.match(/\s*[\w_$]+/)
+	if (m && m.index !== undefined && m[0]) {
+		return { from: col + m.index, to: col + m.index + m[0].length }
+	}
+	return { from: 0, to: s.length + 1 }
 }
 
 // -------------------- Code execution --------------------
@@ -153,10 +158,10 @@ function doRunCode() {
 	} catch (e) {
 		let location = getErrorLocation(e)
 		if (location) {
+			let errorRange = showError(e.message, location.line, location.column)
 			currentError = e
 			currentError.line = location.line
-			currentError.column = location.column > 1 ? location.column : 4
-			showError(e.message, location.line, location.column)
+			currentError.range = errorRange
 		}
 	}
 }
