@@ -8,6 +8,7 @@
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"build": "webpack --env.target=PROD",
 		"dev": "webpack --env.target=DEV",
+		"dev:watch": "webpack --env.target=DEV --watch",
 		"watch": "npm run serve",
 		"serve": "webpack-dev-server --env.target=DEV --content-base web/",
 		"publish:html": "cp *.html ../lcrespom.github.io/synth",

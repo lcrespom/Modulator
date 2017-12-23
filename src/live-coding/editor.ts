@@ -26,7 +26,6 @@ export function createEditor(
 	ac: AudioContext, presets: Presets, synthUI: SynthUI) {
 	(<any>window).lc = new LiveCoding(ac, presets, synthUI)
 	loadMonaco(function() {
-		registerHoverHandler()
 		let editorElem = byId('walc-code-editor')
 		setupDefinitions()
 		editor = monaco.editor.create(editorElem, {
@@ -88,23 +87,12 @@ function handleEditorFocus(elem: HTMLElement) {
 
 type LineRange = { from: number, to: number }
 
-function registerHoverHandler() {
-	monaco.languages.registerHoverProvider('typescript', {
-		provideHover: function(model: any, position: any) {
-			// TODO: make it dynamic
-			// 		call editor.getLineDecorations to get current error position
-			if (!currentError ||
-				position.lineNumber != currentError.line ||
-				position.column < currentError.range.from ||
-				position.column > currentError.range.to) return
-			return {
-				contents: [
-					'**Runtime Error**',
-					currentError.message
-				]
-			}
-		}
-	})
+function getRuntimeErrorDecoration(lineNum: number) {
+	let decs = editor.getLineDecorations(lineNum)
+	if (!decs || decs.length <= 0) return null
+	for (let dec of decs)
+		if (dec.options.className == 'walc-error-line') return dec
+	return null
 }
 
 function getErrorLocation(e: any) {
@@ -131,7 +119,8 @@ function showError(msg: string, line: number, col: number) {
 		range: new monaco.Range(line, errorRange.from, line, errorRange.to),
 		options: {
 			isWholeLine: false,
-			className: 'walc-error-line'
+			className: 'walc-error-line',
+			hoverMessage: ['**Runtime Error**', msg ]
 		}
 	}])
 	return errorRange

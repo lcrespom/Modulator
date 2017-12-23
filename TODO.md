@@ -30,11 +30,11 @@
 - [x] Show sound in graphs (osc and fft)
 - [x] Get note duration by searching for attack/decay times
 - [x] Detect errors in code:
-	- [x] Let Monaco editor detect syntax errors.
-		Use https://github.com/rich-harris/eval2 only if really necessary.
+	- [x] Let Monaco editor detect syntax errors
+	- [ ] Fine tune error marker colors
 	- [x] Fine tune error marker location (start and end columns)
-	- [ ] Get error location from decoration position
-	- [x] Capture runtime errors and highlight line number.
+	- [x] Add hover message to error marker
+	- [x] Capture runtime errors and highlight line number
 	- [x] Display error message on line hover
 - [ ] Quick fix errors (upon enter or alt+enter, look only at current line)
 	- [ ] Add function `()` and `,`
