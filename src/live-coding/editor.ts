@@ -15,7 +15,6 @@ let monacoRequire = (<any>window).require
 declare let monaco: any
 let editor: any
 let decorations: any[] = []
-let currentError: any
 
 function loadMonaco(cb: () => void) {
 	monacoRequire.config({ paths: { 'vs': 'js/vendor/monaco/min/vs' }})
@@ -83,9 +82,8 @@ function handleEditorFocus(elem: HTMLElement) {
 	})
 }
 
-// -------------------- Error handling --------------------
 
-type LineRange = { from: number, to: number }
+// -------------------- Error handling --------------------
 
 function getRuntimeErrorDecoration(lineNum: number) {
 	let decs = editor.getLineDecorations(lineNum)
@@ -126,7 +124,7 @@ function showError(msg: string, line: number, col: number) {
 	return errorRange
 }
 
-function getErrorRange(s: string, col: number): LineRange {
+function getErrorRange(s: string, col: number) {
 	s = s.substring(col - 1)
 	let m = s.match(/\s*[\w_$]+/)
 	if (m && m.index !== undefined && m[0]) {
@@ -140,17 +138,13 @@ function getErrorRange(s: string, col: number): LineRange {
 function doRunCode() {
 	let code = editor.getModel().getValue()
 	try {
-		currentError = null
 		decorations = editor.deltaDecorations(decorations, [])
 		// tslint:disable-next-line:no-eval
 		eval(code)
 	} catch (e) {
 		let location = getErrorLocation(e)
 		if (location) {
-			let errorRange = showError(e.message, location.line, location.column)
-			currentError = e
-			currentError.line = location.line
-			currentError.range = errorRange
+			showError(e.message, location.line, location.column)
 		}
 	}
 }

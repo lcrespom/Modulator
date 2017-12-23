@@ -3263,7 +3263,6 @@ function byId(id) {
 let monacoRequire = window.require;
 let editor;
 let decorations = [];
-let currentError;
 function loadMonaco(cb) {
     monacoRequire.config({ paths: { 'vs': 'js/vendor/monaco/min/vs' } });
     monacoRequire(['vs/editor/editor.main'], cb);
@@ -3322,6 +3321,7 @@ function handleEditorFocus(elem) {
             elem.parentElement.scrollIntoView();
     });
 }
+// -------------------- Error handling --------------------
 function getRuntimeErrorDecoration(lineNum) {
     let decs = editor.getLineDecorations(lineNum);
     if (!decs || decs.length <= 0)
@@ -3372,7 +3372,6 @@ function getErrorRange(s, col) {
 function doRunCode() {
     let code = editor.getModel().getValue();
     try {
-        currentError = null;
         decorations = editor.deltaDecorations(decorations, []);
         // tslint:disable-next-line:no-eval
         eval(code);
@@ -3380,10 +3379,7 @@ function doRunCode() {
     catch (e) {
         let location = getErrorLocation(e);
         if (location) {
-            let errorRange = showError(e.message, location.line, location.column);
-            currentError = e;
-            currentError.line = location.line;
-            currentError.range = errorRange;
+            showError(e.message, location.line, location.column);
         }
     }
 }
