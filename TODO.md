@@ -15,7 +15,7 @@
 		for explanations on how to improve quality, especially the paragraph
 		about instruments swallowing its tongue.
 - [ ] Popping sound at note on/off (improved after adding adsr depth parameter)
-- [ ]Analyzer should detect when no sound is playing and clean osc and fft graphs
+- [ ] Analyzer should detect when no sound is playing and clean osc and fft graphs
 	- Only visible in synths without ADSR
 
 ## Relaunch plan
