@@ -10,16 +10,21 @@ class LCInstrument extends Instrument {
 	name: string
 	duration: number
 
-	param(node: string, name: string, value?: number) {
+	param(pname: string, value?: number) {
+		let names = pname.split('/')
+		if (names.length < 2) throw new Error(
+			`Instrument parameters require "node/param" format`)
+		let node = names[0]
+		let name = names[1]
 		if (value === undefined) {
 			let prm = this.voices[0].getParameterNode(node, name)
 			return prm ? prm.value : NaN
 		}
 		for (let v of this.voices) {
-			let prm = v.getParameterNode(node, name)
+			let prm: any = v.getParameterNode(node, name)
 			if (!prm) throw new Error(
 				`Parameter "{name"} not found in node "${node}" of instrument "${this.name}"`)
-			prm.value = value
+			prm._value = value
 		}
 		return this
 	}
@@ -71,16 +76,17 @@ export class LiveCoding {
 	}
 }
 
-
-export interface NoteInfo {
+interface InstrumentOptions {
 	instrument: LCInstrument
-	number: number
-	time: number
-	velocity: number
-	duration?: number
-	options?: any	// TODO proper options
+	[k: string]: number | LCInstrument
 }
 
+interface EffectOptions {
+	effect: Effect
+	[k: string]: number | Effect
+}
+
+type NoteOptions = InstrumentOptions | EffectOptions
 
 export class Track {
 	notect = 0
@@ -122,17 +128,26 @@ export class Track {
 		return this
 	}
 
-	play(note = 64, duration?: number, options?: any) {
-		if (!this.inst)
-			throw new Error(`Must call instrument before playing a note`)
+	play(note = 64, duration?: number, options?: NoteOptions) {
+		if (!this.inst) throw new Error(
+			`Must call instrument before playing a note or setting parameters`)
 		this.notes.push({
 			instrument: this.inst,
 			number: note,
 			time: this.time,
 			velocity: this.velocity,
-			duration
+			duration,
+			options
 		})
 		return this
+	}
+
+	params(options: NoteOptions) {
+		return this.play(0, undefined, options)
+	}
+
+	param(pname: string, value: number) {
+		return this.params({ instrument: this.inst, [pname]: value })
 	}
 
 	sleep(time: number) {
@@ -204,6 +219,15 @@ function findNoteDuration(preset: any) {
 
 // ---------- Track playback ----------
 
+interface NoteInfo {
+	instrument: LCInstrument
+	number: number
+	time: number
+	velocity: number
+	duration?: number
+	options?: NoteOptions
+}
+
 let tracks: TrackTable = {}
 let nextTracks: TrackTable = {}
 let logEnabled = false
@@ -236,6 +260,8 @@ function playTrack(timer: Timer, track: Track, deltaT: number) {
 }
 
 function playNote(note: NoteInfo, timer: Timer, deltaT: number) {
+	if (note.options) setOptions(note.options)
+	if (note.number < 1) return
 	log(`Note: ${note.number} - ${note.instrument.name}`)
 	note.instrument.noteOn(
 		note.number, note.velocity, note.time + deltaT)
@@ -243,6 +269,19 @@ function playNote(note: NoteInfo, timer: Timer, deltaT: number) {
 		|| note.instrument.duration || timer.noteDuration
 	note.instrument.noteOff(
 		note.number, note.velocity, note.time + duration + deltaT)
+}
+
+function setOptions(opts: NoteOptions) {
+	if (opts.effect) {
+		let e = <Effect> opts.effect
+		for (let pname of Object.getOwnPropertyNames(opts))
+			if (pname != 'effect') e.param(pname, <number>opts[pname])
+	}
+	else if (opts.instrument) {
+		let i = <LCInstrument> opts.instrument
+		for (let pname of Object.getOwnPropertyNames(opts))
+			if (pname != 'instrument') i.param(pname, <number>opts[pname])
+	}
 }
 
 function shouldTrackEnd(track: Track) {

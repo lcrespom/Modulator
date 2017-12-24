@@ -5,7 +5,7 @@ interface Instrument {
 	/** Default note duration, in seconds */
 	duration: number
 	/** Gets or sets the value of a parameter */
-	param(node: string, name: string, value?: number): number | this
+	param(pname: string, value?: number): number | this
 }
 
 interface Effect {
@@ -30,6 +30,18 @@ interface LiveCoding {
 	use_log(enable = true): void
 }
 
+interface InstrumentOptions {
+	instrument: LCInstrument
+	[k: string]: number | LCInstrument
+}
+
+interface EffectOptions {
+	effect: Effect
+	[k: string]: number | Effect
+}
+
+type NoteOptions = InstrumentOptions | EffectOptions
+
 interface Track {
 	/** Sets the instrument to play in the track */
 	instrument(inst: Instrument): this
@@ -38,7 +50,11 @@ interface Track {
 	/** Sets the volume to use in the track */
 	volume(v: number): this
 	/** Plays a given note */
-	play(note: number, duration?: number, options?: any): this
+	play(note: number, duration?: number, options?: NoteOptions): this
+	/** Changes a parameter of the current instrument */
+	param(pname: string, value: number): this
+	/** Changes parameters of instrument or effect */
+	params(options: NoteOptions): this
 	/** Waits the specified time in seconds before playing the next note */
 	sleep(time: number): this
 }

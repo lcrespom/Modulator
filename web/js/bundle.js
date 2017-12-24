@@ -3404,7 +3404,12 @@ function doRunCode() {
 
 
 class LCInstrument extends __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /* Instrument */] {
-    param(node, name, value) {
+    param(pname, value) {
+        let names = pname.split('/');
+        if (names.length < 2)
+            throw new Error(`Instrument parameters require "node/param" format`);
+        let node = names[0];
+        let name = names[1];
         if (value === undefined) {
             let prm = this.voices[0].getParameterNode(node, name);
             return prm ? prm.value : NaN;
@@ -3413,7 +3418,7 @@ class LCInstrument extends __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /
             let prm = v.getParameterNode(node, name);
             if (!prm)
                 throw new Error(`Parameter "{name"} not found in node "${node}" of instrument "${this.name}"`);
-            prm.value = value;
+            prm._value = value;
         }
         return this;
     }
@@ -3494,15 +3499,22 @@ class Track {
     }
     play(note = 64, duration, options) {
         if (!this.inst)
-            throw new Error(`Must call instrument before playing a note`);
+            throw new Error(`Must call instrument before playing a note or setting parameters`);
         this.notes.push({
             instrument: this.inst,
             number: note,
             time: this.time,
             velocity: this.velocity,
-            duration
+            duration,
+            options
         });
         return this;
+    }
+    params(options) {
+        return this.play(0, undefined, options);
+    }
+    param(pname, value) {
+        return this.params({ instrument: this.inst, [pname]: value });
     }
     sleep(time) {
         this.time += time;
@@ -3558,7 +3570,6 @@ function findNoteDuration(preset) {
         duration += 0.01;
     return duration;
 }
-// ---------- Track playback ----------
 let tracks = {};
 let nextTracks = {};
 let logEnabled = false;
@@ -3589,11 +3600,29 @@ function playTrack(timer, track, deltaT) {
     } while (played);
 }
 function playNote(note, timer, deltaT) {
+    if (note.options)
+        setOptions(note.options);
+    if (note.number < 1)
+        return;
     log(`Note: ${note.number} - ${note.instrument.name}`);
     note.instrument.noteOn(note.number, note.velocity, note.time + deltaT);
     let duration = note.duration
         || note.instrument.duration || timer.noteDuration;
     note.instrument.noteOff(note.number, note.velocity, note.time + duration + deltaT);
+}
+function setOptions(opts) {
+    if (opts.effect) {
+        let e = opts.effect;
+        for (let pname of Object.getOwnPropertyNames(opts))
+            if (pname != 'effect')
+                e.param(pname, opts[pname]);
+    }
+    else if (opts.instrument) {
+        let i = opts.instrument;
+        for (let pname of Object.getOwnPropertyNames(opts))
+            if (pname != 'instrument')
+                i.param(pname, opts[pname]);
+    }
 }
 function shouldTrackEnd(track) {
     if (track.notect < track.notes.length)
@@ -3629,7 +3658,7 @@ interface Instrument {
 	/** Default note duration, in seconds */
 	duration: number
 	/** Gets or sets the value of a parameter */
-	param(node: string, name: string, value?: number): number | this
+	param(pname: string, value?: number): number | this
 }
 
 interface Effect {
@@ -3654,6 +3683,18 @@ interface LiveCoding {
 	use_log(enable = true): void
 }
 
+interface InstrumentOptions {
+	instrument: LCInstrument
+	[k: string]: number | LCInstrument
+}
+
+interface EffectOptions {
+	effect: Effect
+	[k: string]: number | Effect
+}
+
+type NoteOptions = InstrumentOptions | EffectOptions
+
 interface Track {
 	/** Sets the instrument to play in the track */
 	instrument(inst: Instrument): this
@@ -3662,7 +3703,11 @@ interface Track {
 	/** Sets the volume to use in the track */
 	volume(v: number): this
 	/** Plays a given note */
-	play(note: number, duration?: number, options?: any): this
+	play(note: number, duration?: number, options?: NoteOptions): this
+	/** Changes a parameter of the current instrument */
+	param(pname: string, value: number): this
+	/** Changes parameters of instrument or effect */
+	params(options: NoteOptions): this
 	/** Waits the specified time in seconds before playing the next note */
 	sleep(time: number): this
 }

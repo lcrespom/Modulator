@@ -42,12 +42,12 @@
 		- [ ] Notes and scales
 		- [ ] Lists/rings
 		- [ ] Random helpers (shuffle, etc => use deterministic seed)
-	- [ ] Set effect and instrument parameters according to track time
-		- Use the options parameter of the play method
+	- [x] Set effect and instrument parameters according to track time
 	- [x] Effects API
 	- [x] Set instrument parameters
 	- [x] Tracks with loops & loop update after end of current
 	- [x] Make synth use the velocity parameter in noteOn
+	- [ ] Prevent instrument and effect instances to be shared across tracks
 - Editor
 	- [ ] Do as with tracker
 		- [ ] Use separate route and independent pages
