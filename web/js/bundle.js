@@ -1219,7 +1219,6 @@ let palette = {
             threshold: { initial: -24, min: -100, max: 0, linear: true },
             knee: { initial: 30, min: 0, max: 40, linear: true },
             ratio: { initial: 12, min: 1, max: 20, linear: true },
-            reduction: { initial: 0, min: -20, max: 0, linear: true },
             attack: { initial: 0.003, min: 0, max: 1 },
             release: { initial: 0.25, min: 0, max: 1 }
         }
