@@ -38,6 +38,7 @@
 	- [ ] Sample loading + playing API
 		- Use upload samples button - see https://davidwalsh.name/multiple-file-upload
 	- [ ] Track stop / global stop command
+	- [ ] Control global track gain node: master_volume, mute/unmute
 	- [ ] Display live coding parameters in "Node Parameters" box (or new box)
 	- [ ] Copy from Sonic Pi
 		- [ ] Notes and scales
