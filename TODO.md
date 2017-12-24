@@ -36,6 +36,7 @@
 		- [ ] Smarter code completion
 		- [ ] Single name: "node/param"
 	- [ ] Sample loading + playing API
+		- Use upload samples button - see https://davidwalsh.name/multiple-file-upload
 	- [ ] Track stop / global stop command
 	- [ ] Display live coding parameters in "Node Parameters" box (or new box)
 	- [ ] Copy from Sonic Pi
