@@ -6,6 +6,7 @@ import { NoteInputs } from './piano/noteInputs'
 import { Presets } from './synthUI/presets'
 import { ModernWindow } from './utils/modern'
 import { createEditor } from './live-coding/editor'
+import { setupRoutes } from './utils/routes'
 
 
 const graphCanvas = <HTMLCanvasElement>$('#graph-canvas')[0]
@@ -29,7 +30,7 @@ function setupPanels() {
 	$(function() {
 		$('#synth').focus()
 	})
-	createEditor(ac, prsts, synthUI)
+	setupRoutes('#synth').then(_ => createEditor(ac, prsts, synthUI))
 	return prsts.presets
 }
 

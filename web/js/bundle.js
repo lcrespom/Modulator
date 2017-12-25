@@ -1480,9 +1480,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__piano_noteInputs__ = __webpack_require__(15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__synthUI_presets__ = __webpack_require__(20);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__live_coding_editor__ = __webpack_require__(21);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_routes__ = __webpack_require__(24);
 /**
  * Main entry point: setup synth editor and keyboard listener.
  */
+
 
 
 
@@ -1504,7 +1506,7 @@ function setupPanels() {
     $(function () {
         $('#synth').focus();
     });
-    Object(__WEBPACK_IMPORTED_MODULE_3__live_coding_editor__["a" /* createEditor */])(ac, prsts, synthUI);
+    Object(__WEBPACK_IMPORTED_MODULE_4__utils_routes__["a" /* setupRoutes */])('#synth').then(_ => Object(__WEBPACK_IMPORTED_MODULE_3__live_coding_editor__["a" /* createEditor */])(ac, prsts, synthUI));
     return prsts.presets;
 }
 function setupPalette() {
@@ -3292,15 +3294,18 @@ function createEditor(ac, presets, synthUI) {
         handleEditorResize(editorElem);
         handleEditorFocus(editorElem);
         registerActions();
-        preventParentScroll(editorElem);
+        editor.focus();
+        $(document).on('route:show', (e, h) => {
+            if (h != '#live-coding')
+                return;
+            editor.focus();
+            window.scrollTo(0, 0);
+        });
     });
 }
 function setupDefinitions() {
     monaco.languages.typescript.
         typescriptDefaults.addExtraLib(__WEBPACK_IMPORTED_MODULE_1__lc_definitions__["a" /* LC_DEFINITIONS */]);
-}
-function preventParentScroll(elem) {
-    $(elem).bind('mousewheel', e => e.preventDefault());
 }
 function registerActions() {
     editor.addAction({
@@ -3717,6 +3722,40 @@ declare let lc: LiveCoding
 `;
 /* harmony export (immutable) */ __webpack_exports__["a"] = LC_DEFINITIONS;
 
+
+
+/***/ }),
+/* 24 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = setupRoutes;
+let oldPage;
+let mainRoute;
+function setupRoutes(initialRoute) {
+    window.onhashchange = showPageFromHash;
+    mainRoute = initialRoute;
+    showPageFromHash();
+    return loadPages();
+}
+function showPageFromHash() {
+    const hash = location.hash || mainRoute;
+    $('#page > div').hide();
+    $(hash).show().css('outline', 'none').focus();
+    if (oldPage)
+        $(document).trigger('route:hide', oldPage);
+    $(document).trigger('route:show', hash);
+    oldPage = hash;
+    window.scrollTo(0, 0);
+}
+function loadPages() {
+    return new Promise(resolve => {
+        $.get('live-coding.html', data => {
+            $('#live-coding').empty().append(data);
+            resolve();
+        });
+    });
+}
 
 
 /***/ })

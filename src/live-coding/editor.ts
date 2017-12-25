@@ -38,17 +38,18 @@ export function createEditor(
 		handleEditorResize(editorElem)
 		handleEditorFocus(editorElem)
 		registerActions()
-		preventParentScroll(editorElem)
+		editor.focus()
+		$(document).on('route:show', (e, h) => {
+			if (h != '#live-coding') return
+			editor.focus()
+			window.scrollTo(0, 0)
+		})
 	})
 }
 
 function setupDefinitions() {
 	monaco.languages.typescript.
 		typescriptDefaults.addExtraLib(LC_DEFINITIONS)
-}
-
-function preventParentScroll(elem: HTMLElement) {
-	$(elem).bind('mousewheel', e => e.preventDefault())
 }
 
 function registerActions() {

@@ -1,7 +1,11 @@
 @import url(https://fonts.googleapis.com/css?family=Electrolize);
 
+html, body {
+	height: 100%;
+	margin: 0;
+}
+
 body {
-	margin: 10px;
 	font-family: Electrolize, "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
@@ -26,6 +30,10 @@ input.rounded {
 }
 
 /*----- General -----*/
+
+#synth, #live-coding {
+	margin: 10px 0;
+}
 
 .mod-no-outline {
 	outline: none;
@@ -337,7 +345,6 @@ input[type=range][orient=vertical] {
 	height: 80ex;
 	resize: vertical;
 	overflow: hidden;
-	margin-top: 6px;
 }
 
 #walc-code-editor {

@@ -52,7 +52,8 @@
 	- [ ] Prevent instrument and effect instances to be shared across tracks
 - Editor
 	- [ ] Do as with tracker
-		- [ ] Use separate route and independent pages
+		- [x] Use separate route and independent pages
+		- [ ] Make page layout take 100% of height
 		- [ ] Add more panels: diagram, log, tutorial, etc
 	- [ ] Run current line
 	- [ ] Run selection
