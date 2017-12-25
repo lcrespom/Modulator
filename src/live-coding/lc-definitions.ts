@@ -28,6 +28,8 @@ interface LiveCoding {
 	loop_track(name: string, cb?: TrackCallback): Track
 	/** Enables or disables logging */
 	use_log(enable = true): void
+	/** Change global BPM */
+	bpm(value?: number): number
 }
 
 interface InstrumentOptions {

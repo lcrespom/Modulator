@@ -32,12 +32,14 @@ class LCInstrument extends Instrument {
 
 
 export class LiveCoding {
+	timer: Timer
+
 	constructor(
 		public ac: AudioContext,
 		public presets: Presets,
 		public synthUI: SynthUI) {
-		let timer = new Timer(ac, 60, 0.2)
-		timer.start(time => timerCB(timer, time))
+		this.timer = new Timer(ac, 60, 0.2)
+		this.timer.start(time => timerCB(this.timer, time))
 	}
 
 	instrument(preset: string | number, numVoices = 4) {
@@ -54,7 +56,7 @@ export class LiveCoding {
 	}
 
 	track(name: string, cb?: TrackCallback) {
-		let t = new Track(this.ac, this.synthUI.outNode)
+		let t = new Track(this.ac, this.synthUI.outNode, this.timer)
 		t.startTime = this.ac.currentTime + 0.1
 		t.name = name
 		if (tracks[name])
@@ -73,6 +75,13 @@ export class LiveCoding {
 
 	use_log(flag = true) {
 		logEnabled = flag
+	}
+
+	bpm(value?: number) {
+		if (value === undefined)
+			return this.timer.bpm
+		this.timer.bpm = value
+		return value
 	}
 }
 
@@ -100,7 +109,8 @@ export class Track {
 	gain: GainNode
 	eff: Effect
 
-	constructor(public ac: AudioContext, public out: AudioNode) {
+	constructor(public ac: AudioContext,
+		public out: AudioNode, public timer: Timer) {
 		this.gain = ac.createGain()
 		this.gain.connect(out)
 	}
@@ -151,7 +161,7 @@ export class Track {
 	}
 
 	sleep(time: number) {
-		this.time += time
+		this.time += time * 60 / this.timer.bpm
 		return this
 	}
 }

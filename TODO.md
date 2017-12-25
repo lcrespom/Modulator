@@ -31,6 +31,8 @@
 
 ## Live Coding
 - Synth API
+	- [x] BPM API
+		- Simplify note timing implementation
 	- [ ] Custom effect support: predefined and user-defined
 	- [ ] Improve parameter API
 		- [ ] Smarter code completion

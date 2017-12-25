@@ -3427,8 +3427,8 @@ class LiveCoding {
         this.ac = ac;
         this.presets = presets;
         this.synthUI = synthUI;
-        let timer = new __WEBPACK_IMPORTED_MODULE_1__synth_timer__["a" /* Timer */](ac, 60, 0.2);
-        timer.start(time => timerCB(timer, time));
+        this.timer = new __WEBPACK_IMPORTED_MODULE_1__synth_timer__["a" /* Timer */](ac, 60, 0.2);
+        this.timer.start(time => timerCB(this.timer, time));
     }
     instrument(preset, numVoices = 4) {
         let prst = getPreset(this.presets, preset);
@@ -3441,7 +3441,7 @@ class LiveCoding {
         return new Effect(this.ac, name);
     }
     track(name, cb) {
-        let t = new Track(this.ac, this.synthUI.outNode);
+        let t = new Track(this.ac, this.synthUI.outNode, this.timer);
         t.startTime = this.ac.currentTime + 0.1;
         t.name = name;
         if (tracks[name])
@@ -3460,13 +3460,20 @@ class LiveCoding {
     use_log(flag = true) {
         logEnabled = flag;
     }
+    bpm(value) {
+        if (value === undefined)
+            return this.timer.bpm;
+        this.timer.bpm = value;
+        return value;
+    }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = LiveCoding;
 
 class Track {
-    constructor(ac, out) {
+    constructor(ac, out, timer) {
         this.ac = ac;
         this.out = out;
+        this.timer = timer;
         this.notect = 0;
         this.notes = [];
         this.time = 0;
@@ -3516,7 +3523,7 @@ class Track {
         return this.params({ instrument: this.inst, [pname]: value });
     }
     sleep(time) {
-        this.time += time;
+        this.time += time * 60 / this.timer.bpm;
         return this;
     }
 }
@@ -3680,6 +3687,8 @@ interface LiveCoding {
 	loop_track(name: string, cb?: TrackCallback): Track
 	/** Enables or disables logging */
 	use_log(enable = true): void
+	/** Change global BPM */
+	bpm(value?: number): number
 }
 
 interface InstrumentOptions {
