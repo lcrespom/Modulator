@@ -51,10 +51,7 @@
 	- [x] Make synth use the velocity parameter in noteOn
 	- [ ] Prevent instrument and effect instances to be shared across tracks
 - Editor
-	- [ ] Do as with tracker
-		- [x] Use separate route and independent pages
-		- [ ] Make page layout take 100% of height
-		- [ ] Add more panels: diagram, log, tutorial, etc
+	- [ ] Add more panels: diagram, log, tutorial, etc
 	- [ ] Run current line
 	- [ ] Run selection
 	- [ ] Multiple editors / buffers
@@ -77,6 +74,9 @@
 	- [x] Add hover message to error marker
 	- [x] Capture runtime errors and highlight line number
 	- [x] Display error message on line hover
+- [x] Do as with tracker
+	- [x] Use separate route and independent pages
+	- [x] Make page layout take 100% of height
 - [ ] Quick fix errors (upon enter or alt+enter, look only at current line)
 	- [ ] Add function `()` and `,`
 	- [ ] Add array and object `,`

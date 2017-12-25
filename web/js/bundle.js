@@ -3292,8 +3292,8 @@ function createEditor(ac, presets, synthUI) {
             // fontSize: 15
         });
         handleEditorResize(editorElem);
-        handleEditorFocus(editorElem);
         registerActions();
+        preventParentScroll(editorElem);
         editor.focus();
         $(document).on('route:show', (e, h) => {
             if (h != '#live-coding')
@@ -3302,6 +3302,9 @@ function createEditor(ac, presets, synthUI) {
             window.scrollTo(0, 0);
         });
     });
+}
+function preventParentScroll(elem) {
+    $(elem).bind('mousewheel', e => e.preventDefault());
 }
 function setupDefinitions() {
     monaco.languages.typescript.
@@ -3318,23 +3321,14 @@ function registerActions() {
     });
 }
 function handleEditorResize(elem) {
-    let edh = elem.clientHeight;
     let edw = elem.clientWidth;
     setInterval(_ => {
-        let newH = elem.clientHeight;
         let newW = elem.clientWidth;
-        if (edh != newH || edw != newW) {
-            edh = newH;
+        if (edw != newW) {
             edw = newW;
             editor.layout();
         }
     }, 1000);
-}
-function handleEditorFocus(elem) {
-    editor.onDidFocusEditor(() => {
-        if (elem.parentElement)
-            elem.parentElement.scrollIntoView();
-    });
 }
 // -------------------- Error handling --------------------
 function getRuntimeErrorDecoration(lineNum) {

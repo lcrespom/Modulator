@@ -35,6 +35,24 @@ input.rounded {
 	margin: 10px 0;
 }
 
+#live-coding {
+	display: flex;
+	flex-direction: column;
+}
+
+#live-coding > .app-navbar {
+	flex: 0;
+}
+
+#live-coding > .main {
+	flex: 1;
+	width: 100%;
+}
+
+#page, #live-coding {
+	height: 100%;
+}
+
 .mod-no-outline {
 	outline: none;
 }
@@ -341,9 +359,8 @@ input[type=range][orient=vertical] {
 /*-------------------------------------------*/
 
 .walc-editor-box {
-	width: calc(100% - 3px);
-	height: 80ex;
-	resize: vertical;
+	width: calc(100% + 3px);
+	height: calc(100% - 20px);
 	overflow: hidden;
 }
 

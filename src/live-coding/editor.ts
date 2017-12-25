@@ -36,8 +36,8 @@ export function createEditor(
 			// fontSize: 15
 		})
 		handleEditorResize(editorElem)
-		handleEditorFocus(editorElem)
 		registerActions()
+		preventParentScroll(editorElem)
 		editor.focus()
 		$(document).on('route:show', (e, h) => {
 			if (h != '#live-coding') return
@@ -45,6 +45,10 @@ export function createEditor(
 			window.scrollTo(0, 0)
 		})
 	})
+}
+
+function preventParentScroll(elem: HTMLElement) {
+	$(elem).bind('mousewheel', e => e.preventDefault())
 }
 
 function setupDefinitions() {
@@ -64,24 +68,14 @@ function registerActions() {
 }
 
 function handleEditorResize(elem: HTMLElement) {
-	let edh = elem.clientHeight
 	let edw = elem.clientWidth
 	setInterval(_ => {
-		let newH = elem.clientHeight
 		let newW = elem.clientWidth
-		if (edh != newH || edw != newW) {
-			edh = newH
+		if (edw != newW) {
 			edw = newW
 			editor.layout()
 		}
 	}, 1000)
-}
-
-function handleEditorFocus(elem: HTMLElement) {
-	editor.onDidFocusEditor(() => {
-		if (elem.parentElement)
-			elem.parentElement.scrollIntoView()
-	})
 }
 
 
