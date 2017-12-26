@@ -51,19 +51,18 @@
 	- [ ] Prevent instrument and effect instances to be shared across tracks
 	- [ ] Smarter code completion for parameters, effect names, etc.
 - Editor
+	- [ ] Flash code to be run
 	- [ ] Add more panels: diagram, log, tutorial, etc
-	- [ ] Partial run
-		- [ ] Run current line
-		- [ ] Run selection
-		- [ ] Flash code to be run
 	- [ ] Multiple editors / buffers
 	- [ ] Button row
 		- [ ] Run code / Run line / Run selection / Stop sound
-			- Use window.editor.getModel().getValueInRange(window.editor.getSelection()) to get selected code
 		- [ ] Increase / decrease font
 		- [ ] Help / live coding API / tutorial
 		- [ ] Load / save code
 		- [ ] Enlarge editor
+	- [x] Partial run
+		- [x] Run current line
+		- [x] Run selection
 - [ ] Background canvas
 	- Canvas API
 	- WebGL / 3D Canvas

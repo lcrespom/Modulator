@@ -3312,12 +3312,20 @@ function setupDefinitions() {
 }
 function registerActions() {
     editor.addAction({
-        id: 'walc-run',
-        label: 'Run code',
+        id: 'walc-run-all',
+        label: 'Run all code',
         keybindings: [monaco.KeyMod.Alt | monaco.KeyCode.Enter],
         contextMenuGroupId: 'navigation',
         contextMenuOrder: 1,
-        run: doRunCode
+        run: runAllCode
+    });
+    editor.addAction({
+        id: 'walc-run-part',
+        label: 'Run current line or selection',
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+        contextMenuGroupId: 'navigation',
+        contextMenuOrder: 1,
+        run: runSomeCode
     });
 }
 function handleEditorResize(elem) {
@@ -3378,8 +3386,7 @@ function getErrorRange(s, col) {
     return { from: 0, to: s.length + 1 };
 }
 // -------------------- Code execution --------------------
-function doRunCode() {
-    let code = editor.getModel().getValue();
+function doRunCode(code) {
     try {
         decorations = editor.deltaDecorations(decorations, []);
         // tslint:disable-next-line:no-eval
@@ -3390,6 +3397,20 @@ function doRunCode() {
         if (location)
             showError(e.message, location.line, location.column);
     }
+}
+function runAllCode() {
+    doRunCode(editor.getModel().getValue());
+}
+function runSomeCode() {
+    let range = editor.getSelection();
+    let sel;
+    if (range.startLineNumber != range.endLineNumber
+        || range.startColumn != range.endColumn)
+        sel = editor.getModel().getValueInRange(range);
+    else
+        sel = editor.getModel().getLineContent(range.startLineNumber);
+    sel = '\n'.repeat(range.startLineNumber - 1) + sel;
+    doRunCode(sel);
 }
 
 
