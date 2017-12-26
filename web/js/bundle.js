@@ -3478,28 +3478,21 @@ class Track {
         this.time = 0;
         this.loop = false;
         this.velocity = 1;
-        this.gain = ac.createGain();
-        this.gain.connect(out);
+        this._gain = ac.createGain();
+        this._gain.connect(out);
+        this.lastGain = this._gain.gain.value;
         this.startTime = this.ac.currentTime;
     }
     instrument(inst) {
         for (let v of inst.voices) {
             v.synth.outGainNode.disconnect();
-            v.synth.outGainNode.connect(this.gain);
+            v.synth.outGainNode.connect(this._gain);
         }
         this.inst = inst;
         return this;
     }
     volume(v) {
         this.velocity = v;
-        return this;
-    }
-    effect(e) {
-        let dst = this.eff ? this.eff.out : this.gain;
-        dst.disconnect();
-        dst.connect(e.in);
-        e.out.connect(this.out);
-        this.eff = e;
         return this;
     }
     play(note = 64, duration, options) {
@@ -3523,6 +3516,27 @@ class Track {
     }
     sleep(time) {
         this.time += time * 60 / this.timer.bpm;
+        return this;
+    }
+    effect(e) {
+        let dst = this._effect ? this._effect.out : this._gain;
+        dst.disconnect();
+        dst.connect(e.in);
+        e.out.connect(this.out);
+        this._effect = e;
+        return this;
+    }
+    mute() {
+        this.lastGain = this._gain.gain.value;
+        this._gain.gain.value = 0;
+        return this;
+    }
+    unmute() {
+        this._gain.gain.value = this.lastGain;
+        return this;
+    }
+    gain(value) {
+        this._gain.gain.value = value;
         return this;
     }
 }
@@ -3557,10 +3571,13 @@ function getPreset(presets, preset) {
             throw new Error(`The preset number should be between 1 and ${maxPrst}`);
         return presets.presets[preset - 1];
     }
-    for (let prs of presets.presets)
-        if (prs.name == preset)
-            return prs;
-    throw new Error(`Preset "${preset}" does not exist`);
+    else if (typeof preset == 'string') {
+        for (let prs of presets.presets)
+            if (prs.name == preset)
+                return prs;
+        throw new Error(`Preset "${preset}" does not exist`);
+    }
+    return preset;
 }
 function findNoteDuration(preset) {
     let duration = 0;
@@ -3674,21 +3691,6 @@ interface Effect {
 
 type TrackCallback = (t: Track) => void;
 
-interface LiveCoding {
-	/** Creates an instrument from a preset name or number */
-	instrument(preset: string | number, numVoices?: number): Instrument
-	/** Creates an effect */
-	effect(name: string): Effect
-	/** Creates a named track */
-	track(name: string, cb?: TrackCallback): Track
-	/** Creates a looping track */
-	loop_track(name: string, cb?: TrackCallback): Track
-	/** Enables or disables logging */
-	use_log(enable = true): void
-	/** Change global BPM */
-	bpm(value?: number): number
-}
-
 interface InstrumentOptions {
 	instrument: LCInstrument
 	[k: string]: number | LCInstrument
@@ -3700,6 +3702,28 @@ interface EffectOptions {
 }
 
 type NoteOptions = InstrumentOptions | EffectOptions
+
+interface PresetData {
+	name: string
+	nodes: any[]
+	nodeData: any[]
+	modulatorType: string
+}
+
+interface LiveCoding {
+	/** Creates an instrument from a preset name, number or data */
+	instrument(preset: number | string | PresetData, numVoices?: number): Instrument
+	/** Creates an effect */
+	effect(name: string): Effect
+	/** Creates a named track */
+	track(name: string, cb?: TrackCallback): Track
+	/** Creates a looping track */
+	loop_track(name: string, cb?: TrackCallback): Track
+	/** Enables or disables logging */
+	use_log(enable = true): void
+	/** Change global BPM */
+	bpm(value?: number): number
+}
 
 interface Track {
 	/** Sets the instrument to play in the track */
@@ -3716,6 +3740,12 @@ interface Track {
 	params(options: NoteOptions): this
 	/** Waits the specified time in seconds before playing the next note */
 	sleep(time: number): this
+	/** Mutes track audio */
+	mute(): this
+	/** Unmutes track */
+	unmute(): this
+	/** Sets global gain for all notes */
+	gain(value: number): this
 }
 
 

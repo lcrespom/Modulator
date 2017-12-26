@@ -32,18 +32,16 @@
 ## Live Coding
 - Synth API
 	- [ ] Custom effect support: predefined and user-defined
-	- [ ] Improve parameter API
-		- [ ] Smarter code completion
-		- [ ] Single name: "node/param"
 	- [ ] Sample loading + playing API
 		- Use upload samples button - see https://davidwalsh.name/multiple-file-upload
 	- [ ] Track stop / global stop command
-	- [ ] Control global track gain node: master_volume, mute/unmute
+	- [ ] Track solo / unsolo
 	- [ ] Display live coding parameters in "Node Parameters" box (or new box)
 	- [ ] Copy from Sonic Pi
 		- [ ] Notes and scales
 		- [ ] Lists/rings
 		- [ ] Random helpers (shuffle, etc => use deterministic seed)
+	- [x] Control global track gain node: gain, mute/unmute
 	- [x] Set effect and instrument parameters according to track time
 	- [x] Effects API
 	- [x] Set instrument parameters
@@ -51,6 +49,7 @@
 	- [x] Make synth use the velocity parameter in noteOn
 	- [x] BPM API
 	- [ ] Prevent instrument and effect instances to be shared across tracks
+	- [ ] Smarter code completion for parameters, effect names, etc.
 - Editor
 	- [ ] Add more panels: diagram, log, tutorial, etc
 	- [ ] Run current line

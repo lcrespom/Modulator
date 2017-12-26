@@ -42,7 +42,7 @@ export class LiveCoding {
 		this.timer.start(time => timerCB(this.timer, time))
 	}
 
-	instrument(preset: string | number, numVoices = 4) {
+	instrument(preset: number | string | PresetData, numVoices = 4) {
 		let prst = getPreset(this.presets, preset)
 		let instr = new LCInstrument(
 			this.ac, prst, numVoices, this.synthUI.outNode)
@@ -107,20 +107,22 @@ export class Track {
 	name: string
 	inst: LCInstrument
 	velocity = 1
-	gain: GainNode
-	eff: Effect
+	_gain: GainNode
+	_effect: Effect
+	lastGain: number
 
 	constructor(public ac: AudioContext,
 		public out: AudioNode, public timer: Timer) {
-		this.gain = ac.createGain()
-		this.gain.connect(out)
+		this._gain = ac.createGain()
+		this._gain.connect(out)
+		this.lastGain = this._gain.gain.value
 		this.startTime = this.ac.currentTime
 	}
 
 	instrument(inst: LCInstrument) {
 		for (let v of inst.voices) {
 			v.synth.outGainNode.disconnect()
-			v.synth.outGainNode.connect(this.gain)
+			v.synth.outGainNode.connect(this._gain)
 		}
 		this.inst = inst
 		return this
@@ -128,15 +130,6 @@ export class Track {
 
 	volume(v: number) {
 		this.velocity = v
-		return this
-	}
-
-	effect(e: Effect) {
-		let dst = this.eff ? this.eff.out : this.gain
-		dst.disconnect()
-		dst.connect(e.in)
-		e.out.connect(this.out)
-		this.eff = e
 		return this
 	}
 
@@ -166,6 +159,32 @@ export class Track {
 		this.time += time * 60 / this.timer.bpm
 		return this
 	}
+
+	effect(e: Effect) {
+		let dst = this._effect ? this._effect.out : this._gain
+		dst.disconnect()
+		dst.connect(e.in)
+		e.out.connect(this.out)
+		this._effect = e
+		return this
+	}
+
+	mute() {
+		this.lastGain = this._gain.gain.value
+		this._gain.gain.value = 0
+		return this
+	}
+
+	unmute() {
+		this._gain.gain.value = this.lastGain
+		return this
+	}
+
+	gain(value: number) {
+		this._gain.gain.value = value
+		return this
+	}
+
 }
 
 export class Effect {
@@ -203,16 +222,26 @@ interface TrackTable {
 	[trackName: string]: Track
 }
 
-function getPreset(presets: Presets, preset: string | number) {
+interface PresetData {
+	name: string
+	nodes: any[]
+	nodeData: any[]
+	modulatorType: string
+}
+
+function getPreset(presets: Presets, preset: number | string | PresetData) {
 	if (typeof preset == 'number') {
 		let maxPrst = presets.presets.length
 		if (preset < 1 || preset > maxPrst)
 			throw new Error(`The preset number should be between 1 and ${maxPrst}`)
 		return presets.presets[preset - 1]
 	}
-	for (let prs of presets.presets)
+	else if (typeof preset == 'string') {
+		for (let prs of presets.presets)
 		if (prs.name == preset) return prs
-	throw new Error(`Preset "${preset}" does not exist`)
+		throw new Error(`Preset "${preset}" does not exist`)
+	}
+	return preset
 }
 
 function findNoteDuration(preset: any) {

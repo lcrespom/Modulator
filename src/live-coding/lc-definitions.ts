@@ -17,21 +17,6 @@ interface Effect {
 
 type TrackCallback = (t: Track) => void;
 
-interface LiveCoding {
-	/** Creates an instrument from a preset name or number */
-	instrument(preset: string | number, numVoices?: number): Instrument
-	/** Creates an effect */
-	effect(name: string): Effect
-	/** Creates a named track */
-	track(name: string, cb?: TrackCallback): Track
-	/** Creates a looping track */
-	loop_track(name: string, cb?: TrackCallback): Track
-	/** Enables or disables logging */
-	use_log(enable = true): void
-	/** Change global BPM */
-	bpm(value?: number): number
-}
-
 interface InstrumentOptions {
 	instrument: LCInstrument
 	[k: string]: number | LCInstrument
@@ -43,6 +28,28 @@ interface EffectOptions {
 }
 
 type NoteOptions = InstrumentOptions | EffectOptions
+
+interface PresetData {
+	name: string
+	nodes: any[]
+	nodeData: any[]
+	modulatorType: string
+}
+
+interface LiveCoding {
+	/** Creates an instrument from a preset name, number or data */
+	instrument(preset: number | string | PresetData, numVoices?: number): Instrument
+	/** Creates an effect */
+	effect(name: string): Effect
+	/** Creates a named track */
+	track(name: string, cb?: TrackCallback): Track
+	/** Creates a looping track */
+	loop_track(name: string, cb?: TrackCallback): Track
+	/** Enables or disables logging */
+	use_log(enable = true): void
+	/** Change global BPM */
+	bpm(value?: number): number
+}
 
 interface Track {
 	/** Sets the instrument to play in the track */
@@ -59,6 +66,12 @@ interface Track {
 	params(options: NoteOptions): this
 	/** Waits the specified time in seconds before playing the next note */
 	sleep(time: number): this
+	/** Mutes track audio */
+	mute(): this
+	/** Unmutes track */
+	unmute(): this
+	/** Sets global gain for all notes */
+	gain(value: number): this
 }
 
 
