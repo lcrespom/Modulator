@@ -52,8 +52,10 @@
 	- [ ] Smarter code completion for parameters, effect names, etc.
 - Editor
 	- [ ] Add more panels: diagram, log, tutorial, etc
-	- [ ] Run current line
-	- [ ] Run selection
+	- [ ] Partial run
+		- [ ] Run current line
+		- [ ] Run selection
+		- [ ] Flash code to be run
 	- [ ] Multiple editors / buffers
 	- [ ] Button row
 		- [ ] Run code / Run line / Run selection / Stop sound

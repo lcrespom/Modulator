@@ -3400,6 +3400,8 @@ function doRunCode() {
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_instrument__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__synth_timer__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__track__ = __webpack_require__(27);
+
 
 
 class LCInstrument extends __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /* Instrument */] {
@@ -3422,6 +3424,8 @@ class LCInstrument extends __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /
         return this;
     }
 }
+/* unused harmony export LCInstrument */
+
 class LiveCoding {
     constructor(ac, presets, synthUI) {
         this.ac = ac;
@@ -3441,7 +3445,7 @@ class LiveCoding {
         return new Effect(this.ac, name);
     }
     track(name, cb) {
-        let t = new Track(this.ac, this.synthUI.outNode, this.timer);
+        let t = new __WEBPACK_IMPORTED_MODULE_2__track__["a" /* Track */](this.ac, this.synthUI.outNode, this.timer);
         t.name = name;
         if (tracks[name])
             nextTracks[name] = t;
@@ -3467,80 +3471,6 @@ class LiveCoding {
     }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = LiveCoding;
-
-class Track {
-    constructor(ac, out, timer) {
-        this.ac = ac;
-        this.out = out;
-        this.timer = timer;
-        this.notect = 0;
-        this.notes = [];
-        this.time = 0;
-        this.loop = false;
-        this.velocity = 1;
-        this._gain = ac.createGain();
-        this._gain.connect(out);
-        this.lastGain = this._gain.gain.value;
-        this.startTime = this.ac.currentTime;
-    }
-    instrument(inst) {
-        for (let v of inst.voices) {
-            v.synth.outGainNode.disconnect();
-            v.synth.outGainNode.connect(this._gain);
-        }
-        this.inst = inst;
-        return this;
-    }
-    volume(v) {
-        this.velocity = v;
-        return this;
-    }
-    play(note = 64, duration, options) {
-        if (!this.inst)
-            throw new Error(`Must call instrument before playing a note or setting parameters`);
-        this.notes.push({
-            instrument: this.inst,
-            number: note,
-            time: this.time,
-            velocity: this.velocity,
-            duration,
-            options
-        });
-        return this;
-    }
-    params(options) {
-        return this.play(0, undefined, options);
-    }
-    param(pname, value) {
-        return this.params({ instrument: this.inst, [pname]: value });
-    }
-    sleep(time) {
-        this.time += time * 60 / this.timer.bpm;
-        return this;
-    }
-    effect(e) {
-        let dst = this._effect ? this._effect.out : this._gain;
-        dst.disconnect();
-        dst.connect(e.in);
-        e.out.connect(this.out);
-        this._effect = e;
-        return this;
-    }
-    mute() {
-        this.lastGain = this._gain.gain.value;
-        this._gain.gain.value = 0;
-        return this;
-    }
-    unmute() {
-        this._gain.gain.value = this.lastGain;
-        return this;
-    }
-    gain(value) {
-        this._gain.gain.value = value;
-        return this;
-    }
-}
-/* unused harmony export Track */
 
 class Effect {
     constructor(ac, name) {
@@ -3787,6 +3717,91 @@ function loadPages() {
         });
     });
 }
+
+
+/***/ }),
+/* 25 */,
+/* 26 */,
+/* 27 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+class Track {
+    constructor(ac, out, timer) {
+        this.ac = ac;
+        this.out = out;
+        this.timer = timer;
+        this.notect = 0;
+        this.notes = [];
+        this.time = 0;
+        this.loop = false;
+        this.velocity = 1;
+        this._gain = ac.createGain();
+        this._gain.connect(out);
+        this.lastGain = this._gain.gain.value;
+        this.startTime = this.ac.currentTime;
+    }
+    // ---------- Timed methods ----------
+    instrument(inst) {
+        for (let v of inst.voices) {
+            v.synth.outGainNode.disconnect();
+            v.synth.outGainNode.connect(this._gain);
+        }
+        this.inst = inst;
+        return this;
+    }
+    volume(v) {
+        this.velocity = v;
+        return this;
+    }
+    play(note = 64, duration, options) {
+        if (!this.inst)
+            throw new Error(`Must call instrument before playing a note or setting parameters`);
+        this.notes.push({
+            instrument: this.inst,
+            number: note,
+            time: this.time,
+            velocity: this.velocity,
+            duration,
+            options
+        });
+        return this;
+    }
+    params(options) {
+        return this.play(0, undefined, options);
+    }
+    param(pname, value) {
+        return this.params({ instrument: this.inst, [pname]: value });
+    }
+    sleep(time) {
+        this.time += time * 60 / this.timer.bpm;
+        return this;
+    }
+    // ----------Instantaneoous methods ----------
+    effect(e) {
+        let dst = this._effect ? this._effect.out : this._gain;
+        dst.disconnect();
+        dst.connect(e.in);
+        e.out.connect(this.out);
+        this._effect = e;
+        return this;
+    }
+    mute() {
+        this.lastGain = this._gain.gain.value;
+        this._gain.gain.value = 0;
+        return this;
+    }
+    unmute() {
+        this._gain.gain.value = this.lastGain;
+        return this;
+    }
+    gain(value) {
+        this._gain.gain.value = value;
+        return this;
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Track;
+
 
 
 /***/ })
