@@ -31,8 +31,6 @@
 
 ## Live Coding
 - Synth API
-	- [x] BPM API
-		- Simplify note timing implementation
 	- [ ] Custom effect support: predefined and user-defined
 	- [ ] Improve parameter API
 		- [ ] Smarter code completion
@@ -51,6 +49,7 @@
 	- [x] Set instrument parameters
 	- [x] Tracks with loops & loop update after end of current
 	- [x] Make synth use the velocity parameter in noteOn
+	- [x] BPM API
 	- [ ] Prevent instrument and effect instances to be shared across tracks
 - Editor
 	- [ ] Add more panels: diagram, log, tutorial, etc

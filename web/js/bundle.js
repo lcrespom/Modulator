@@ -3442,7 +3442,6 @@ class LiveCoding {
     }
     track(name, cb) {
         let t = new Track(this.ac, this.synthUI.outNode, this.timer);
-        t.startTime = this.ac.currentTime + 0.1;
         t.name = name;
         if (tracks[name])
             nextTracks[name] = t;
@@ -3477,11 +3476,11 @@ class Track {
         this.notect = 0;
         this.notes = [];
         this.time = 0;
-        this.startTime = 0;
         this.loop = false;
         this.velocity = 1;
         this.gain = ac.createGain();
         this.gain.connect(out);
+        this.startTime = this.ac.currentTime;
     }
     instrument(inst) {
         for (let v of inst.voices) {
@@ -3585,12 +3584,11 @@ function log(...args) {
     console.log(...args);
 }
 function timerCB(timer, time) {
-    let deltaT = time - timer.ac.currentTime;
     let tnames = Object.getOwnPropertyNames(tracks);
     for (let tname of tnames)
-        playTrack(timer, tracks[tname], deltaT);
+        playTrack(timer, tracks[tname], time);
 }
-function playTrack(timer, track, deltaT) {
+function playTrack(timer, track, time) {
     let played;
     do {
         played = false;
@@ -3598,23 +3596,23 @@ function playTrack(timer, track, deltaT) {
             break;
         track = tracks[track.name];
         let note = track.notes[track.notect];
-        if (track.startTime + note.time < timer.nextNoteTime) {
-            playNote(note, timer, track.startTime + deltaT);
+        if (track.startTime + note.time <= time) {
+            playNote(note, timer, track.startTime);
             played = true;
             track.notect++;
         }
     } while (played);
 }
-function playNote(note, timer, deltaT) {
+function playNote(note, timer, startTime) {
     if (note.options)
         setOptions(note.options);
     if (note.number < 1)
         return;
     log(`Note: ${note.number} - ${note.instrument.name}`);
-    note.instrument.noteOn(note.number, note.velocity, note.time + deltaT);
+    note.instrument.noteOn(note.number, note.velocity, startTime + note.time);
     let duration = note.duration
         || note.instrument.duration || timer.noteDuration;
-    note.instrument.noteOff(note.number, note.velocity, note.time + duration + deltaT);
+    note.instrument.noteOff(note.number, note.velocity, startTime + note.time + duration);
 }
 function setOptions(opts) {
     if (opts.effect) {
