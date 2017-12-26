@@ -52,7 +52,7 @@
 	- [ ] Smarter code completion for parameters, effect names, etc.
 - Editor
 	- [ ] Flash code to be run
-	- [ ] Add more panels: diagram, log, tutorial, etc
+	- [ ] Add more panels: osc, fft, log, tutorial, etc
 	- [ ] Multiple editors / buffers
 	- [ ] Button row
 		- [ ] Run code / Run line / Run selection / Stop sound
