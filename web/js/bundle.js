@@ -3924,6 +3924,8 @@ function registerActions(editor, monaco) {
 function registerButtons(editorActions) {
     $('#walc-font-sm').click(_ => editorActions.reduceFont());
     $('#walc-font-lg').click(_ => editorActions.enlargeFont());
+    $('#walc-run-all').click(_ => editorActions.runAllCode());
+    $('#walc-run-sel').click(_ => editorActions.runSomeCode());
 }
 class EditorActions {
     constructor(editor) {
