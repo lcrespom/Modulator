@@ -65,17 +65,7 @@ class EditorActions {
 
 	runSomeCode() {
 		let range = this.editor.getSelection()
-		let sel: string
-		if (range.startLineNumber != range.endLineNumber
-			|| range.startColumn != range.endColumn) {
-			sel = this.editor.getModel().getValueInRange(range)
-		}
-		else {
-			sel = this.editor.getModel().getLineContent(range.startLineNumber)
-			range.startColumn = 1
-			range.endColumn = sel.length + 1
-		}
-		sel = '\n'.repeat(range.startLineNumber - 1) + sel
+		let sel = this.getRange(range)
 		doRunCode(sel)
 		flashRange(range)
 	}
@@ -88,6 +78,20 @@ class EditorActions {
 
 	enlargeFont() {
 		this.editor.updateOptions({ fontSize: this.getFontSize() + 1 })
+	}
+
+	private getRange(range: any) {
+		let sel: string
+		if (range.startLineNumber != range.endLineNumber
+			|| range.startColumn != range.endColumn) {
+			sel = this.editor.getModel().getValueInRange(range)
+		}
+		else {
+			sel = this.editor.getModel().getLineContent(range.startLineNumber)
+			range.startColumn = 1
+			range.endColumn = sel.length + 1
+		}
+		return '\n'.repeat(range.startLineNumber - 1) + sel
 	}
 
 	private getFontSize() {

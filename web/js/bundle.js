@@ -3938,17 +3938,7 @@ class EditorActions {
     }
     runSomeCode() {
         let range = this.editor.getSelection();
-        let sel;
-        if (range.startLineNumber != range.endLineNumber
-            || range.startColumn != range.endColumn) {
-            sel = this.editor.getModel().getValueInRange(range);
-        }
-        else {
-            sel = this.editor.getModel().getLineContent(range.startLineNumber);
-            range.startColumn = 1;
-            range.endColumn = sel.length + 1;
-        }
-        sel = '\n'.repeat(range.startLineNumber - 1) + sel;
+        let sel = this.getRange(range);
         Object(__WEBPACK_IMPORTED_MODULE_0__editor__["b" /* doRunCode */])(sel);
         Object(__WEBPACK_IMPORTED_MODULE_0__editor__["c" /* flashRange */])(range);
     }
@@ -3960,6 +3950,19 @@ class EditorActions {
     }
     enlargeFont() {
         this.editor.updateOptions({ fontSize: this.getFontSize() + 1 });
+    }
+    getRange(range) {
+        let sel;
+        if (range.startLineNumber != range.endLineNumber
+            || range.startColumn != range.endColumn) {
+            sel = this.editor.getModel().getValueInRange(range);
+        }
+        else {
+            sel = this.editor.getModel().getLineContent(range.startLineNumber);
+            range.startColumn = 1;
+            range.endColumn = sel.length + 1;
+        }
+        return '\n'.repeat(range.startLineNumber - 1) + sel;
     }
     getFontSize() {
         return this.editor.getConfiguration().fontInfo.fontSize;
