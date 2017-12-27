@@ -131,10 +131,6 @@ export class Effect {
 
 // ---------- Helpers ----------
 
-interface TrackTable {
-	[trackName: string]: Track
-}
-
 interface PresetData {
 	name: string
 	nodes: any[]
@@ -182,7 +178,11 @@ export interface NoteInfo {
 	options?: NoteOptions
 }
 
-let tracks: TrackTable = {}
+interface TrackTable {
+	[trackName: string]: Track
+}
+
+export let tracks: TrackTable = {}
 let nextTracks: TrackTable = {}
 let logEnabled = false
 

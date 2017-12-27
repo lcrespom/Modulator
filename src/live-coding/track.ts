@@ -68,7 +68,7 @@ export class Track {
 	}
 
 
-	// ----------Instantaneoous methods ----------
+	// ----------Instantaneous methods ----------
 
 	effect(e: Effect) {
 		let dst = this._effect ? this._effect.out : this._gain

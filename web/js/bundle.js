@@ -3271,7 +3271,8 @@ function byId(id) {
     return document.getElementById(id) || sinkDiv;
 }
 // -------------------- Editor setup --------------------
-let monacoRequire = window.require;
+let global = window;
+let monacoRequire = global.require;
 let editor;
 let decorations = [];
 function loadMonaco(cb) {
@@ -3279,7 +3280,8 @@ function loadMonaco(cb) {
     monacoRequire(['vs/editor/editor.main'], cb);
 }
 function createEditor(ac, presets, synthUI) {
-    window.lc = new __WEBPACK_IMPORTED_MODULE_0__live_coding__["a" /* LiveCoding */](ac, presets, synthUI);
+    global.lc = new __WEBPACK_IMPORTED_MODULE_0__live_coding__["a" /* LiveCoding */](ac, presets, synthUI);
+    global.tracks = __WEBPACK_IMPORTED_MODULE_0__live_coding__["b" /* tracks */];
     loadMonaco(function () {
         let editorElem = byId('walc-code-editor');
         setupDefinitions();
@@ -3419,6 +3421,7 @@ function runSomeCode() {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return tracks; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_instrument__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__synth_timer__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__track__ = __webpack_require__(27);
@@ -3699,7 +3702,11 @@ interface Track {
 	gain(value: number): this
 }
 
+interface TrackTable {
+	[trackName: string]: Track
+}
 
+declare let tracks: TrackTable
 declare let lc: LiveCoding
 `;
 /* harmony export (immutable) */ __webpack_exports__["a"] = LC_DEFINITIONS;
@@ -3798,7 +3805,7 @@ class Track {
         this.time += time * 60 / this.timer.bpm;
         return this;
     }
-    // ----------Instantaneoous methods ----------
+    // ----------Instantaneous methods ----------
     effect(e) {
         let dst = this._effect ? this._effect.out : this._gain;
         dst.disconnect();

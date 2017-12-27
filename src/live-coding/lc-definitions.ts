@@ -74,6 +74,10 @@ interface Track {
 	gain(value: number): this
 }
 
+interface TrackTable {
+	[trackName: string]: Track
+}
 
+declare let tracks: TrackTable
 declare let lc: LiveCoding
 `
