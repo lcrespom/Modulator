@@ -174,14 +174,9 @@ function doRunCode(code: string) {
 }
 
 function runAllCode() {
-	doRunCode(editor.getModel().getValue())
-	let range = {
-		startColumn: 1,
-		endColumn: Number.MAX_SAFE_INTEGER,
-		startLineNumber: 1,
-		endLineNumber: Number.MAX_SAFE_INTEGER
-	}
-	flashRange(range)
+	let model = editor.getModel()
+	doRunCode(model.getValue())
+	flashRange(model.getFullModelRange())
 }
 
 function runSomeCode() {
