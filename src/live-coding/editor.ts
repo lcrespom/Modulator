@@ -3,7 +3,8 @@ import { SynthUI } from '../synthUI/synthUI'
 
 import { LiveCoding, tracks } from './live-coding'
 import { LC_DEFINITIONS } from './lc-definitions'
-import { registerButtons } from './buttons'
+import { registerActions } from './editor-actions'
+
 
 let sinkDiv = document.createElement('div')
 
@@ -40,10 +41,9 @@ export function createEditor(
 			// fontSize: 15
 		})
 		handleEditorResize(editorElem)
-		registerActions()
+		registerActions(editor, monaco)
 		preventParentScroll(editorElem)
 		editor.focus()
-		registerButtons(editor)
 		$(document).on('route:show', (e, h) => {
 			if (h != '#live-coding') return
 			editor.focus()
@@ -59,27 +59,6 @@ function preventParentScroll(elem: HTMLElement) {
 function setupDefinitions() {
 	monaco.languages.typescript.
 		typescriptDefaults.addExtraLib(LC_DEFINITIONS)
-}
-
-function registerActions() {
-	editor.addAction({
-		id: 'walc-run-all',
-		label: 'Run all code',
-		keybindings: [
-			monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter
-		],
-		contextMenuGroupId: 'navigation',
-		contextMenuOrder: 1,
-		run: runAllCode
-	})
-	editor.addAction({
-		id: 'walc-run-part',
-		label: 'Run current line or selection',
-		keybindings: [ monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter ],
-		contextMenuGroupId: 'navigation',
-		contextMenuOrder: 1,
-		run: runSomeCode
-	})
 }
 
 function handleEditorResize(elem: HTMLElement) {
@@ -147,7 +126,7 @@ function getErrorRange(s: string, col: number) {
 
 // -------------------- Code execution --------------------
 
-function flashRange(range: any) {
+export function flashRange(range: any) {
 	let decs: any[] = []
 	decs = editor.deltaDecorations(decs, [{
 		range,
@@ -164,7 +143,7 @@ function flashRange(range: any) {
 	}, 100)
 }
 
-function doRunCode(code: string) {
+export function doRunCode(code: string) {
 	try {
 		decorations = editor.deltaDecorations(decorations, [])
 		// tslint:disable-next-line:no-eval
@@ -174,27 +153,4 @@ function doRunCode(code: string) {
 		if (location)
 			showError(e.message, location.line, location.column)
 	}
-}
-
-function runAllCode() {
-	let model = editor.getModel()
-	doRunCode(model.getValue())
-	flashRange(model.getFullModelRange())
-}
-
-function runSomeCode() {
-	let range = editor.getSelection()
-	let sel: string
-	if (range.startLineNumber != range.endLineNumber
-		|| range.startColumn != range.endColumn) {
-		sel = editor.getModel().getValueInRange(range)
-	}
-	else {
-		sel = editor.getModel().getLineContent(range.startLineNumber)
-		range.startColumn = 1
-		range.endColumn = sel.length + 1
-	}
-	sel = '\n'.repeat(range.startLineNumber - 1) + sel
-	doRunCode(sel)
-	flashRange(range)
 }

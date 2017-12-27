@@ -3262,9 +3262,11 @@ class Presets {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = createEditor;
+/* harmony export (immutable) */ __webpack_exports__["c"] = flashRange;
+/* harmony export (immutable) */ __webpack_exports__["b"] = doRunCode;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__live_coding__ = __webpack_require__(22);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lc_definitions__ = __webpack_require__(23);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__buttons__ = __webpack_require__(28);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__editor_actions__ = __webpack_require__(29);
 
 
 
@@ -3296,10 +3298,9 @@ function createEditor(ac, presets, synthUI) {
             // fontSize: 15
         });
         handleEditorResize(editorElem);
-        registerActions();
+        Object(__WEBPACK_IMPORTED_MODULE_2__editor_actions__["a" /* registerActions */])(editor, monaco);
         preventParentScroll(editorElem);
         editor.focus();
-        Object(__WEBPACK_IMPORTED_MODULE_2__buttons__["a" /* registerButtons */])(editor);
         $(document).on('route:show', (e, h) => {
             if (h != '#live-coding')
                 return;
@@ -3314,26 +3315,6 @@ function preventParentScroll(elem) {
 function setupDefinitions() {
     monaco.languages.typescript.
         typescriptDefaults.addExtraLib(__WEBPACK_IMPORTED_MODULE_1__lc_definitions__["a" /* LC_DEFINITIONS */]);
-}
-function registerActions() {
-    editor.addAction({
-        id: 'walc-run-all',
-        label: 'Run all code',
-        keybindings: [
-            monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter
-        ],
-        contextMenuGroupId: 'navigation',
-        contextMenuOrder: 1,
-        run: runAllCode
-    });
-    editor.addAction({
-        id: 'walc-run-part',
-        label: 'Run current line or selection',
-        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
-        contextMenuGroupId: 'navigation',
-        contextMenuOrder: 1,
-        run: runSomeCode
-    });
 }
 function handleEditorResize(elem) {
     let edw = elem.clientWidth;
@@ -3422,27 +3403,6 @@ function doRunCode(code) {
         if (location)
             showError(e.message, location.line, location.column);
     }
-}
-function runAllCode() {
-    let model = editor.getModel();
-    doRunCode(model.getValue());
-    flashRange(model.getFullModelRange());
-}
-function runSomeCode() {
-    let range = editor.getSelection();
-    let sel;
-    if (range.startLineNumber != range.endLineNumber
-        || range.startColumn != range.endColumn) {
-        sel = editor.getModel().getValueInRange(range);
-    }
-    else {
-        sel = editor.getModel().getLineContent(range.startLineNumber);
-        range.startColumn = 1;
-        range.endColumn = sel.length + 1;
-    }
-    sel = '\n'.repeat(range.startLineNumber - 1) + sel;
-    doRunCode(sel);
-    flashRange(range);
 }
 
 
@@ -3909,29 +3869,35 @@ function loadPages() {
 
 
 /***/ }),
-/* 28 */
+/* 28 */,
+/* 29 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = registerButtons;
-function registerButtons(editor) {
-    $('#walc-font-sm').click(_ => reduceFont(editor));
-    $('#walc-font-lg').click(_ => enlargeFont(editor));
-    registerShortcuts(editor);
-}
-function reduceFont(editor) {
-    let fs = getFontSize(editor);
-    if (fs <= 1)
-        return;
-    editor.updateOptions({ fontSize: fs - 1 });
-}
-function enlargeFont(editor) {
-    editor.updateOptions({ fontSize: getFontSize(editor) + 1 });
-}
-function getFontSize(editor) {
-    return editor.getConfiguration().fontInfo.fontSize;
-}
-function registerShortcuts(editor) {
+/* harmony export (immutable) */ __webpack_exports__["a"] = registerActions;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__editor__ = __webpack_require__(21);
+
+function registerActions(editor, monaco) {
+    let editorActions = new EditorActions(editor);
+    registerButtons(editorActions);
+    editor.addAction({
+        id: 'walc-run-all',
+        label: 'Run all code',
+        keybindings: [
+            monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter
+        ],
+        contextMenuGroupId: 'navigation',
+        contextMenuOrder: 1,
+        run: () => editorActions.runAllCode()
+    });
+    editor.addAction({
+        id: 'walc-run-part',
+        label: 'Run current line or selection',
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+        contextMenuGroupId: 'navigation',
+        contextMenuOrder: 1,
+        run: () => editorActions.runSomeCode()
+    });
     editor.addAction({
         id: 'walc-font-sm',
         label: 'Reduce code font',
@@ -3941,7 +3907,7 @@ function registerShortcuts(editor) {
         ],
         contextMenuGroupId: 'navigation',
         contextMenuOrder: 2,
-        run: () => reduceFont(editor)
+        run: () => editorActions.reduceFont()
     });
     editor.addAction({
         id: 'walc-font-lg',
@@ -3952,8 +3918,50 @@ function registerShortcuts(editor) {
         ],
         contextMenuGroupId: 'navigation',
         contextMenuOrder: 2,
-        run: () => enlargeFont(editor)
+        run: () => editorActions.enlargeFont()
     });
+}
+function registerButtons(editorActions) {
+    $('#walc-font-sm').click(_ => editorActions.reduceFont());
+    $('#walc-font-lg').click(_ => editorActions.enlargeFont());
+}
+class EditorActions {
+    constructor(editor) {
+        this.editor = editor;
+    }
+    runAllCode() {
+        let model = this.editor.getModel();
+        Object(__WEBPACK_IMPORTED_MODULE_0__editor__["b" /* doRunCode */])(model.getValue());
+        Object(__WEBPACK_IMPORTED_MODULE_0__editor__["c" /* flashRange */])(model.getFullModelRange());
+    }
+    runSomeCode() {
+        let range = this.editor.getSelection();
+        let sel;
+        if (range.startLineNumber != range.endLineNumber
+            || range.startColumn != range.endColumn) {
+            sel = this.editor.getModel().getValueInRange(range);
+        }
+        else {
+            sel = this.editor.getModel().getLineContent(range.startLineNumber);
+            range.startColumn = 1;
+            range.endColumn = sel.length + 1;
+        }
+        sel = '\n'.repeat(range.startLineNumber - 1) + sel;
+        Object(__WEBPACK_IMPORTED_MODULE_0__editor__["b" /* doRunCode */])(sel);
+        Object(__WEBPACK_IMPORTED_MODULE_0__editor__["c" /* flashRange */])(range);
+    }
+    reduceFont() {
+        let fs = this.getFontSize();
+        if (fs <= 1)
+            return;
+        this.editor.updateOptions({ fontSize: fs - 1 });
+    }
+    enlargeFont() {
+        this.editor.updateOptions({ fontSize: this.getFontSize() + 1 });
+    }
+    getFontSize() {
+        return this.editor.getConfiguration().fontInfo.fontSize;
+    }
 }
 
 
