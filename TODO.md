@@ -55,11 +55,11 @@
 	- [ ] Add more panels: osc, fft, log, tutorial, etc
 	- [ ] Multiple editors / buffers
 	- [ ] Button row
-		- [x] Button layout
-		- [ ] Run code / Run line / Run selection / Stop sound
-		- [ ] Increase / decrease font
+		- [ ] Stop / pause / continue
 		- [ ] Help / live coding API / tutorial
 		- [ ] Upload / Download code
+		- [x] Run code / Run line|selection
+		- [x] Increase / decrease font
 	- [x] Partial run
 		- [x] Run current line
 		- [x] Run selection
