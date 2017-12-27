@@ -52,7 +52,6 @@
 	- [ ] Prevent instrument and effect instances to be shared across tracks
 	- [ ] Smarter code completion for parameters, effect names, etc.
 - Editor
-	- [ ] Flash code to be run
 	- [ ] Add more panels: osc, fft, log, tutorial, etc
 	- [ ] Multiple editors / buffers
 	- [ ] Button row
@@ -64,6 +63,7 @@
 	- [x] Partial run
 		- [x] Run current line
 		- [x] Run selection
+	- [x] Flash code to be run
 - [ ] Background canvas
 	- Canvas API
 	- WebGL / 3D Canvas

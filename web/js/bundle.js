@@ -1480,7 +1480,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__piano_noteInputs__ = __webpack_require__(15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__synthUI_presets__ = __webpack_require__(20);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__live_coding_editor__ = __webpack_require__(21);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_routes__ = __webpack_require__(24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_routes__ = __webpack_require__(25);
 /**
  * Main entry point: setup synth editor and keyboard listener.
  */
@@ -3263,7 +3263,7 @@ class Presets {
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = createEditor;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__live_coding__ = __webpack_require__(22);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lc_definitions__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lc_definitions__ = __webpack_require__(24);
 
 
 let sinkDiv = document.createElement('div');
@@ -3316,7 +3316,9 @@ function registerActions() {
     editor.addAction({
         id: 'walc-run-all',
         label: 'Run all code',
-        keybindings: [monaco.KeyMod.Alt | monaco.KeyCode.Enter],
+        keybindings: [
+            monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter
+        ],
         contextMenuGroupId: 'navigation',
         contextMenuOrder: 1,
         run: runAllCode
@@ -3346,7 +3348,7 @@ function getRuntimeErrorDecoration(lineNum) {
     if (!decs || decs.length <= 0)
         return null;
     for (let dec of decs)
-        if (dec.options.className == 'walc-error-line')
+        if (dec.options.className == 'walc-error')
             return dec;
     return null;
 }
@@ -3373,7 +3375,7 @@ function showError(msg, line, col) {
             range: new monaco.Range(line, errorRange.from, line, errorRange.to),
             options: {
                 isWholeLine: false,
-                className: 'walc-error-line',
+                className: 'walc-error',
                 hoverMessage: ['**Runtime Error**', msg]
             }
         }]);
@@ -3388,6 +3390,20 @@ function getErrorRange(s, col) {
     return { from: 0, to: s.length + 1 };
 }
 // -------------------- Code execution --------------------
+function flashRange(range) {
+    let decs = [];
+    decs = editor.deltaDecorations(decs, [{
+            range,
+            options: {
+                isWholeLine: false,
+                className: 'walc-running'
+            }
+        }]);
+    setTimeout(() => {
+        // TODO this probably removes runtime errors
+        decs = editor.deltaDecorations(decs, []);
+    }, 500);
+}
 function doRunCode(code) {
     try {
         decorations = editor.deltaDecorations(decorations, []);
@@ -3402,17 +3418,29 @@ function doRunCode(code) {
 }
 function runAllCode() {
     doRunCode(editor.getModel().getValue());
+    let range = {
+        startColumn: 1,
+        endColumn: Number.MAX_SAFE_INTEGER,
+        startLineNumber: 1,
+        endLineNumber: Number.MAX_SAFE_INTEGER
+    };
+    flashRange(range);
 }
 function runSomeCode() {
     let range = editor.getSelection();
     let sel;
     if (range.startLineNumber != range.endLineNumber
-        || range.startColumn != range.endColumn)
+        || range.startColumn != range.endColumn) {
         sel = editor.getModel().getValueInRange(range);
-    else
+    }
+    else {
         sel = editor.getModel().getLineContent(range.startLineNumber);
+        range.startColumn = 1;
+        range.endColumn = sel.length + 1;
+    }
     sel = '\n'.repeat(range.startLineNumber - 1) + sel;
     doRunCode(sel);
+    flashRange(range);
 }
 
 
@@ -3424,7 +3452,7 @@ function runSomeCode() {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return tracks; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_instrument__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__synth_timer__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__track__ = __webpack_require__(27);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__track__ = __webpack_require__(23);
 
 
 
@@ -3645,6 +3673,104 @@ function shouldTrackEnd(track) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+class Track {
+    constructor(ac, out, timer) {
+        this.ac = ac;
+        this.out = out;
+        this.timer = timer;
+        this.notect = 0;
+        this.notes = [];
+        this.time = 0;
+        this.loop = false;
+        this.velocity = 1;
+        this.shouldStop = false;
+        this.stopped = false;
+        this._gain = ac.createGain();
+        this._gain.connect(out);
+        this.lastGain = this._gain.gain.value;
+        this.startTime = this.ac.currentTime;
+    }
+    // ---------- Timed methods ----------
+    instrument(inst) {
+        for (let v of inst.voices) {
+            v.synth.outGainNode.disconnect();
+            v.synth.outGainNode.connect(this._gain);
+        }
+        this.inst = inst;
+        return this;
+    }
+    volume(v) {
+        this.velocity = v;
+        return this;
+    }
+    play(note = 64, duration, options) {
+        if (!this.inst)
+            throw new Error(`Must call instrument before playing a note or setting parameters`);
+        this.notes.push({
+            instrument: this.inst,
+            number: note,
+            time: this.time,
+            velocity: this.velocity,
+            duration,
+            options
+        });
+        return this;
+    }
+    params(options) {
+        return this.play(0, undefined, options);
+    }
+    param(pname, value) {
+        return this.params({ instrument: this.inst, [pname]: value });
+    }
+    sleep(time) {
+        this.time += time * 60 / this.timer.bpm;
+        return this;
+    }
+    stop() {
+        this.shouldStop = true;
+        return this;
+    }
+    pause() {
+        this.stopped = true;
+        return this;
+    }
+    continue() {
+        this.shouldStop = false;
+        this.stopped = false;
+        return this;
+    }
+    // ----------Instantaneous methods ----------
+    effect(e) {
+        let dst = this._effect ? this._effect.out : this._gain;
+        dst.disconnect();
+        dst.connect(e.in);
+        e.out.connect(this.out);
+        this._effect = e;
+        return this;
+    }
+    mute() {
+        this.lastGain = this._gain.gain.value;
+        this._gain.gain.value = 0;
+        return this;
+    }
+    unmute() {
+        this._gain.gain.value = this.lastGain;
+        return this;
+    }
+    gain(value) {
+        this._gain.gain.value = value;
+        return this;
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Track;
+
+
+
+/***/ }),
+/* 24 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 const LC_DEFINITIONS = `
 interface Instrument {
 	/** Name of the preset used to create the instrument */
@@ -3745,7 +3871,7 @@ declare let lc: LiveCoding
 
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3776,106 +3902,6 @@ function loadPages() {
         });
     });
 }
-
-
-/***/ }),
-/* 25 */,
-/* 26 */,
-/* 27 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-class Track {
-    constructor(ac, out, timer) {
-        this.ac = ac;
-        this.out = out;
-        this.timer = timer;
-        this.notect = 0;
-        this.notes = [];
-        this.time = 0;
-        this.loop = false;
-        this.velocity = 1;
-        this.shouldStop = false;
-        this.stopped = false;
-        this._gain = ac.createGain();
-        this._gain.connect(out);
-        this.lastGain = this._gain.gain.value;
-        this.startTime = this.ac.currentTime;
-    }
-    // ---------- Timed methods ----------
-    instrument(inst) {
-        for (let v of inst.voices) {
-            v.synth.outGainNode.disconnect();
-            v.synth.outGainNode.connect(this._gain);
-        }
-        this.inst = inst;
-        return this;
-    }
-    volume(v) {
-        this.velocity = v;
-        return this;
-    }
-    play(note = 64, duration, options) {
-        if (!this.inst)
-            throw new Error(`Must call instrument before playing a note or setting parameters`);
-        this.notes.push({
-            instrument: this.inst,
-            number: note,
-            time: this.time,
-            velocity: this.velocity,
-            duration,
-            options
-        });
-        return this;
-    }
-    params(options) {
-        return this.play(0, undefined, options);
-    }
-    param(pname, value) {
-        return this.params({ instrument: this.inst, [pname]: value });
-    }
-    sleep(time) {
-        this.time += time * 60 / this.timer.bpm;
-        return this;
-    }
-    stop() {
-        this.shouldStop = true;
-        return this;
-    }
-    pause() {
-        this.stopped = true;
-        return this;
-    }
-    continue() {
-        this.shouldStop = false;
-        this.stopped = false;
-        return this;
-    }
-    // ----------Instantaneous methods ----------
-    effect(e) {
-        let dst = this._effect ? this._effect.out : this._gain;
-        dst.disconnect();
-        dst.connect(e.in);
-        e.out.connect(this.out);
-        this._effect = e;
-        return this;
-    }
-    mute() {
-        this.lastGain = this._gain.gain.value;
-        this._gain.gain.value = 0;
-        return this;
-    }
-    unmute() {
-        this._gain.gain.value = this.lastGain;
-        return this;
-    }
-    gain(value) {
-        this._gain.gain.value = value;
-        return this;
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = Track;
-
 
 
 /***/ })

@@ -370,10 +370,10 @@ input[type=range][orient=vertical] {
 	height: 100%;
 }
 
-.walc-error-line {
+.walc-error {
 	background-color: #FA9;
 }
 
-/*.redsquiggly {
-	background-color: #FDB !important;
-}*/
+.walc-running {
+	background-color: lightgreen;
+}

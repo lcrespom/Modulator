@@ -63,7 +63,9 @@ function registerActions() {
 	editor.addAction({
 		id: 'walc-run-all',
 		label: 'Run all code',
-		keybindings: [ monaco.KeyMod.Alt | monaco.KeyCode.Enter ],
+		keybindings: [
+			monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter
+		],
 		contextMenuGroupId: 'navigation',
 		contextMenuOrder: 1,
 		run: runAllCode
@@ -96,7 +98,7 @@ function getRuntimeErrorDecoration(lineNum: number) {
 	let decs = editor.getLineDecorations(lineNum)
 	if (!decs || decs.length <= 0) return null
 	for (let dec of decs)
-		if (dec.options.className == 'walc-error-line') return dec
+		if (dec.options.className == 'walc-error') return dec
 	return null
 }
 
@@ -124,7 +126,7 @@ function showError(msg: string, line: number, col: number) {
 		range: new monaco.Range(line, errorRange.from, line, errorRange.to),
 		options: {
 			isWholeLine: false,
-			className: 'walc-error-line',
+			className: 'walc-error',
 			hoverMessage: ['**Runtime Error**', msg ]
 		}
 	}])
@@ -142,6 +144,21 @@ function getErrorRange(s: string, col: number) {
 
 // -------------------- Code execution --------------------
 
+function flashRange(range: any) {
+	let decs: any[] = []
+	decs = editor.deltaDecorations(decs, [{
+		range,
+		options: {
+			isWholeLine: false,
+			className: 'walc-running'
+		}
+	}])
+	setTimeout(() => {
+		// TODO this probably removes runtime errors
+		decs = editor.deltaDecorations(decs, [])
+	}, 500)
+}
+
 function doRunCode(code: string) {
 	try {
 		decorations = editor.deltaDecorations(decorations, [])
@@ -156,16 +173,28 @@ function doRunCode(code: string) {
 
 function runAllCode() {
 	doRunCode(editor.getModel().getValue())
+	let range = {
+		startColumn: 1,
+		endColumn: Number.MAX_SAFE_INTEGER,
+		startLineNumber: 1,
+		endLineNumber: Number.MAX_SAFE_INTEGER
+	}
+	flashRange(range)
 }
 
 function runSomeCode() {
 	let range = editor.getSelection()
 	let sel: string
 	if (range.startLineNumber != range.endLineNumber
-		|| range.startColumn != range.endColumn)
+		|| range.startColumn != range.endColumn) {
 		sel = editor.getModel().getValueInRange(range)
-	else
+	}
+	else {
 		sel = editor.getModel().getLineContent(range.startLineNumber)
+		range.startColumn = 1
+		range.endColumn = sel.length + 1
+	}
 	sel = '\n'.repeat(range.startLineNumber - 1) + sel
 	doRunCode(sel)
+	flashRange(range)
 }
