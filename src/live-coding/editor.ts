@@ -154,7 +154,6 @@ function flashRange(range: any) {
 		}
 	}])
 	setTimeout(() => {
-		// TODO this probably removes runtime errors
 		decs = editor.deltaDecorations(decs, [])
 	}, 500)
 }
