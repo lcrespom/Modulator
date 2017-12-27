@@ -49,6 +49,12 @@ interface LiveCoding {
 	use_log(enable = true): void
 	/** Change global BPM */
 	bpm(value?: number): number
+	/** Stops all looping track at the end of their loop */
+	stop(): this
+	/** Pauses all tracks at their current position */
+	pause(): this
+	/** Continues playback of stopped or paused tracks */
+	continue(): this
 }
 
 interface Track {
@@ -72,6 +78,12 @@ interface Track {
 	unmute(): this
 	/** Sets global gain for all notes */
 	gain(value: number): this
+	/** Stops a looping track at the end of the loop */
+	stop(): this
+	/** Pauses a track at its current position */
+	pause(): this
+	/** Continues playback of a stopped or paused track */
+	continue(): this
 }
 
 interface TrackTable {

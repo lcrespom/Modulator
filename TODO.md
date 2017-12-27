@@ -34,13 +34,14 @@
 	- [ ] Custom effect support: predefined and user-defined
 	- [ ] Sample loading + playing API
 		- Use upload samples button - see https://davidwalsh.name/multiple-file-upload
-	- [ ] Track stop / global stop command
 	- [ ] Track solo / unsolo
 	- [ ] Display live coding parameters in "Node Parameters" box (or new box)
 	- [ ] Copy from Sonic Pi
 		- [ ] Notes and scales
 		- [ ] Lists/rings
 		- [ ] Random helpers (shuffle, etc => use deterministic seed)
+	- [x] Global pause / stop / continue
+	- [x] Track stop / pause / continue
 	- [x] Control global track gain node: gain, mute/unmute
 	- [x] Set effect and instrument parameters according to track time
 	- [x] Effects API

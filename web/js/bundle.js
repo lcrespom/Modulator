@@ -3493,6 +3493,15 @@ class LiveCoding {
         this.timer.bpm = value;
         return value;
     }
+    stop() {
+        eachTrack(t => t.stop());
+    }
+    pause() {
+        eachTrack(t => t.pause());
+    }
+    continue() {
+        eachTrack(t => t.continue());
+    }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = LiveCoding;
 
@@ -3554,10 +3563,13 @@ function log(...args) {
         return;
     console.log(...args);
 }
-function timerCB(timer, time) {
+function eachTrack(cb) {
     let tnames = Object.getOwnPropertyNames(tracks);
     for (let tname of tnames)
-        playTrack(timer, tracks[tname], time);
+        cb(tracks[tname]);
+}
+function timerCB(timer, time) {
+    eachTrack(t => playTrack(timer, t, time));
 }
 function playTrack(timer, track, time) {
     let played;
@@ -3600,9 +3612,16 @@ function setOptions(opts) {
     }
 }
 function shouldTrackEnd(track) {
+    if (track.stopped)
+        return true;
     if (track.notect < track.notes.length)
         return false;
     track.notect = 0;
+    if (track.shouldStop) {
+        track.stopped = true;
+        track.shouldStop = false;
+        return true;
+    }
     if (nextTracks[track.name]) {
         let nextTrack = nextTracks[track.name];
         nextTrack.startTime = track.startTime + track.time;
@@ -3677,6 +3696,12 @@ interface LiveCoding {
 	use_log(enable = true): void
 	/** Change global BPM */
 	bpm(value?: number): number
+	/** Stops all looping track at the end of their loop */
+	stop(): this
+	/** Pauses all tracks at their current position */
+	pause(): this
+	/** Continues playback of stopped or paused tracks */
+	continue(): this
 }
 
 interface Track {
@@ -3700,6 +3725,12 @@ interface Track {
 	unmute(): this
 	/** Sets global gain for all notes */
 	gain(value: number): this
+	/** Stops a looping track at the end of the loop */
+	stop(): this
+	/** Pauses a track at its current position */
+	pause(): this
+	/** Continues playback of a stopped or paused track */
+	continue(): this
 }
 
 interface TrackTable {
@@ -3764,6 +3795,8 @@ class Track {
         this.time = 0;
         this.loop = false;
         this.velocity = 1;
+        this.shouldStop = false;
+        this.stopped = false;
         this._gain = ac.createGain();
         this._gain.connect(out);
         this.lastGain = this._gain.gain.value;
@@ -3803,6 +3836,19 @@ class Track {
     }
     sleep(time) {
         this.time += time * 60 / this.timer.bpm;
+        return this;
+    }
+    stop() {
+        this.shouldStop = true;
+        return this;
+    }
+    pause() {
+        this.stopped = true;
+        return this;
+    }
+    continue() {
+        this.shouldStop = false;
+        this.stopped = false;
         return this;
     }
     // ----------Instantaneous methods ----------

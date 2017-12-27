@@ -84,6 +84,18 @@ export class LiveCoding {
 		this.timer.bpm = value
 		return value
 	}
+
+	stop() {
+		eachTrack(t => t.stop())
+	}
+
+	pause() {
+		eachTrack(t => t.pause())
+	}
+
+	continue() {
+		eachTrack(t => t.continue())
+	}
 }
 
 
@@ -191,10 +203,14 @@ function log(...args: any[]) {
 	console.log(...args)
 }
 
-function timerCB(timer: Timer, time: number) {
+function eachTrack(cb: (t: Track) => void) {
 	let tnames = Object.getOwnPropertyNames(tracks)
 	for (let tname of tnames)
-		playTrack(timer, tracks[tname], time)
+		cb(tracks[tname])
+}
+
+function timerCB(timer: Timer, time: number) {
+	eachTrack(t => playTrack(timer, t, time))
 }
 
 function playTrack(timer: Timer, track: Track, time: number) {
@@ -238,8 +254,14 @@ function setOptions(opts: NoteOptions) {
 }
 
 function shouldTrackEnd(track: Track) {
+	if (track.stopped) return true
 	if (track.notect < track.notes.length) return false
 	track.notect = 0
+	if (track.shouldStop) {
+		track.stopped = true
+		track.shouldStop = false
+		return true
+	}
 	if (nextTracks[track.name]) {
 		let nextTrack = nextTracks[track.name]
 		nextTrack.startTime = track.startTime + track.time

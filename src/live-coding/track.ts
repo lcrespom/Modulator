@@ -14,6 +14,8 @@ export class Track {
 	_gain: GainNode
 	_effect: Effect
 	lastGain: number
+	shouldStop = false
+	stopped = false
 
 	constructor(public ac: AudioContext,
 		public out: AudioNode, public timer: Timer) {
@@ -67,6 +69,21 @@ export class Track {
 		return this
 	}
 
+	stop() {
+		this.shouldStop = true
+		return this
+	}
+
+	pause() {
+		this.stopped = true
+		return this
+	}
+
+	continue() {
+		this.shouldStop = false
+		this.stopped = false
+		return this
+	}
 
 	// ----------Instantaneous methods ----------
 
