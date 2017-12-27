@@ -3264,6 +3264,8 @@ class Presets {
 /* harmony export (immutable) */ __webpack_exports__["a"] = createEditor;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__live_coding__ = __webpack_require__(22);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lc_definitions__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__buttons__ = __webpack_require__(28);
+
 
 
 let sinkDiv = document.createElement('div');
@@ -3297,6 +3299,7 @@ function createEditor(ac, presets, synthUI) {
         registerActions();
         preventParentScroll(editorElem);
         editor.focus();
+        Object(__WEBPACK_IMPORTED_MODULE_2__buttons__["a" /* registerButtons */])(editor);
         $(document).on('route:show', (e, h) => {
             if (h != '#live-coding')
                 return;
@@ -3901,6 +3904,55 @@ function loadPages() {
             $('#live-coding').empty().append(data);
             resolve();
         });
+    });
+}
+
+
+/***/ }),
+/* 28 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = registerButtons;
+function registerButtons(editor) {
+    $('#walc-font-sm').click(_ => reduceFont(editor));
+    $('#walc-font-lg').click(_ => enlargeFont(editor));
+    registerShortcuts(editor);
+}
+function reduceFont(editor) {
+    let fs = getFontSize(editor);
+    if (fs <= 1)
+        return;
+    editor.updateOptions({ fontSize: fs - 1 });
+}
+function enlargeFont(editor) {
+    editor.updateOptions({ fontSize: getFontSize(editor) + 1 });
+}
+function getFontSize(editor) {
+    return editor.getConfiguration().fontInfo.fontSize;
+}
+function registerShortcuts(editor) {
+    editor.addAction({
+        id: 'walc-font-sm',
+        label: 'Reduce code font',
+        keybindings: [
+            monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.US_COMMA,
+            monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.US_MINUS
+        ],
+        contextMenuGroupId: 'navigation',
+        contextMenuOrder: 2,
+        run: () => reduceFont(editor)
+    });
+    editor.addAction({
+        id: 'walc-font-lg',
+        label: 'Enlarge code font',
+        keybindings: [
+            monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.US_DOT,
+            monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.US_EQUAL
+        ],
+        contextMenuGroupId: 'navigation',
+        contextMenuOrder: 2,
+        run: () => enlargeFont(editor)
     });
 }
 

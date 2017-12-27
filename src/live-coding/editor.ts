@@ -3,6 +3,7 @@ import { SynthUI } from '../synthUI/synthUI'
 
 import { LiveCoding, tracks } from './live-coding'
 import { LC_DEFINITIONS } from './lc-definitions'
+import { registerButtons } from './buttons'
 
 let sinkDiv = document.createElement('div')
 
@@ -42,6 +43,7 @@ export function createEditor(
 		registerActions()
 		preventParentScroll(editorElem)
 		editor.focus()
+		registerButtons(editor)
 		$(document).on('route:show', (e, h) => {
 			if (h != '#live-coding') return
 			editor.focus()
