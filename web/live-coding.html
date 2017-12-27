@@ -24,6 +24,34 @@
 <div class="main" id="walc">
 	<div class="walc-editor-box graph-box">
 		<h5 class="bg-primary box-header">Live Coding</h5>
+		<div class="walc-buttons">
+			<div>
+				<button id="walc-runall" class="btn btn-primary btn-xs" title="Run all code">
+					<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+				</button>
+				&nbsp;
+				<button id="walc-runsel" class="btn btn-primary btn-xs" title="Run current line or selection">
+					[<span class="glyphicon glyphicon-play" aria-hidden="true"></span>]
+				</button>
+				&nbsp;
+				<button id="walc-stop" class="btn btn-primary btn-xs" title="Stop all tracks">
+					<span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
+				</button>
+			</div>
+			<div>
+				<button id="walc-font-lg" class="btn btn-primary btn-xs" title="Decrease code font">
+					Font <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+				</button>
+				&nbsp;
+				<button id="walc-font-sm" class="btn btn-primary btn-xs" title="Increase code font">
+					Font <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+				</button>
+				&nbsp;
+				<button id="walc-help" class="btn btn-primary btn-xs" title="Live coding help">
+					<span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+				</button>
+			</div>
+		</div>
 		<div id="walc-code-editor"></div>
 	</div>
 </div>

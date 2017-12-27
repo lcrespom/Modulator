@@ -365,7 +365,6 @@ input[type=range][orient=vertical] {
 }
 
 #walc-code-editor {
-	padding-top: 3px;
 	width: 100%;
 	height: 100%;
 }
@@ -377,4 +376,16 @@ input[type=range][orient=vertical] {
 .walc-running {
 	background-color: rgb(91, 255, 91);
 	transition: background-color 0.7s ease-in;
+}
+
+.walc-buttons {
+	padding: 10px;
+	border-bottom: 1px solid #999;
+	display: flex;
+	justify-content: space-between;
+}
+
+.walc-buttons button {
+	min-width: 3em;
+	outline: none !important;
 }

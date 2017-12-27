@@ -108,6 +108,7 @@ function getErrorLocation(e: any) {
 		return { line: e.line, column: e.column }
 	// Chrome: <anonymous>
 	// Firefox: > eval
+	if (!e.stack) return null
 	let match = e.stack.match(/(<anonymous>|> eval):(\d+):(\d+)/)
 	if (match && match.length == 4) {
 		return {
