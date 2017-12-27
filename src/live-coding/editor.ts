@@ -153,9 +153,12 @@ function flashRange(range: any) {
 			className: 'walc-running'
 		}
 	}])
-	setTimeout(() => {
-		decs = editor.deltaDecorations(decs, [])
-	}, 500)
+	setTimeout(_ => {
+		$('.walc-running').css('background-color', 'inherit')
+		setTimeout(() => {
+			decs = editor.deltaDecorations(decs, [])
+		}, 1000)
+	}, 100)
 }
 
 function doRunCode(code: string) {

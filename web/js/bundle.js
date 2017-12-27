@@ -3399,10 +3399,12 @@ function flashRange(range) {
                 className: 'walc-running'
             }
         }]);
-    setTimeout(() => {
-        // TODO this probably removes runtime errors
-        decs = editor.deltaDecorations(decs, []);
-    }, 500);
+    setTimeout(_ => {
+        $('.walc-running').css('background-color', 'inherit');
+        setTimeout(() => {
+            decs = editor.deltaDecorations(decs, []);
+        }, 1000);
+    }, 100);
 }
 function doRunCode(code) {
     try {

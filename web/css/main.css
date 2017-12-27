@@ -375,5 +375,6 @@ input[type=range][orient=vertical] {
 }
 
 .walc-running {
-	background-color: lightgreen;
+	background-color: rgb(91, 255, 91);
+	transition: background-color 0.7s ease-in;
 }
