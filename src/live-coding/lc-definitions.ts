@@ -57,23 +57,9 @@ interface LiveCoding {
 	continue(): this
 }
 
-interface Track {
-	/** Sets the instrument to play in the track */
-	instrument(inst: Instrument): this
+interface TrackControl {
 	/** Adds an effect to the track. All sound played in the track will be altered by the effect */
 	effect(e: Effect): this
-	/** Sets the volume to use in the track */
-	volume(v: number): this
-	/** Plays a given note */
-	play(note: number, duration?: number, options?: NoteOptions): this
-	/** Transposes notes the specified amount */
-	transpose(notes: number): this
-	/** Changes a parameter of the current instrument */
-	param(pname: string, value: number): this
-	/** Changes parameters of instrument or effect */
-	params(options: NoteOptions): this
-	/** Waits the specified time in seconds before playing the next note */
-	sleep(time: number): this
 	/** Mutes track audio */
 	mute(): this
 	/** Unmutes track */
@@ -88,8 +74,28 @@ interface Track {
 	continue(): this
 }
 
+interface Track {
+	/** Sets the instrument to play in the track */
+	instrument(inst: Instrument): this
+	/** Adds an effect to the track. All sound played in the track will be immediately
+	altered by the effect */
+	effect(e: Effect): this
+	/** Sets the volume to use in the track */
+	volume(v: number): this
+	/** Plays a given note */
+	play(note: number, duration?: number, options?: NoteOptions): this
+	/** Transposes notes the specified amount */
+	transpose(notes: number): this
+	/** Changes a parameter of the current instrument */
+	param(pname: string, value: number): this
+	/** Changes parameters of instrument or effect */
+	params(options: NoteOptions): this
+	/** Waits the specified time in seconds before playing the next note */
+	sleep(time: number): this
+}
+
 interface TrackTable {
-	[trackName: string]: Track
+	[trackName: string]: TrackControl
 }
 
 declare let tracks: TrackTable

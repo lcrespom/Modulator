@@ -3703,23 +3703,9 @@ interface LiveCoding {
 	continue(): this
 }
 
-interface Track {
-	/** Sets the instrument to play in the track */
-	instrument(inst: Instrument): this
+interface TrackControl {
 	/** Adds an effect to the track. All sound played in the track will be altered by the effect */
 	effect(e: Effect): this
-	/** Sets the volume to use in the track */
-	volume(v: number): this
-	/** Plays a given note */
-	play(note: number, duration?: number, options?: NoteOptions): this
-	/** Transposes notes the specified amount */
-	transpose(notes: number): this
-	/** Changes a parameter of the current instrument */
-	param(pname: string, value: number): this
-	/** Changes parameters of instrument or effect */
-	params(options: NoteOptions): this
-	/** Waits the specified time in seconds before playing the next note */
-	sleep(time: number): this
 	/** Mutes track audio */
 	mute(): this
 	/** Unmutes track */
@@ -3734,8 +3720,28 @@ interface Track {
 	continue(): this
 }
 
+interface Track {
+	/** Sets the instrument to play in the track */
+	instrument(inst: Instrument): this
+	/** Adds an effect to the track. All sound played in the track will be immediately
+	altered by the effect */
+	effect(e: Effect): this
+	/** Sets the volume to use in the track */
+	volume(v: number): this
+	/** Plays a given note */
+	play(note: number, duration?: number, options?: NoteOptions): this
+	/** Transposes notes the specified amount */
+	transpose(notes: number): this
+	/** Changes a parameter of the current instrument */
+	param(pname: string, value: number): this
+	/** Changes parameters of instrument or effect */
+	params(options: NoteOptions): this
+	/** Waits the specified time in seconds before playing the next note */
+	sleep(time: number): this
+}
+
 interface TrackTable {
-	[trackName: string]: Track
+	[trackName: string]: TrackControl
 }
 
 declare let tracks: TrackTable
@@ -3759,32 +3765,74 @@ declare let lc: LiveCoding
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-class Track {
+class TrackControl {
     constructor(ac, out, timer) {
         this.ac = ac;
         this.out = out;
         this.timer = timer;
+        this.shouldStop = false;
+        this.stopped = false;
+        this._gain = ac.createGain();
+        this._gain.connect(out);
+        this.lastGain = this._gain.gain.value;
+        this.startTime = this.ac.currentTime;
+    }
+    mute() {
+        this.lastGain = this._gain.gain.value;
+        this._gain.gain.value = 1e-5;
+        return this;
+    }
+    unmute() {
+        this._gain.gain.value = this.lastGain;
+        return this;
+    }
+    gain(value, rampTime) {
+        if (value < 1e-5)
+            value = 1e-5;
+        if (rampTime === undefined)
+            this._gain.gain.value = value;
+        else
+            this._gain.gain.exponentialRampToValueAtTime(value, this.ac.currentTime + rampTime);
+        return this;
+    }
+    stop() {
+        this.shouldStop = true;
+        return this;
+    }
+    pause() {
+        this.stopped = true;
+        return this;
+    }
+    continue() {
+        this.shouldStop = false;
+        this.stopped = false;
+        return this;
+    }
+}
+class Track extends TrackControl {
+    constructor() {
+        super(...arguments);
         this.notect = 0;
         this.notes = [];
         this.time = 0;
         this.loop = false;
         this.velocity = 1;
-        this.shouldStop = false;
-        this.stopped = false;
         this._transpose = 0;
-        this._gain = ac.createGain();
-        this._gain.connect(out);
-        this.lastGain = this._gain.gain.value;
-        this.startTime = this.ac.currentTime;
-        this.effects = {};
     }
-    // ---------- Timed methods ----------
     instrument(inst) {
         for (let v of inst.voices) {
             v.synth.outGainNode.disconnect();
             v.synth.outGainNode.connect(this._gain);
         }
         this.inst = inst;
+        return this;
+    }
+    effect(e) {
+        let dst = this._effect ? this._effect.out : this._gain;
+        dst.disconnect();
+        dst.connect(e.in);
+        e.out.connect(this.out);
+        this._effect = e;
         return this;
     }
     volume(v) {
@@ -3816,46 +3864,6 @@ class Track {
     }
     sleep(time) {
         this.time += time * 60 / this.timer.bpm;
-        return this;
-    }
-    stop() {
-        this.shouldStop = true;
-        return this;
-    }
-    pause() {
-        this.stopped = true;
-        return this;
-    }
-    continue() {
-        this.shouldStop = false;
-        this.stopped = false;
-        return this;
-    }
-    // ----------Instantaneous methods ----------
-    effect(e) {
-        let dst = this._effect ? this._effect.out : this._gain;
-        dst.disconnect();
-        dst.connect(e.in);
-        e.out.connect(this.out);
-        this._effect = e;
-        return this;
-    }
-    mute() {
-        this.lastGain = this._gain.gain.value;
-        this._gain.gain.value = 1e-5;
-        return this;
-    }
-    unmute() {
-        this._gain.gain.value = this.lastGain;
-        return this;
-    }
-    gain(value, rampTime) {
-        if (value < 1e-5)
-            value = 1e-5;
-        if (rampTime === undefined)
-            this._gain.gain.value = value;
-        else
-            this._gain.gain.exponentialRampToValueAtTime(value, this.ac.currentTime + rampTime);
         return this;
     }
 }

@@ -2,26 +2,13 @@ import { Timer } from '../synth/timer'
 
 import { LCInstrument, Effect, NoteInfo, NoteOptions } from 'live-coding'
 
-interface MapLike<T> {
-	[key: string]: T
-}
 
-export class Track {
-	notect = 0
-	notes: NoteInfo[] = []
-	time = 0
-	startTime: number
-	loop = false
-	name: string
-	inst: LCInstrument
-	velocity = 1
+class TrackControl {
 	_gain: GainNode
-	_effect: Effect
-	effects: MapLike<Effect>
 	lastGain: number
+	startTime: number
 	shouldStop = false
 	stopped = false
-	_transpose = 0
 
 	constructor(public ac: AudioContext,
 		public out: AudioNode, public timer: Timer) {
@@ -29,11 +16,59 @@ export class Track {
 		this._gain.connect(out)
 		this.lastGain = this._gain.gain.value
 		this.startTime = this.ac.currentTime
-		this.effects = {}
 	}
 
+	mute() {
+		this.lastGain = this._gain.gain.value
+		this._gain.gain.value = 1e-5
+		return this
+	}
 
-	// ---------- Timed methods ----------
+	unmute() {
+		this._gain.gain.value = this.lastGain
+		return this
+	}
+
+	gain(value: number, rampTime?: number) {
+		if (value < 1e-5) value = 1e-5
+		if (rampTime === undefined)
+			this._gain.gain.value = value
+		else
+			this._gain.gain.exponentialRampToValueAtTime(
+				value, this.ac.currentTime + rampTime
+			)
+		return this
+	}
+
+	stop() {
+		this.shouldStop = true
+		return this
+	}
+
+	pause() {
+		this.stopped = true
+		return this
+	}
+
+	continue() {
+		this.shouldStop = false
+		this.stopped = false
+		return this
+	}
+
+}
+
+
+export class Track extends TrackControl {
+	notect = 0
+	notes: NoteInfo[] = []
+	time = 0
+	loop = false
+	name: string
+	inst: LCInstrument
+	velocity = 1
+	_effect: Effect
+	_transpose = 0
 
 	instrument(inst: LCInstrument) {
 		for (let v of inst.voices) {
@@ -41,6 +76,15 @@ export class Track {
 			v.synth.outGainNode.connect(this._gain)
 		}
 		this.inst = inst
+		return this
+	}
+
+	effect(e: Effect) {
+		let dst = this._effect ? this._effect.out : this._gain
+		dst.disconnect()
+		dst.connect(e.in)
+		e.out.connect(this.out)
+		this._effect = e
 		return this
 	}
 
@@ -78,55 +122,6 @@ export class Track {
 
 	sleep(time: number) {
 		this.time += time * 60 / this.timer.bpm
-		return this
-	}
-
-	stop() {
-		this.shouldStop = true
-		return this
-	}
-
-	pause() {
-		this.stopped = true
-		return this
-	}
-
-	continue() {
-		this.shouldStop = false
-		this.stopped = false
-		return this
-	}
-
-	// ----------Instantaneous methods ----------
-
-	effect(e: Effect) {
-		let dst = this._effect ? this._effect.out : this._gain
-		dst.disconnect()
-		dst.connect(e.in)
-		e.out.connect(this.out)
-		this._effect = e
-		return this
-	}
-
-	mute() {
-		this.lastGain = this._gain.gain.value
-		this._gain.gain.value = 1e-5
-		return this
-	}
-
-	unmute() {
-		this._gain.gain.value = this.lastGain
-		return this
-	}
-
-	gain(value: number, rampTime?: number) {
-		if (value < 1e-5) value = 1e-5
-		if (rampTime === undefined)
-			this._gain.gain.value = value
-		else
-			this._gain.gain.exponentialRampToValueAtTime(
-				value, this.ac.currentTime + rampTime
-			)
 		return this
 	}
 
