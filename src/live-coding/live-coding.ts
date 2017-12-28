@@ -53,8 +53,10 @@ export class LiveCoding {
 		return instr
 	}
 
-	effect(name: string) {
-		return new Effect(this.ac, name)
+	effect(name: string, newName?: string) {
+		let eff = new Effect(this.ac, name)
+		effects[newName || name] = eff
+		return eff
 	}
 
 	track(name: string, cb?: TrackCallback) {
@@ -113,12 +115,10 @@ export type NoteOptions = InstrumentOptions | EffectOptions
 
 
 export class Effect {
-	name: string
 	in: AudioNode
 	out: AudioNode
 
-	constructor(private ac: AudioContext, name: string) {
-		this.name = name
+	constructor(private ac: AudioContext, public name: string) {
 		let methodName = 'create' + name
 		let anyac: any = ac
 		if (!anyac[methodName])
@@ -193,10 +193,15 @@ export interface NoteInfo {
 	options?: NoteOptions
 }
 
+interface EffectTable {
+	[effectName: string]: Effect
+}
+
 interface TrackTable {
 	[trackName: string]: Track
 }
 
+export let effects: EffectTable = {}
 export let tracks: TrackTable = {}
 let nextTracks: TrackTable = {}
 let logEnabled = false

@@ -1480,7 +1480,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__piano_noteInputs__ = __webpack_require__(15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__synthUI_presets__ = __webpack_require__(20);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__live_coding_editor__ = __webpack_require__(21);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_routes__ = __webpack_require__(24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_routes__ = __webpack_require__(27);
 /**
  * Main entry point: setup synth editor and keyboard listener.
  */
@@ -3266,7 +3266,7 @@ class Presets {
 /* harmony export (immutable) */ __webpack_exports__["b"] = doRunCode;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__live_coding__ = __webpack_require__(22);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lc_definitions__ = __webpack_require__(23);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__editor_actions__ = __webpack_require__(28);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__editor_actions__ = __webpack_require__(29);
 
 
 
@@ -3285,7 +3285,8 @@ function loadMonaco(cb) {
 }
 function createEditor(ac, presets, synthUI) {
     global.lc = new __WEBPACK_IMPORTED_MODULE_0__live_coding__["a" /* LiveCoding */](ac, presets, synthUI);
-    global.tracks = __WEBPACK_IMPORTED_MODULE_0__live_coding__["b" /* tracks */];
+    global.tracks = __WEBPACK_IMPORTED_MODULE_0__live_coding__["c" /* tracks */];
+    global.effects = __WEBPACK_IMPORTED_MODULE_0__live_coding__["b" /* effects */];
     loadMonaco(function () {
         let editorElem = byId('walc-code-editor');
         setupDefinitions();
@@ -3411,10 +3412,11 @@ function doRunCode(code) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return tracks; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return effects; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return tracks; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_instrument__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__synth_timer__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__track__ = __webpack_require__(27);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__track__ = __webpack_require__(26);
 
 
 
@@ -3455,8 +3457,10 @@ class LiveCoding {
         instr.duration = findNoteDuration(prst);
         return instr;
     }
-    effect(name) {
-        return new Effect(this.ac, name);
+    effect(name, newName) {
+        let eff = new Effect(this.ac, name);
+        effects[newName || name] = eff;
+        return eff;
     }
     track(name, cb) {
         let t = new __WEBPACK_IMPORTED_MODULE_2__track__["a" /* Track */](this.ac, this.synthUI.outNode, this.timer);
@@ -3549,6 +3553,7 @@ function findNoteDuration(preset) {
         duration += 0.01;
     return duration;
 }
+let effects = {};
 let tracks = {};
 let nextTracks = {};
 let logEnabled = false;
@@ -3681,7 +3686,7 @@ interface LiveCoding {
 	/** Creates an instrument from a preset name, number or data */
 	instrument(preset: number | string | PresetData, numVoices?: number): Instrument
 	/** Creates an effect */
-	effect(name: string): Effect
+	effect(name: string, newName?: string): Effect
 	/** Creates a named track */
 	track(name: string, cb?: TrackCallback): Track
 	/** Creates a looping track */
@@ -3702,7 +3707,7 @@ interface Track {
 	/** Sets the instrument to play in the track */
 	instrument(inst: Instrument): this
 	/** Adds an effect to the track. All sound played in the track will be altered by the effect */
-	effect(e: Effect | string, name?: string): Effect
+	effect(e: Effect): this
 	/** Sets the volume to use in the track */
 	volume(v: number): this
 	/** Plays a given note */
@@ -3732,6 +3737,13 @@ interface TrackTable {
 }
 
 declare let tracks: TrackTable
+
+interface EffectTable {
+	[effectName: string]: Effect
+}
+
+declare let effects: EffectTable
+
 declare let lc: LiveCoding
 `;
 /* harmony export (immutable) */ __webpack_exports__["a"] = LC_DEFINITIONS;
@@ -3739,43 +3751,9 @@ declare let lc: LiveCoding
 
 
 /***/ }),
-/* 24 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = setupRoutes;
-let oldPage;
-let mainRoute;
-function setupRoutes(initialRoute) {
-    window.onhashchange = showPageFromHash;
-    mainRoute = initialRoute;
-    showPageFromHash();
-    return loadPages();
-}
-function showPageFromHash() {
-    const hash = location.hash || mainRoute;
-    $('#page > div').hide();
-    $(hash).show().css('outline', 'none').focus();
-    if (oldPage)
-        $(document).trigger('route:hide', oldPage);
-    $(document).trigger('route:show', hash);
-    oldPage = hash;
-    window.scrollTo(0, 0);
-}
-function loadPages() {
-    return new Promise(resolve => {
-        $.get('live-coding.html', data => {
-            $('#live-coding').empty().append(data);
-            resolve();
-        });
-    });
-}
-
-
-/***/ }),
+/* 24 */,
 /* 25 */,
-/* 26 */,
-/* 27 */
+/* 26 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3847,21 +3825,13 @@ class Track {
         return this;
     }
     // ----------Instantaneous methods ----------
-    effect(e, name) {
-        if (typeof e == 'string') {
-            let eff = this.effects[e];
-            if (!eff)
-                throw new Error(`Effect ${e} not found in track`);
-            return eff;
-        }
+    effect(e) {
         let dst = this._effect ? this._effect.out : this._gain;
         dst.disconnect();
         dst.connect(e.in);
         e.out.connect(this.out);
         this._effect = e;
-        if (name)
-            this.effects[name] = e;
-        return e;
+        return this;
     }
     mute() {
         this.lastGain = this._gain.gain.value;
@@ -3887,7 +3857,42 @@ class Track {
 
 
 /***/ }),
-/* 28 */
+/* 27 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = setupRoutes;
+let oldPage;
+let mainRoute;
+function setupRoutes(initialRoute) {
+    window.onhashchange = showPageFromHash;
+    mainRoute = initialRoute;
+    showPageFromHash();
+    return loadPages();
+}
+function showPageFromHash() {
+    const hash = location.hash || mainRoute;
+    $('#page > div').hide();
+    $(hash).show().css('outline', 'none').focus();
+    if (oldPage)
+        $(document).trigger('route:hide', oldPage);
+    $(document).trigger('route:show', hash);
+    oldPage = hash;
+    window.scrollTo(0, 0);
+}
+function loadPages() {
+    return new Promise(resolve => {
+        $.get('live-coding.html', data => {
+            $('#live-coding').empty().append(data);
+            resolve();
+        });
+    });
+}
+
+
+/***/ }),
+/* 28 */,
+/* 29 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";

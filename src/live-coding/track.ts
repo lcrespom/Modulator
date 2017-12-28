@@ -93,19 +93,13 @@ export class Track {
 
 	// ----------Instantaneous methods ----------
 
-	effect(e: Effect | string, name?: string) {
-		if (typeof e == 'string') {
-			let eff = this.effects[e]
-			if (!eff) throw new Error(`Effect ${e} not found in track`)
-			return eff
-		}
+	effect(e: Effect) {
 		let dst = this._effect ? this._effect.out : this._gain
 		dst.disconnect()
 		dst.connect(e.in)
 		e.out.connect(this.out)
 		this._effect = e
-		if (name) this.effects[name] = e
-		return e
+		return this
 	}
 
 	mute() {

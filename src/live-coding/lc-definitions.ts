@@ -40,7 +40,7 @@ interface LiveCoding {
 	/** Creates an instrument from a preset name, number or data */
 	instrument(preset: number | string | PresetData, numVoices?: number): Instrument
 	/** Creates an effect */
-	effect(name: string): Effect
+	effect(name: string, newName?: string): Effect
 	/** Creates a named track */
 	track(name: string, cb?: TrackCallback): Track
 	/** Creates a looping track */
@@ -61,7 +61,7 @@ interface Track {
 	/** Sets the instrument to play in the track */
 	instrument(inst: Instrument): this
 	/** Adds an effect to the track. All sound played in the track will be altered by the effect */
-	effect(e: Effect | string, name?: string): Effect
+	effect(e: Effect): this
 	/** Sets the volume to use in the track */
 	volume(v: number): this
 	/** Plays a given note */
@@ -91,5 +91,12 @@ interface TrackTable {
 }
 
 declare let tracks: TrackTable
+
+interface EffectTable {
+	[effectName: string]: Effect
+}
+
+declare let effects: EffectTable
+
 declare let lc: LiveCoding
 `
