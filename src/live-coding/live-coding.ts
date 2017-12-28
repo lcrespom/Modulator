@@ -127,15 +127,29 @@ export class Effect {
 		this.out = this.in
 	}
 
-	param(name: string, value?: number, rampTime?: number) {
+	getAudioParam(name: string) {
 		let prm: AudioParam = (<any>this.in)[name]
-		if (!prm) throw new Error(
-			`Parameter "${name}" not found in effect "${this.name}"`)
-		if (value === undefined) return prm.value
-		if (rampTime === undefined)
+		if (!prm)
+			throw new Error(`Parameter "${name}" not found in effect "${this.name}"`)
+		return prm
+	}
+
+	param(name: string, value?: number, rampTime?: number, exponential = true) {
+		let prm = this.getAudioParam(name)
+		if (value === undefined) {
+			return prm.value
+		}
+		if (rampTime === undefined) {
 			prm.value = value
-		else
-			prm.exponentialRampToValueAtTime(value, this.ac.currentTime + rampTime)
+		}
+		else {
+			if (exponential) {
+				prm.exponentialRampToValueAtTime(value, this.ac.currentTime + rampTime)
+			}
+			else {
+				prm.linearRampToValueAtTime(value, this.ac.currentTime + rampTime)
+			}
+		}
 		return this
 	}
 

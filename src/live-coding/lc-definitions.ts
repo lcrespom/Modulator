@@ -12,7 +12,7 @@ interface Effect {
 	/** Effect name */
 	name: string
 	/** Gets or sets the value of a parameter */
-	param(name: string, value?: number, rampTime?: number): number | this
+	param(name: string, value?: number, rampTime?: number, exponential = true): number | this
 }
 
 type TrackCallback = (t: Track) => void;

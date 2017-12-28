@@ -3510,16 +3510,28 @@ class Effect {
         this.in = ac[methodName]();
         this.out = this.in;
     }
-    param(name, value, rampTime) {
+    getAudioParam(name) {
         let prm = this.in[name];
         if (!prm)
             throw new Error(`Parameter "${name}" not found in effect "${this.name}"`);
-        if (value === undefined)
+        return prm;
+    }
+    param(name, value, rampTime, exponential = true) {
+        let prm = this.getAudioParam(name);
+        if (value === undefined) {
             return prm.value;
-        if (rampTime === undefined)
+        }
+        if (rampTime === undefined) {
             prm.value = value;
-        else
-            prm.exponentialRampToValueAtTime(value, this.ac.currentTime + rampTime);
+        }
+        else {
+            if (exponential) {
+                prm.exponentialRampToValueAtTime(value, this.ac.currentTime + rampTime);
+            }
+            else {
+                prm.linearRampToValueAtTime(value, this.ac.currentTime + rampTime);
+            }
+        }
         return this;
     }
 }
@@ -3658,7 +3670,7 @@ interface Effect {
 	/** Effect name */
 	name: string
 	/** Gets or sets the value of a parameter */
-	param(name: string, value?: number, rampTime?: number): number | this
+	param(name: string, value?: number, rampTime?: number, exponential = true): number | this
 }
 
 type TrackCallback = (t: Track) => void;
