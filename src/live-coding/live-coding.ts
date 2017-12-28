@@ -117,7 +117,7 @@ export class Effect {
 	in: AudioNode
 	out: AudioNode
 
-	constructor(ac: AudioContext, name: string) {
+	constructor(private ac: AudioContext, name: string) {
 		this.name = name
 		let methodName = 'create' + name
 		let anyac: any = ac
@@ -127,12 +127,15 @@ export class Effect {
 		this.out = this.in
 	}
 
-	param(name: string, value?: number) {
+	param(name: string, value?: number, rampTime?: number) {
 		let prm: AudioParam = (<any>this.in)[name]
 		if (!prm) throw new Error(
 			`Parameter "${name}" not found in effect "${this.name}"`)
 		if (value === undefined) return prm.value
-		prm.value = value
+		if (rampTime === undefined)
+			prm.value = value
+		else
+			prm.exponentialRampToValueAtTime(value, this.ac.currentTime + rampTime)
 		return this
 	}
 

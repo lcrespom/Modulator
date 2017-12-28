@@ -3497,6 +3497,7 @@ class LiveCoding {
 
 class Effect {
     constructor(ac, name) {
+        this.ac = ac;
         this.name = name;
         let methodName = 'create' + name;
         let anyac = ac;
@@ -3505,13 +3506,16 @@ class Effect {
         this.in = ac[methodName]();
         this.out = this.in;
     }
-    param(name, value) {
+    param(name, value, rampTime) {
         let prm = this.in[name];
         if (!prm)
             throw new Error(`Parameter "${name}" not found in effect "${this.name}"`);
         if (value === undefined)
             return prm.value;
-        prm.value = value;
+        if (rampTime === undefined)
+            prm.value = value;
+        else
+            prm.exponentialRampToValueAtTime(value, this.ac.currentTime + rampTime);
         return this;
     }
 }
@@ -3649,7 +3653,7 @@ interface Effect {
 	/** Effect name */
 	name: string
 	/** Gets or sets the value of a parameter */
-	param(name: string, value?: number): number | this
+	param(name: string, value?: number, rampTime?: number): number | this
 }
 
 type TrackCallback = (t: Track) => void;
@@ -3698,7 +3702,7 @@ interface Track {
 	/** Sets the instrument to play in the track */
 	instrument(inst: Instrument): this
 	/** Adds an effect to the track. All sound played in the track will be altered by the effect */
-	effect(e: Effect): this
+	effect(e: Effect | string, name?: string): Effect
 	/** Sets the volume to use in the track */
 	volume(v: number): this
 	/** Plays a given note */
@@ -3714,7 +3718,7 @@ interface Track {
 	/** Unmutes track */
 	unmute(): this
 	/** Sets global gain for all notes */
-	gain(value: number): this
+	gain(value: number, rampTime?: number): this
 	/** Stops a looping track at the end of the loop */
 	stop(): this
 	/** Pauses a track at its current position */
@@ -3791,6 +3795,7 @@ class Track {
         this._gain.connect(out);
         this.lastGain = this._gain.gain.value;
         this.startTime = this.ac.currentTime;
+        this.effects = {};
     }
     // ---------- Timed methods ----------
     instrument(inst) {
@@ -3842,25 +3847,38 @@ class Track {
         return this;
     }
     // ----------Instantaneous methods ----------
-    effect(e) {
+    effect(e, name) {
+        if (typeof e == 'string') {
+            let eff = this.effects[e];
+            if (!eff)
+                throw new Error(`Effect ${e} not found in track`);
+            return eff;
+        }
         let dst = this._effect ? this._effect.out : this._gain;
         dst.disconnect();
         dst.connect(e.in);
         e.out.connect(this.out);
         this._effect = e;
-        return this;
+        if (name)
+            this.effects[name] = e;
+        return e;
     }
     mute() {
         this.lastGain = this._gain.gain.value;
-        this._gain.gain.value = 0;
+        this._gain.gain.value = 1e-5;
         return this;
     }
     unmute() {
         this._gain.gain.value = this.lastGain;
         return this;
     }
-    gain(value) {
-        this._gain.gain.value = value;
+    gain(value, rampTime) {
+        if (value < 1e-5)
+            value = 1e-5;
+        if (rampTime === undefined)
+            this._gain.gain.value = value;
+        else
+            this._gain.gain.exponentialRampToValueAtTime(value, this.ac.currentTime + rampTime);
         return this;
     }
 }

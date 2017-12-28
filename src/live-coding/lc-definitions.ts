@@ -12,7 +12,7 @@ interface Effect {
 	/** Effect name */
 	name: string
 	/** Gets or sets the value of a parameter */
-	param(name: string, value?: number): number | this
+	param(name: string, value?: number, rampTime?: number): number | this
 }
 
 type TrackCallback = (t: Track) => void;
@@ -61,7 +61,7 @@ interface Track {
 	/** Sets the instrument to play in the track */
 	instrument(inst: Instrument): this
 	/** Adds an effect to the track. All sound played in the track will be altered by the effect */
-	effect(e: Effect): this
+	effect(e: Effect | string, name?: string): Effect
 	/** Sets the volume to use in the track */
 	volume(v: number): this
 	/** Plays a given note */
@@ -77,7 +77,7 @@ interface Track {
 	/** Unmutes track */
 	unmute(): this
 	/** Sets global gain for all notes */
-	gain(value: number): this
+	gain(value: number, rampTime?: number): this
 	/** Stops a looping track at the end of the loop */
 	stop(): this
 	/** Pauses a track at its current position */

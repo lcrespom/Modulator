@@ -35,11 +35,15 @@
 	- [ ] Sample loading + playing API
 		- Use upload samples button - see https://davidwalsh.name/multiple-file-upload
 	- [ ] Track solo / unsolo
+	- [ ] Track synchronization via cue/sync methods
+		- Cue to post message
+		- Synch to wait for message
 	- [ ] Display live coding parameters in "Node Parameters" box (or new box)
 	- [ ] Copy from Sonic Pi
 		- [ ] Notes and scales
 		- [ ] Lists/rings
 		- [ ] Random helpers (shuffle, etc => use deterministic seed)
+	- [x] Ramps in track gain and effects
 	- [x] Global pause / stop / continue
 	- [x] Track stop / pause / continue
 	- [x] Control global track gain node: gain, mute/unmute

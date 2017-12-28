@@ -2,6 +2,10 @@ import { Timer } from '../synth/timer'
 
 import { LCInstrument, Effect, NoteInfo, NoteOptions } from 'live-coding'
 
+interface MapLike<T> {
+	[key: string]: T
+}
+
 export class Track {
 	notect = 0
 	notes: NoteInfo[] = []
@@ -13,6 +17,7 @@ export class Track {
 	velocity = 1
 	_gain: GainNode
 	_effect: Effect
+	effects: MapLike<Effect>
 	lastGain: number
 	shouldStop = false
 	stopped = false
@@ -23,6 +28,7 @@ export class Track {
 		this._gain.connect(out)
 		this.lastGain = this._gain.gain.value
 		this.startTime = this.ac.currentTime
+		this.effects = {}
 	}
 
 
@@ -87,18 +93,24 @@ export class Track {
 
 	// ----------Instantaneous methods ----------
 
-	effect(e: Effect) {
+	effect(e: Effect | string, name?: string) {
+		if (typeof e == 'string') {
+			let eff = this.effects[e]
+			if (!eff) throw new Error(`Effect ${e} not found in track`)
+			return eff
+		}
 		let dst = this._effect ? this._effect.out : this._gain
 		dst.disconnect()
 		dst.connect(e.in)
 		e.out.connect(this.out)
 		this._effect = e
-		return this
+		if (name) this.effects[name] = e
+		return e
 	}
 
 	mute() {
 		this.lastGain = this._gain.gain.value
-		this._gain.gain.value = 0
+		this._gain.gain.value = 1e-5
 		return this
 	}
 
@@ -107,8 +119,14 @@ export class Track {
 		return this
 	}
 
-	gain(value: number) {
-		this._gain.gain.value = value
+	gain(value: number, rampTime?: number) {
+		if (value < 1e-5) value = 1e-5
+		if (rampTime === undefined)
+			this._gain.gain.value = value
+		else
+			this._gain.gain.exponentialRampToValueAtTime(
+				value, this.ac.currentTime + rampTime
+			)
 		return this
 	}
 
