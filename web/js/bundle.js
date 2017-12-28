@@ -3712,6 +3712,8 @@ interface Track {
 	volume(v: number): this
 	/** Plays a given note */
 	play(note: number, duration?: number, options?: NoteOptions): this
+	/** Transposes notes the specified amount */
+	transpose(notes: number): this
 	/** Changes a parameter of the current instrument */
 	param(pname: string, value: number): this
 	/** Changes parameters of instrument or effect */
@@ -3769,6 +3771,7 @@ class Track {
         this.velocity = 1;
         this.shouldStop = false;
         this.stopped = false;
+        this._transpose = 0;
         this._gain = ac.createGain();
         this._gain.connect(out);
         this.lastGain = this._gain.gain.value;
@@ -3793,12 +3796,16 @@ class Track {
             throw new Error(`Must call instrument before playing a note or setting parameters`);
         this.notes.push({
             instrument: this.inst,
-            number: note,
+            number: note + this._transpose,
             time: this.time,
             velocity: this.velocity,
             duration,
             options
         });
+        return this;
+    }
+    transpose(notes) {
+        this._transpose = notes;
         return this;
     }
     params(options) {

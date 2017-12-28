@@ -66,6 +66,8 @@ interface Track {
 	volume(v: number): this
 	/** Plays a given note */
 	play(note: number, duration?: number, options?: NoteOptions): this
+	/** Transposes notes the specified amount */
+	transpose(notes: number): this
 	/** Changes a parameter of the current instrument */
 	param(pname: string, value: number): this
 	/** Changes parameters of instrument or effect */

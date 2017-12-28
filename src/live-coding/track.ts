@@ -21,6 +21,7 @@ export class Track {
 	lastGain: number
 	shouldStop = false
 	stopped = false
+	_transpose = 0
 
 	constructor(public ac: AudioContext,
 		public out: AudioNode, public timer: Timer) {
@@ -53,12 +54,17 @@ export class Track {
 			`Must call instrument before playing a note or setting parameters`)
 		this.notes.push({
 			instrument: this.inst,
-			number: note,
+			number: note + this._transpose,
 			time: this.time,
 			velocity: this.velocity,
 			duration,
 			options
 		})
+		return this
+	}
+
+	transpose(notes: number) {
+		this._transpose = notes
 		return this
 	}
 

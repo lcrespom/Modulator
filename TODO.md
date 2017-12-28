@@ -43,6 +43,7 @@
 		- [ ] Notes and scales
 		- [ ] Lists/rings
 		- [ ] Random helpers (shuffle, etc => use deterministic seed)
+	- [ ] track.end() => end a looping track and remove it from the tracks table
 	- [x] Ramps in track gain and effects
 	- [x] Global pause / stop / continue
 	- [x] Track stop / pause / continue
