@@ -53,13 +53,9 @@ input.rounded {
 .app-navbar > .right-buttons {
 	display: inline-block;
 	position: absolute;
-	right: 0px;
+	right: 6px;
 	top: 0px;
 	margin-top: 4px;
-}
-
-#synth .app-navbar > .right-buttons {
-	right: 6px;
 }
 
 /*----- General -----*/
@@ -394,7 +390,7 @@ input[type=range][orient=vertical] {
 }
 
 .walc-editor-box {
-	width: 100%;
+	width: calc(100% - 6px);
 	height: calc(100% - 20px);
 	overflow: hidden;
 }
