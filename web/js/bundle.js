@@ -1480,7 +1480,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__piano_noteInputs__ = __webpack_require__(15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__synthUI_presets__ = __webpack_require__(20);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__live_coding_editor__ = __webpack_require__(21);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_routes__ = __webpack_require__(27);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_routes__ = __webpack_require__(24);
 /**
  * Main entry point: setup synth editor and keyboard listener.
  */
@@ -3266,7 +3266,7 @@ class Presets {
 /* harmony export (immutable) */ __webpack_exports__["b"] = doRunCode;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__live_coding__ = __webpack_require__(22);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lc_definitions__ = __webpack_require__(23);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__editor_actions__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__editor_actions__ = __webpack_require__(28);
 
 
 
@@ -3416,7 +3416,7 @@ function doRunCode(code) {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return tracks; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_instrument__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__synth_timer__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__track__ = __webpack_require__(26);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__track__ = __webpack_require__(27);
 
 
 
@@ -3771,9 +3771,43 @@ declare let lc: LiveCoding
 
 
 /***/ }),
-/* 24 */,
+/* 24 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = setupRoutes;
+let oldPage;
+let mainRoute;
+function setupRoutes(initialRoute) {
+    window.onhashchange = showPageFromHash;
+    mainRoute = initialRoute;
+    showPageFromHash();
+    return loadPages();
+}
+function showPageFromHash() {
+    const hash = location.hash || mainRoute;
+    $('#page > div').hide();
+    $(hash).show().css('outline', 'none').focus();
+    if (oldPage)
+        $(document).trigger('route:hide', oldPage);
+    $(document).trigger('route:show', hash);
+    oldPage = hash;
+    window.scrollTo(0, 0);
+}
+function loadPages() {
+    return new Promise(resolve => {
+        $.get('live-coding.html', data => {
+            $('#live-coding').empty().append(data);
+            resolve();
+        });
+    });
+}
+
+
+/***/ }),
 /* 25 */,
-/* 26 */
+/* 26 */,
+/* 27 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3884,42 +3918,7 @@ class Track extends TrackControl {
 
 
 /***/ }),
-/* 27 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = setupRoutes;
-let oldPage;
-let mainRoute;
-function setupRoutes(initialRoute) {
-    window.onhashchange = showPageFromHash;
-    mainRoute = initialRoute;
-    showPageFromHash();
-    return loadPages();
-}
-function showPageFromHash() {
-    const hash = location.hash || mainRoute;
-    $('#page > div').hide();
-    $(hash).show().css('outline', 'none').focus();
-    if (oldPage)
-        $(document).trigger('route:hide', oldPage);
-    $(document).trigger('route:show', hash);
-    oldPage = hash;
-    window.scrollTo(0, 0);
-}
-function loadPages() {
-    return new Promise(resolve => {
-        $.get('live-coding.html', data => {
-            $('#live-coding').empty().append(data);
-            resolve();
-        });
-    });
-}
-
-
-/***/ }),
-/* 28 */,
-/* 29 */
+/* 28 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";

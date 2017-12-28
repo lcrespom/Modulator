@@ -57,7 +57,11 @@
 	- [ ] Prevent instrument and effect instances to be shared across tracks
 	- [ ] Smarter code completion for parameters, effect names, etc.
 - Editor
-	- [ ] Add more panels: osc, fft, log, tutorial, etc
+	- [ ] Add more panels
+		- [ ] osc & fft
+		- [ ] log
+		- [ ] track status: timeline, mute/solo, stopped
+		- [ ] instruments and parameters => click to edit parameters in separate panel
 	- [ ] Multiple editors / buffers
 	- [ ] Button row
 		- [ ] Stop / pause / continue
