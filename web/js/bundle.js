@@ -3915,14 +3915,13 @@ function loadPages() {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__editor__ = __webpack_require__(21);
 
 function registerActions(editor, monaco) {
+    const CTRL_ALT = monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd;
     let editorActions = new EditorActions(editor);
     registerButtons(editorActions);
     editor.addAction({
         id: 'walc-run-all',
         label: 'Run all code',
-        keybindings: [
-            monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter
-        ],
+        keybindings: [CTRL_ALT | monaco.KeyCode.Enter],
         contextMenuGroupId: 'navigation',
         contextMenuOrder: 1,
         run: () => editorActions.runAllCode()
@@ -3938,10 +3937,7 @@ function registerActions(editor, monaco) {
     editor.addAction({
         id: 'walc-font-sm',
         label: 'Reduce code font',
-        keybindings: [
-            monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.US_COMMA,
-            monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.US_MINUS
-        ],
+        keybindings: [CTRL_ALT | monaco.KeyCode.US_COMMA, CTRL_ALT | monaco.KeyCode.US_MINUS],
         contextMenuGroupId: 'navigation',
         contextMenuOrder: 2,
         run: () => editorActions.reduceFont()
@@ -3949,10 +3945,7 @@ function registerActions(editor, monaco) {
     editor.addAction({
         id: 'walc-font-lg',
         label: 'Enlarge code font',
-        keybindings: [
-            monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.US_DOT,
-            monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.US_EQUAL
-        ],
+        keybindings: [CTRL_ALT | monaco.KeyCode.US_DOT, CTRL_ALT | monaco.KeyCode.US_EQUAL],
         contextMenuGroupId: 'navigation',
         contextMenuOrder: 2,
         run: () => editorActions.enlargeFont()

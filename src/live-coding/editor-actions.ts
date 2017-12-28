@@ -2,14 +2,13 @@ import { doRunCode, flashRange } from './editor'
 
 
 export function registerActions(editor: any, monaco: any) {
+	const CTRL_ALT = monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd
 	let editorActions = new EditorActions(editor)
 	registerButtons(editorActions)
 	editor.addAction({
 		id: 'walc-run-all',
 		label: 'Run all code',
-		keybindings: [
-			monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter
-		],
+		keybindings: [CTRL_ALT | monaco.KeyCode.Enter],
 		contextMenuGroupId: 'navigation',
 		contextMenuOrder: 1,
 		run: () => editorActions.runAllCode()
@@ -17,7 +16,7 @@ export function registerActions(editor: any, monaco: any) {
 	editor.addAction({
 		id: 'walc-run-part',
 		label: 'Run current line or selection',
-		keybindings: [ monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter ],
+		keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
 		contextMenuGroupId: 'navigation',
 		contextMenuOrder: 1,
 		run: () => editorActions.runSomeCode()
@@ -25,10 +24,7 @@ export function registerActions(editor: any, monaco: any) {
 	editor.addAction({
 		id: 'walc-font-sm',
 		label: 'Reduce code font',
-		keybindings: [
-			monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.US_COMMA,
-			monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.US_MINUS
-		],
+		keybindings: [CTRL_ALT | monaco.KeyCode.US_COMMA, CTRL_ALT | monaco.KeyCode.US_MINUS],
 		contextMenuGroupId: 'navigation',
 		contextMenuOrder: 2,
 		run: () => editorActions.reduceFont()
@@ -36,10 +32,7 @@ export function registerActions(editor: any, monaco: any) {
 	editor.addAction({
 		id: 'walc-font-lg',
 		label: 'Enlarge code font',
-		keybindings: [
-			monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.US_DOT,
-			monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.US_EQUAL
-		],
+		keybindings: [CTRL_ALT | monaco.KeyCode.US_DOT, CTRL_ALT | monaco.KeyCode.US_EQUAL],
 		contextMenuGroupId: 'navigation',
 		contextMenuOrder: 2,
 		run: () => editorActions.enlargeFont()
