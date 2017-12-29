@@ -1492,8 +1492,10 @@ function loadMonaco(cb) {
 }
 function createEditor(ac, presets, synthUI) {
     global.lc = new __WEBPACK_IMPORTED_MODULE_0__live_coding__["a" /* LiveCoding */](ac, presets, synthUI);
-    global.tracks = __WEBPACK_IMPORTED_MODULE_0__live_coding__["c" /* tracks */];
+    global.instruments = __WEBPACK_IMPORTED_MODULE_0__live_coding__["c" /* instruments */];
     global.effects = __WEBPACK_IMPORTED_MODULE_0__live_coding__["b" /* effects */];
+    global.tracks = __WEBPACK_IMPORTED_MODULE_0__live_coding__["d" /* tracks */];
+    global.global = {};
     loadMonaco(function () {
         let editorElem = byId('walc-code-editor');
         setupDefinitions();
@@ -3412,8 +3414,9 @@ class Presets {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return instruments; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return effects; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return tracks; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return tracks; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_instrument__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__synth_timer__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__track__ = __webpack_require__(23);
@@ -3461,11 +3464,12 @@ class LiveCoding {
         this.timer = new __WEBPACK_IMPORTED_MODULE_1__synth_timer__["a" /* Timer */](context, 60, 0.2);
         this.timer.start(time => timerCB(this.timer, time));
     }
-    instrument(preset, numVoices = 4) {
+    instrument(preset, name, numVoices = 4) {
         let prst = getPreset(this.presets, preset);
         let instr = new LCInstrument(this.context, prst, numVoices, this.synthUI.outNode);
         instr.name = prst.name;
         instr.duration = findNoteDuration(prst);
+        instruments[name || instr.name] = instr;
         return instr;
     }
     effect(name, newName) {
@@ -3538,6 +3542,7 @@ function findNoteDuration(preset) {
         duration += 0.01;
     return duration;
 }
+let instruments = {};
 let effects = {};
 let tracks = {};
 let nextTracks = {};
@@ -3676,7 +3681,7 @@ class TrackControl {
         return this;
     }
     delete() {
-        delete __WEBPACK_IMPORTED_MODULE_0__live_coding__["c" /* tracks */][this.name];
+        delete __WEBPACK_IMPORTED_MODULE_0__live_coding__["d" /* tracks */][this.name];
     }
 }
 class Track extends TrackControl {
@@ -6025,7 +6030,7 @@ interface PresetData {
 
 interface LiveCoding {
 	/** Creates an instrument from a preset name, number or data */
-	instrument(preset: number | string | PresetData, numVoices?: number): Instrument
+	instrument(preset: number | string | PresetData, name?: string, numVoices?: number): Instrument
 	/** Creates an effect */
 	effect(name: string, newName?: string): Effect
 	/** Creates a named track */
@@ -6089,6 +6094,10 @@ interface Track {
 	loopCount: number
 }
 
+interface InstrumentTable {
+	[instrName: string]: Instrument
+}
+
 interface TrackTable {
 	[trackName: string]: TrackControl
 }
@@ -6099,9 +6108,13 @@ interface EffectTable {
 	[effectName: string]: Effect
 }
 
+declare let instruments: InstrumentTable
+
 declare let effects: EffectTable
 
 declare let lc: LiveCoding
+
+declare let global: any
 `;
 /* harmony export (immutable) */ __webpack_exports__["a"] = LC_DEFINITIONS;
 

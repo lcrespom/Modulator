@@ -42,7 +42,7 @@ interface PresetData {
 
 interface LiveCoding {
 	/** Creates an instrument from a preset name, number or data */
-	instrument(preset: number | string | PresetData, numVoices?: number): Instrument
+	instrument(preset: number | string | PresetData, name?: string, numVoices?: number): Instrument
 	/** Creates an effect */
 	effect(name: string, newName?: string): Effect
 	/** Creates a named track */
@@ -106,6 +106,10 @@ interface Track {
 	loopCount: number
 }
 
+interface InstrumentTable {
+	[instrName: string]: Instrument
+}
+
 interface TrackTable {
 	[trackName: string]: TrackControl
 }
@@ -116,7 +120,11 @@ interface EffectTable {
 	[effectName: string]: Effect
 }
 
+declare let instruments: InstrumentTable
+
 declare let effects: EffectTable
 
 declare let lc: LiveCoding
+
+declare let global: any
 `

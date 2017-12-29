@@ -1,7 +1,7 @@
 import { Presets } from '../synthUI/presets'
 import { SynthUI } from '../synthUI/synthUI'
 
-import { LiveCoding, tracks, effects } from './live-coding'
+import { LiveCoding, instruments, effects, tracks } from './live-coding'
 import { LC_DEFINITIONS } from './lc-definitions'
 import { registerActions } from './editor-actions'
 
@@ -28,8 +28,10 @@ function loadMonaco(cb: () => void) {
 export function createEditor(
 	ac: AudioContext, presets: Presets, synthUI: SynthUI) {
 	global.lc = new LiveCoding(ac, presets, synthUI)
-	global.tracks = tracks
+	global.instruments = instruments
 	global.effects = effects
+	global.tracks = tracks
+	global.global = {}
 	loadMonaco(function() {
 		let editorElem = byId('walc-code-editor')
 		setupDefinitions()

@@ -55,12 +55,13 @@ export class LiveCoding {
 		this.timer.start(time => timerCB(this.timer, time))
 	}
 
-	instrument(preset: number | string | PresetData, numVoices = 4) {
+	instrument(preset: number | string | PresetData, name?: string, numVoices = 4) {
 		let prst = getPreset(this.presets, preset)
 		let instr = new LCInstrument(
 			this.context, prst, numVoices, this.synthUI.outNode)
 		instr.name = prst.name
 		instr.duration = findNoteDuration(prst)
+		instruments[name || instr.name] = instr
 		return instr
 	}
 
@@ -176,6 +177,10 @@ export interface NoteInfo {
 	options?: NoteOptions
 }
 
+interface InstrumentTable {
+	[instrName: string]: Instrument
+}
+
 interface EffectTable {
 	[effectName: string]: Effect
 }
@@ -184,8 +189,10 @@ interface TrackTable {
 	[trackName: string]: Track
 }
 
+export let instruments: InstrumentTable = {}
 export let effects: EffectTable = {}
 export let tracks: TrackTable = {}
+
 let nextTracks: TrackTable = {}
 let logEnabled = false
 
