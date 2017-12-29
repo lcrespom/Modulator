@@ -90,25 +90,34 @@ export class LiveCoding {
 
 	use_log(flag = true) {
 		logEnabled = flag
+		return this
+	}
+
+	log(...args: any[]) {
+		console.log(...args)
+		return this
 	}
 
 	bpm(value?: number) {
 		if (value === undefined)
 			return this.timer.bpm
 		this.timer.bpm = value
-		return value
+		return this
 	}
 
 	stop() {
 		eachTrack(t => t.stop())
+		return this
 	}
 
 	pause() {
 		eachTrack(t => t.pause())
+		return this
 	}
 
 	continue() {
 		eachTrack(t => t.continue())
+		return this
 	}
 }
 

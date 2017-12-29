@@ -49,10 +49,12 @@ interface LiveCoding {
 	track(name: string, cb?: TrackCallback): Track
 	/** Creates a looping track */
 	loop_track(name: string, cb?: TrackCallback): Track
-	/** Enables or disables logging */
-	use_log(enable = true): void
+	/** Enables or disables logging of note events */
+	use_log(enable = true): this
+	/** Prints the specified data to the log */
+	log(...args: any[]): this
 	/** Change global BPM */
-	bpm(value?: number): number
+	bpm(value?: number): number | this
 	/** Stops all looping track at the end of their loop */
 	stop(): this
 	/** Pauses all tracks at their current position */

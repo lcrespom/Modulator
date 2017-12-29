@@ -123,14 +123,6 @@ let	FLOAT = 'float',
 	INT = 'int'
 
 
-// if (typeof module !== 'undefined' && module.exports) {
-// 	module.exports = Tuna
-// } else if (typeof define === 'function') {
-// 	window.define('Tuna', definition)
-// } else {
-// 	window.Tuna = Tuna
-// }
-
 function definition() {
 	return Tuna
 }
