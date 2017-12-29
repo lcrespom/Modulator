@@ -69,6 +69,7 @@ export class Track extends TrackControl {
 	notes: NoteInfo[] = []
 	time = 0
 	loop = false
+	loopCount = 0
 	inst: LCInstrument
 	velocity = 1
 	_effect: Effect

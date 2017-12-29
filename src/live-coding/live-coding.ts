@@ -252,6 +252,7 @@ function shouldTrackEnd(track: Track) {
 	}
 	if (track.loop) {
 		track.startTime += track.time
+		track.loopCount++
 		return false
 	}
 	else {

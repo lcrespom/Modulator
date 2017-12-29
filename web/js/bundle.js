@@ -3606,6 +3606,7 @@ function shouldTrackEnd(track) {
     }
     if (track.loop) {
         track.startTime += track.time;
+        track.loopCount++;
         return false;
     }
     else {
@@ -3676,6 +3677,7 @@ class Track extends TrackControl {
         this.notes = [];
         this.time = 0;
         this.loop = false;
+        this.loopCount = 0;
         this.velocity = 1;
         this._transpose = 0;
     }
@@ -5977,14 +5979,14 @@ interface Effect {
 	/** Effect name */
 	name: string
 	/** Gets or sets the value of a parameter */
-	param(name: string, value?: number, rampTime?: number, exponential = true): number | this
+	param(name: string, value?: number, rampTime?: number, exponential?: boolean): number | this
 }
 
 type TrackCallback = (t: Track) => void;
 
 interface InstrumentOptions {
-	instrument: LCInstrument
-	[k: string]: number | LCInstrument
+	instrument: Instrument
+	[k: string]: number | Instrument
 }
 
 interface EffectOptions {
@@ -6062,7 +6064,9 @@ interface Track {
 	/** Waits the specified time in seconds before playing the next note */
 	sleep(time: number): this
 	/** Repeats the enclosed code a given number of times */
-	repeat(times: number, cb: (i: number) => void)
+	repeat(times: number, cb: (i: number) => void): void
+	/** Counts how many times the loop has executed */
+	loopCount: number
 }
 
 interface TrackTable {
