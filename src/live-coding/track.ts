@@ -1,6 +1,7 @@
 import { Timer } from '../synth/timer'
 
-import { LCInstrument, Effect, NoteInfo, NoteOptions } from 'live-coding'
+import { LCInstrument, NoteInfo, NoteOptions } from './live-coding'
+import { Effect } from './effects'
 
 
 class TrackControl {
@@ -80,10 +81,10 @@ export class Track extends TrackControl {
 	}
 
 	effect(e: Effect) {
-		let dst = this._effect ? this._effect.out : this._gain
+		let dst = this._effect ? this._effect.output : this._gain
 		dst.disconnect()
-		dst.connect(e.in)
-		e.out.connect(this.out)
+		dst.connect(e.input)
+		e.output.connect(this.out)
 		this._effect = e
 		return this
 	}

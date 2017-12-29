@@ -5,6 +5,7 @@ import { NodeData } from '../synth/synth'
 import { SynthUI } from '../synthUI/synthUI'
 
 import { Track } from './track'
+import { Effect, createEffect } from './effects'
 
 export type TrackCallback = (t: Track) => void
 
@@ -54,7 +55,7 @@ export class LiveCoding {
 	}
 
 	effect(name: string, newName?: string) {
-		let eff = new Effect(this.context, name)
+		let eff = createEffect(this.context, name)
 		effects[newName || name] = eff
 		return eff
 	}
@@ -112,48 +113,6 @@ interface EffectOptions {
 }
 
 export type NoteOptions = InstrumentOptions | EffectOptions
-
-
-export class Effect {
-	in: AudioNode
-	out: AudioNode
-
-	constructor(private ac: AudioContext, public name: string) {
-		let methodName = 'create' + name
-		let anyac: any = ac
-		if (!anyac[methodName])
-			throw new Error(`Effect "${name}" does not exist`)
-		this.in = (<any>ac)[methodName]()
-		this.out = this.in
-	}
-
-	getAudioParam(name: string) {
-		let prm: AudioParam = (<any>this.in)[name]
-		if (!prm)
-			throw new Error(`Parameter "${name}" not found in effect "${this.name}"`)
-		return prm
-	}
-
-	param(name: string, value?: number, rampTime?: number, exponential = true) {
-		let prm = this.getAudioParam(name)
-		if (value === undefined) {
-			return prm.value
-		}
-		if (rampTime === undefined) {
-			prm.value = value
-		}
-		else {
-			if (exponential) {
-				prm.exponentialRampToValueAtTime(value, this.ac.currentTime + rampTime)
-			}
-			else {
-				prm.linearRampToValueAtTime(value, this.ac.currentTime + rampTime)
-			}
-		}
-		return this
-	}
-
-}
 
 
 // ------------------------- Privates -------------------------
