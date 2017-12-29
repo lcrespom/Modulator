@@ -3519,6 +3519,10 @@ class LiveCoding {
         eachTrack(t => t.continue());
         return this;
     }
+    reset() {
+        eachTrack(t => t.delete());
+        return this;
+    }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = LiveCoding;
 
@@ -3689,6 +3693,7 @@ class TrackControl {
         return this;
     }
     delete() {
+        this.mute();
         delete __WEBPACK_IMPORTED_MODULE_0__live_coding__["d" /* tracks */][this.name];
     }
 }
@@ -3921,6 +3926,8 @@ interface LiveCoding {
 	pause(): this
 	/** Continues playback of stopped or paused tracks */
 	continue(): this
+	/** Stops and deletes all tracks */
+	reset(): this
 	/** The AudioContext, for the daring ones */
 	context: AudioContext
 }
@@ -4023,6 +4030,14 @@ function registerActions(editor, monaco) {
         run: () => editorActions.runSomeCode()
     });
     editor.addAction({
+        id: 'walc-stop-all',
+        label: 'Stop all tracks',
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.US_DOT],
+        contextMenuGroupId: 'navigation',
+        contextMenuOrder: 1,
+        run: () => editorActions.stopAllTracks()
+    });
+    editor.addAction({
         id: 'walc-font-sm',
         label: 'Reduce code font',
         keybindings: [CTRL_ALT | monaco.KeyCode.US_COMMA, CTRL_ALT | monaco.KeyCode.US_MINUS],
@@ -4042,6 +4057,7 @@ function registerActions(editor, monaco) {
 function registerButtons(editorActions) {
     $('#walc-font-sm').click(_ => editorActions.reduceFont());
     $('#walc-font-lg').click(_ => editorActions.enlargeFont());
+    $('#walc-stop').click(_ => editorActions.stopAllTracks());
     $('#walc-run-all').click(_ => editorActions.runAllCode());
     $('#walc-run-sel').click(_ => editorActions.runSomeCode());
 }
@@ -4059,6 +4075,9 @@ class EditorActions {
         let sel = this.getRange(range);
         Object(__WEBPACK_IMPORTED_MODULE_0__editor__["b" /* doRunCode */])(sel);
         Object(__WEBPACK_IMPORTED_MODULE_0__editor__["c" /* flashRange */])(range);
+    }
+    stopAllTracks() {
+        lc.reset();
     }
     reduceFont() {
         let fs = this.getFontSize();

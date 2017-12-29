@@ -1,4 +1,5 @@
 import { doRunCode, flashRange } from './editor'
+import { LiveCoding } from './live-coding'
 
 
 export function registerActions(editor: any, monaco: any) {
@@ -22,6 +23,14 @@ export function registerActions(editor: any, monaco: any) {
 		run: () => editorActions.runSomeCode()
 	})
 	editor.addAction({
+		id: 'walc-stop-all',
+		label: 'Stop all tracks',
+		keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.US_DOT],
+		contextMenuGroupId: 'navigation',
+		contextMenuOrder: 1,
+		run: () => editorActions.stopAllTracks()
+	})
+	editor.addAction({
 		id: 'walc-font-sm',
 		label: 'Reduce code font',
 		keybindings: [CTRL_ALT | monaco.KeyCode.US_COMMA, CTRL_ALT | monaco.KeyCode.US_MINUS],
@@ -42,10 +51,12 @@ export function registerActions(editor: any, monaco: any) {
 function registerButtons(editorActions: EditorActions) {
 	$('#walc-font-sm').click(_ => editorActions.reduceFont())
 	$('#walc-font-lg').click(_ => editorActions.enlargeFont())
+	$('#walc-stop').click(_ => editorActions.stopAllTracks())
 	$('#walc-run-all').click(_ => editorActions.runAllCode())
 	$('#walc-run-sel').click(_ => editorActions.runSomeCode())
 }
 
+declare let lc: LiveCoding
 
 class EditorActions {
 	constructor(public editor: any) {}
@@ -61,6 +72,10 @@ class EditorActions {
 		let sel = this.getRange(range)
 		doRunCode(sel)
 		flashRange(range)
+	}
+
+	stopAllTracks() {
+		lc.reset()
 	}
 
 	reduceFont() {

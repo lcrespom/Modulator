@@ -61,6 +61,8 @@ interface LiveCoding {
 	pause(): this
 	/** Continues playback of stopped or paused tracks */
 	continue(): this
+	/** Stops and deletes all tracks */
+	reset(): this
 	/** The AudioContext, for the daring ones */
 	context: AudioContext
 }

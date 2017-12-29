@@ -59,6 +59,7 @@ class TrackControl {
 	}
 
 	delete() {
+		this.mute()
 		delete tracks[this.name]
 	}
 }

@@ -119,6 +119,11 @@ export class LiveCoding {
 		eachTrack(t => t.continue())
 		return this
 	}
+
+	reset() {
+		eachTrack(t => t.delete())
+		return this
+	}
 }
 
 
