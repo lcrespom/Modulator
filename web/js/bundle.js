@@ -3443,27 +3443,27 @@ class LCInstrument extends __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /
 /* unused harmony export LCInstrument */
 
 class LiveCoding {
-    constructor(ac, presets, synthUI) {
-        this.ac = ac;
+    constructor(context, presets, synthUI) {
+        this.context = context;
         this.presets = presets;
         this.synthUI = synthUI;
-        this.timer = new __WEBPACK_IMPORTED_MODULE_1__synth_timer__["a" /* Timer */](ac, 60, 0.2);
+        this.timer = new __WEBPACK_IMPORTED_MODULE_1__synth_timer__["a" /* Timer */](context, 60, 0.2);
         this.timer.start(time => timerCB(this.timer, time));
     }
     instrument(preset, numVoices = 4) {
         let prst = getPreset(this.presets, preset);
-        let instr = new LCInstrument(this.ac, prst, numVoices, this.synthUI.outNode);
+        let instr = new LCInstrument(this.context, prst, numVoices, this.synthUI.outNode);
         instr.name = prst.name;
         instr.duration = findNoteDuration(prst);
         return instr;
     }
     effect(name, newName) {
-        let eff = new Effect(this.ac, name);
+        let eff = new Effect(this.context, name);
         effects[newName || name] = eff;
         return eff;
     }
     track(name, cb) {
-        let t = new __WEBPACK_IMPORTED_MODULE_2__track__["a" /* Track */](this.ac, this.synthUI.outNode, this.timer);
+        let t = new __WEBPACK_IMPORTED_MODULE_2__track__["a" /* Track */](this.context, this.synthUI.outNode, this.timer);
         t.name = name;
         if (tracks[name])
             nextTracks[name] = t;
@@ -3713,6 +3713,8 @@ interface LiveCoding {
 	pause(): this
 	/** Continues playback of stopped or paused tracks */
 	continue(): this
+	/** The AudioContext, for the daring ones */
+	context: AudioContext
 }
 
 interface TrackControl {

@@ -6,6 +6,7 @@
 	- Click on a piano note, keep the mouse button pressed
 	- Move mouse away from piano key
 	- Release mouse button
+- [ ] Loading a synth with two ADSR nodes generates horrible sounds
 - [ ] Buffered audio nodes fail after switching back&forth from empty preset
 	- Uncaught (in promise) DOMException: Unable to decode audio data
 	- See lines 260 and 302 in synth.ts

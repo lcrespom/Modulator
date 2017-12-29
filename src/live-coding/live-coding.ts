@@ -37,30 +37,30 @@ export class LiveCoding {
 	timer: Timer
 
 	constructor(
-		public ac: AudioContext,
+		public context: AudioContext,
 		public presets: Presets,
 		public synthUI: SynthUI) {
-		this.timer = new Timer(ac, 60, 0.2)
+		this.timer = new Timer(context, 60, 0.2)
 		this.timer.start(time => timerCB(this.timer, time))
 	}
 
 	instrument(preset: number | string | PresetData, numVoices = 4) {
 		let prst = getPreset(this.presets, preset)
 		let instr = new LCInstrument(
-			this.ac, prst, numVoices, this.synthUI.outNode)
+			this.context, prst, numVoices, this.synthUI.outNode)
 		instr.name = prst.name
 		instr.duration = findNoteDuration(prst)
 		return instr
 	}
 
 	effect(name: string, newName?: string) {
-		let eff = new Effect(this.ac, name)
+		let eff = new Effect(this.context, name)
 		effects[newName || name] = eff
 		return eff
 	}
 
 	track(name: string, cb?: TrackCallback) {
-		let t = new Track(this.ac, this.synthUI.outNode, this.timer)
+		let t = new Track(this.context, this.synthUI.outNode, this.timer)
 		t.name = name
 		if (tracks[name])
 			nextTracks[name] = t
