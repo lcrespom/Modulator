@@ -1472,8 +1472,8 @@ class LineInNode extends CustomNodeBase {
 /* harmony export (immutable) */ __webpack_exports__["c"] = flashRange;
 /* harmony export (immutable) */ __webpack_exports__["b"] = doRunCode;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__live_coding__ = __webpack_require__(22);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lc_definitions__ = __webpack_require__(25);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__editor_actions__ = __webpack_require__(26);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lc_definitions__ = __webpack_require__(26);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__editor_actions__ = __webpack_require__(27);
 
 
 
@@ -1631,7 +1631,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__piano_noteInputs__ = __webpack_require__(16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__synthUI_presets__ = __webpack_require__(21);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__live_coding_editor__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_routes__ = __webpack_require__(27);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_routes__ = __webpack_require__(28);
 /**
  * Main entry point: setup synth editor and keyboard listener.
  */
@@ -3620,6 +3620,8 @@ function shouldTrackEnd(track) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__live_coding__ = __webpack_require__(22);
+
 class TrackControl {
     constructor(ac, out, timer) {
         this.ac = ac;
@@ -3662,6 +3664,9 @@ class TrackControl {
         this.shouldStop = false;
         this.stopped = false;
         return this;
+    }
+    delete() {
+        delete __WEBPACK_IMPORTED_MODULE_0__live_coding__["c" /* tracks */][this.name];
     }
 }
 class Track extends TrackControl {
@@ -3721,6 +3726,11 @@ class Track extends TrackControl {
         this.time += time * 60 / this.timer.bpm;
         return this;
     }
+    repeat(times, cb) {
+        for (let i = 0; i < times; i++)
+            cb(i);
+        return this;
+    }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = Track;
 
@@ -3733,18 +3743,12 @@ class Track extends TrackControl {
 "use strict";
 /* unused harmony export registerProvider */
 /* harmony export (immutable) */ __webpack_exports__["a"] = createEffect;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__tuna_tuna_effects__ = __webpack_require__(30);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__tuna_tuna__ = __webpack_require__(25);
 
-class WebAudioEffect {
+class BaseEffect {
     constructor(ac, name) {
         this.ac = ac;
         this.name = name;
-        let methodName = 'create' + name;
-        let anyac = ac;
-        if (!anyac[methodName])
-            throw new Error(`Effect "${name}" does not exist`);
-        this.input = ac[methodName]();
-        this.output = this.input;
     }
     param(name, value, rampTime, exponential = true) {
         let prm = this.getAudioParam(name);
@@ -3766,15 +3770,44 @@ class WebAudioEffect {
     }
     getAudioParam(name) {
         let prm = this.input[name];
-        if (!prm)
+        if (!prm || !(prm instanceof AudioParam))
             throw new Error(`Parameter "${name}" not found in effect "${this.name}"`);
         return prm;
     }
 }
+/* unused harmony export BaseEffect */
+
+class WebAudioEffect extends BaseEffect {
+    constructor(ac, name) {
+        super(ac, name);
+        let methodName = 'create' + name;
+        let anyac = ac;
+        if (!anyac[methodName])
+            throw new Error(`Effect "${name}" does not exist`);
+        this.input = ac[methodName]();
+        this.output = this.input;
+    }
+}
+class TunaEffect extends BaseEffect {
+    constructor(ac, name) {
+        super(ac, name);
+        let effClass = tuna[name];
+        if (!effClass)
+            throw new Error(`Effect "tuna/${name}" does not exist`);
+        this.input = new effClass();
+        this.output = this.input;
+    }
+}
 let providers = {
     WebAudio: (ac, name) => new WebAudioEffect(ac, name),
-    tuna: __WEBPACK_IMPORTED_MODULE_0__tuna_tuna_effects__["a" /* tunaProvider */]
+    tuna: tunaProvider
 };
+function tunaProvider(ac, name) {
+    if (!tuna)
+        tuna = Object(__WEBPACK_IMPORTED_MODULE_0__tuna_tuna__["a" /* Tuna */])(ac);
+    return new TunaEffect(ac, name);
+}
+let tuna;
 function registerProvider(prefix, provider) {
     providers[prefix] = provider;
 }
@@ -3791,291 +3824,6 @@ function createEffect(ac, name) {
 
 /***/ }),
 /* 25 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-const LC_DEFINITIONS = `
-interface Instrument {
-	/** Name of the preset used to create the instrument */
-	name: string
-	/** Default note duration, in seconds */
-	duration: number
-	/** Gets or sets the value of a parameter */
-	param(pname: string, value?: number): number | this
-}
-
-interface Effect {
-	/** Effect name */
-	name: string
-	/** Gets or sets the value of a parameter */
-	param(name: string, value?: number, rampTime?: number, exponential = true): number | this
-}
-
-type TrackCallback = (t: Track) => void;
-
-interface InstrumentOptions {
-	instrument: LCInstrument
-	[k: string]: number | LCInstrument
-}
-
-interface EffectOptions {
-	effect: Effect
-	[k: string]: number | Effect
-}
-
-type NoteOptions = InstrumentOptions | EffectOptions
-
-interface PresetData {
-	name: string
-	nodes: any[]
-	nodeData: any[]
-	modulatorType: string
-}
-
-interface LiveCoding {
-	/** Creates an instrument from a preset name, number or data */
-	instrument(preset: number | string | PresetData, numVoices?: number): Instrument
-	/** Creates an effect */
-	effect(name: string, newName?: string): Effect
-	/** Creates a named track */
-	track(name: string, cb?: TrackCallback): Track
-	/** Creates a looping track */
-	loop_track(name: string, cb?: TrackCallback): Track
-	/** Enables or disables logging */
-	use_log(enable = true): void
-	/** Change global BPM */
-	bpm(value?: number): number
-	/** Stops all looping track at the end of their loop */
-	stop(): this
-	/** Pauses all tracks at their current position */
-	pause(): this
-	/** Continues playback of stopped or paused tracks */
-	continue(): this
-	/** The AudioContext, for the daring ones */
-	context: AudioContext
-}
-
-interface TrackControl {
-	/** Adds an effect to the track. All sound played in the track will be altered by the effect */
-	effect(e: Effect): this
-	/** Mutes track audio */
-	mute(): this
-	/** Unmutes track */
-	unmute(): this
-	/** Sets global gain for all notes */
-	gain(value: number, rampTime?: number): this
-	/** Stops a looping track at the end of the loop */
-	stop(): this
-	/** Pauses a track at its current position */
-	pause(): this
-	/** Continues playback of a stopped or paused track */
-	continue(): this
-}
-
-interface Track {
-	/** Sets the instrument to play in the track */
-	instrument(inst: Instrument): this
-	/** Adds an effect to the track. All sound played in the track will be immediately
-	altered by the effect */
-	effect(e: Effect): this
-	/** Sets the volume to use in the track */
-	volume(v: number): this
-	/** Plays a given note */
-	play(note: number, duration?: number, options?: NoteOptions): this
-	/** Transposes notes the specified amount */
-	transpose(notes: number): this
-	/** Changes a parameter of the current instrument */
-	param(pname: string, value: number): this
-	/** Changes parameters of instrument or effect */
-	params(options: NoteOptions): this
-	/** Waits the specified time in seconds before playing the next note */
-	sleep(time: number): this
-}
-
-interface TrackTable {
-	[trackName: string]: TrackControl
-}
-
-declare let tracks: TrackTable
-
-interface EffectTable {
-	[effectName: string]: Effect
-}
-
-declare let effects: EffectTable
-
-declare let lc: LiveCoding
-`;
-/* harmony export (immutable) */ __webpack_exports__["a"] = LC_DEFINITIONS;
-
-
-
-/***/ }),
-/* 26 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = registerActions;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__editor__ = __webpack_require__(9);
-
-function registerActions(editor, monaco) {
-    const CTRL_ALT = monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd;
-    let editorActions = new EditorActions(editor);
-    registerButtons(editorActions);
-    editor.addAction({
-        id: 'walc-run-all',
-        label: 'Run all code',
-        keybindings: [CTRL_ALT | monaco.KeyCode.Enter],
-        contextMenuGroupId: 'navigation',
-        contextMenuOrder: 1,
-        run: () => editorActions.runAllCode()
-    });
-    editor.addAction({
-        id: 'walc-run-part',
-        label: 'Run current line or selection',
-        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
-        contextMenuGroupId: 'navigation',
-        contextMenuOrder: 1,
-        run: () => editorActions.runSomeCode()
-    });
-    editor.addAction({
-        id: 'walc-font-sm',
-        label: 'Reduce code font',
-        keybindings: [CTRL_ALT | monaco.KeyCode.US_COMMA, CTRL_ALT | monaco.KeyCode.US_MINUS],
-        contextMenuGroupId: 'navigation',
-        contextMenuOrder: 2,
-        run: () => editorActions.reduceFont()
-    });
-    editor.addAction({
-        id: 'walc-font-lg',
-        label: 'Enlarge code font',
-        keybindings: [CTRL_ALT | monaco.KeyCode.US_DOT, CTRL_ALT | monaco.KeyCode.US_EQUAL],
-        contextMenuGroupId: 'navigation',
-        contextMenuOrder: 2,
-        run: () => editorActions.enlargeFont()
-    });
-}
-function registerButtons(editorActions) {
-    $('#walc-font-sm').click(_ => editorActions.reduceFont());
-    $('#walc-font-lg').click(_ => editorActions.enlargeFont());
-    $('#walc-run-all').click(_ => editorActions.runAllCode());
-    $('#walc-run-sel').click(_ => editorActions.runSomeCode());
-}
-class EditorActions {
-    constructor(editor) {
-        this.editor = editor;
-    }
-    runAllCode() {
-        let model = this.editor.getModel();
-        Object(__WEBPACK_IMPORTED_MODULE_0__editor__["b" /* doRunCode */])(model.getValue());
-        Object(__WEBPACK_IMPORTED_MODULE_0__editor__["c" /* flashRange */])(model.getFullModelRange());
-    }
-    runSomeCode() {
-        let range = this.editor.getSelection();
-        let sel = this.getRange(range);
-        Object(__WEBPACK_IMPORTED_MODULE_0__editor__["b" /* doRunCode */])(sel);
-        Object(__WEBPACK_IMPORTED_MODULE_0__editor__["c" /* flashRange */])(range);
-    }
-    reduceFont() {
-        let fs = this.getFontSize();
-        if (fs <= 1)
-            return;
-        this.editor.updateOptions({ fontSize: fs - 1 });
-    }
-    enlargeFont() {
-        this.editor.updateOptions({ fontSize: this.getFontSize() + 1 });
-    }
-    getRange(range) {
-        let sel;
-        if (range.startLineNumber != range.endLineNumber
-            || range.startColumn != range.endColumn) {
-            sel = this.editor.getModel().getValueInRange(range);
-        }
-        else {
-            sel = this.editor.getModel().getLineContent(range.startLineNumber);
-            range.startColumn = 1;
-            range.endColumn = sel.length + 1;
-        }
-        return '\n'.repeat(range.startLineNumber - 1) + sel;
-    }
-    getFontSize() {
-        return this.editor.getConfiguration().fontInfo.fontSize;
-    }
-}
-
-
-/***/ }),
-/* 27 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = setupRoutes;
-let oldPage;
-let mainRoute;
-function setupRoutes(initialRoute) {
-    window.onhashchange = showPageFromHash;
-    mainRoute = initialRoute;
-    showPageFromHash();
-    return loadPages();
-}
-function showPageFromHash() {
-    const hash = location.hash || mainRoute;
-    $('#page > div').hide();
-    $(hash).show().css('outline', 'none').focus();
-    if (oldPage)
-        $(document).trigger('route:hide', oldPage);
-    $(document).trigger('route:show', hash);
-    oldPage = hash;
-    window.scrollTo(0, 0);
-}
-function loadPages() {
-    return new Promise(resolve => {
-        $.get('live-coding.html', data => {
-            $('#live-coding').empty().append(data);
-            resolve();
-        });
-    });
-}
-
-
-/***/ }),
-/* 28 */,
-/* 29 */,
-/* 30 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = tunaProvider;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__tuna__ = __webpack_require__(31);
-
-class TunaEffect {
-    constructor(ac, name) {
-        this.ac = ac;
-        this.name = name;
-        let effClass = tuna[name];
-        if (!effClass)
-            throw new Error(`Effect "tuna/${name}" does not exist`);
-        this.input = new effClass();
-        this.output = this.input;
-    }
-    param(name, value, rampTime, exponential = true) {
-        // TODO: pending
-        return this;
-    }
-    getAudioParam(name) {
-        // TODO: pending
-    }
-}
-function tunaProvider(ac, name) {
-    if (!tuna)
-        tuna = Object(__WEBPACK_IMPORTED_MODULE_0__tuna__["a" /* Tuna */])(ac);
-    return new TunaEffect(ac, name);
-}
-let tuna;
-
-
-/***/ }),
-/* 31 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -6208,6 +5956,259 @@ Tuna.prototype.LFO.prototype = Object.create(Super, {
 Tuna.toString = Tuna.prototype.toString = function () {
     return 'Please visit https://github.com/Theodeus/tuna/wiki for instructions on how to use Tuna.js';
 };
+
+
+/***/ }),
+/* 26 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+const LC_DEFINITIONS = `
+interface Instrument {
+	/** Name of the preset used to create the instrument */
+	name: string
+	/** Default note duration, in seconds */
+	duration: number
+	/** Gets or sets the value of a parameter */
+	param(pname: string, value?: number): number | this
+}
+
+interface Effect {
+	/** Effect name */
+	name: string
+	/** Gets or sets the value of a parameter */
+	param(name: string, value?: number, rampTime?: number, exponential = true): number | this
+}
+
+type TrackCallback = (t: Track) => void;
+
+interface InstrumentOptions {
+	instrument: LCInstrument
+	[k: string]: number | LCInstrument
+}
+
+interface EffectOptions {
+	effect: Effect
+	[k: string]: number | Effect
+}
+
+type NoteOptions = InstrumentOptions | EffectOptions
+
+interface PresetData {
+	name: string
+	nodes: any[]
+	nodeData: any[]
+	modulatorType: string
+}
+
+interface LiveCoding {
+	/** Creates an instrument from a preset name, number or data */
+	instrument(preset: number | string | PresetData, numVoices?: number): Instrument
+	/** Creates an effect */
+	effect(name: string, newName?: string): Effect
+	/** Creates a named track */
+	track(name: string, cb?: TrackCallback): Track
+	/** Creates a looping track */
+	loop_track(name: string, cb?: TrackCallback): Track
+	/** Enables or disables logging */
+	use_log(enable = true): void
+	/** Change global BPM */
+	bpm(value?: number): number
+	/** Stops all looping track at the end of their loop */
+	stop(): this
+	/** Pauses all tracks at their current position */
+	pause(): this
+	/** Continues playback of stopped or paused tracks */
+	continue(): this
+	/** The AudioContext, for the daring ones */
+	context: AudioContext
+}
+
+interface TrackControl {
+	/** Adds an effect to the track. All sound played in the track will be altered by the effect */
+	effect(e: Effect): this
+	/** Mutes track audio */
+	mute(): this
+	/** Unmutes track */
+	unmute(): this
+	/** Sets global gain for all notes */
+	gain(value: number, rampTime?: number): this
+	/** Stops a looping track at the end of the loop */
+	stop(): this
+	/** Pauses a track at its current position */
+	pause(): this
+	/** Continues playback of a stopped or paused track */
+	continue(): this
+	/** Stops and deletes the track from the tracks object */
+	delete(): void
+}
+
+interface Track {
+	/** Sets the instrument to play in the track */
+	instrument(inst: Instrument): this
+	/** Adds an effect to the track. All sound played in the track will be immediately
+	altered by the effect */
+	effect(e: Effect): this
+	/** Sets the volume to use in the track */
+	volume(v: number): this
+	/** Plays a given note */
+	play(note: number, duration?: number, options?: NoteOptions): this
+	/** Transposes notes the specified amount */
+	transpose(notes: number): this
+	/** Changes a parameter of the current instrument */
+	param(pname: string, value: number): this
+	/** Changes parameters of instrument or effect */
+	params(options: NoteOptions): this
+	/** Waits the specified time in seconds before playing the next note */
+	sleep(time: number): this
+	/** Repeats the enclosed code a given number of times */
+	repeat(times: number, cb: (i: number) => void)
+}
+
+interface TrackTable {
+	[trackName: string]: TrackControl
+}
+
+declare let tracks: TrackTable
+
+interface EffectTable {
+	[effectName: string]: Effect
+}
+
+declare let effects: EffectTable
+
+declare let lc: LiveCoding
+`;
+/* harmony export (immutable) */ __webpack_exports__["a"] = LC_DEFINITIONS;
+
+
+
+/***/ }),
+/* 27 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = registerActions;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__editor__ = __webpack_require__(9);
+
+function registerActions(editor, monaco) {
+    const CTRL_ALT = monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd;
+    let editorActions = new EditorActions(editor);
+    registerButtons(editorActions);
+    editor.addAction({
+        id: 'walc-run-all',
+        label: 'Run all code',
+        keybindings: [CTRL_ALT | monaco.KeyCode.Enter],
+        contextMenuGroupId: 'navigation',
+        contextMenuOrder: 1,
+        run: () => editorActions.runAllCode()
+    });
+    editor.addAction({
+        id: 'walc-run-part',
+        label: 'Run current line or selection',
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+        contextMenuGroupId: 'navigation',
+        contextMenuOrder: 1,
+        run: () => editorActions.runSomeCode()
+    });
+    editor.addAction({
+        id: 'walc-font-sm',
+        label: 'Reduce code font',
+        keybindings: [CTRL_ALT | monaco.KeyCode.US_COMMA, CTRL_ALT | monaco.KeyCode.US_MINUS],
+        contextMenuGroupId: 'navigation',
+        contextMenuOrder: 2,
+        run: () => editorActions.reduceFont()
+    });
+    editor.addAction({
+        id: 'walc-font-lg',
+        label: 'Enlarge code font',
+        keybindings: [CTRL_ALT | monaco.KeyCode.US_DOT, CTRL_ALT | monaco.KeyCode.US_EQUAL],
+        contextMenuGroupId: 'navigation',
+        contextMenuOrder: 2,
+        run: () => editorActions.enlargeFont()
+    });
+}
+function registerButtons(editorActions) {
+    $('#walc-font-sm').click(_ => editorActions.reduceFont());
+    $('#walc-font-lg').click(_ => editorActions.enlargeFont());
+    $('#walc-run-all').click(_ => editorActions.runAllCode());
+    $('#walc-run-sel').click(_ => editorActions.runSomeCode());
+}
+class EditorActions {
+    constructor(editor) {
+        this.editor = editor;
+    }
+    runAllCode() {
+        let model = this.editor.getModel();
+        Object(__WEBPACK_IMPORTED_MODULE_0__editor__["b" /* doRunCode */])(model.getValue());
+        Object(__WEBPACK_IMPORTED_MODULE_0__editor__["c" /* flashRange */])(model.getFullModelRange());
+    }
+    runSomeCode() {
+        let range = this.editor.getSelection();
+        let sel = this.getRange(range);
+        Object(__WEBPACK_IMPORTED_MODULE_0__editor__["b" /* doRunCode */])(sel);
+        Object(__WEBPACK_IMPORTED_MODULE_0__editor__["c" /* flashRange */])(range);
+    }
+    reduceFont() {
+        let fs = this.getFontSize();
+        if (fs <= 1)
+            return;
+        this.editor.updateOptions({ fontSize: fs - 1 });
+    }
+    enlargeFont() {
+        this.editor.updateOptions({ fontSize: this.getFontSize() + 1 });
+    }
+    getRange(range) {
+        let sel;
+        if (range.startLineNumber != range.endLineNumber
+            || range.startColumn != range.endColumn) {
+            sel = this.editor.getModel().getValueInRange(range);
+        }
+        else {
+            sel = this.editor.getModel().getLineContent(range.startLineNumber);
+            range.startColumn = 1;
+            range.endColumn = sel.length + 1;
+        }
+        return '\n'.repeat(range.startLineNumber - 1) + sel;
+    }
+    getFontSize() {
+        return this.editor.getConfiguration().fontInfo.fontSize;
+    }
+}
+
+
+/***/ }),
+/* 28 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = setupRoutes;
+let oldPage;
+let mainRoute;
+function setupRoutes(initialRoute) {
+    window.onhashchange = showPageFromHash;
+    mainRoute = initialRoute;
+    showPageFromHash();
+    return loadPages();
+}
+function showPageFromHash() {
+    const hash = location.hash || mainRoute;
+    $('#page > div').hide();
+    $(hash).show().css('outline', 'none').focus();
+    if (oldPage)
+        $(document).trigger('route:hide', oldPage);
+    $(document).trigger('route:show', hash);
+    oldPage = hash;
+    window.scrollTo(0, 0);
+}
+function loadPages() {
+    return new Promise(resolve => {
+        $.get('live-coding.html', data => {
+            $('#live-coding').empty().append(data);
+            resolve();
+        });
+    });
+}
 
 
 /***/ })

@@ -74,6 +74,8 @@ interface TrackControl {
 	pause(): this
 	/** Continues playback of a stopped or paused track */
 	continue(): this
+	/** Stops and deletes the track from the tracks object */
+	delete(): void
 }
 
 interface Track {
@@ -94,6 +96,8 @@ interface Track {
 	params(options: NoteOptions): this
 	/** Waits the specified time in seconds before playing the next note */
 	sleep(time: number): this
+	/** Repeats the enclosed code a given number of times */
+	repeat(times: number, cb: (i: number) => void)
 }
 
 interface TrackTable {

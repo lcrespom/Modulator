@@ -31,8 +31,12 @@
 - [ ] Fix deprecation warnings
 
 ## Live Coding
+- Document and publish
+	- [ ] Merge with master
+	- [ ] Publish in GitHub pages
+	- [ ] Document API
+	- [ ] Provide examples
 - Synth API
-	- [ ] Custom effect support: predefined and user-defined
 	- [ ] Sample loading + playing API
 		- Use upload samples button - see https://davidwalsh.name/multiple-file-upload
 	- [ ] Track solo / unsolo
@@ -44,7 +48,8 @@
 		- [ ] Notes and scales
 		- [ ] Lists/rings
 		- [ ] Random helpers (shuffle, etc => use deterministic seed)
-	- [ ] track.end() => end a looping track and remove it from the tracks table
+	- [x] track.delete() => stop a track and remove it from the tracks table
+	- [x] Custom effect support: predefined and user-defined
 	- [x] Ramps in track gain and effects
 	- [x] Global pause / stop / continue
 	- [x] Track stop / pause / continue

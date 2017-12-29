@@ -1,10 +1,11 @@
 import { Timer } from '../synth/timer'
 
-import { LCInstrument, NoteInfo, NoteOptions } from './live-coding'
+import { LCInstrument, NoteInfo, NoteOptions, tracks } from './live-coding'
 import { Effect } from './effects'
 
 
 class TrackControl {
+	name: string
 	_gain: GainNode
 	lastGain: number
 	startTime: number
@@ -57,6 +58,9 @@ class TrackControl {
 		return this
 	}
 
+	delete() {
+		delete tracks[this.name]
+	}
 }
 
 
@@ -65,7 +69,6 @@ export class Track extends TrackControl {
 	notes: NoteInfo[] = []
 	time = 0
 	loop = false
-	name: string
 	inst: LCInstrument
 	velocity = 1
 	_effect: Effect
@@ -123,6 +126,11 @@ export class Track extends TrackControl {
 
 	sleep(time: number) {
 		this.time += time * 60 / this.timer.bpm
+		return this
+	}
+
+	repeat(times: number, cb: (i: number) => void) {
+		for (let i = 0; i < times; i++) cb(i)
 		return this
 	}
 
