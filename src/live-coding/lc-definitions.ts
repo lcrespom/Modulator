@@ -6,6 +6,8 @@ interface Instrument {
 	duration: number
 	/** Gets or sets the value of a parameter */
 	param(pname: string, value?: number): number | this
+	/** Returns a list of parameter names */
+	paramNames(): string[]
 }
 
 interface Effect {
@@ -13,6 +15,8 @@ interface Effect {
 	name: string
 	/** Gets or sets the value of a parameter */
 	param(name: string, value?: number, rampTime?: number, exponential?: boolean): number | this
+	/** Returns a list of parameter names */
+	paramNames(): string[]
 }
 
 type TrackCallback = (t: Track) => void;

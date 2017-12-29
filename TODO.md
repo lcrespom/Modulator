@@ -43,7 +43,7 @@
 	- [ ] Track synchronization via cue/sync methods
 		- Cue to post message
 		- Synch to wait for message
-	- [ ] Display live coding parameters in "Node Parameters" box (or new box)
+	- [ ] Global scope variable to store whatever free data
 	- [ ] Copy from Sonic Pi
 		- [ ] Notes and scales
 		- [ ] Lists/rings

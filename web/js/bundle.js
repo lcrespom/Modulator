@@ -3441,6 +3441,15 @@ class LCInstrument extends __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /
         }
         return this;
     }
+    paramNames() {
+        let pnames = [];
+        let v = this.voices[0];
+        for (let nname of Object.getOwnPropertyNames(v.nodes))
+            for (let pname in v.nodes[nname])
+                if (v.nodes[nname][pname] instanceof AudioParam)
+                    pnames.push(nname + '/' + pname);
+        return pnames;
+    }
 }
 /* unused harmony export LCInstrument */
 
@@ -3769,6 +3778,13 @@ class BaseEffect {
             }
         }
         return this;
+    }
+    paramNames() {
+        let pnames = [];
+        for (let pname in this.input)
+            if (this.input[pname] instanceof AudioParam)
+                pnames.push(pname);
+        return pnames;
     }
     getAudioParam(name) {
         let prm = this.input[name];
@@ -5973,6 +5989,8 @@ interface Instrument {
 	duration: number
 	/** Gets or sets the value of a parameter */
 	param(pname: string, value?: number): number | this
+	/** Returns a list of parameter names */
+	paramNames(): string[]
 }
 
 interface Effect {
@@ -5980,6 +5998,8 @@ interface Effect {
 	name: string
 	/** Gets or sets the value of a parameter */
 	param(name: string, value?: number, rampTime?: number, exponential?: boolean): number | this
+	/** Returns a list of parameter names */
+	paramNames(): string[]
 }
 
 type TrackCallback = (t: Track) => void;

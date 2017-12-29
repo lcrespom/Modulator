@@ -6,6 +6,7 @@ export interface Effect {
 	output: AudioNode
 	param(name: string, value?: number,
 		rampTime?: number, exponential?: boolean): number | this
+	paramNames(): string[]
 }
 
 
@@ -32,6 +33,14 @@ export class BaseEffect implements Effect {
 			}
 		}
 		return this
+	}
+
+	paramNames() {
+		let pnames = []
+		for (let pname in this.input)
+			if ((<any>this.input)[pname] instanceof AudioParam)
+				pnames.push(pname)
+		return pnames
 	}
 
 	private getAudioParam(name: string) {

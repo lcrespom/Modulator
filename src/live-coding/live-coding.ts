@@ -31,6 +31,16 @@ export class LCInstrument extends Instrument {
 		}
 		return this
 	}
+
+	paramNames() {
+		let pnames = []
+		let v = this.voices[0]
+		for (let nname of Object.getOwnPropertyNames(v.nodes))
+			for (let pname in v.nodes[nname])
+				if ((<any>v.nodes[nname])[pname] instanceof AudioParam)
+					pnames.push(nname + '/' + pname)
+		return pnames
+	}
 }
 
 
