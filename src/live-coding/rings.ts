@@ -1,4 +1,4 @@
-class Ring<T> extends Array<T> {
+export class Ring<T> extends Array<T> {
 	tick_ct = 0
 
 	tick(): T {
@@ -6,6 +6,10 @@ class Ring<T> extends Array<T> {
 		this.tick_ct++
 		if (this.tick_ct >= this.length) this.tick_ct = 0
 		return result
+	}
+
+	choose(): T {
+		return this[randomInt(this.length)]
 	}
 
 	fromArray(arr: T[]): Ring<T> {
@@ -127,6 +131,7 @@ function copytick<T>(from: Ring<T>, to: Ring<T>): Ring<T> {
 	return to
 }
 
+// TODO: use real random
 function randomInt(max: number) {
 	return Math.floor(Math.random() * max)
 }

@@ -4,6 +4,7 @@ import { SynthUI } from '../synthUI/synthUI'
 import { LiveCoding, instruments, effects, tracks } from './live-coding'
 import { registerActions } from './editor-actions'
 import { setupRing } from './rings'
+import { Note } from './scales'
 
 
 let sinkDiv = document.createElement('div')
@@ -27,7 +28,7 @@ function loadMonaco(cb: () => void) {
 
 export function createEditor(
 	ac: AudioContext, presets: Presets, synthUI: SynthUI) {
-	setupGlobals(ac, presets, synthUI)
+	setupGlobals(new LiveCoding(ac, presets, synthUI))
 	loadMonaco(function() {
 		let editorElem = byId('walc-code-editor')
 		setupDefinitions()
@@ -51,11 +52,12 @@ export function createEditor(
 	})
 }
 
-function setupGlobals(ac: AudioContext, presets: Presets, synthUI: SynthUI) {
-	global.lc = new LiveCoding(ac, presets, synthUI)
+function setupGlobals(lc: LiveCoding) {
+	global.lc = lc
 	global.instruments = instruments
 	global.effects = effects
 	global.tracks = tracks
+	global.Note = Note
 	global.global = {}
 	setupRing()
 }

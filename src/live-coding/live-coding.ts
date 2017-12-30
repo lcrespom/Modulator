@@ -6,6 +6,8 @@ import { SynthUI } from '../synthUI/synthUI'
 
 import { Track } from './track'
 import { Effect, createEffect } from './effects'
+import { makeScale } from './scales'
+import { Ring } from './rings'
 
 export type TrackCallback = (t: Track) => void
 
@@ -86,6 +88,10 @@ export class LiveCoding {
 		let t = this.track(name, cb)
 		t.loop = true
 		return t
+	}
+
+	scale(note: number, type?: string, octaves?: number): Ring<number> {
+		return makeScale(note, type, octaves)
 	}
 
 	use_log(flag = true) {
