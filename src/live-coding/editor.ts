@@ -2,7 +2,6 @@ import { Presets } from '../synthUI/presets'
 import { SynthUI } from '../synthUI/synthUI'
 
 import { LiveCoding, instruments, effects, tracks } from './live-coding'
-import { LC_DEFINITIONS } from './lc-definitions'
 import { registerActions } from './editor-actions'
 import { setupRing } from './rings'
 
@@ -65,9 +64,14 @@ function preventParentScroll(elem: HTMLElement) {
 	$(elem).bind('mousewheel', e => e.preventDefault())
 }
 
+function addTypeScriptDefinitions(defs: string) {
+	monaco.languages.typescript.typescriptDefaults.addExtraLib(defs)
+}
+
 function setupDefinitions() {
-	monaco.languages.typescript.
-		typescriptDefaults.addExtraLib(LC_DEFINITIONS)
+	fetch('js/lc-definitions.ts')
+	.then(response => response.text())
+	.then(addTypeScriptDefinitions)
 }
 
 function handleEditorResize(elem: HTMLElement) {
