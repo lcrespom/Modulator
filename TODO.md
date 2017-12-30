@@ -2,6 +2,7 @@
 
 ## Bugs
 - [ ] When app window is scrolled down, node connection draws arrows incorrectly
+- [ ] Node deletion only works once
 - [ ] Piano notes get stuck. How to reproduce:
 	- Click on a piano note, keep the mouse button pressed
 	- Move mouse away from piano key
@@ -102,6 +103,8 @@
 
 - Review TODO items inside code
 
+- Allow parameter changes in poly mode => start in poly mode
+
 - For demo purposes, enable arpeggio and portamento in some patches,
 	or create new ones if required.
 
@@ -126,8 +129,6 @@
 		[spec](https://webaudio.github.io/web-audio-api/#widl-AudioParam-exponentialRampToValueAtTime-AudioParam-float-value-double-endTime)
 		has the formula.
 - Improve soundbank: multi-file upload
-
-- Make analyzer work also in polyphonic mode
 
 - Navigate selection of audio nodes in the graph using the keyboard,
 	e.g. page up / page down, or alt+left / alt+right
