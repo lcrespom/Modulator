@@ -1,3 +1,35 @@
+// ------------------------- The LiveCoding API ------------------------------
+
+interface LiveCoding {
+	/** The AudioContext, for the daring ones */
+	context: AudioContext
+	/** Creates an instrument from a preset name, number or data */
+	instrument(preset: number | string | PresetData, name?: string, numVoices?: number): Instrument
+	/** Creates an effect */
+	effect(name: string, newName?: string): Effect
+	/** Creates a named track */
+	track(name: string, cb?: TrackCallback): Track
+	/** Creates a looping track */
+	loop_track(name: string, cb?: TrackCallback): Track
+	/** Enables or disables logging of note events */
+	use_log(enable?: boolean): this
+	/** Prints the specified data to the log */
+	log(...args: any[]): this
+	/** Change global BPM */
+	bpm(value?: number): number | this
+	/** Stops all looping track at the end of their loop */
+	stop(): this
+	/** Pauses all tracks at their current position */
+	pause(): this
+	/** Continues playback of stopped or paused tracks */
+	continue(): this
+	/** Stops and deletes all tracks */
+	reset(): this
+}
+
+
+// -------------------- Instruments, effects and tracks -------------------------
+
 interface Instrument {
 	/** Name of the preset used to create the instrument */
 	name: string
@@ -38,33 +70,6 @@ interface PresetData {
 	nodes: any[]
 	nodeData: any[]
 	modulatorType: string
-}
-
-interface LiveCoding {
-	/** The AudioContext, for the daring ones */
-	context: AudioContext
-	/** Creates an instrument from a preset name, number or data */
-	instrument(preset: number | string | PresetData, name?: string, numVoices?: number): Instrument
-	/** Creates an effect */
-	effect(name: string, newName?: string): Effect
-	/** Creates a named track */
-	track(name: string, cb?: TrackCallback): Track
-	/** Creates a looping track */
-	loop_track(name: string, cb?: TrackCallback): Track
-	/** Enables or disables logging of note events */
-	use_log(enable?: boolean): this
-	/** Prints the specified data to the log */
-	log(...args: any[]): this
-	/** Change global BPM */
-	bpm(value?: number): number | this
-	/** Stops all looping track at the end of their loop */
-	stop(): this
-	/** Pauses all tracks at their current position */
-	pause(): this
-	/** Continues playback of stopped or paused tracks */
-	continue(): this
-	/** Stops and deletes all tracks */
-	reset(): this
 }
 
 /** The TrackControl interface provides access to a playing track in order
@@ -115,6 +120,9 @@ interface Track {
 	repeat(times: number, cb: (i: number) => void): void
 }
 
+
+// -------------------- Globals -------------------------
+
 interface InstrumentTable {
 	[instrName: string]: Instrument
 }
@@ -143,3 +151,50 @@ declare let global: any
  effects and tracks, and controlling global settings */
 declare let lc: LiveCoding
 
+
+// -------------------- Rings -------------------------
+
+/** A ring is an array extended with immutable operations and a convenient
+tick() iterator */
+interface Ring<T> extends Array<T> {
+	/** Returns the current element and increments the position counter.
+	If the position counter goes past the end of the ring, it wraps to
+	the start of the ring */
+	tick(): T
+	/** Creates a copy of the ring */
+	clone(): Ring<T>
+	/** Returns a reversed copy of the ring */
+	reverse(): Ring<T>
+	/** Returns a shuffled copy of the ring */
+	shuffle(): Ring<T>
+	/** Returns a new ring containing only the first **n** elements */
+	take(n: number): Ring<T>
+	/** Returns a new ring containing everything but the first **n** elements */
+	drop(n: number): Ring<T>
+	/** Returns a new ring with the last element missing  */
+	butlast(): Ring<T>
+	/** Returns a new ring with the last **n** elements missing */
+	drop_last(n: number): Ring<T>
+	/** Returns a new ring with only the last **n** elements */
+	take_last(n: number): Ring<T>
+	/** Repeats each element in the ring **n** times */
+	stretch(n: number): Ring<T>
+	/** Repeats the entire ring **n** times */
+	repeat(n: number): Ring<T>
+	/** Adds the ring to a reversed version of itself  */
+	mirror(): Ring<T>
+	/** Adds the ring to a reversed version of itself,
+	without duplicating the middle value  */
+	reflect(): Ring<T>
+	/** Returns a new ring with all elements multiplied by **n**
+	(assumes ring contains numbers only) */
+	scale(n: number): Ring<T>
+	/** Returns a new ring with **n** added to all elements
+	(assumes ring contains numbers only) */
+	transpose(n: number): Ring<T>
+}
+
+interface Array<T> {
+	/** Creates a ring from an array */
+	ring: () => Ring<T>
+}

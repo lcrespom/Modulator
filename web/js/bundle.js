@@ -6149,21 +6149,6 @@ class Ring extends Array {
     constructor() {
         super(...arguments);
         this.tick_ct = 0;
-        /*
-            .shuffle - creates a shuffled version of the ring
-            .pick(3) - returns a ring with the results of calling .choose 3 times
-            .pick - similar to .pick(3) only the size defaults to the same as the original ring
-            .take(5) - returns a new ring containing only the first 5 elements
-            .drop(3) - returns a new ring with everything but the first 3 elements
-            .butlast - returns a new ring with the last element missing
-            .drop_last(3) - returns a new ring with the last 3 elements missing
-            .take_last(6)- returns a new ring with only the last 6 elements
-            .stretch(2) - repeats each element in the ring twice
-            .repeat(3) - repeats the entire ring 3 times
-            .mirror - adds the ring to a reversed version of itself
-            .reflect - same as mirror but doesn’t duplicate middle value
-            .scale(2) - returns a new ring with all elements multiplied by 2 (assumes ring contains numbers only)
-        */
     }
     tick() {
         let result = this[this.tick_ct];
@@ -6181,13 +6166,73 @@ class Ring extends Array {
         return new Array(...this);
     }
     clone() {
-        return this.toArray().ring();
+        return copytick(this, this.toArray().ring());
     }
     reverse() {
-        return this.toArray().reverse().ring();
+        return copytick(this, this.toArray().reverse().ring());
     }
     sort(compareFn) {
-        return this.toArray().sort(compareFn).ring();
+        let r = this.toArray().sort(compareFn).ring();
+        return copytick(this, r);
+    }
+    shuffle() {
+        let r = this.clone();
+        for (let i = r.length - 1; i > 0; i--) {
+            let j = randomInt(i + 1);
+            let temp = r[i];
+            r[i] = r[j];
+            r[j] = temp;
+        }
+        return copytick(this, r);
+    }
+    take(n) {
+        return copytick(this, this.slice(0, n));
+    }
+    drop(n) {
+        return copytick(this, this.slice(n));
+    }
+    butlast() {
+        return this.take(this.length - 1);
+    }
+    drop_last(n) {
+        return this.take(this.length - n);
+    }
+    take_last(n) {
+        return this.drop(this.length - n);
+    }
+    stretch(n) {
+        let r = new Ring();
+        for (let x of this)
+            for (let i = 0; i < n; i++)
+                r.push(x);
+        return copytick(this, r);
+    }
+    repeat(n) {
+        let r = new Ring();
+        for (let i = 0; i < n; i++)
+            for (let x of this)
+                r.push(x);
+        return copytick(this, r);
+    }
+    mirror() {
+        let r = this.concat(this.reverse());
+        return copytick(this, r);
+    }
+    reflect() {
+        let r = this.concat(this.reverse().drop(1));
+        return copytick(this, r);
+    }
+    scale(n) {
+        let r = this.clone();
+        for (let i = 0; i < r.length; i++)
+            r[i] *= n;
+        return copytick(this, r);
+    }
+    transpose(n) {
+        let r = this.clone();
+        for (let i = 0; i < r.length; i++)
+            r[i] += n;
+        return copytick(this, r);
     }
     toString() {
         let arr = [];
@@ -6203,6 +6248,15 @@ function setupRing() {
             return new Ring().fromArray(this);
         };
     }
+}
+function copytick(from, to) {
+    to.tick_ct = from.tick_ct;
+    if (to.tick_ct >= to.length)
+        to.tick_ct = to.length - 1;
+    return to;
+}
+function randomInt(max) {
+    return Math.floor(Math.random() * max);
 }
 
 

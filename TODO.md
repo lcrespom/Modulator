@@ -45,7 +45,7 @@
 		- Synch to wait for message
 	- [ ] Copy from Sonic Pi
 		- [ ] Notes and scales
-		- [ ] Lists/rings
+		- [x] Rings
 		- [ ] Random helpers (shuffle, etc => use deterministic seed)
 	- [x] Custom effect support: predefined and user-defined
 	- [x] Ramps in track gain and effects

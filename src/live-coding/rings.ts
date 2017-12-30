@@ -18,15 +18,85 @@ class Ring<T> extends Array<T> {
 	}
 
 	clone(): Ring<T> {
-		return this.toArray().ring()
+		return copytick(this, this.toArray().ring())
 	}
 
 	reverse(): Ring<T> {
-		return this.toArray().reverse().ring()
+		return copytick(this, this.toArray().reverse().ring())
 	}
 
-	sort(compareFn?: (a: T, b: T) => number) {
-		return <this>this.toArray().sort(compareFn).ring()
+	sort(compareFn?: (a: T, b: T) => number): this {
+		let r = this.toArray().sort(compareFn).ring()
+		return <this>copytick(this, r)
+	}
+
+	shuffle(): Ring<T> {
+		let r = this.clone()
+		for (let i = r.length - 1; i > 0; i--) {
+			let j = randomInt(i + 1)
+			let temp = r[i]
+			r[i] = r[j]
+			r[j] = temp
+		}
+		return copytick(this, r)
+	}
+
+	take(n: number): Ring<T> {
+		return copytick(this, <Ring<T>>this.slice(0, n))
+	}
+
+	drop(n: number): Ring<T> {
+		return copytick(this, <Ring<T>>this.slice(n))
+	}
+
+	butlast(): Ring<T> {
+		return this.take(this.length - 1)
+	}
+
+	drop_last(n: number): Ring<T> {
+		return this.take(this.length - n)
+	}
+
+	take_last(n: number): Ring<T> {
+		return this.drop(this.length - n)
+	}
+
+	stretch(n: number): Ring<T> {
+		let r = new Ring<T>()
+		for (let x of this)
+			for (let i = 0; i < n; i++)
+				r.push(x)
+		return copytick(this, r)
+	}
+
+	repeat(n: number): Ring<T> {
+		let r = new Ring<T>()
+		for (let i = 0; i < n; i++)
+			for (let x of this)
+				r.push(x)
+		return copytick(this, r)
+	}
+
+	mirror(): Ring<T> {
+		let r = this.concat(this.reverse())
+		return copytick(this, <Ring<T>>r)
+	}
+
+	reflect(): Ring<T> {
+		let r = this.concat(this.reverse().drop(1))
+		return copytick(this, <Ring<T>>r)
+	}
+
+	scale(n: number): Ring<T> {
+		let r = <any>this.clone()
+		for (let i = 0; i < r.length; i++) r[i] *= n
+		return copytick(this, r)
+	}
+
+	transpose(n: number): Ring<T> {
+		let r = <any>this.clone()
+		for (let i = 0; i < r.length; i++) r[i] += n
+		return copytick(this, r)
 	}
 
 	toString() {
@@ -35,21 +105,6 @@ class Ring<T> extends Array<T> {
 		arr[this.tick_ct] = '>' + arr[this.tick_ct] + '<'
 		return '(' + arr.join(', ') + ')'
 	}
-	/*
-		.shuffle - creates a shuffled version of the ring
-		.pick(3) - returns a ring with the results of calling .choose 3 times
-		.pick - similar to .pick(3) only the size defaults to the same as the original ring
-		.take(5) - returns a new ring containing only the first 5 elements
-		.drop(3) - returns a new ring with everything but the first 3 elements
-		.butlast - returns a new ring with the last element missing
-		.drop_last(3) - returns a new ring with the last 3 elements missing
-		.take_last(6)- returns a new ring with only the last 6 elements
-		.stretch(2) - repeats each element in the ring twice
-		.repeat(3) - repeats the entire ring 3 times
-		.mirror - adds the ring to a reversed version of itself
-		.reflect - same as mirror but doesn’t duplicate middle value
-		.scale(2) - returns a new ring with all elements multiplied by 2 (assumes ring contains numbers only)
-	*/
 }
 
 declare global {
@@ -64,4 +119,14 @@ export function setupRing() {
 			return new Ring().fromArray(this)
 		}
 	}
+}
+
+function copytick<T>(from: Ring<T>, to: Ring<T>): Ring<T> {
+	to.tick_ct = from.tick_ct
+	if (to.tick_ct >= to.length) to.tick_ct = to.length - 1
+	return to
+}
+
+function randomInt(max: number) {
+	return Math.floor(Math.random() * max)
 }
