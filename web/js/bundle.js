@@ -1474,6 +1474,8 @@ class LineInNode extends CustomNodeBase {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__live_coding__ = __webpack_require__(22);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lc_definitions__ = __webpack_require__(25);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__editor_actions__ = __webpack_require__(26);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__rings__ = __webpack_require__(32);
+
 
 
 
@@ -1491,11 +1493,7 @@ function loadMonaco(cb) {
     monacoRequire(['vs/editor/editor.main'], cb);
 }
 function createEditor(ac, presets, synthUI) {
-    global.lc = new __WEBPACK_IMPORTED_MODULE_0__live_coding__["a" /* LiveCoding */](ac, presets, synthUI);
-    global.instruments = __WEBPACK_IMPORTED_MODULE_0__live_coding__["c" /* instruments */];
-    global.effects = __WEBPACK_IMPORTED_MODULE_0__live_coding__["b" /* effects */];
-    global.tracks = __WEBPACK_IMPORTED_MODULE_0__live_coding__["d" /* tracks */];
-    global.global = {};
+    setupGlobals(ac, presets, synthUI);
     loadMonaco(function () {
         let editorElem = byId('walc-code-editor');
         setupDefinitions();
@@ -1518,6 +1516,14 @@ function createEditor(ac, presets, synthUI) {
             window.scrollTo(0, 0);
         });
     });
+}
+function setupGlobals(ac, presets, synthUI) {
+    global.lc = new __WEBPACK_IMPORTED_MODULE_0__live_coding__["a" /* LiveCoding */](ac, presets, synthUI);
+    global.instruments = __WEBPACK_IMPORTED_MODULE_0__live_coding__["c" /* instruments */];
+    global.effects = __WEBPACK_IMPORTED_MODULE_0__live_coding__["b" /* effects */];
+    global.tracks = __WEBPACK_IMPORTED_MODULE_0__live_coding__["d" /* tracks */];
+    global.global = {};
+    Object(__WEBPACK_IMPORTED_MODULE_3__rings__["a" /* setupRing */])();
 }
 function preventParentScroll(elem) {
     $(elem).bind('mousewheel', e => e.preventDefault());
@@ -6271,6 +6277,73 @@ Tuna.prototype.LFO.prototype = Object.create(Super, {
 Tuna.toString = Tuna.prototype.toString = function () {
     return 'Please visit https://github.com/Theodeus/tuna/wiki for instructions on how to use Tuna.js';
 };
+
+
+/***/ }),
+/* 32 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = setupRing;
+class Ring extends Array {
+    constructor() {
+        super(...arguments);
+        this.tick_ct = 0;
+        /*
+            .shuffle - creates a shuffled version of the ring
+            .pick(3) - returns a ring with the results of calling .choose 3 times
+            .pick - similar to .pick(3) only the size defaults to the same as the original ring
+            .take(5) - returns a new ring containing only the first 5 elements
+            .drop(3) - returns a new ring with everything but the first 3 elements
+            .butlast - returns a new ring with the last element missing
+            .drop_last(3) - returns a new ring with the last 3 elements missing
+            .take_last(6)- returns a new ring with only the last 6 elements
+            .stretch(2) - repeats each element in the ring twice
+            .repeat(3) - repeats the entire ring 3 times
+            .mirror - adds the ring to a reversed version of itself
+            .reflect - same as mirror but doesn’t duplicate middle value
+            .scale(2) - returns a new ring with all elements multiplied by 2 (assumes ring contains numbers only)
+        */
+    }
+    tick() {
+        let result = this[this.tick_ct];
+        this.tick_ct++;
+        if (this.tick_ct >= this.length)
+            this.tick_ct = 0;
+        return result;
+    }
+    fromArray(arr) {
+        for (let x of arr)
+            this.push(x);
+        return this;
+    }
+    toArray() {
+        return new Array(...this);
+    }
+    clone() {
+        return this.toArray().ring();
+    }
+    reverse() {
+        return this.toArray().reverse().ring();
+    }
+    sort(compareFn) {
+        return this.toArray().sort(compareFn).ring();
+    }
+    toString() {
+        let arr = [];
+        for (let x of this)
+            arr.push(x.toString());
+        arr[this.tick_ct] = '>' + arr[this.tick_ct] + '<';
+        return '(' + arr.join(', ') + ')';
+    }
+}
+function setupRing() {
+    if (!Array.prototype.ring) {
+        Array.prototype.ring = function () {
+            return new Ring().fromArray(this);
+        };
+    }
+}
 
 
 /***/ })

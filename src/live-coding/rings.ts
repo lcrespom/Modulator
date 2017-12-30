@@ -1,24 +1,41 @@
 class Ring<T> extends Array<T> {
-	tick_ct = -1
-
-	constructor(arr: T[]) {
-		super()
-		for (let x of arr) this.push(x)
-	}
+	tick_ct = 0
 
 	tick(): T {
+		let result = this[this.tick_ct]
 		this.tick_ct++
 		if (this.tick_ct >= this.length) this.tick_ct = 0
-		return this[this.tick_ct]
+		return result
+	}
+
+	fromArray(arr: T[]): Ring<T> {
+		for (let x of arr) this.push(x)
+		return this
+	}
+
+	toArray(): T[] {
+		return new Array(...this)
+	}
+
+	clone(): Ring<T> {
+		return this.toArray().ring()
 	}
 
 	reverse(): Ring<T> {
-		let result: Ring<T> = [].ring()
-		for (let x of this) result.unshift(x)
-		return result
+		return this.toArray().reverse().ring()
+	}
+
+	sort(compareFn?: (a: T, b: T) => number) {
+		return <this>this.toArray().sort(compareFn).ring()
+	}
+
+	toString() {
+		let arr: string[] = []
+		for (let x of this) arr.push(x.toString())
+		arr[this.tick_ct] = '>' + arr[this.tick_ct] + '<'
+		return '(' + arr.join(', ') + ')'
 	}
 	/*
-		.sort - creates a sorted version of the ring
 		.shuffle - creates a shuffled version of the ring
 		.pick(3) - returns a ring with the results of calling .choose 3 times
 		.pick - similar to .pick(3) only the size defaults to the same as the original ring
@@ -42,7 +59,9 @@ declare global {
 }
 
 export function setupRing() {
-	(<any>Array.prototype).ring = function() {
-		return new Ring(this)
+	if (!Array.prototype.ring) {
+		Array.prototype.ring = function() {
+			return new Ring().fromArray(this)
+		}
 	}
 }

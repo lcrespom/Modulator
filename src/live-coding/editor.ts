@@ -4,6 +4,7 @@ import { SynthUI } from '../synthUI/synthUI'
 import { LiveCoding, instruments, effects, tracks } from './live-coding'
 import { LC_DEFINITIONS } from './lc-definitions'
 import { registerActions } from './editor-actions'
+import { setupRing } from './rings'
 
 
 let sinkDiv = document.createElement('div')
@@ -27,11 +28,7 @@ function loadMonaco(cb: () => void) {
 
 export function createEditor(
 	ac: AudioContext, presets: Presets, synthUI: SynthUI) {
-	global.lc = new LiveCoding(ac, presets, synthUI)
-	global.instruments = instruments
-	global.effects = effects
-	global.tracks = tracks
-	global.global = {}
+	setupGlobals(ac, presets, synthUI)
 	loadMonaco(function() {
 		let editorElem = byId('walc-code-editor')
 		setupDefinitions()
@@ -53,6 +50,15 @@ export function createEditor(
 			window.scrollTo(0, 0)
 		})
 	})
+}
+
+function setupGlobals(ac: AudioContext, presets: Presets, synthUI: SynthUI) {
+	global.lc = new LiveCoding(ac, presets, synthUI)
+	global.instruments = instruments
+	global.effects = effects
+	global.tracks = tracks
+	global.global = {}
+	setupRing()
 }
 
 function preventParentScroll(elem: HTMLElement) {
