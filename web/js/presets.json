@@ -893,6 +893,230 @@
 		"nodes": [
 			{
 				"id": 0,
+				"x": 540,
+				"y": 240,
+				"name": "Out",
+				"inputs": [6],
+				"classes": "node node-out"
+			},
+			{
+				"id": 1,
+				"x": 40,
+				"y": 40,
+				"name": "Osc",
+				"inputs": [],
+				"classes": "node node-src"
+			},
+			{
+				"id": 2,
+				"x": 220,
+				"y": 40,
+				"name": "Filter",
+				"inputs": [1],
+				"classes": "node node-effect"
+			},
+			{
+				"id": 3,
+				"x": 220,
+				"y": 140,
+				"name": "Filter",
+				"inputs": [2],
+				"classes": "node node-effect"
+			},
+			{
+				"id": 4,
+				"x": 220,
+				"y": 240,
+				"name": "Filter",
+				"inputs": [3],
+				"classes": "node node-effect"
+			},
+			{
+				"id": 5,
+				"x": 380,
+				"y": 140,
+				"name": "ADSR",
+				"inputs": [],
+				"classes": "node node-ctrl"
+			},
+			{
+				"id": 6,
+				"x": 380,
+				"y": 240,
+				"name": "Gain",
+				"inputs": [4, 5],
+				"classes": "node node-effect"
+			}
+		],
+		"nodeData": [
+			{ "type": "out", "params": {} },
+			{
+				"type": "Oscillator",
+				"params": { "frequency": 220, "detune": 0, "type": "sawtooth" }
+			},
+			{
+				"type": "Filter",
+				"params": {
+					"frequency": 50,
+					"Q": 0,
+					"detune": 0,
+					"gain": 0,
+					"type": "highpass"
+				}
+			},
+			{
+				"type": "Filter",
+				"params": {
+					"frequency": 1000,
+					"Q": 7,
+					"detune": 0,
+					"gain": 0,
+					"type": "lowpass"
+				}
+			},
+			{
+				"type": "Filter",
+				"params": {
+					"frequency": 1000,
+					"Q": 7,
+					"detune": 0,
+					"gain": 0,
+					"type": "lowpass"
+				}
+			},
+			{
+				"type": "ADSR",
+				"params": {
+					"attack": 0,
+					"decay": 0,
+					"sustain": 1,
+					"release": 0.25,
+					"depth": 1
+				},
+				"controlParam": "gain",
+				"controlParams": ["gain"]
+			},
+			{ "type": "Gain", "params": { "gain": 1 } }
+		],
+		"name": "TB-303",
+		"modulatorType": "synth",
+		"keyboard": {
+			"portamento": 0,
+			"octave": 3,
+			"arpeggio": { "bpm": 128, "mode": 0, "octave": 1 }
+		}
+	},
+	{
+		"nodes": [
+			{
+				"id": 0,
+				"x": 560,
+				"y": 220,
+				"name": "Out",
+				"inputs": [5],
+				"classes": "node node-out"
+			},
+			{
+				"id": 1,
+				"x": 60,
+				"y": 220,
+				"name": "Osc",
+				"inputs": [4],
+				"classes": "node node-src"
+			},
+			{
+				"id": 3,
+				"x": 60,
+				"y": 20,
+				"name": "LFO",
+				"inputs": [],
+				"classes": "node node-ctrl"
+			},
+			{
+				"id": 4,
+				"x": 60,
+				"y": 120,
+				"name": "Gain<br>Control",
+				"inputs": [3],
+				"classes": "node node-ctrl"
+			},
+			{
+				"id": 5,
+				"x": 400,
+				"y": 220,
+				"name": "Filter",
+				"inputs": [6],
+				"classes": "node node-effect"
+			},
+			{
+				"id": 6,
+				"x": 260,
+				"y": 220,
+				"name": "Gain",
+				"inputs": [7, 1],
+				"classes": "node node-effect"
+			},
+			{
+				"id": 7,
+				"x": 260,
+				"y": 320,
+				"name": "ADSR",
+				"inputs": [],
+				"classes": "node node-ctrl"
+			}
+		],
+		"nodeData": [
+			{ "type": "out", "params": {} },
+			{
+				"type": "Oscillator",
+				"params": { "frequency": 220, "detune": 0, "type": "sine" }
+			},
+			{
+				"type": "LFO",
+				"params": { "frequency": 2200, "detune": 0, "type": "sine" }
+			},
+			{
+				"type": "GainCtrl",
+				"params": { "gain": 500 },
+				"controlParam": "frequency",
+				"controlParams": ["frequency", "detune"]
+			},
+			{
+				"type": "Filter",
+				"params": {
+					"frequency": 2000,
+					"Q": 0,
+					"detune": 0,
+					"gain": 0,
+					"type": "lowpass"
+				}
+			},
+			{ "type": "Gain", "params": { "gain": 1 } },
+			{
+				"type": "ADSR",
+				"params": {
+					"attack": 0,
+					"decay": 0.1,
+					"sustain": 0.5,
+					"release": 1,
+					"depth": 1
+				},
+				"controlParam": "gain",
+				"controlParams": ["gain"]
+			}
+		],
+		"name": "Simple FM",
+		"modulatorType": "synth",
+		"keyboard": {
+			"portamento": 0,
+			"octave": 3,
+			"arpeggio": { "bpm": 128, "mode": 0, "octave": 1 }
+		}
+	},
+	{
+		"nodes": [
+			{
+				"id": 0,
 				"x": 460,
 				"y": 160,
 				"name": "Out",
