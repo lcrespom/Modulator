@@ -3911,11 +3911,15 @@ function createEffect(ac, name) {
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = registerActions;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__editor__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__editor_buffers__ = __webpack_require__(47);
+
 
 function registerActions(editor, monaco) {
     const CTRL_ALT = monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd;
+    const CTRL_SHIFT = monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift;
     let editorActions = new EditorActions(editor);
     registerButtons(editorActions);
+    // -------------------- Run code actions --------------------
     editor.addAction({
         id: 'walc-run-all',
         label: 'Run all code',
@@ -3940,10 +3944,13 @@ function registerActions(editor, monaco) {
         contextMenuOrder: 3,
         run: () => editorActions.stopAllTracks()
     });
+    // -------------------- Font size actions --------------------
     editor.addAction({
         id: 'walc-font-sm',
         label: 'Reduce code font',
-        keybindings: [CTRL_ALT | monaco.KeyCode.US_COMMA, CTRL_ALT | monaco.KeyCode.US_MINUS],
+        keybindings: [
+            CTRL_ALT | monaco.KeyCode.US_COMMA, CTRL_ALT | monaco.KeyCode.US_MINUS
+        ],
         contextMenuGroupId: 'modulator',
         contextMenuOrder: 4,
         run: () => editorActions.reduceFont()
@@ -3951,10 +3958,25 @@ function registerActions(editor, monaco) {
     editor.addAction({
         id: 'walc-font-lg',
         label: 'Enlarge code font',
-        keybindings: [CTRL_ALT | monaco.KeyCode.US_DOT, CTRL_ALT | monaco.KeyCode.US_EQUAL],
+        keybindings: [
+            CTRL_ALT | monaco.KeyCode.US_DOT, CTRL_ALT | monaco.KeyCode.US_EQUAL
+        ],
         contextMenuGroupId: 'modulator',
         contextMenuOrder: 5,
         run: () => editorActions.enlargeFont()
+    });
+    // -------------------- Buffer actions --------------------
+    editor.addAction({
+        id: 'walc-buffer-prev',
+        label: 'Previous code buffer',
+        keybindings: [CTRL_SHIFT | monaco.KeyCode.US_COMMA],
+        run: () => editorActions.showPrevBuffer()
+    });
+    editor.addAction({
+        id: 'walc-buffer-next',
+        label: 'Next code buffer',
+        keybindings: [CTRL_SHIFT | monaco.KeyCode.US_DOT],
+        run: () => editorActions.showNextBuffer()
     });
 }
 function registerButtons(editorActions) {
@@ -3990,6 +4012,12 @@ class EditorActions {
     }
     enlargeFont() {
         this.editor.updateOptions({ fontSize: this.getFontSize() + 1 });
+    }
+    showPrevBuffer() {
+        Object(__WEBPACK_IMPORTED_MODULE_1__editor_buffers__["c" /* prevBuffer */])(this.editor);
+    }
+    showNextBuffer() {
+        Object(__WEBPACK_IMPORTED_MODULE_1__editor_buffers__["b" /* nextBuffer */])(this.editor);
     }
     getRange(range) {
         let sel;
@@ -7464,28 +7492,44 @@ if ((typeof module) == 'object' && module.exports) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = handleBuffers;
+/* harmony export (immutable) */ __webpack_exports__["c"] = prevBuffer;
+/* harmony export (immutable) */ __webpack_exports__["b"] = nextBuffer;
 const NUM_BUFFERS = 8;
 let currentBuffer = 1;
+// -------------------- Buffer navigation --------------------
 function handleBuffers(editor) {
     handleEditorStorage(editor);
     for (let i = 1; i <= NUM_BUFFERS; i++)
         registerButton(i, editor);
 }
+function prevBuffer(editor) {
+    let num = currentBuffer - 1;
+    if (num < 1)
+        num = NUM_BUFFERS;
+    bufferChanged(num, editor);
+}
+function nextBuffer(editor) {
+    let num = currentBuffer + 1;
+    if (num > NUM_BUFFERS)
+        num = 1;
+    bufferChanged(num, editor);
+}
 function registerButton(id, editor) {
-    getButton$(id).click(_ => {
-        getButton$(currentBuffer)
-            .removeClass('btn-primary')
-            .addClass('btn-default');
-        getButton$(id)
-            .removeClass('btn-default')
-            .addClass('btn-primary');
-        bufferChanged(id, editor);
-    });
+    getButton$(id).click(_ => bufferChanged(id, editor));
 }
 function getButton$(id) {
     return $('#walc-buffer-' + id);
 }
+function updateButtons(disableId, enableId) {
+    getButton$(disableId)
+        .removeClass('btn-primary')
+        .addClass('btn-default');
+    getButton$(enableId)
+        .removeClass('btn-default')
+        .addClass('btn-primary');
+}
 function bufferChanged(num, editor) {
+    updateButtons(currentBuffer, num);
     storeBuffer(currentBuffer, getEditorText(editor));
     setEditorText(editor, loadBuffer(num));
     currentBuffer = num;

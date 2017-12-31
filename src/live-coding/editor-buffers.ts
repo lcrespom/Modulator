@@ -1,30 +1,46 @@
 const NUM_BUFFERS = 8
 let currentBuffer = 1
 
+
+// -------------------- Buffer navigation --------------------
+
 export function handleBuffers(editor: any) {
 	handleEditorStorage(editor)
 	for (let i = 1; i <= NUM_BUFFERS; i++)
 		registerButton(i, editor)
 }
 
+export function prevBuffer(editor: any) {
+	let num = currentBuffer - 1
+	if (num < 1) num = NUM_BUFFERS
+	bufferChanged(num, editor)
+}
+
+export function nextBuffer(editor: any) {
+	let num = currentBuffer + 1
+	if (num > NUM_BUFFERS) num = 1
+	bufferChanged(num, editor)
+}
 
 function registerButton(id: number, editor: any) {
-	getButton$(id).click(_ => {
-		getButton$(currentBuffer)
-			.removeClass('btn-primary')
-			.addClass('btn-default')
-		getButton$(id)
-			.removeClass('btn-default')
-			.addClass('btn-primary')
-		bufferChanged(id, editor)
-	})
+	getButton$(id).click(_ => bufferChanged(id, editor))
 }
 
 function getButton$(id: number) {
 	return $('#walc-buffer-' + id)
 }
 
+function updateButtons(disableId: number, enableId: number) {
+	getButton$(disableId)
+		.removeClass('btn-primary')
+		.addClass('btn-default')
+	getButton$(enableId)
+		.removeClass('btn-default')
+		.addClass('btn-primary')
+}
+
 function bufferChanged(num: number, editor: any) {
+	updateButtons(currentBuffer, num)
 	storeBuffer(currentBuffer, getEditorText(editor))
 	setEditorText(editor, loadBuffer(num))
 	currentBuffer = num
