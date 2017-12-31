@@ -10,7 +10,7 @@ export function registerActions(editor: any, monaco: any) {
 		id: 'walc-run-all',
 		label: 'Run all code',
 		keybindings: [CTRL_ALT | monaco.KeyCode.Enter],
-		contextMenuGroupId: 'navigation',
+		contextMenuGroupId: 'modulator',
 		contextMenuOrder: 1,
 		run: () => editorActions.runAllCode()
 	})
@@ -18,32 +18,32 @@ export function registerActions(editor: any, monaco: any) {
 		id: 'walc-run-part',
 		label: 'Run current line or selection',
 		keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
-		contextMenuGroupId: 'navigation',
-		contextMenuOrder: 1,
+		contextMenuGroupId: 'modulator',
+		contextMenuOrder: 2,
 		run: () => editorActions.runSomeCode()
 	})
 	editor.addAction({
 		id: 'walc-stop-all',
 		label: 'Stop all tracks',
 		keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.US_DOT],
-		contextMenuGroupId: 'navigation',
-		contextMenuOrder: 1,
+		contextMenuGroupId: 'modulator',
+		contextMenuOrder: 3,
 		run: () => editorActions.stopAllTracks()
 	})
 	editor.addAction({
 		id: 'walc-font-sm',
 		label: 'Reduce code font',
 		keybindings: [CTRL_ALT | monaco.KeyCode.US_COMMA, CTRL_ALT | monaco.KeyCode.US_MINUS],
-		contextMenuGroupId: 'navigation',
-		contextMenuOrder: 2,
+		contextMenuGroupId: 'modulator',
+		contextMenuOrder: 4,
 		run: () => editorActions.reduceFont()
 	})
 	editor.addAction({
 		id: 'walc-font-lg',
 		label: 'Enlarge code font',
 		keybindings: [CTRL_ALT | monaco.KeyCode.US_DOT, CTRL_ALT | monaco.KeyCode.US_EQUAL],
-		contextMenuGroupId: 'navigation',
-		contextMenuOrder: 2,
+		contextMenuGroupId: 'modulator',
+		contextMenuOrder: 5,
 		run: () => editorActions.enlargeFont()
 	})
 }
