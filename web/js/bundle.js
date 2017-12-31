@@ -1476,6 +1476,8 @@ class LineInNode extends CustomNodeBase {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__rings__ = __webpack_require__(32);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__scales__ = __webpack_require__(33);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__random__ = __webpack_require__(37);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__editor_buffers__ = __webpack_require__(47);
+
 
 
 
@@ -1511,7 +1513,7 @@ function createEditor(ac, presets, synthUI) {
         Object(__WEBPACK_IMPORTED_MODULE_1__editor_actions__["a" /* registerActions */])(editor, monaco);
         preventParentScroll(editorElem);
         editor.focus();
-        handleEditorStorage();
+        Object(__WEBPACK_IMPORTED_MODULE_5__editor_buffers__["a" /* handleBuffers */])(editor);
         $(document).on('route:show', (e, h) => {
             if (h != '#live-coding')
                 return;
@@ -1550,25 +1552,6 @@ function handleEditorResize(elem) {
             editor.layout();
         }
     }, 1000);
-}
-function handleEditorStorage() {
-    recoverStoredCode();
-    watchCodeAndStoreIt();
-}
-function watchCodeAndStoreIt() {
-    let storedCode = editor.getModel().getValue();
-    setInterval(() => {
-        let code = editor.getModel().getValue();
-        if (storedCode == code)
-            return;
-        localStorage.code_buffer_0 = code;
-        storedCode = code;
-    }, 1000);
-}
-function recoverStoredCode() {
-    let code = localStorage.code_buffer_0;
-    if (code)
-        editor.getModel().setValue(code);
 }
 // -------------------- Error handling --------------------
 function getRuntimeErrorDecoration(lineNum) {
@@ -7474,6 +7457,75 @@ if ((typeof module) == 'object' && module.exports) {
 /***/ (function(module, exports) {
 
 /* (ignored) */
+
+/***/ }),
+/* 47 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = handleBuffers;
+const NUM_BUFFERS = 8;
+let currentBuffer = 1;
+function handleBuffers(editor) {
+    handleEditorStorage(editor);
+    for (let i = 1; i <= NUM_BUFFERS; i++)
+        registerButton(i, editor);
+}
+function registerButton(id, editor) {
+    getButton$(id).click(_ => {
+        getButton$(currentBuffer)
+            .removeClass('btn-primary')
+            .addClass('btn-default');
+        getButton$(id)
+            .removeClass('btn-default')
+            .addClass('btn-primary');
+        bufferChanged(id, editor);
+    });
+}
+function getButton$(id) {
+    return $('#walc-buffer-' + id);
+}
+function bufferChanged(num, editor) {
+    storeBuffer(currentBuffer, getEditorText(editor));
+    setEditorText(editor, loadBuffer(num));
+    currentBuffer = num;
+    editor.focus();
+    editor.revealLine(1); // TODO store cursor positions
+}
+// -------------------- Buffer storage management --------------------
+function handleEditorStorage(editor) {
+    recoverStoredCode(editor);
+    watchCodeAndStoreIt(editor);
+}
+function recoverStoredCode(editor) {
+    let code = loadBuffer(currentBuffer);
+    if (code)
+        setEditorText(editor, code);
+}
+function watchCodeAndStoreIt(editor) {
+    let storedCode = getEditorText(editor);
+    setInterval(() => {
+        let code = getEditorText(editor);
+        if (storedCode == code)
+            return;
+        storeBuffer(currentBuffer, code);
+        storedCode = code;
+    }, 1000);
+}
+// -------------------- Helpers --------------------
+function storeBuffer(num, txt) {
+    localStorage.setItem('code_buffer_' + num, txt);
+}
+function loadBuffer(num) {
+    return localStorage.getItem('code_buffer_' + num) || '';
+}
+function setEditorText(editor, text) {
+    editor.getModel().setValue(text);
+}
+function getEditorText(editor) {
+    return editor.getModel().getValue();
+}
+
 
 /***/ })
 /******/ ]);

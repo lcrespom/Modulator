@@ -68,19 +68,20 @@
 		- [ ] log
 		- [ ] track status: timeline, mute/solo, stopped
 		- [ ] instruments and parameters => click to edit parameters in separate panel
-	- [ ] Multiple editors / buffers
 	- [ ] Button row
 		- [x] Stop / pause / continue
 		- [ ] Help / live coding API / tutorial
 		- [ ] Upload / Download code
 		- [x] Run code / Run line|selection
 		- [x] Increase / decrease font
+	- [x] Multiple editor buffers
+	- [x] Preserve editor code across page refreshes
 	- [x] Partial run
 		- [x] Run current line
 		- [x] Run selection
 	- [x] Flash code to be run
-- [x] Preserve editor code across page refreshes
-- [x] Show sound in graphs (osc and fft)
+	- [x] Show sound in graphs (osc and fft)
+
 - [x] Get note duration by searching for attack/decay times
 - [x] Detect errors in code:
 	- [x] Let Monaco editor detect syntax errors
