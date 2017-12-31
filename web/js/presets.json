@@ -852,7 +852,7 @@
 			{
 				"type": "Filter",
 				"params": {
-					"frequency": 20000,
+					"frequency": 2000,
 					"Q": 21.8,
 					"detune": 0,
 					"gain": 0,
