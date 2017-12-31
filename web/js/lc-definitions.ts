@@ -123,37 +123,6 @@ interface Track {
 }
 
 
-// -------------------- Globals -------------------------
-
-interface InstrumentTable {
-	[instrName: string]: Instrument
-}
-
-interface EffectTable {
-	[effectName: string]: Effect
-}
-
-interface TrackTable {
-	[trackName: string]: TrackControl
-}
-
-/** Holds all instruments created by lc.instrument() */
-declare let instruments: InstrumentTable
-
-/** Holds all effects created by lc.effect() */
-declare let effects: EffectTable
-
-/** Holds all tracks created by lc.track() or lc.loop_track() */
-declare let tracks: TrackTable
-
-/** A global area to store any data to be used across executions */
-declare let global: any
-
-/** The live coding API entry point, used to create instruments,
- effects and tracks, and controlling global settings */
-declare let lc: LiveCoding
-
-
 // -------------------- Rings -------------------------
 
 /** A ring is an array extended with immutable operations and a convenient
@@ -235,3 +204,56 @@ const enum Note {
 	E8 = 112, F8 = 113, Fs8 = 114, Gb8 = 114, G8 = 115, Gs8 = 116,
 	Ab8 = 116, A8 = 117, As8 = 118, Bb8 = 118, B8 = 119
 }
+
+
+// -------------------- Predictable random -------------------------
+
+interface Random {
+	/** Initializes the random generator with a given seed */
+	seed(newSeed?: number): number
+	/** Returns a floating-point number between **from** and **to** */
+	float(from: number, to?: number): number
+	/** Returns an integer number between **from** and **to** */
+	integer(from: number, to: number): number
+	/** Returns an integer number between 1 and **sides** */
+	dice(sides: number): number
+	/** Returns **true** once every **times**, on average */
+	one_in(times: number): boolean
+	/** Randomly chooses an element of the passed data */
+	choose(...args: any[]): any
+}
+
+
+// -------------------- Globals -------------------------
+
+interface InstrumentTable {
+	[instrName: string]: Instrument
+}
+
+interface EffectTable {
+	[effectName: string]: Effect
+}
+
+interface TrackTable {
+	[trackName: string]: TrackControl
+}
+
+/** Holds all instruments created by lc.instrument() */
+declare let instruments: InstrumentTable
+
+/** Holds all effects created by lc.effect() */
+declare let effects: EffectTable
+
+/** Holds all tracks created by lc.track() or lc.loop_track() */
+declare let tracks: TrackTable
+
+/** A global area to store any data to be used across executions */
+declare let global: any
+
+/** The live coding API entry point, used to create instruments,
+ effects and tracks, and controlling global settings */
+declare let lc: LiveCoding
+
+/** A *predictable* random number generator which will always return
+the same sequence of numbers from the start of the program. */
+declare let random: Random

@@ -5,6 +5,7 @@ import { LiveCoding, instruments, effects, tracks } from './live-coding'
 import { registerActions } from './editor-actions'
 import { setupRing } from './rings'
 import { Note } from './scales'
+import { random } from './random'
 
 
 let sinkDiv = document.createElement('div')
@@ -58,6 +59,7 @@ function setupGlobals(lc: LiveCoding) {
 	global.effects = effects
 	global.tracks = tracks
 	global.Note = Note
+	global.random = random
 	global.global = {}
 	setupRing()
 }

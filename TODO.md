@@ -44,11 +44,11 @@
 	- [ ] Track synchronization via cue/sync methods
 		- Cue to post message
 		- Synch to wait for message
-	- [ ] Copy from Sonic Pi
+	- [x] Copy from Sonic Pi
 		- [x] Notes
 		- [x] Rings
 		- [x] Scales
-		- [ ] Random helpers (shuffle, etc => use deterministic seed)
+		- [x] Random helpers (shuffle, etc => use deterministic seed)
 	- [x] Custom effect support: predefined and user-defined
 	- [x] Ramps in track gain and effects
 	- [x] Global pause / stop / continue

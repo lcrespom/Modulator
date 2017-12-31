@@ -1,3 +1,5 @@
+import { random } from './random'
+
 export class Ring<T> extends Array<T> {
 	tick_ct = 0
 
@@ -9,7 +11,7 @@ export class Ring<T> extends Array<T> {
 	}
 
 	choose(): T {
-		return this[randomInt(this.length)]
+		return this[random.integer(0, this.length - 1)]
 	}
 
 	fromArray(arr: T[]): Ring<T> {
@@ -37,7 +39,7 @@ export class Ring<T> extends Array<T> {
 	shuffle(): Ring<T> {
 		let r = this.clone()
 		for (let i = r.length - 1; i > 0; i--) {
-			let j = randomInt(i + 1)
+			let j = random.integer(0, i)
 			let temp = r[i]
 			r[i] = r[j]
 			r[j] = temp
@@ -129,9 +131,4 @@ function copytick<T>(from: Ring<T>, to: Ring<T>): Ring<T> {
 	to.tick_ct = from.tick_ct
 	if (to.tick_ct >= to.length) to.tick_ct = to.length - 1
 	return to
-}
-
-// TODO: use real random
-function randomInt(max: number) {
-	return Math.floor(Math.random() * max)
 }
