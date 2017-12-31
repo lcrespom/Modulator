@@ -70,7 +70,7 @@
 		- [ ] instruments and parameters => click to edit parameters in separate panel
 	- [ ] Multiple editors / buffers
 	- [ ] Button row
-		- [ ] Stop / pause / continue
+		- [x] Stop / pause / continue
 		- [ ] Help / live coding API / tutorial
 		- [ ] Upload / Download code
 		- [x] Run code / Run line|selection
@@ -79,9 +79,7 @@
 		- [x] Run current line
 		- [x] Run selection
 	- [x] Flash code to be run
-- [ ] Background canvas
-	- Canvas API
-	- WebGL / 3D Canvas
+- [x] Preserve editor code across page refreshes
 - [x] Show sound in graphs (osc and fft)
 - [x] Get note duration by searching for attack/decay times
 - [x] Detect errors in code:
@@ -94,6 +92,9 @@
 - [x] Do as with tracker
 	- [x] Use separate route and independent pages
 	- [x] Make page layout take 100% of height
+- [ ] Background canvas
+	- Canvas API
+	- WebGL / 3D Canvas
 - [ ] Quick fix errors (upon enter or alt+enter, look only at current line)
 	- [ ] Add function `()` and `,`
 	- [ ] Add array and object `,`

@@ -1511,6 +1511,7 @@ function createEditor(ac, presets, synthUI) {
         Object(__WEBPACK_IMPORTED_MODULE_1__editor_actions__["a" /* registerActions */])(editor, monaco);
         preventParentScroll(editorElem);
         editor.focus();
+        handleEditorStorage();
         $(document).on('route:show', (e, h) => {
             if (h != '#live-coding')
                 return;
@@ -1549,6 +1550,25 @@ function handleEditorResize(elem) {
             editor.layout();
         }
     }, 1000);
+}
+function handleEditorStorage() {
+    recoverStoredCode();
+    watchCodeAndStoreIt();
+}
+function watchCodeAndStoreIt() {
+    let storedCode = editor.getModel().getValue();
+    setInterval(() => {
+        let code = editor.getModel().getValue();
+        if (storedCode == code)
+            return;
+        localStorage.code_buffer_0 = code;
+        storedCode = code;
+    }, 1000);
+}
+function recoverStoredCode() {
+    let code = localStorage.code_buffer_0;
+    if (code)
+        editor.getModel().setValue(code);
 }
 // -------------------- Error handling --------------------
 function getRuntimeErrorDecoration(lineNum) {
@@ -3539,7 +3559,11 @@ class LiveCoding {
         return this;
     }
     reset() {
-        eachTrack(t => t.delete());
+        eachTrack(t => {
+            if (t._effect)
+                t._effect.input.disconnect();
+            t.delete();
+        });
         return this;
     }
 }
@@ -3851,6 +3875,25 @@ class TunaEffect extends BaseEffect {
             throw new Error(`Effect "tuna/${name}" does not exist`);
         this.input = new effClass();
         this.output = this.input;
+    }
+    paramNames() {
+        let tunaEffect = this.input;
+        let names = [];
+        for (let pname of Object.getOwnPropertyNames(tunaEffect.defaults))
+            names.push(pname);
+        return names;
+    }
+    param(name, value, rampTime, exponential = true) {
+        let tunaEffect = this.input;
+        if (!tunaEffect.defaults[name])
+            throw new Error(`Effect "${name}" does not exist`);
+        if (value === undefined)
+            return tunaEffect[name];
+        if (rampTime === undefined)
+            tunaEffect[name] = value;
+        else
+            tunaEffect.automate(name, value, rampTime);
+        return this;
     }
 }
 let providers = {
@@ -5798,6 +5841,7 @@ Tuna.prototype.WahWah.prototype = Object.create(Super, {
         }
     },
     filterFreqTimeout: {
+        writable: true,
         value: 0
     },
     setFilterFreq: {
@@ -5863,7 +5907,7 @@ Tuna.prototype.WahWah.prototype = Object.create(Super, {
         },
         set: function (value) {
             this._resonance = value;
-            this.filterPeaking.Q = this._resonance;
+            this.filterPeaking.Q.value = this._resonance;
         }
     },
     init: {

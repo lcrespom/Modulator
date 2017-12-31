@@ -74,6 +74,28 @@ class TunaEffect extends BaseEffect {
 		this.input = new effClass()
 		this.output = this.input
 	}
+
+	paramNames() {
+		let tunaEffect: any = this.input
+		let names = []
+		for (let pname of Object.getOwnPropertyNames(tunaEffect.defaults))
+			names.push(pname)
+		return names
+	}
+
+	param(name: string, value?: number, rampTime?: number, exponential = true) {
+		let tunaEffect: any = this.input
+		if (!tunaEffect.defaults[name])
+			throw new Error(`Effect "${name}" does not exist`)
+		if (value === undefined)
+			return tunaEffect[name]
+		if (rampTime === undefined)
+			tunaEffect[name] = value
+		else
+			tunaEffect.automate(name, value, rampTime)
+		return this
+	}
+
 }
 
 

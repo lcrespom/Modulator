@@ -127,7 +127,10 @@ export class LiveCoding {
 	}
 
 	reset() {
-		eachTrack(t => t.delete())
+		eachTrack(t => {
+			if (t._effect) t._effect.input.disconnect()
+			t.delete()
+		})
 		return this
 	}
 }

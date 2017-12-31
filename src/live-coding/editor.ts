@@ -45,6 +45,7 @@ export function createEditor(
 		registerActions(editor, monaco)
 		preventParentScroll(editorElem)
 		editor.focus()
+		handleEditorStorage()
 		$(document).on('route:show', (e, h) => {
 			if (h != '#live-coding') return
 			editor.focus()
@@ -89,6 +90,26 @@ function handleEditorResize(elem: HTMLElement) {
 	}, 1000)
 }
 
+function handleEditorStorage() {
+	recoverStoredCode()
+	watchCodeAndStoreIt()
+}
+
+function watchCodeAndStoreIt() {
+	let storedCode = editor.getModel().getValue()
+	setInterval(() => {
+		let code = editor.getModel().getValue()
+		if (storedCode == code) return
+		localStorage.code_buffer_0 = code
+		storedCode = code
+	}, 1000)
+}
+
+function recoverStoredCode() {
+	let code = localStorage.code_buffer_0
+	if (code)
+		editor.getModel().setValue(code)
+}
 
 // -------------------- Error handling --------------------
 
