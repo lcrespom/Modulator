@@ -1484,6 +1484,5 @@
 				"octave": 1
 			}
 		}
-	},
-	{ "nodes": [{ "id": 0, "x": 520, "y": 160, "name": "Out", "inputs": [4], "classes": "node node-out" }, { "id": 1, "x": 320, "y": 160, "name": "Filter", "inputs": [2, 3], "classes": "node node-effect" }, { "id": 2, "x": 140, "y": 100, "name": "Osc 1", "inputs": [], "classes": "node node-src" }, { "id": 3, "x": 140, "y": 220, "name": "Osc 2", "inputs": [], "classes": "node node-src" }, { "id": 4, "x": 420, "y": 60, "name": "Gain", "inputs": [1, 5], "classes": "node node-effect" }, { "id": 5, "x": 420, "y": 280, "name": "ADSR", "inputs": [], "classes": "node node-ctrl" }], "nodeData": [{ "type": "out", "params": {} }, { "type": "Filter", "params": { "frequency": 20000.00000000001, "Q": 21.85229866744905, "detune": 0, "gain": 0, "type": "lowpass" } }, { "type": "Oscillator", "params": { "frequency": 140, "detune": 0, "type": "sawtooth" } }, { "type": "Oscillator", "params": { "frequency": 280, "detune": 10, "type": "sawtooth" } }, { "type": "Gain", "params": { "gain": 0.6800000071525574 } }, { "type": "ADSR", "params": { "attack": 0, "decay": 0.5, "sustain": 1, "release": 0.2056704849906188, "depth": 0.98 }, "controlParam": "gain", "controlParams": ["gain"] }], "name": "Fat Bass", "modulatorType": "synth", "keyboard": { "portamento": 0, "octave": 3, "arpeggio": { "bpm": 128.11048251107968, "mode": 0, "octave": 1 } } }
+	}
 ]
