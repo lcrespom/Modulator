@@ -9,21 +9,6 @@ body {
 	font-family: Electrolize, "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
-body.dark {
-	background-color: black;
-	color: #aaa;
-}
-
-.dark input, .dark select {
-	color: black;
-}
-
-.dark .audio-graph {
-	background-color: #111;
-	border-radius: 5px; margin: 10px;
-	box-shadow: inset 0px 0px 10px 3px rgba(25,100,128,0.6);
-}
-
 input.rounded {
 	border: 1px solid #DFDFDF;
 	border-radius: 5px;
@@ -461,5 +446,27 @@ input[type=range][orient=vertical] {
 .walc-log-box {
 	flex: 1;
 	margin-top: 8px;
+}
+
+
+/*----- Dark theme -----*/
+
+body.dark {
+	background-color: black;
+	color: #aaa;
+}
+
+.dark input, .dark select {
+	color: black;
+}
+
+.dark .audio-graph {
+	background-color: #111;
+	border-radius: 5px; margin: 10px;
+	box-shadow: inset 0px 0px 10px 3px rgba(25,100,128,0.6);
+}
+
+.dark .walc-error {
+	background-color: red;
 }
 

@@ -1496,6 +1496,8 @@ function byId(id) {
 let global = window;
 let monacoRequire = global.require;
 let editor;
+let _synthUI;
+let analyzer;
 let decorations = [];
 function loadMonaco(cb) {
     monacoRequire.config({ paths: { 'vs': 'js/vendor/monaco/min/vs' } });
@@ -1517,7 +1519,6 @@ function createEditor(ac, presets, synthUI) {
         handleEditorResize(editorElem);
         Object(__WEBPACK_IMPORTED_MODULE_1__editor_actions__["a" /* registerActions */])(editor, monaco);
         preventParentScroll(editorElem);
-        setupAnalyzers(synthUI);
         editor.focus();
         Object(__WEBPACK_IMPORTED_MODULE_5__editor_buffers__["a" /* handleBuffers */])(editor);
         $(document).on('route:show', (e, h) => {
@@ -1526,6 +1527,8 @@ function createEditor(ac, presets, synthUI) {
             editor.focus();
             window.scrollTo(0, 0);
         });
+        _synthUI = synthUI;
+        analyzer = new __WEBPACK_IMPORTED_MODULE_6__synthUI_analyzer__["a" /* AudioAnalyzer */]($('#walc-graph-fft'), $('#walc-graph-osc'));
     });
 }
 function setupGlobals(lc) {
@@ -1559,9 +1562,8 @@ function handleEditorResize(elem) {
         }
     }, 1000);
 }
-function setupAnalyzers(synthUI) {
-    let analyzer = new __WEBPACK_IMPORTED_MODULE_6__synthUI_analyzer__["a" /* AudioAnalyzer */]($('#walc-graph-fft'), $('#walc-graph-osc'));
-    analyzer.analyze(synthUI.outNode);
+function setupAnalyzers() {
+    analyzer.analyze(_synthUI.outNode);
 }
 // -------------------- Error handling --------------------
 function getRuntimeErrorDecoration(lineNum) {
@@ -1630,6 +1632,7 @@ function flashRange(range) {
     }, 100);
 }
 function doRunCode(code) {
+    setupAnalyzers();
     try {
         decorations = editor.deltaDecorations(decorations, []);
         // tslint:disable-next-line:no-eval

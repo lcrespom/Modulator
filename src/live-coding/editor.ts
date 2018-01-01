@@ -22,6 +22,8 @@ let global = <any>window
 let monacoRequire = global.require
 declare let monaco: any
 let editor: any
+let _synthUI: SynthUI
+let analyzer: AudioAnalyzer
 let decorations: any[] = []
 
 function loadMonaco(cb: () => void) {
@@ -46,7 +48,6 @@ export function createEditor(
 		handleEditorResize(editorElem)
 		registerActions(editor, monaco)
 		preventParentScroll(editorElem)
-		setupAnalyzers(synthUI)
 		editor.focus()
 		handleBuffers(editor)
 		$(document).on('route:show', (e, h) => {
@@ -54,6 +55,8 @@ export function createEditor(
 			editor.focus()
 			window.scrollTo(0, 0)
 		})
+		_synthUI = synthUI
+		analyzer = new AudioAnalyzer($('#walc-graph-fft'), $('#walc-graph-osc'))
 	})
 }
 
@@ -93,9 +96,8 @@ function handleEditorResize(elem: HTMLElement) {
 	}, 1000)
 }
 
-function setupAnalyzers(synthUI: SynthUI) {
-	let analyzer = new AudioAnalyzer($('#walc-graph-fft'), $('#walc-graph-osc'))
-	analyzer.analyze(synthUI.outNode)
+function setupAnalyzers() {
+	analyzer.analyze(_synthUI.outNode)
 }
 
 // -------------------- Error handling --------------------
@@ -169,6 +171,7 @@ export function flashRange(range: any) {
 }
 
 export function doRunCode(code: string) {
+	setupAnalyzers()
 	try {
 		decorations = editor.deltaDecorations(decorations, [])
 		// tslint:disable-next-line:no-eval
