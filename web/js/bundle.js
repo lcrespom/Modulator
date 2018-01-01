@@ -2207,7 +2207,8 @@ class GraphInteraction {
             let cltx = evt.clientX || 0;
             let clty = evt.clientY || 0;
             dstn.x = cltx - ofs.left;
-            dstn.y = clty - ofs.top + ($('body').scrollTop() || 0);
+            let scrollTop = document.scrollingElement.scrollTop;
+            dstn.y = clty - ofs.top + scrollTop;
             this.graph.draw();
             this.gc.save();
             this.gc.setLineDash([10]);

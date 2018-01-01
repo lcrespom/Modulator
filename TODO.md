@@ -1,7 +1,6 @@
 # ToDo
 
 ## Bugs
-- [ ] When app window is scrolled down, node connection draws arrows incorrectly
 - [ ] Node deletion only works once
 - [ ] Piano notes get stuck. How to reproduce:
 	- Click on a piano note, keep the mouse button pressed
@@ -19,6 +18,7 @@
 - [ ] Popping sound at note on/off (improved after adding adsr depth parameter)
 - [ ] Analyzer should detect when no sound is playing and clean osc and fft graphs
 	- Only visible in synths without ADSR
+- [x] When app window is scrolled down, node connection draws arrows incorrectly
 
 ## Relaunch plan
 - [x] Tracker branch
