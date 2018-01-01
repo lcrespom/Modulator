@@ -32,8 +32,9 @@
 - Document and publish
 	- [ ] Merge with master
 	- [ ] Publish in GitHub pages
+	- [ ] Tutorial
+	- [ ] Examples
 	- [ ] Document API
-	- [ ] Provide examples
 - Synth API
 	- [ ] Sample loading + playing API
 		- Use upload samples button - see https://davidwalsh.name/multiple-file-upload
@@ -59,16 +60,21 @@
 	- [x] BPM API
 	- [ ] Prevent instrument and effect instances to be shared across tracks
 	- [ ] Smarter code completion for parameters, effect names, etc.
+		- Use completion provider, see https://microsoft.github.io/monaco-editor/playground.html#extending-language-services-completion-provider-example
 - Editor
 	- [ ] Add more panels
 		- [ ] osc & fft
 		- [ ] log
-		- [ ] track status: timeline, mute/solo, stopped
+		- [ ] Info
+			- [ ] Tracks: name + status: timeline, mute/solo, stopped
+			- [ ] Effects: name + params
+			- [ ] Instruments: name + params
+			- [ ] Click on effect/instrument to display params in params panel
 		- [ ] instruments and parameters => click to edit parameters in separate panel
-	- [ ] Button row
-		- [x] Stop / pause / continue
-		- [ ] Help / live coding API / tutorial
+	- [x] Button row
 		- [ ] Upload / Download code
+		- [x] Stop / pause / continue
+		- [x] Help / live coding API / tutorial
 		- [x] Run code / Run line|selection
 		- [x] Increase / decrease font
 	- [x] Multiple editor buffers

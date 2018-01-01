@@ -1,3 +1,38 @@
+// -------------------- Globals -------------------------
+
+/** The live coding API entry point, used to create instruments,
+ effects and tracks, and controlling global settings */
+declare let lc: LiveCoding
+
+/** A *predictable* random number generator which will always return
+the same sequence of numbers from the start of the program. */
+declare let random: Random
+
+/** A global area to store any data to be used across executions */
+declare let global: any
+
+/** Holds all instruments created by lc.instrument() */
+declare let instruments: InstrumentTable
+
+/** Holds all effects created by lc.effect() */
+declare let effects: EffectTable
+
+/** Holds all tracks created by lc.track() or lc.loop_track() */
+declare let tracks: TrackTable
+
+interface InstrumentTable {
+	[instrName: string]: Instrument
+}
+
+interface EffectTable {
+	[effectName: string]: Effect
+}
+
+interface TrackTable {
+	[trackName: string]: TrackControl
+}
+
+
 // ------------------------- The LiveCoding API ------------------------------
 
 interface LiveCoding {
@@ -53,49 +88,6 @@ interface Effect {
 	paramNames(): string[]
 }
 
-type TrackCallback = (t: Track) => void
-
-interface InstrumentOptions {
-	instrument: Instrument
-	[k: string]: number | Instrument
-}
-
-interface EffectOptions {
-	effect: Effect
-	[k: string]: number | Effect
-}
-
-type NoteOptions = InstrumentOptions | EffectOptions
-
-interface PresetData {
-	name: string
-	nodes: any[]
-	nodeData: any[]
-	modulatorType: string
-}
-
-/** The TrackControl interface provides access to a playing track in order
-to control its general status, such as muting, pausing, adding an effect, etc. */
-interface TrackControl {
-	/** Adds an effect to the track. All sound played in the track will be
-	altered by the effect */
-	effect(e: Effect): this
-	/** Mutes track audio */
-	mute(): this
-	/** Unmutes track */
-	unmute(): this
-	/** Sets global gain for all notes */
-	gain(value: number, rampTime?: number): this
-	/** Stops a looping track at the end of the loop */
-	stop(): this
-	/** Pauses a track at its current position */
-	pause(): this
-	/** Continues playback of a stopped or paused track */
-	continue(): this
-	/** Stops and deletes the track from the tracks object */
-	delete(): void
-}
-
 /** The Track interface provides access to time-based functions
  such as playing notes, waiting for a specified time, etc. */
 interface Track {
@@ -120,6 +112,49 @@ interface Track {
 	sleep(time: number): this
 	/** Repeats the enclosed code a given number of times */
 	repeat(times: number, cb: (i: number) => void): this
+}
+
+/** The TrackControl interface provides access to a playing track in order
+to control its general status, such as muting, pausing, adding an effect, etc. */
+interface TrackControl {
+	/** Adds an effect to the track. All sound played in the track will be
+	altered by the effect */
+	effect(e: Effect): this
+	/** Mutes track audio */
+	mute(): this
+	/** Unmutes track */
+	unmute(): this
+	/** Sets global gain for all notes */
+	gain(value: number, rampTime?: number): this
+	/** Stops a looping track at the end of the loop */
+	stop(): this
+	/** Pauses a track at its current position */
+	pause(): this
+	/** Continues playback of a stopped or paused track */
+	continue(): this
+	/** Stops and deletes the track from the tracks object */
+	delete(): void
+}
+
+type TrackCallback = (t: Track) => void
+
+interface InstrumentOptions {
+	instrument: Instrument
+	[k: string]: number | Instrument
+}
+
+interface EffectOptions {
+	effect: Effect
+	[k: string]: number | Effect
+}
+
+type NoteOptions = InstrumentOptions | EffectOptions
+
+interface PresetData {
+	name: string
+	nodes: any[]
+	nodeData: any[]
+	modulatorType: string
 }
 
 
@@ -222,38 +257,3 @@ interface Random {
 	/** Randomly chooses an element of the passed data */
 	choose(...args: any[]): any
 }
-
-
-// -------------------- Globals -------------------------
-
-interface InstrumentTable {
-	[instrName: string]: Instrument
-}
-
-interface EffectTable {
-	[effectName: string]: Effect
-}
-
-interface TrackTable {
-	[trackName: string]: TrackControl
-}
-
-/** Holds all instruments created by lc.instrument() */
-declare let instruments: InstrumentTable
-
-/** Holds all effects created by lc.effect() */
-declare let effects: EffectTable
-
-/** Holds all tracks created by lc.track() or lc.loop_track() */
-declare let tracks: TrackTable
-
-/** A global area to store any data to be used across executions */
-declare let global: any
-
-/** The live coding API entry point, used to create instruments,
- effects and tracks, and controlling global settings */
-declare let lc: LiveCoding
-
-/** A *predictable* random number generator which will always return
-the same sequence of numbers from the start of the program. */
-declare let random: Random
