@@ -7,6 +7,7 @@ import { setupRing } from './rings'
 import { Note } from './scales'
 import { random } from './random'
 import { handleBuffers } from './editor-buffers'
+import { AudioAnalyzer } from '../synthUI/analyzer';
 
 
 let sinkDiv = document.createElement('div')
@@ -45,6 +46,7 @@ export function createEditor(
 		handleEditorResize(editorElem)
 		registerActions(editor, monaco)
 		preventParentScroll(editorElem)
+		setupAnalyzers(synthUI)
 		editor.focus()
 		handleBuffers(editor)
 		$(document).on('route:show', (e, h) => {
@@ -91,6 +93,10 @@ function handleEditorResize(elem: HTMLElement) {
 	}, 1000)
 }
 
+function setupAnalyzers(synthUI: SynthUI) {
+	let analyzer = new AudioAnalyzer($('#walc-graph-fft'), $('#walc-graph-osc'))
+	analyzer.analyze(synthUI.outNode)
+}
 
 // -------------------- Error handling --------------------
 

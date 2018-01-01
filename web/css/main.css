@@ -11,6 +11,17 @@ body {
 
 body.dark {
 	background-color: black;
+	color: #aaa;
+}
+
+.dark input, .dark select {
+	color: black;
+}
+
+.dark .audio-graph {
+	background-color: #111;
+	border-radius: 5px; margin: 10px;
+	box-shadow: inset 0px 0px 10px 3px rgba(25,100,128,0.6);
 }
 
 input.rounded {
@@ -383,21 +394,17 @@ input[type=range][orient=vertical] {
 	flex-direction: column;
 }
 
-#live-coding > .app-navbar {
-	flex: 0;
-}
-
 #live-coding > .main {
-	display: flex;
-	flex-direction: column;
 	flex: 1;
-	width: 100%;
+	max-width: initial;
+	margin: 0 10px;
+	display: flex;
 }
 
 .walc-editor-box {
-	width: calc(100% - 6px);
 	height: calc(100% - 20px);
 	overflow: hidden;
+	flex: 1;
 	display: flex;
 	flex-direction: column;
 }
@@ -434,3 +441,25 @@ input[type=range][orient=vertical] {
 	min-width: 3em;
 	outline: none !important;
 }
+
+#walc-right-col {
+	width: 476px;
+	margin-bottom: 20px;
+	margin-left: 8px;
+	display: flex;
+	flex-direction: column;
+}
+
+.walc-graph-box {
+	display: flex;
+}
+
+.walc-graph-box > #audio-graph-fft {
+	margin-right: 0;
+}
+
+.walc-log-box {
+	flex: 1;
+	margin-top: 8px;
+}
+

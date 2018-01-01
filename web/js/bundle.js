@@ -1480,6 +1480,8 @@ class LineInNode extends CustomNodeBase {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__scales__ = __webpack_require__(33);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__random__ = __webpack_require__(37);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__editor_buffers__ = __webpack_require__(47);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__synthUI_analyzer__ = __webpack_require__(15);
+
 
 
 
@@ -1515,6 +1517,7 @@ function createEditor(ac, presets, synthUI) {
         handleEditorResize(editorElem);
         Object(__WEBPACK_IMPORTED_MODULE_1__editor_actions__["a" /* registerActions */])(editor, monaco);
         preventParentScroll(editorElem);
+        setupAnalyzers(synthUI);
         editor.focus();
         Object(__WEBPACK_IMPORTED_MODULE_5__editor_buffers__["a" /* handleBuffers */])(editor);
         $(document).on('route:show', (e, h) => {
@@ -1555,6 +1558,10 @@ function handleEditorResize(elem) {
             editor.layout();
         }
     }, 1000);
+}
+function setupAnalyzers(synthUI) {
+    let analyzer = new __WEBPACK_IMPORTED_MODULE_6__synthUI_analyzer__["a" /* AudioAnalyzer */]($('#walc-graph-fft'), $('#walc-graph-osc'));
+    analyzer.analyze(synthUI.outNode);
 }
 // -------------------- Error handling --------------------
 function getRuntimeErrorDecoration(lineNum) {

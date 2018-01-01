@@ -63,7 +63,7 @@
 		- Use completion provider, see https://microsoft.github.io/monaco-editor/playground.html#extending-language-services-completion-provider-example
 - Editor
 	- [ ] Add more panels
-		- [ ] osc & fft
+		- [x] osc & fft
 		- [ ] log
 		- [ ] Info
 			- [ ] Tracks: name + status: timeline, mute/solo, stopped
