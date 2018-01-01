@@ -3779,6 +3779,19 @@ class Track extends TrackControl {
         });
         return this;
     }
+    play_notes(notes, times, durations) {
+        if (typeof times == 'number')
+            times = [times];
+        let rtimes = times.ring();
+        if (typeof durations == 'number')
+            durations = [durations];
+        let rdurs = durations ? durations.ring() : undefined;
+        let rnotes = notes.ring();
+        this.repeat(notes.length, _ => this
+            .play(rnotes.tick(), rdurs ? rdurs.tick() : undefined)
+            .sleep(rtimes.tick()));
+        return this;
+    }
     transpose(notes) {
         this._transpose = notes;
         return this;
