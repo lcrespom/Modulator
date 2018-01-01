@@ -12,23 +12,17 @@ declare let random: Random
 declare let global: any
 
 /** Holds all instruments created by lc.instrument() */
-declare let instruments: InstrumentTable
-
-/** Holds all effects created by lc.effect() */
-declare let effects: EffectTable
-
-/** Holds all tracks created by lc.track() or lc.loop_track() */
-declare let tracks: TrackTable
-
-interface InstrumentTable {
+declare let instruments: {
 	[instrName: string]: Instrument
 }
 
-interface EffectTable {
+/** Holds all effects created by lc.effect() */
+declare let effects: {
 	[effectName: string]: Effect
 }
 
-interface TrackTable {
+/** Holds all tracks created by lc.track() or lc.loop_track() */
+declare let tracks: {
 	[trackName: string]: TrackControl
 }
 
