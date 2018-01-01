@@ -3886,15 +3886,15 @@ class TunaEffect extends BaseEffect {
     }
     paramNames() {
         let tunaEffect = this.input;
-        let names = [];
+        let names = ['bypass'];
         for (let pname of Object.getOwnPropertyNames(tunaEffect.defaults))
             names.push(pname);
         return names;
     }
     param(name, value, rampTime, exponential = true) {
         let tunaEffect = this.input;
-        if (!tunaEffect.defaults[name])
-            throw new Error(`Effect "${name}" does not exist`);
+        if (tunaEffect[name] === undefined)
+            throw new Error(`Parameter "${name}" not found in effect "${this.name}"`);
         if (value === undefined)
             return tunaEffect[name];
         if (rampTime === undefined)
