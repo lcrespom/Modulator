@@ -3471,6 +3471,7 @@ class LCInstrument extends __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /
             if (!prm)
                 throw new Error(`Parameter "{name"} not found in node "${node}" of instrument "${this.name}"`);
             prm._value = value;
+            prm.value = value;
         }
         return this;
     }

@@ -30,6 +30,7 @@ export class LCInstrument extends Instrument {
 			if (!prm) throw new Error(
 				`Parameter "{name"} not found in node "${node}" of instrument "${this.name}"`)
 			prm._value = value
+			prm.value = value
 		}
 		return this
 	}
