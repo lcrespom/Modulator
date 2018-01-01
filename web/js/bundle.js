@@ -2987,11 +2987,21 @@ class PianoKeyboard {
             const midi = knum + this.baseNote;
             this.displayKeyDown(key);
             this.noteOn(midi);
+            this.pressedKey = key;
         });
         key.mouseup(_ => {
             const midi = knum + this.baseNote;
             this.displayKeyUp(key);
             this.noteOff(midi);
+            this.pressedKey = null;
+        });
+        key.mouseout(_ => {
+            if (key != this.pressedKey)
+                return;
+            const midi = knum + this.baseNote;
+            this.displayKeyUp(key);
+            this.noteOff(midi);
+            this.pressedKey = null;
         });
     }
     registerButtons(panel) {

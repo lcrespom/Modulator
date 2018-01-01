@@ -2,10 +2,6 @@
 
 ## Bugs
 - [ ] Node deletion only works once
-- [ ] Piano notes get stuck. How to reproduce:
-	- Click on a piano note, keep the mouse button pressed
-	- Move mouse away from piano key
-	- Release mouse button
 - [ ] Loading a synth with two ADSR nodes generates horrible sounds
 - [ ] Buffered audio nodes fail after switching back&forth from empty preset
 	- Uncaught (in promise) DOMException: Unable to decode audio data
@@ -18,6 +14,7 @@
 - [ ] Popping sound at note on/off (improved after adding adsr depth parameter)
 - [ ] Analyzer should detect when no sound is playing and clean osc and fft graphs
 	- Only visible in synths without ADSR
+- [x] Piano notes get stuck
 - [x] When app window is scrolled down, node connection draws arrows incorrectly
 
 ## Relaunch plan

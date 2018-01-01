@@ -81,6 +81,7 @@ export class PianoKeyboard {
 	envelope: { attack: number; release: number }
 	portaSlider: JQuery
 	controls: JQuery
+	pressedKey: JQuery | null
 	arpeggio = {
 		mode: 0,
 		octave: 1,
@@ -106,11 +107,20 @@ export class PianoKeyboard {
 			const midi = knum + this.baseNote
 			this.displayKeyDown(key)
 			this.noteOn(midi)
+			this.pressedKey = key
 		})
 		key.mouseup(_ => {
 			const midi = knum + this.baseNote
 			this.displayKeyUp(key)
 			this.noteOff(midi)
+			this.pressedKey = null
+		})
+		key.mouseout(_ => {
+			if (key != this.pressedKey) return
+			const midi = knum + this.baseNote
+			this.displayKeyUp(key)
+			this.noteOff(midi)
+			this.pressedKey = null
 		})
 	}
 
