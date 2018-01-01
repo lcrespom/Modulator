@@ -112,10 +112,12 @@ class EditorActions {
 		if (this.lightTheme) {
 			$('body').removeClass('dark')
 			monaco.editor.setTheme('vs')
+			$('.logo > img').attr('src', 'img/logo.svg')
 		}
 		else {
 			$('body').addClass('dark')
 			monaco.editor.setTheme('vs-dark')
+			$('.logo > img').attr('src', 'img/logo-white.svg')
 		}
 	}
 
