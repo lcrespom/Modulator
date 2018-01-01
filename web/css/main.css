@@ -9,6 +9,10 @@ body {
 	font-family: Electrolize, "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
+body.dark {
+	background-color: black;
+}
+
 input.rounded {
 	border: 1px solid #DFDFDF;
 	border-radius: 5px;

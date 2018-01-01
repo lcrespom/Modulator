@@ -69,14 +69,18 @@
 			- [ ] Tracks: name + status: timeline, mute/solo, stopped
 			- [ ] Effects: name + params
 			- [ ] Instruments: name + params
+			- [ ] Samples
 			- [ ] Click on effect/instrument to display params in params panel
 		- [ ] instruments and parameters => click to edit parameters in separate panel
 	- [x] Button row
 		- [ ] Upload / Download code
+		- [ ] Upload samples
 		- [x] Stop / pause / continue
 		- [x] Help / live coding API / tutorial
 		- [x] Run code / Run line|selection
 		- [x] Increase / decrease font
+	- [x] Dark theme
+		- [ ] configure code colors with monokai
 	- [x] Multiple editor buffers
 	- [x] Preserve editor code across page refreshes
 	- [x] Partial run

@@ -32,11 +32,11 @@ function getButton$(id: number) {
 
 function updateButtons(disableId: number, enableId: number) {
 	getButton$(disableId)
-		.removeClass('btn-primary')
-		.addClass('btn-default')
-	getButton$(enableId)
-		.removeClass('btn-default')
+		.removeClass('btn-info')
 		.addClass('btn-primary')
+	getButton$(enableId)
+		.removeClass('btn-primary')
+		.addClass('btn-info')
 }
 
 function bufferChanged(num: number, editor: any) {

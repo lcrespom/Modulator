@@ -70,16 +70,24 @@ export function registerActions(editor: any, monaco: any) {
 }
 
 function registerButtons(editorActions: EditorActions) {
+	// ----- Left buttons ----
 	$('#walc-font-sm').click(_ => editorActions.reduceFont())
 	$('#walc-font-lg').click(_ => editorActions.enlargeFont())
 	$('#walc-stop').click(_ => editorActions.stopAllTracks())
+	// ----- Right buttons -----
+	$('#walc-toggle-theme').click(_ => editorActions.toggleTheme())
 	$('#walc-run-all').click(_ => editorActions.runAllCode())
 	$('#walc-run-sel').click(_ => editorActions.runSomeCode())
 }
 
+
 declare let lc: LiveCoding
+declare let monaco: any
+
 
 class EditorActions {
+	lightTheme = true
+
 	constructor(public editor: any) {}
 
 	runAllCode() {
@@ -97,6 +105,18 @@ class EditorActions {
 
 	stopAllTracks() {
 		lc.reset()
+	}
+
+	toggleTheme() {
+		this.lightTheme = !this.lightTheme
+		if (this.lightTheme) {
+			$('body').removeClass('dark')
+			monaco.editor.setTheme('vs')
+		}
+		else {
+			$('body').addClass('dark')
+			monaco.editor.setTheme('vs-dark')
+		}
 	}
 
 	reduceFont() {

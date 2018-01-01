@@ -3991,15 +3991,19 @@ function registerActions(editor, monaco) {
     });
 }
 function registerButtons(editorActions) {
+    // ----- Left buttons ----
     $('#walc-font-sm').click(_ => editorActions.reduceFont());
     $('#walc-font-lg').click(_ => editorActions.enlargeFont());
     $('#walc-stop').click(_ => editorActions.stopAllTracks());
+    // ----- Right buttons -----
+    $('#walc-toggle-theme').click(_ => editorActions.toggleTheme());
     $('#walc-run-all').click(_ => editorActions.runAllCode());
     $('#walc-run-sel').click(_ => editorActions.runSomeCode());
 }
 class EditorActions {
     constructor(editor) {
         this.editor = editor;
+        this.lightTheme = true;
     }
     runAllCode() {
         let model = this.editor.getModel();
@@ -4014,6 +4018,17 @@ class EditorActions {
     }
     stopAllTracks() {
         lc.reset();
+    }
+    toggleTheme() {
+        this.lightTheme = !this.lightTheme;
+        if (this.lightTheme) {
+            $('body').removeClass('dark');
+            monaco.editor.setTheme('vs');
+        }
+        else {
+            $('body').addClass('dark');
+            monaco.editor.setTheme('vs-dark');
+        }
     }
     reduceFont() {
         let fs = this.getFontSize();
@@ -7533,11 +7548,11 @@ function getButton$(id) {
 }
 function updateButtons(disableId, enableId) {
     getButton$(disableId)
-        .removeClass('btn-primary')
-        .addClass('btn-default');
-    getButton$(enableId)
-        .removeClass('btn-default')
+        .removeClass('btn-info')
         .addClass('btn-primary');
+    getButton$(enableId)
+        .removeClass('btn-primary')
+        .addClass('btn-info');
 }
 function bufferChanged(num, editor) {
     updateButtons(currentBuffer, num);
