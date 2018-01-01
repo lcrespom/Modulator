@@ -691,8 +691,11 @@ class Voice {
     getParameterNode(nname, pname) {
         let n = this.nodes[nname];
         if (!n)
-            throw new Error(`Node "${nname}" not found in synth`);
-        return n[pname];
+            throw new Error(`Node "${nname}" not found`);
+        let prm = n[pname];
+        if (!prm)
+            throw new Error(`Parameter "${pname}" not found in node "${nname}"`);
+        return prm;
     }
     close() {
         // This method must be called to avoid memory leaks at the Web Audio level
@@ -3456,7 +3459,7 @@ class Presets {
 
 
 class LCInstrument extends __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /* Instrument */] {
-    param(pname, value) {
+    param(pname, value, rampTime, exponential = true) {
         let names = pname.split('/');
         if (names.length < 2)
             throw new Error(`Instrument parameters require "node/param" format`);
@@ -3464,14 +3467,11 @@ class LCInstrument extends __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /
         let name = names[1];
         if (value === undefined) {
             let prm = this.voices[0].getParameterNode(node, name);
-            return prm ? prm.value : NaN;
+            return prm.value;
         }
         for (let v of this.voices) {
             let prm = v.getParameterNode(node, name);
-            if (!prm)
-                throw new Error(`Parameter "{name"} not found in node "${node}" of instrument "${this.name}"`);
-            prm._value = value;
-            prm.value = value;
+            this.updateValue(prm, value, rampTime, exponential);
         }
         return this;
     }
@@ -3483,6 +3483,21 @@ class LCInstrument extends __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /
                 if (v.nodes[nname][pname] instanceof AudioParam)
                     pnames.push(nname + '/' + pname);
         return pnames;
+    }
+    updateValue(prm, value, rampTime, exponential = true) {
+        if (rampTime === undefined) {
+            prm._value = value;
+            prm.value = value;
+        }
+        else {
+            let ctx = this.voices[0].synth.ac;
+            if (exponential) {
+                prm.exponentialRampToValueAtTime(value, ctx.currentTime + rampTime);
+            }
+            else {
+                prm.linearRampToValueAtTime(value, ctx.currentTime + rampTime);
+            }
+        }
     }
 }
 /* unused harmony export LCInstrument */

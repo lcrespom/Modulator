@@ -94,8 +94,11 @@ export class Voice {
 	getParameterNode(nname: string, pname: string): AudioParam {
 		let n = this.nodes[nname]
 		if (!n)
-			throw new Error(`Node "${nname}" not found in synth`)
-		return (<any>n)[pname]
+			throw new Error(`Node "${nname}" not found`)
+		let prm = (<any>n)[pname]
+		if (!prm)
+			throw new Error(`Parameter "${pname}" not found in node "${nname}"`)
+		return prm
 	}
 
 	close(): void {

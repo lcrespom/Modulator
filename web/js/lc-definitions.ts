@@ -73,7 +73,7 @@ interface Instrument {
 	/** Default note duration, in seconds */
 	duration: number
 	/** Gets or sets the value of a parameter */
-	param(pname: string, value?: number): number | this
+	param(pname: string, value?: number, rampTime?: number, exponential?): number | this
 	/** Returns a list of parameter names */
 	paramNames(): string[]
 }
