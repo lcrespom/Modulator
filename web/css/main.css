@@ -448,10 +448,13 @@ input[type=range][orient=vertical] {
 	margin-top: 8px;
 }
 
+#walc-log-container {
+    height: calc(100% - 22px);
+    overflow-y: scroll;
+}
 #walc-log-content {
 	font-family: Menlo, Monaco, "Courier New", monospace;
 	padding: 8px;
-	overflow: scroll;
 }
 
 /*----- Dark theme -----*/

@@ -20,6 +20,7 @@
 
 <!-- Main app area -->
 <div class="main" id="walc">
+	<!-- - - - - - - - - - - Editing box - - - - - - - - - - -->
 	<div class="walc-editor-box graph-box">
 		<h5 class="bg-primary box-header">Live Coding</h5>
 		<!-- - - - - - - - - - - Top Button row - - - - - - - - - - -->
@@ -90,6 +91,7 @@
 		</div>
 	</div>
 	<div id="walc-right-col">
+		<!-- - - - - - - - - - - Analyzers - - - - - - - - - - -->
 		<div class="graph-box">
 			<h5 class="bg-primary box-header">Graph</h5>
 			<div class="walc-graph-box">
@@ -97,9 +99,12 @@
 				<div id="walc-graph-osc" class="audio-graph"></div>
 			</div>
 		</div>
+		<!-- - - - - - - - - - - Log - - - - - - - - - - -->
 		<div class="graph-box walc-log-box">
 			<h5 class="bg-primary box-header">Log</h5>
-			<div id="walc-log-content"></div>
+			<div id="walc-log-container">
+				<div id="walc-log-content"></div>
+			</div>
 		</div>
 	</div>
 </div>

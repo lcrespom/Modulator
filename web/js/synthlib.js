@@ -60,11 +60,12 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 28);
+/******/ 	return __webpack_require__(__webpack_require__.s = 44);
 /******/ })
 /************************************************************************/
-/******/ ([
-/* 0 */
+/******/ ({
+
+/***/ 1:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -106,7 +107,362 @@ function focusable(elem) {
 
 
 /***/ }),
-/* 1 */
+
+/***/ 10:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return palette; });
+// -------------------- Node palette definition --------------------
+const OCTAVE_DETUNE = {
+    initial: 0,
+    min: -1200,
+    max: 1200,
+    linear: true
+};
+/**
+ * The set of AudioNodes available to the application, along with
+ * their configuration.
+ */
+let palette = {
+    // Sources
+    Oscillator: {
+        constructor: 'createOscillator',
+        noteHandler: 'osc',
+        params: {
+            frequency: { initial: 220, min: 20, max: 20000 },
+            detune: OCTAVE_DETUNE,
+            type: {
+                initial: 'sawtooth',
+                choices: ['sine', 'square', 'sawtooth', 'triangle']
+            }
+        }
+    },
+    Buffer: {
+        constructor: 'createBufferSource',
+        noteHandler: 'buffer',
+        params: {
+            playbackRate: { initial: 1, min: 0, max: 8 },
+            detune: OCTAVE_DETUNE,
+            buffer: {
+                initial: null,
+                handler: 'BufferDataHandler'
+            },
+            loop: { initial: false },
+            loopStart: { initial: 0, min: 0, max: 10 },
+            loopEnd: { initial: 3, min: 0, max: 10 }
+        }
+    },
+    Noise: {
+        constructor: 'createNoise',
+        noteHandler: 'restartable',
+        custom: true,
+        params: {
+            gain: { initial: 1, min: 0, max: 10 }
+        }
+    },
+    LineIn: {
+        constructor: 'createLineIn',
+        custom: true,
+        params: {}
+    },
+    SoundBank: {
+        constructor: 'createBufferSource',
+        noteHandler: 'soundBank',
+        params: {
+            buffer: {
+                initial: null,
+                handler: 'SoundBankHandler'
+            }
+        }
+    },
+    // Effects
+    Gain: {
+        constructor: 'createGain',
+        params: {
+            gain: { initial: 1, min: 0, max: 10, linear: true }
+        }
+    },
+    Filter: {
+        constructor: 'createBiquadFilter',
+        params: {
+            frequency: { initial: 440, min: 20, max: 20000 },
+            Q: { initial: 0, min: 0, max: 100 },
+            detune: OCTAVE_DETUNE,
+            gain: { initial: 0, min: -40, max: 40, linear: true },
+            type: {
+                initial: 'lowpass',
+                choices: ['lowpass', 'highpass', 'bandpass',
+                    'lowshelf', 'highshelf', 'peaking', 'notch', 'allpass']
+            }
+        },
+    },
+    Delay: {
+        constructor: 'createDelay',
+        params: {
+            delayTime: { initial: 1, min: 0, max: 5 }
+        }
+    },
+    StereoPan: {
+        constructor: 'createStereoPanner',
+        params: {
+            pan: { initial: 0, min: -1, max: 1, linear: true }
+        }
+    },
+    Compressor: {
+        constructor: 'createDynamicsCompressor',
+        params: {
+            threshold: { initial: -24, min: -100, max: 0, linear: true },
+            knee: { initial: 30, min: 0, max: 40, linear: true },
+            ratio: { initial: 12, min: 1, max: 20, linear: true },
+            attack: { initial: 0.003, min: 0, max: 1 },
+            release: { initial: 0.25, min: 0, max: 1 }
+        }
+    },
+    Detuner: {
+        constructor: 'createDetuner',
+        custom: true,
+        params: {
+            octave: { initial: 0, min: -2, max: 2, linear: true }
+        }
+    },
+    // Controllers
+    LFO: {
+        constructor: 'createOscillator',
+        noteHandler: 'LFO',
+        control: true,
+        params: {
+            frequency: { initial: 5, min: 0.01, max: 200 },
+            detune: OCTAVE_DETUNE,
+            type: {
+                initial: 'sine',
+                choices: ['sine', 'square', 'sawtooth', 'triangle']
+            }
+        }
+    },
+    GainCtrl: {
+        constructor: 'createGain',
+        control: true,
+        params: {
+            gain: { initial: 10, min: 0, max: 100, linear: true }
+        }
+    },
+    ADSR: {
+        constructor: 'createADSR',
+        noteHandler: 'ADSR',
+        control: true,
+        custom: true,
+        params: {
+            attack: { initial: 0.2, min: 0, max: 10 },
+            decay: { initial: 0.5, min: 0, max: 10 },
+            sustain: { initial: 0.5, min: 0, max: 1, linear: true },
+            release: { initial: 1.0, min: 0, max: 10 },
+            depth: { initial: 1.0, min: 0, max: 1 }
+        }
+    },
+    NoiseCtrl: {
+        constructor: 'createNoiseCtrl',
+        control: true,
+        custom: true,
+        params: {
+            frequency: { initial: 4, min: 0, max: 200 },
+            depth: { initial: 20, min: 0, max: 200 }
+        }
+    },
+    // Output
+    Speaker: {
+        constructor: null,
+        params: {}
+    }
+};
+
+
+/***/ }),
+
+/***/ 11:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/**
+ * Base class to derive all custom nodes from it
+ */
+class CustomNodeBase {
+    constructor() {
+        this.custom = true;
+        this.channelCount = 2;
+        this.channelCountMode = 'max';
+        this.channelInterpretation = 'speakers';
+        this.numberOfInputs = 0;
+        this.numberOfOutputs = 1;
+    }
+    // Connect - disconnect
+    connect(destination, output, input) {
+        return destination;
+    }
+    disconnect(destination, output, input) { }
+    // Required for extending EventTarget
+    addEventListener() { }
+    dispatchEvent(evt) { return false; }
+    removeEventListener() { }
+}
+/* unused harmony export CustomNodeBase */
+
+/**
+ * Envelope generator that controls the evolution over time of a destination
+ * node's parameter. All parameter control is performed in the corresponding
+ * ADSR note handler.
+ */
+class ADSR extends CustomNodeBase {
+    constructor() {
+        super(...arguments);
+        this.attack = 0.2;
+        this.decay = 0.5;
+        this.sustain = 0.5;
+        this.release = 1;
+        this.depth = 1;
+        // TODO linear / exponential
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = ADSR;
+
+/**
+ * Base ScriptProcessor, to derive all custom audio processing nodes from it.
+ */
+class ScriptProcessor extends CustomNodeBase {
+    constructor(ac) {
+        super();
+        this.gain = 1;
+        this.playing = false;
+        this.anode = ac.createScriptProcessor(1024);
+        this.anode.onaudioprocess = evt => this.processAudio(evt);
+    }
+    connect(node) {
+        return this.anode.connect(node);
+    }
+    disconnect() {
+        this.anode.disconnect();
+    }
+    start() {
+        this.playing = true;
+    }
+    stop() {
+        this.playing = false;
+    }
+    processAudio(evt) { }
+}
+/* unused harmony export ScriptProcessor */
+
+/**
+ * Simple noise generator
+ */
+class NoiseGenerator extends ScriptProcessor {
+    processAudio(evt) {
+        for (let channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
+            const out = evt.outputBuffer.getChannelData(channel);
+            for (let sample = 0; sample < out.length; sample++)
+                out[sample] = this.playing ? this.gain * (Math.random() * 2 - 1) : 0;
+        }
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["e"] = NoiseGenerator;
+
+/**
+ * Noise generator to be used as control node.
+ * It uses sample & hold in order to implement the 'frequency' parameter.
+ */
+class NoiseCtrlGenerator extends ScriptProcessor {
+    constructor(ac) {
+        super(ac);
+        this.ac = ac;
+        this.frequency = 4;
+        this.depth = 20;
+        this.sct = 0;
+        this.v = 0;
+    }
+    connect(param) {
+        return this.anode.connect(param);
+    }
+    processAudio(evt) {
+        const samplesPerCycle = this.ac.sampleRate / this.frequency;
+        for (let channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
+            let out = evt.outputBuffer.getChannelData(channel);
+            for (let sample = 0; sample < out.length; sample++) {
+                this.sct++;
+                if (this.sct > samplesPerCycle) {
+                    this.v = this.depth * (Math.random() * 2 - 1);
+                    this.sct = 0; // this.sct - Math.floor(this.sct);
+                }
+                out[sample] = this.v;
+            }
+        }
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["d"] = NoiseCtrlGenerator;
+
+/**
+ * Simple Pitch Shifter implemented in a quick & dirty way
+ */
+class Detuner extends ScriptProcessor {
+    constructor() {
+        super(...arguments);
+        this.octave = 0;
+        this.numberOfInputs = 1;
+    }
+    processAudio(evt) {
+        const dx = Math.pow(2, this.octave);
+        for (let channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
+            let out = evt.outputBuffer.getChannelData(channel);
+            let inbuf = evt.inputBuffer.getChannelData(channel);
+            let sct = 0;
+            for (let sample = 0; sample < out.length; sample++) {
+                out[sample] = inbuf[Math.floor(sct)];
+                sct += dx;
+                if (sct >= inbuf.length)
+                    sct = 0;
+            }
+        }
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["b"] = Detuner;
+
+/**
+ * Captures audio from the PC audio input.
+ * Requires user's authorization to grab audio input.
+ */
+class LineInNode extends CustomNodeBase {
+    connect(anode) {
+        if (this.srcNode) {
+            this.srcNode.connect(anode);
+            this.dstNode = anode;
+            return anode;
+        }
+        const navigator = window.navigator;
+        navigator.getUserMedia = (navigator.getUserMedia ||
+            navigator.webkitGetUserMedia ||
+            navigator.mozGetUserMedia ||
+            navigator.msGetUserMedia);
+        navigator.getUserMedia({ audio: true }, (stream) => {
+            const ac = anode.context;
+            this.srcNode = ac.createMediaStreamSource(stream);
+            let a2 = anode;
+            if (a2.custom && a2.anode)
+                a2 = a2.anode;
+            this.srcNode.connect(a2);
+            this.dstNode = anode;
+            this.stream = stream;
+        }, (error) => console.error(error));
+    }
+    disconnect() {
+        this.srcNode.disconnect(this.dstNode);
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["c"] = LineInNode;
+
+
+
+/***/ }),
+
+/***/ 4:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -164,15 +520,45 @@ function upload(event, cb, readFunc) {
 
 
 /***/ }),
-/* 2 */
+
+/***/ 44:
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(45);
+
+
+/***/ }),
+
+/***/ 45:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__notes__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__palette__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_modern__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__customNodes__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_file__ = __webpack_require__(1);
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_instrument__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__synth_timer__ = __webpack_require__(7);
+/**
+ * Library that exports the Instrument and Voice classes
+ */
+
+
+const global = window;
+global.Modulator = global.Modulator || {};
+global.Modulator.Instrument = __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /* Instrument */];
+global.Modulator.Voice = __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["b" /* Voice */];
+global.Modulator.Timer = __WEBPACK_IMPORTED_MODULE_1__synth_timer__["a" /* Timer */];
+
+
+/***/ }),
+
+/***/ 5:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__notes__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__palette__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_modern__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__customNodes__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_file__ = __webpack_require__(4);
 
 
 
@@ -442,8 +828,8 @@ class SoundBankHandler {
 
 
 /***/ }),
-/* 3 */,
-/* 4 */
+
+/***/ 7:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -491,11 +877,12 @@ class Timer {
 
 
 /***/ }),
-/* 5 */
+
+/***/ 8:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth__ = __webpack_require__(5);
 
 /**
  * A polyphonic synth controlling an array of voices
@@ -657,11 +1044,12 @@ class SynthLoader {
 
 
 /***/ }),
-/* 6 */
+
+/***/ 9:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_modern__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_modern__ = __webpack_require__(1);
 
 /**
  * Handles common AudioNode cloning, used by oscillator and buffered data nodes.
@@ -1000,404 +1388,7 @@ class OutputTracker {
 
 
 
-/***/ }),
-/* 7 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return palette; });
-// -------------------- Node palette definition --------------------
-const OCTAVE_DETUNE = {
-    initial: 0,
-    min: -1200,
-    max: 1200,
-    linear: true
-};
-/**
- * The set of AudioNodes available to the application, along with
- * their configuration.
- */
-let palette = {
-    // Sources
-    Oscillator: {
-        constructor: 'createOscillator',
-        noteHandler: 'osc',
-        params: {
-            frequency: { initial: 220, min: 20, max: 20000 },
-            detune: OCTAVE_DETUNE,
-            type: {
-                initial: 'sawtooth',
-                choices: ['sine', 'square', 'sawtooth', 'triangle']
-            }
-        }
-    },
-    Buffer: {
-        constructor: 'createBufferSource',
-        noteHandler: 'buffer',
-        params: {
-            playbackRate: { initial: 1, min: 0, max: 8 },
-            detune: OCTAVE_DETUNE,
-            buffer: {
-                initial: null,
-                handler: 'BufferDataHandler'
-            },
-            loop: { initial: false },
-            loopStart: { initial: 0, min: 0, max: 10 },
-            loopEnd: { initial: 3, min: 0, max: 10 }
-        }
-    },
-    Noise: {
-        constructor: 'createNoise',
-        noteHandler: 'restartable',
-        custom: true,
-        params: {
-            gain: { initial: 1, min: 0, max: 10 }
-        }
-    },
-    LineIn: {
-        constructor: 'createLineIn',
-        custom: true,
-        params: {}
-    },
-    SoundBank: {
-        constructor: 'createBufferSource',
-        noteHandler: 'soundBank',
-        params: {
-            buffer: {
-                initial: null,
-                handler: 'SoundBankHandler'
-            }
-        }
-    },
-    // Effects
-    Gain: {
-        constructor: 'createGain',
-        params: {
-            gain: { initial: 1, min: 0, max: 10, linear: true }
-        }
-    },
-    Filter: {
-        constructor: 'createBiquadFilter',
-        params: {
-            frequency: { initial: 440, min: 20, max: 20000 },
-            Q: { initial: 0, min: 0, max: 100 },
-            detune: OCTAVE_DETUNE,
-            gain: { initial: 0, min: -40, max: 40, linear: true },
-            type: {
-                initial: 'lowpass',
-                choices: ['lowpass', 'highpass', 'bandpass',
-                    'lowshelf', 'highshelf', 'peaking', 'notch', 'allpass']
-            }
-        },
-    },
-    Delay: {
-        constructor: 'createDelay',
-        params: {
-            delayTime: { initial: 1, min: 0, max: 5 }
-        }
-    },
-    StereoPan: {
-        constructor: 'createStereoPanner',
-        params: {
-            pan: { initial: 0, min: -1, max: 1, linear: true }
-        }
-    },
-    Compressor: {
-        constructor: 'createDynamicsCompressor',
-        params: {
-            threshold: { initial: -24, min: -100, max: 0, linear: true },
-            knee: { initial: 30, min: 0, max: 40, linear: true },
-            ratio: { initial: 12, min: 1, max: 20, linear: true },
-            attack: { initial: 0.003, min: 0, max: 1 },
-            release: { initial: 0.25, min: 0, max: 1 }
-        }
-    },
-    Detuner: {
-        constructor: 'createDetuner',
-        custom: true,
-        params: {
-            octave: { initial: 0, min: -2, max: 2, linear: true }
-        }
-    },
-    // Controllers
-    LFO: {
-        constructor: 'createOscillator',
-        noteHandler: 'LFO',
-        control: true,
-        params: {
-            frequency: { initial: 5, min: 0.01, max: 200 },
-            detune: OCTAVE_DETUNE,
-            type: {
-                initial: 'sine',
-                choices: ['sine', 'square', 'sawtooth', 'triangle']
-            }
-        }
-    },
-    GainCtrl: {
-        constructor: 'createGain',
-        control: true,
-        params: {
-            gain: { initial: 10, min: 0, max: 100, linear: true }
-        }
-    },
-    ADSR: {
-        constructor: 'createADSR',
-        noteHandler: 'ADSR',
-        control: true,
-        custom: true,
-        params: {
-            attack: { initial: 0.2, min: 0, max: 10 },
-            decay: { initial: 0.5, min: 0, max: 10 },
-            sustain: { initial: 0.5, min: 0, max: 1, linear: true },
-            release: { initial: 1.0, min: 0, max: 10 },
-            depth: { initial: 1.0, min: 0, max: 1 }
-        }
-    },
-    NoiseCtrl: {
-        constructor: 'createNoiseCtrl',
-        control: true,
-        custom: true,
-        params: {
-            frequency: { initial: 4, min: 0, max: 200 },
-            depth: { initial: 20, min: 0, max: 200 }
-        }
-    },
-    // Output
-    Speaker: {
-        constructor: null,
-        params: {}
-    }
-};
-
-
-/***/ }),
-/* 8 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/**
- * Base class to derive all custom nodes from it
- */
-class CustomNodeBase {
-    constructor() {
-        this.custom = true;
-        this.channelCount = 2;
-        this.channelCountMode = 'max';
-        this.channelInterpretation = 'speakers';
-        this.numberOfInputs = 0;
-        this.numberOfOutputs = 1;
-    }
-    // Connect - disconnect
-    connect(destination, output, input) {
-        return destination;
-    }
-    disconnect(destination, output, input) { }
-    // Required for extending EventTarget
-    addEventListener() { }
-    dispatchEvent(evt) { return false; }
-    removeEventListener() { }
-}
-/* unused harmony export CustomNodeBase */
-
-/**
- * Envelope generator that controls the evolution over time of a destination
- * node's parameter. All parameter control is performed in the corresponding
- * ADSR note handler.
- */
-class ADSR extends CustomNodeBase {
-    constructor() {
-        super(...arguments);
-        this.attack = 0.2;
-        this.decay = 0.5;
-        this.sustain = 0.5;
-        this.release = 1;
-        this.depth = 1;
-        // TODO linear / exponential
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = ADSR;
-
-/**
- * Base ScriptProcessor, to derive all custom audio processing nodes from it.
- */
-class ScriptProcessor extends CustomNodeBase {
-    constructor(ac) {
-        super();
-        this.gain = 1;
-        this.playing = false;
-        this.anode = ac.createScriptProcessor(1024);
-        this.anode.onaudioprocess = evt => this.processAudio(evt);
-    }
-    connect(node) {
-        return this.anode.connect(node);
-    }
-    disconnect() {
-        this.anode.disconnect();
-    }
-    start() {
-        this.playing = true;
-    }
-    stop() {
-        this.playing = false;
-    }
-    processAudio(evt) { }
-}
-/* unused harmony export ScriptProcessor */
-
-/**
- * Simple noise generator
- */
-class NoiseGenerator extends ScriptProcessor {
-    processAudio(evt) {
-        for (let channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
-            const out = evt.outputBuffer.getChannelData(channel);
-            for (let sample = 0; sample < out.length; sample++)
-                out[sample] = this.playing ? this.gain * (Math.random() * 2 - 1) : 0;
-        }
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["e"] = NoiseGenerator;
-
-/**
- * Noise generator to be used as control node.
- * It uses sample & hold in order to implement the 'frequency' parameter.
- */
-class NoiseCtrlGenerator extends ScriptProcessor {
-    constructor(ac) {
-        super(ac);
-        this.ac = ac;
-        this.frequency = 4;
-        this.depth = 20;
-        this.sct = 0;
-        this.v = 0;
-    }
-    connect(param) {
-        return this.anode.connect(param);
-    }
-    processAudio(evt) {
-        const samplesPerCycle = this.ac.sampleRate / this.frequency;
-        for (let channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
-            let out = evt.outputBuffer.getChannelData(channel);
-            for (let sample = 0; sample < out.length; sample++) {
-                this.sct++;
-                if (this.sct > samplesPerCycle) {
-                    this.v = this.depth * (Math.random() * 2 - 1);
-                    this.sct = 0; // this.sct - Math.floor(this.sct);
-                }
-                out[sample] = this.v;
-            }
-        }
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["d"] = NoiseCtrlGenerator;
-
-/**
- * Simple Pitch Shifter implemented in a quick & dirty way
- */
-class Detuner extends ScriptProcessor {
-    constructor() {
-        super(...arguments);
-        this.octave = 0;
-        this.numberOfInputs = 1;
-    }
-    processAudio(evt) {
-        const dx = Math.pow(2, this.octave);
-        for (let channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
-            let out = evt.outputBuffer.getChannelData(channel);
-            let inbuf = evt.inputBuffer.getChannelData(channel);
-            let sct = 0;
-            for (let sample = 0; sample < out.length; sample++) {
-                out[sample] = inbuf[Math.floor(sct)];
-                sct += dx;
-                if (sct >= inbuf.length)
-                    sct = 0;
-            }
-        }
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["b"] = Detuner;
-
-/**
- * Captures audio from the PC audio input.
- * Requires user's authorization to grab audio input.
- */
-class LineInNode extends CustomNodeBase {
-    connect(anode) {
-        if (this.srcNode) {
-            this.srcNode.connect(anode);
-            this.dstNode = anode;
-            return anode;
-        }
-        const navigator = window.navigator;
-        navigator.getUserMedia = (navigator.getUserMedia ||
-            navigator.webkitGetUserMedia ||
-            navigator.mozGetUserMedia ||
-            navigator.msGetUserMedia);
-        navigator.getUserMedia({ audio: true }, (stream) => {
-            const ac = anode.context;
-            this.srcNode = ac.createMediaStreamSource(stream);
-            let a2 = anode;
-            if (a2.custom && a2.anode)
-                a2 = a2.anode;
-            this.srcNode.connect(a2);
-            this.dstNode = anode;
-            this.stream = stream;
-        }, (error) => console.error(error));
-    }
-    disconnect() {
-        this.srcNode.disconnect(this.dstNode);
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["c"] = LineInNode;
-
-
-
-/***/ }),
-/* 9 */,
-/* 10 */,
-/* 11 */,
-/* 12 */,
-/* 13 */,
-/* 14 */,
-/* 15 */,
-/* 16 */,
-/* 17 */,
-/* 18 */,
-/* 19 */,
-/* 20 */,
-/* 21 */,
-/* 22 */,
-/* 23 */,
-/* 24 */,
-/* 25 */,
-/* 26 */,
-/* 27 */,
-/* 28 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = __webpack_require__(29);
-
-
-/***/ }),
-/* 29 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_instrument__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__synth_timer__ = __webpack_require__(4);
-/**
- * Library that exports the Instrument and Voice classes
- */
-
-
-const global = window;
-global.Modulator = global.Modulator || {};
-global.Modulator.Instrument = __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /* Instrument */];
-global.Modulator.Voice = __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["b" /* Voice */];
-global.Modulator.Timer = __WEBPACK_IMPORTED_MODULE_1__synth_timer__["a" /* Timer */];
-
-
 /***/ })
-/******/ ]);
+
+/******/ });
 //# sourceMappingURL=synthlib.js.map

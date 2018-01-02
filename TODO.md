@@ -64,7 +64,8 @@
 - Editor
 	- [ ] Add more panels
 		- [x] osc & fft
-		- [ ] log
+		- [x] log
+		- [ ] Colors in logs, e.g. note data
 		- [ ] Info
 			- [ ] Tracks: name + status: timeline, mute/solo, stopped
 			- [ ] Effects: name + params

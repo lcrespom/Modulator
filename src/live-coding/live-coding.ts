@@ -231,11 +231,16 @@ export let tracks: TrackTable = {}
 
 let nextTracks: TrackTable = {}
 let logEnabled = false
+let logCount = 0
+const MAX_LOG_LINES = 1000
 
 function logToPanel(enable: boolean, ...args: any[]) {
 	if (!enable) return
+	if (logCount++ > MAX_LOG_LINES)
+		$('#walc-log-content > *:first-child').remove()
 	let txt = args.join(', ')
 	$('#walc-log-content').append('<div>' + txt + '</div>')
+	$('#walc-log-container').scrollTop(Number.MAX_SAFE_INTEGER)
 }
 
 function eachTrack(cb: (t: Track) => void) {

@@ -72,7 +72,12 @@ function setupGlobals(lc: LiveCoding) {
 }
 
 function preventParentScroll(elem: HTMLElement) {
-	$(elem).bind('mousewheel', e => e.preventDefault())
+	$(elem).bind('wheel', e => e.preventDefault())
+	$('#walc-log-container').bind('wheel', function(e) {
+		let evt = <WheelEvent>e.originalEvent
+		this.scrollTop += evt.deltaY // TODO: test in Mac ( d < 0 ? -1 : 1 ) * 30
+		e.preventDefault()
+	})
 }
 
 function addTypeScriptDefinitions(defs: string) {
