@@ -13,8 +13,8 @@ const graphCanvas = <HTMLCanvasElement>$('#graph-canvas')[0]
 const ac = createAudioContext()
 const synthUI = new SynthUI(ac, graphCanvas,
 	$('#node-params'), $('#audio-graph-fft'), $('#audio-graph-osc'))
+setupPanels()
 
-const presets = setupPanels()
 
 function createAudioContext(): AudioContext {
 	const CtxClass: any = window.AudioContext || window.webkitAudioContext
@@ -31,7 +31,9 @@ function setupPanels() {
 		$('#synth').focus()
 	})
 	setupRoutes('#synth').then(_ => createEditor(ac, prsts, synthUI))
-	return prsts.presets
+	$(document).on('route:show', (e, h) => {
+		if (h == '#synth') prsts.selectBestNode()
+	})
 }
 
 

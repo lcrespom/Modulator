@@ -1678,7 +1678,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 const graphCanvas = $('#graph-canvas')[0];
 const ac = createAudioContext();
 const synthUI = new __WEBPACK_IMPORTED_MODULE_0__synthUI_synthUI__["a" /* SynthUI */](ac, graphCanvas, $('#node-params'), $('#audio-graph-fft'), $('#audio-graph-osc'));
-const presets = setupPanels();
+setupPanels();
 function createAudioContext() {
     const CtxClass = window.AudioContext || window.webkitAudioContext;
     return new CtxClass();
@@ -1693,7 +1693,10 @@ function setupPanels() {
         $('#synth').focus();
     });
     Object(__WEBPACK_IMPORTED_MODULE_4__utils_routes__["a" /* setupRoutes */])('#synth').then(_ => Object(__WEBPACK_IMPORTED_MODULE_3__live_coding_editor__["a" /* createEditor */])(ac, prsts, synthUI));
-    return prsts.presets;
+    $(document).on('route:show', (e, h) => {
+        if (h == '#synth')
+            prsts.selectBestNode();
+    });
 }
 function setupPalette() {
     $(function () {
