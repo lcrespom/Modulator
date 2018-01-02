@@ -1,6 +1,11 @@
+import { NoteInfo } from './live-coding'
+import { Track } from './track'
+import { Note } from './scales'
+
 let logEnabled = true
 let logCount = 0
 const MAX_LOG_LINES = 1000
+
 
 export function logToPanel(always: boolean, asHTML: boolean, ...args: any[]) {
 	if (!always && !logEnabled) return
@@ -34,4 +39,17 @@ export function txt2html(s: string) {
 
 export function clearLog() {
 	$('#walc-log-content').empty()
+}
+
+export function logNote(note: NoteInfo, track: Track) {
+	let noteName = (<any>Note)[note.number]
+	if (noteName && noteName.length < 3) noteName += ' '
+	let snote = noteName
+		? `{log-bold|${noteName}} (${note.number})`
+		: `{log-bold|${note.number}}`
+	let sinstr = `{log-instr|${note.instrument.name}}`
+	let strack = `{log-track|${track.name}}`
+	logToPanel(false, true, txt2html(
+		`Note: ${snote} ${sinstr} ${strack}`
+	))
 }

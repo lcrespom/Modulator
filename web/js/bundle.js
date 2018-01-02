@@ -1545,7 +1545,7 @@ function setupGlobals(lc) {
 }
 function preventParentScroll(elem) {
     $(elem).bind('wheel', e => e.preventDefault());
-    Object(__WEBPACK_IMPORTED_MODULE_7__log__["d" /* preventLogParentScroll */])();
+    Object(__WEBPACK_IMPORTED_MODULE_7__log__["e" /* preventLogParentScroll */])();
 }
 function addTypeScriptDefinitions(defs) {
     monaco.languages.typescript.typescriptDefaults.addExtraLib(defs);
@@ -1596,7 +1596,7 @@ function getErrorLocation(e) {
     return null;
 }
 function showError(msg, line, col) {
-    Object(__WEBPACK_IMPORTED_MODULE_7__log__["c" /* logToPanel */])(true, true, Object(__WEBPACK_IMPORTED_MODULE_7__log__["e" /* txt2html */])(`{log-bold|Runtime error}: "${msg}" at line ${line}, column ${col}`));
+    Object(__WEBPACK_IMPORTED_MODULE_7__log__["d" /* logToPanel */])(true, true, Object(__WEBPACK_IMPORTED_MODULE_7__log__["f" /* txt2html */])(`{log-bold|Runtime error}: "${msg}" at line ${line}, column ${col}`));
     editor.revealLineInCenter(line);
     let errorRange = getErrorRange(editor.getModel().getLineContent(line), col);
     decorations = editor.deltaDecorations(decorations, [{
@@ -3558,7 +3558,7 @@ class LiveCoding {
         return Object(__WEBPACK_IMPORTED_MODULE_4__scales__["b" /* makeScale */])(note, type, octaves);
     }
     log(...args) {
-        Object(__WEBPACK_IMPORTED_MODULE_5__log__["c" /* logToPanel */])(true, false, ...args);
+        Object(__WEBPACK_IMPORTED_MODULE_5__log__["d" /* logToPanel */])(true, false, ...args);
         return this;
     }
     log_enable(flag = true) {
@@ -3658,7 +3658,7 @@ function playNote(track, note, timer, startTime) {
         setOptions(note.options);
     if (note.number < 1)
         return;
-    Object(__WEBPACK_IMPORTED_MODULE_5__log__["c" /* logToPanel */])(false, true, Object(__WEBPACK_IMPORTED_MODULE_5__log__["e" /* txt2html */])(`Note: {log-bold|${note.number}} {log-instr|${note.instrument.name}} {log-track|${track.name}}`));
+    Object(__WEBPACK_IMPORTED_MODULE_5__log__["c" /* logNote */])(note, track);
     note.instrument.noteOn(note.number, note.velocity, startTime + note.time);
     let duration = note.duration
         || note.instrument.duration || timer.noteDuration;
@@ -6317,6 +6317,11 @@ const NoteDeltas = {
     minor_pentatonic: [0, 3, 5, 7, 10, 12],
     chromatic: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 };
+function invertEnum(enm) {
+    for (let k of Object.getOwnPropertyNames(enm))
+        enm[enm[k]] = k;
+}
+invertEnum(Note);
 function makeSingleScale(note, type) {
     let deltas = NoteDeltas[type];
     if (!deltas)
@@ -7645,11 +7650,14 @@ if ((typeof module) == 'object' && module.exports) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (immutable) */ __webpack_exports__["c"] = logToPanel;
+/* harmony export (immutable) */ __webpack_exports__["d"] = logToPanel;
 /* harmony export (immutable) */ __webpack_exports__["b"] = enableLog;
-/* harmony export (immutable) */ __webpack_exports__["d"] = preventLogParentScroll;
-/* harmony export (immutable) */ __webpack_exports__["e"] = txt2html;
+/* harmony export (immutable) */ __webpack_exports__["e"] = preventLogParentScroll;
+/* harmony export (immutable) */ __webpack_exports__["f"] = txt2html;
 /* harmony export (immutable) */ __webpack_exports__["a"] = clearLog;
+/* harmony export (immutable) */ __webpack_exports__["c"] = logNote;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__scales__ = __webpack_require__(31);
+
 let logEnabled = true;
 let logCount = 0;
 const MAX_LOG_LINES = 1000;
@@ -7682,6 +7690,17 @@ function txt2html(s) {
 }
 function clearLog() {
     $('#walc-log-content').empty();
+}
+function logNote(note, track) {
+    let noteName = __WEBPACK_IMPORTED_MODULE_0__scales__["a" /* Note */][note.number];
+    if (noteName && noteName.length < 3)
+        noteName += ' ';
+    let snote = noteName
+        ? `{log-bold|${noteName}} (${note.number})`
+        : `{log-bold|${note.number}}`;
+    let sinstr = `{log-instr|${note.instrument.name}}`;
+    let strack = `{log-track|${track.name}}`;
+    logToPanel(false, true, txt2html(`Note: ${snote} ${sinstr} ${strack}`));
 }
 
 

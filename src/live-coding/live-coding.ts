@@ -8,7 +8,7 @@ import { Track } from './track'
 import { Effect, createEffect } from './effects'
 import { makeScale } from './scales'
 import { Ring } from './rings'
-import { enableLog, logToPanel, txt2html, clearLog } from './log'
+import { enableLog, logToPanel, clearLog, logNote } from './log'
 
 
 export type TrackCallback = (t: Track) => void
@@ -267,9 +267,7 @@ function playTrack(timer: Timer, track: Track, time: number) {
 function playNote(track: Track, note: NoteInfo, timer: Timer, startTime: number) {
 	if (note.options) setOptions(note.options)
 	if (note.number < 1) return
-	logToPanel(false, true, txt2html(
-		`Note: {log-bold|${note.number}} {log-instr|${note.instrument.name}} {log-track|${track.name}}`
-	))
+	logNote(note, track)
 	note.instrument.noteOn(
 		note.number, note.velocity, startTime + note.time)
 	let duration = note.duration
