@@ -386,12 +386,29 @@ input[type=range][orient=vertical] {
 	display: flex;
 }
 
+#live-coding > .app-navbar {
+	width: 100%;
+	position: relative;
+	padding-left: 10px;
+}
+
+#live-coding > .app-navbar > .right-buttons {
+	right: 10px;
+}
+
 .walc-editor-box {
+	min-width: 476px;
 	height: calc(100% - 20px);
 	overflow: hidden;
 	flex: 1;
 	display: flex;
 	flex-direction: column;
+}
+
+@media (max-width: 1040px) {
+	#walc-buffer-8 {
+		display: none;
+	}
 }
 
 #walc-code-editor {
@@ -439,7 +456,7 @@ input[type=range][orient=vertical] {
 	display: flex;
 }
 
-.walc-graph-box > #audio-graph-fft {
+.walc-graph-box > #walc-graph-fft {
 	margin-right: 0;
 }
 

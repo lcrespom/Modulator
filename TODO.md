@@ -73,6 +73,7 @@
 		- [x] log
 			- [x] Colors in logs, e.g. note data
 			- [ ] Log more events: instr/track/effect creation, track end, track loop, etc
+			- [ ] Make log_enable receive two parameters: `log_notes` and `log_events`
 		- [ ] Info
 			- [ ] Tracks: name + status: timeline, mute/solo, stopped
 			- [ ] Effects: name + params
