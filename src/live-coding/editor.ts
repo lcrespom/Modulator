@@ -7,7 +7,8 @@ import { setupRing } from './rings'
 import { Note } from './scales'
 import { random } from './random'
 import { handleBuffers } from './editor-buffers'
-import { AudioAnalyzer } from '../synthUI/analyzer';
+import { AudioAnalyzer } from '../synthUI/analyzer'
+import { preventLogParentScroll, logToPanel, txt2html } from './log'
 
 
 let sinkDiv = document.createElement('div')
@@ -73,11 +74,7 @@ function setupGlobals(lc: LiveCoding) {
 
 function preventParentScroll(elem: HTMLElement) {
 	$(elem).bind('wheel', e => e.preventDefault())
-	$('#walc-log-container').bind('wheel', function(e) {
-		let evt = <WheelEvent>e.originalEvent
-		this.scrollTop += evt.deltaY // TODO: test in Mac ( d < 0 ? -1 : 1 ) * 30
-		e.preventDefault()
-	})
+	preventLogParentScroll()
 }
 
 function addTypeScriptDefinitions(defs: string) {
@@ -133,7 +130,9 @@ function getErrorLocation(e: any) {
 }
 
 function showError(msg: string, line: number, col: number) {
-	console.log(`Runtime error: "${msg}" at line ${line}, column ${col}`)
+	logToPanel(true, true, txt2html(
+		`{log-bold|Runtime error}: "${msg}" at line ${line}, column ${col}`
+	))
 	editor.revealLineInCenter(line)
 	let errorRange = getErrorRange(editor.getModel().getLineContent(line), col)
 	decorations = editor.deltaDecorations(decorations, [{

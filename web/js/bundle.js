@@ -60,20 +60,11 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 18);
+/******/ 	return __webpack_require__(__webpack_require__.s = 10);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports) {
-
-module.exports = function() {
-	throw new Error("define cannot be used indirect");
-};
-
-
-/***/ }),
-/* 1 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -115,44 +106,7 @@ function focusable(elem) {
 
 
 /***/ }),
-/* 2 */
-/***/ (function(module, exports) {
-
-module.exports = function(module) {
-	if(!module.webpackPolyfill) {
-		module.deprecate = function() {};
-		module.paths = [];
-		// module.parent = undefined by default
-		if(!module.children) module.children = [];
-		Object.defineProperty(module, "loaded", {
-			enumerable: true,
-			get: function() {
-				return module.l;
-			}
-		});
-		Object.defineProperty(module, "id", {
-			enumerable: true,
-			get: function() {
-				return module.i;
-			}
-		});
-		module.webpackPolyfill = 1;
-	}
-	return module;
-};
-
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports) {
-
-/* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {/* globals __webpack_amd_options__ */
-module.exports = __webpack_amd_options__;
-
-/* WEBPACK VAR INJECTION */}.call(exports, {}))
-
-/***/ }),
-/* 4 */
+/* 1 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -210,15 +164,15 @@ function upload(event, cb, readFunc) {
 
 
 /***/ }),
-/* 5 */
+/* 2 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__notes__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__palette__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_modern__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__customNodes__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_file__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__notes__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__palette__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_modern__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__customNodes__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_file__ = __webpack_require__(1);
 
 
 
@@ -488,7 +442,7 @@ class SoundBankHandler {
 
 
 /***/ }),
-/* 6 */
+/* 3 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -603,7 +557,7 @@ $('body').append(popup);
 
 
 /***/ }),
-/* 7 */
+/* 4 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -651,11 +605,11 @@ class Timer {
 
 
 /***/ }),
-/* 8 */
+/* 5 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth__ = __webpack_require__(2);
 
 /**
  * A polyphonic synth controlling an array of voices
@@ -817,11 +771,11 @@ class SynthLoader {
 
 
 /***/ }),
-/* 9 */
+/* 6 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_modern__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_modern__ = __webpack_require__(0);
 
 /**
  * Handles common AudioNode cloning, used by oscillator and buffered data nodes.
@@ -1161,7 +1115,7 @@ class OutputTracker {
 
 
 /***/ }),
-/* 10 */
+/* 7 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1331,7 +1285,7 @@ let palette = {
 
 
 /***/ }),
-/* 11 */
+/* 8 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1513,119 +1467,22 @@ class LineInNode extends CustomNodeBase {
 
 
 /***/ }),
-/* 12 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/**
- * Displays FFT and Oscilloscope graphs from the output of a given AudioNode
- */
-class AudioAnalyzer {
-    constructor(jqfft, jqosc) {
-        this.canvasFFT = this.createCanvas(jqfft);
-        this.gcFFT = this.canvasFFT.getContext('2d');
-        this.canvasOsc = this.createCanvas(jqosc);
-        this.gcOsc = this.canvasOsc.getContext('2d');
-    }
-    createCanvas(panel) {
-        const jqCanvas = $(`<canvas width="${panel.width()}" height="${panel.height()}">`);
-        panel.append(jqCanvas);
-        const canvas = jqCanvas[0];
-        return canvas;
-    }
-    createAnalyzerNode(ac) {
-        if (this.anode)
-            return;
-        this.anode = ac.createAnalyser();
-        this.fftData = new Uint8Array(this.anode.fftSize);
-        this.oscData = new Uint8Array(this.anode.fftSize);
-    }
-    analyze(input) {
-        this.disconnect();
-        this.createAnalyzerNode(input.context);
-        this.input = input;
-        this.input.connect(this.anode);
-        this.requestAnimationFrame();
-    }
-    disconnect() {
-        if (!this.input)
-            return;
-        this.input.disconnect(this.anode);
-        this.input = null;
-    }
-    requestAnimationFrame() {
-        window.requestAnimationFrame(_ => this.updateCanvas());
-    }
-    updateCanvas() {
-        if (!this.input)
-            return;
-        if (this.gcFFT)
-            this.drawFFT(this.gcFFT, this.canvasFFT, this.fftData, '#00FF00');
-        if (this.gcOsc)
-            this.drawOsc(this.gcOsc, this.canvasOsc, this.oscData, '#FFFF00');
-        this.requestAnimationFrame();
-    }
-    drawFFT(gc, canvas, data, color) {
-        const [w, h] = this.setupDraw(gc, canvas, data, color);
-        this.anode.getByteFrequencyData(data);
-        const dx = (data.length / 2) / canvas.width;
-        let x = 0;
-        // TODO calculate average of all samples from x to x + dx - 1
-        for (let i = 0; i < w; i++) {
-            let y = data[Math.floor(x)];
-            x += dx;
-            gc.moveTo(i, h - 1);
-            gc.lineTo(i, h - 1 - h * y / 256);
-        }
-        gc.stroke();
-        gc.closePath();
-    }
-    drawOsc(gc, canvas, data, color) {
-        const [w, h] = this.setupDraw(gc, canvas, data, color);
-        this.anode.getByteTimeDomainData(data);
-        gc.moveTo(0, h / 2);
-        let x = 0;
-        while (data[x] > 128 && x < data.length / 4)
-            x++;
-        while (data[x] < 128 && x < data.length / 4)
-            x++;
-        const dx = (data.length * 0.75) / canvas.width;
-        for (let i = 0; i < w; i++) {
-            let y = data[Math.floor(x)];
-            x += dx;
-            gc.lineTo(i, h * y / 256);
-        }
-        gc.stroke();
-        gc.closePath();
-    }
-    setupDraw(gc, canvas, data, color) {
-        const w = canvas.width;
-        const h = canvas.height;
-        gc.clearRect(0, 0, w, h);
-        gc.beginPath();
-        gc.strokeStyle = color;
-        return [w, h];
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = AudioAnalyzer;
-
-
-
-/***/ }),
-/* 13 */
+/* 9 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = createEditor;
 /* harmony export (immutable) */ __webpack_exports__["c"] = flashRange;
 /* harmony export (immutable) */ __webpack_exports__["b"] = doRunCode;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__live_coding__ = __webpack_require__(14);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__editor_actions__ = __webpack_require__(32);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__rings__ = __webpack_require__(33);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__scales__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__random__ = __webpack_require__(17);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__editor_buffers__ = __webpack_require__(16);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__synthUI_analyzer__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__live_coding__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__editor_actions__ = __webpack_require__(27);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__rings__ = __webpack_require__(34);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__scales__ = __webpack_require__(31);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__random__ = __webpack_require__(33);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__editor_buffers__ = __webpack_require__(32);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__synthUI_analyzer__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__log__ = __webpack_require__(47);
+
 
 
 
@@ -1688,11 +1545,7 @@ function setupGlobals(lc) {
 }
 function preventParentScroll(elem) {
     $(elem).bind('wheel', e => e.preventDefault());
-    $('#walc-log-container').bind('wheel', function (e) {
-        let evt = e.originalEvent;
-        this.scrollTop += evt.deltaY; // TODO: test in Mac ( d < 0 ? -1 : 1 ) * 30
-        e.preventDefault();
-    });
+    Object(__WEBPACK_IMPORTED_MODULE_7__log__["d" /* preventLogParentScroll */])();
 }
 function addTypeScriptDefinitions(defs) {
     monaco.languages.typescript.typescriptDefaults.addExtraLib(defs);
@@ -1743,7 +1596,7 @@ function getErrorLocation(e) {
     return null;
 }
 function showError(msg, line, col) {
-    console.log(`Runtime error: "${msg}" at line ${line}, column ${col}`);
+    Object(__WEBPACK_IMPORTED_MODULE_7__log__["c" /* logToPanel */])(true, true, Object(__WEBPACK_IMPORTED_MODULE_7__log__["e" /* txt2html */])(`{log-bold|Runtime error}: "${msg}" at line ${line}, column ${col}`));
     editor.revealLineInCenter(line);
     let errorRange = getErrorRange(editor.getModel().getLineContent(line), col);
     decorations = editor.deltaDecorations(decorations, [{
@@ -1797,482 +1650,23 @@ function doRunCode(code) {
 
 
 /***/ }),
-/* 14 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return instruments; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return effects; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return tracks; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_instrument__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__synth_timer__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__track__ = __webpack_require__(29);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__effects__ = __webpack_require__(30);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__scales__ = __webpack_require__(15);
-
-
-
-
-
-class LCInstrument extends __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /* Instrument */] {
-    param(pname, value, rampTime, exponential = true) {
-        let names = pname.split('/');
-        if (names.length < 2)
-            throw new Error(`Instrument parameters require "node/param" format`);
-        let node = names[0];
-        let name = names[1];
-        if (value === undefined) {
-            let prm = this.voices[0].getParameterNode(node, name);
-            return prm.value;
-        }
-        for (let v of this.voices) {
-            let prm = v.getParameterNode(node, name);
-            this.updateValue(prm, value, rampTime, exponential);
-        }
-        return this;
-    }
-    paramNames() {
-        let pnames = [];
-        let v = this.voices[0];
-        for (let nname of Object.getOwnPropertyNames(v.nodes))
-            for (let pname in v.nodes[nname])
-                if (v.nodes[nname][pname] instanceof AudioParam)
-                    pnames.push(nname + '/' + pname);
-        return pnames;
-    }
-    updateValue(prm, value, rampTime, exponential = true) {
-        if (rampTime === undefined) {
-            prm._value = value;
-            prm.value = value;
-        }
-        else {
-            let ctx = this.voices[0].synth.ac;
-            if (exponential) {
-                prm.exponentialRampToValueAtTime(value, ctx.currentTime + rampTime);
-            }
-            else {
-                prm.linearRampToValueAtTime(value, ctx.currentTime + rampTime);
-            }
-        }
-    }
-}
-/* unused harmony export LCInstrument */
-
-class LiveCoding {
-    constructor(context, presets, synthUI) {
-        this.context = context;
-        this.presets = presets;
-        this.synthUI = synthUI;
-        this.timer = new __WEBPACK_IMPORTED_MODULE_1__synth_timer__["a" /* Timer */](context, 60, 0.2);
-        this.timer.start(time => timerCB(this.timer, time));
-    }
-    instrument(preset, name, numVoices = 4) {
-        let prst = getPreset(this.presets, preset);
-        let instr = new LCInstrument(this.context, prst, numVoices, this.synthUI.outNode);
-        instr.name = prst.name;
-        instr.duration = findNoteDuration(prst);
-        instruments[name || instr.name] = instr;
-        return instr;
-    }
-    effect(name, newName) {
-        let eff = Object(__WEBPACK_IMPORTED_MODULE_3__effects__["a" /* createEffect */])(this.context, name);
-        effects[newName || name] = eff;
-        return eff;
-    }
-    track(name, cb) {
-        let t = new __WEBPACK_IMPORTED_MODULE_2__track__["a" /* Track */](this.context, this.synthUI.outNode, this.timer);
-        t.name = name;
-        if (tracks[name])
-            nextTracks[name] = t;
-        else
-            tracks[name] = t;
-        if (cb)
-            cb(t);
-        return t;
-    }
-    loop_track(name, cb) {
-        let t = this.track(name, cb);
-        t.loop = true;
-        return t;
-    }
-    scale(note, type, octaves) {
-        return Object(__WEBPACK_IMPORTED_MODULE_4__scales__["b" /* makeScale */])(note, type, octaves);
-    }
-    use_log(flag = true) {
-        logEnabled = flag;
-        return this;
-    }
-    log(...args) {
-        logToPanel(true, false, ...args);
-    }
-    bpm(value) {
-        if (value === undefined)
-            return this.timer.bpm;
-        this.timer.bpm = value;
-        return this;
-    }
-    stop() {
-        eachTrack(t => t.stop());
-        return this;
-    }
-    pause() {
-        eachTrack(t => t.pause());
-        return this;
-    }
-    continue() {
-        eachTrack(t => t.continue());
-        return this;
-    }
-    reset() {
-        eachTrack(t => {
-            if (t._effect)
-                t._effect.input.disconnect();
-            t.delete();
-        });
-        return this;
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = LiveCoding;
-
-function getPreset(presets, preset) {
-    if (typeof preset == 'number') {
-        let maxPrst = presets.presets.length;
-        if (preset < 1 || preset > maxPrst)
-            throw new Error(`The preset number should be between 1 and ${maxPrst}`);
-        return presets.presets[preset - 1];
-    }
-    else if (typeof preset == 'string') {
-        for (let prs of presets.presets)
-            if (prs.name == preset)
-                return prs;
-        throw new Error(`Preset "${preset}" does not exist`);
-    }
-    return preset;
-}
-function findNoteDuration(preset) {
-    let duration = 0;
-    for (let node of preset.nodeData) {
-        if (node.type == 'ADSR') {
-            let d = node.params.attack + node.params.decay;
-            if (d > duration)
-                duration = d;
-        }
-    }
-    if (duration)
-        duration += 0.01;
-    return duration;
-}
-let instruments = {};
-let effects = {};
-let tracks = {};
-let nextTracks = {};
-let logEnabled = false;
-let logCount = 0;
-const MAX_LOG_LINES = 1000;
-function logToPanel(enable, asHTML, ...args) {
-    if (!enable)
-        return;
-    if (logCount++ > MAX_LOG_LINES)
-        $('#walc-log-content > *:first-child').remove();
-    let txt = args.join(', ');
-    let div = $('<div>');
-    if (asHTML)
-        div.html(txt);
-    else
-        div.text(txt);
-    $('#walc-log-content').append(div);
-    $('#walc-log-container').scrollTop(Number.MAX_SAFE_INTEGER);
-}
-function eachTrack(cb) {
-    let tnames = Object.getOwnPropertyNames(tracks);
-    for (let tname of tnames)
-        cb(tracks[tname]);
-}
-function timerCB(timer, time) {
-    eachTrack(t => playTrack(timer, t, time));
-}
-function playTrack(timer, track, time) {
-    let played;
-    do {
-        played = false;
-        if (shouldTrackEnd(track))
-            break;
-        track = tracks[track.name];
-        let note = track.notes[track.notect];
-        if (track.startTime + note.time <= time) {
-            playNote(note, timer, track.startTime);
-            played = true;
-            track.notect++;
-        }
-    } while (played);
-}
-function playNote(note, timer, startTime) {
-    if (note.options)
-        setOptions(note.options);
-    if (note.number < 1)
-        return;
-    logToPanel(logEnabled, false, `Note: ${note.number} - ${note.instrument.name}`);
-    note.instrument.noteOn(note.number, note.velocity, startTime + note.time);
-    let duration = note.duration
-        || note.instrument.duration || timer.noteDuration;
-    note.instrument.noteOff(note.number, note.velocity, startTime + note.time + duration);
-}
-function setOptions(opts) {
-    if (opts.effect) {
-        let e = opts.effect;
-        for (let pname of Object.getOwnPropertyNames(opts))
-            if (pname != 'effect')
-                e.param(pname, opts[pname]);
-    }
-    else if (opts.instrument) {
-        let i = opts.instrument;
-        for (let pname of Object.getOwnPropertyNames(opts))
-            if (pname != 'instrument')
-                i.param(pname, opts[pname]);
-    }
-}
-function shouldTrackEnd(track) {
-    if (track.stopped)
-        return true;
-    if (track.notect < track.notes.length)
-        return false;
-    track.notect = 0;
-    if (track.shouldStop) {
-        track.stopped = true;
-        track.shouldStop = false;
-        return true;
-    }
-    if (nextTracks[track.name]) {
-        let nextTrack = nextTracks[track.name];
-        nextTrack.startTime = track.startTime + track.time;
-        tracks[track.name] = nextTrack;
-        delete nextTracks[track.name];
-        return false;
-    }
-    if (track.loop) {
-        track.startTime += track.time;
-        track.loopCount++;
-        return false;
-    }
-    else {
-        delete tracks[track.name];
-        return true;
-    }
-}
-
-
-/***/ }),
-/* 15 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Note; });
-/* harmony export (immutable) */ __webpack_exports__["b"] = makeScale;
-let Note = {
-    C0: 12, Cs0: 13, Db0: 13, D0: 14, Ds0: 15, Eb0: 15,
-    E0: 16, F0: 17, Fs0: 18, Gb0: 18, G0: 19, Gs0: 20,
-    Ab0: 20, A0: 21, As0: 22, Bb0: 22, B0: 23,
-    C1: 24, Cs1: 25, Db1: 25, D1: 26, Ds1: 27, Eb1: 27,
-    E1: 28, F1: 29, Fs1: 30, Gb1: 30, G1: 31, Gs1: 32,
-    Ab1: 32, A1: 33, As1: 34, Bb1: 34, B1: 35,
-    C2: 36, Cs2: 37, Db2: 37, D2: 38, Ds2: 39, Eb2: 39,
-    E2: 40, F2: 41, Fs2: 42, Gb2: 42, G2: 43, Gs2: 44,
-    Ab2: 44, A2: 45, As2: 46, Bb2: 46, B2: 47,
-    C3: 48, Cs3: 49, Db3: 49, D3: 50, Ds3: 51, Eb3: 51,
-    E3: 52, F3: 53, Fs3: 54, Gb3: 54, G3: 55, Gs3: 56,
-    Ab3: 56, A3: 57, As3: 58, Bb3: 58, B3: 59,
-    C4: 60, Cs4: 61, Db4: 61, D4: 62, Ds4: 63, Eb4: 63,
-    E4: 64, F4: 65, Fs4: 66, Gb4: 66, G4: 67, Gs4: 68,
-    Ab4: 68, A4: 69, As4: 70, Bb4: 70, B4: 71,
-    C5: 72, Cs5: 73, Db5: 73, D5: 74, Ds5: 75, Eb5: 75,
-    E5: 76, F5: 77, Fs5: 78, Gb5: 78, G5: 79, Gs5: 80,
-    Ab5: 80, A5: 81, As5: 82, Bb5: 82, B5: 83,
-    C6: 84, Cs6: 85, Db6: 85, D6: 86, Ds6: 87, Eb6: 87,
-    E6: 88, F6: 89, Fs6: 90, Gb6: 90, G6: 91, Gs6: 92,
-    Ab6: 92, A6: 93, As6: 94, Bb6: 94, B6: 95,
-    C7: 96, Cs7: 97, Db7: 97, D7: 98, Ds7: 99, Eb7: 99,
-    E7: 100, F7: 101, Fs7: 102, Gb7: 102, G7: 103, Gs7: 104,
-    Ab7: 104, A7: 105, As7: 106, Bb7: 106, B7: 107,
-    C8: 108, Cs8: 109, Db8: 109, D8: 110, Ds8: 111, Eb8: 111,
-    E8: 112, F8: 113, Fs8: 114, Gb8: 114, G8: 115, Gs8: 116,
-    Ab8: 116, A8: 117, As8: 118, Bb8: 118, B8: 119
-};
-const NoteDeltas = {
-    major: [0, 2, 4, 5, 7, 9, 11, 12],
-    major_pentatonic: [0, 2, 4, 7, 9, 12],
-    minor: [0, 2, 3, 5, 7, 8, 10, 12],
-    minor_pentatonic: [0, 3, 5, 7, 10, 12],
-    chromatic: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-};
-function makeSingleScale(note, type) {
-    let deltas = NoteDeltas[type];
-    if (!deltas)
-        throw new Error(`Scale type "${type}" does not exist`);
-    let r = [];
-    for (let delta of deltas)
-        r.push(note + delta);
-    return r.ring();
-}
-function makeScale(note, type = 'major', octaves = 1) {
-    if (octaves <= 1)
-        return makeSingleScale(note, type);
-    let r = [].ring();
-    for (let oct = 0; oct < octaves; oct++) {
-        r = r.concat(makeSingleScale(note + oct * 12, type));
-        if (oct < octaves - 1)
-            r = r.butlast();
-    }
-    return r;
-}
-
-
-/***/ }),
-/* 16 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = handleBuffers;
-/* harmony export (immutable) */ __webpack_exports__["c"] = prevBuffer;
-/* harmony export (immutable) */ __webpack_exports__["b"] = nextBuffer;
-const NUM_BUFFERS = 8;
-let currentBuffer = 1;
-// -------------------- Buffer navigation --------------------
-function handleBuffers(editor) {
-    handleEditorStorage(editor);
-    for (let i = 1; i <= NUM_BUFFERS; i++)
-        registerButton(i, editor);
-}
-function prevBuffer(editor) {
-    let num = currentBuffer - 1;
-    if (num < 1)
-        num = NUM_BUFFERS;
-    bufferChanged(num, editor);
-}
-function nextBuffer(editor) {
-    let num = currentBuffer + 1;
-    if (num > NUM_BUFFERS)
-        num = 1;
-    bufferChanged(num, editor);
-}
-function registerButton(id, editor) {
-    getButton$(id).click(_ => bufferChanged(id, editor));
-}
-function getButton$(id) {
-    return $('#walc-buffer-' + id);
-}
-function updateButtons(disableId, enableId) {
-    getButton$(disableId)
-        .removeClass('btn-info')
-        .addClass('btn-primary');
-    getButton$(enableId)
-        .removeClass('btn-primary')
-        .addClass('btn-info');
-}
-function bufferChanged(num, editor) {
-    updateButtons(currentBuffer, num);
-    storeBuffer(currentBuffer, getEditorText(editor));
-    setEditorText(editor, loadBuffer(num));
-    currentBuffer = num;
-    editor.focus();
-    editor.revealLine(1); // TODO store cursor positions
-}
-// -------------------- Buffer storage management --------------------
-function handleEditorStorage(editor) {
-    recoverStoredCode(editor);
-    watchCodeAndStoreIt(editor);
-}
-function recoverStoredCode(editor) {
-    let code = loadBuffer(currentBuffer);
-    if (code)
-        setEditorText(editor, code);
-}
-function watchCodeAndStoreIt(editor) {
-    let storedCode = getEditorText(editor);
-    setInterval(() => {
-        let code = getEditorText(editor);
-        if (storedCode == code)
-            return;
-        storeBuffer(currentBuffer, code);
-        storedCode = code;
-    }, 1000);
-}
-// -------------------- Helpers --------------------
-function storeBuffer(num, txt) {
-    localStorage.setItem('code_buffer_' + num, txt);
-}
-function loadBuffer(num) {
-    return localStorage.getItem('code_buffer_' + num) || '';
-}
-function setEditorText(editor, text) {
-    editor.getModel().setValue(text);
-}
-function getEditorText(editor) {
-    return editor.getModel().getValue();
-}
-
-
-/***/ }),
-/* 17 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return random; });
-const seedrandom = __webpack_require__(34);
-let random = {
-    seed(newSeed) {
-        if (newSeed !== undefined)
-            setSeedNumber(newSeed);
-        return seedNumber;
-    },
-    float(from, to) {
-        if (to === undefined)
-            return rng() * from;
-        return from + rng() * (to - from);
-    },
-    integer(from, to) {
-        return from + Math.floor(rng() * (to - from + 1));
-    },
-    dice(sides) {
-        return this.integer(1, sides);
-    },
-    one_in(times) {
-        return this.dice(times) === 1;
-    },
-    choose(...args) {
-        let arr = [];
-        for (let a of args)
-            arr = arr.concat(a);
-        return arr[this.dice(arr.length) - 1];
-    }
-};
-let seedNumber = 0;
-let rng;
-function setSeedNumber(newSeed) {
-    let seed = (newSeed + 123456789).toString();
-    rng = seedrandom(seed);
-    seedNumber = newSeed;
-}
-setSeedNumber(0);
-
-
-/***/ }),
-/* 18 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(19);
+module.exports = __webpack_require__(11);
 
 
 /***/ }),
-/* 19 */
+/* 11 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synthUI_synthUI__ = __webpack_require__(20);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__piano_noteInputs__ = __webpack_require__(23);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__synthUI_presets__ = __webpack_require__(28);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__live_coding_editor__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_routes__ = __webpack_require__(43);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synthUI_synthUI__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__piano_noteInputs__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__synthUI_presets__ = __webpack_require__(21);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__live_coding_editor__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_routes__ = __webpack_require__(28);
 /**
  * Main entry point: setup synth editor and keyboard listener.
  */
@@ -2310,16 +1704,16 @@ function setupPalette() {
 
 
 /***/ }),
-/* 20 */
+/* 12 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__graph__ = __webpack_require__(21);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__synth_synth__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_modern__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_popups__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__paramsUI__ = __webpack_require__(22);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__analyzer__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__graph__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__synth_synth__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_modern__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_popups__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__paramsUI__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__analyzer__ = __webpack_require__(15);
 
 
 
@@ -2521,7 +1915,7 @@ function getCssFromClass(className, propName) {
 
 
 /***/ }),
-/* 21 */
+/* 13 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2914,14 +2308,14 @@ class GraphDraw {
 
 
 /***/ }),
-/* 22 */
+/* 14 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = renderParams;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_modern__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_file__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_popups__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_modern__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_file__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_popups__ = __webpack_require__(3);
 
 
 
@@ -3180,15 +2574,114 @@ function truncateFloat(f, len) {
 
 
 /***/ }),
-/* 23 */
+/* 15 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__keyboard__ = __webpack_require__(24);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__midi__ = __webpack_require__(25);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__piano__ = __webpack_require__(26);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__arpeggiator__ = __webpack_require__(27);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__synth_instrument__ = __webpack_require__(8);
+/**
+ * Displays FFT and Oscilloscope graphs from the output of a given AudioNode
+ */
+class AudioAnalyzer {
+    constructor(jqfft, jqosc) {
+        this.canvasFFT = this.createCanvas(jqfft);
+        this.gcFFT = this.canvasFFT.getContext('2d');
+        this.canvasOsc = this.createCanvas(jqosc);
+        this.gcOsc = this.canvasOsc.getContext('2d');
+    }
+    createCanvas(panel) {
+        const jqCanvas = $(`<canvas width="${panel.width()}" height="${panel.height()}">`);
+        panel.append(jqCanvas);
+        const canvas = jqCanvas[0];
+        return canvas;
+    }
+    createAnalyzerNode(ac) {
+        if (this.anode)
+            return;
+        this.anode = ac.createAnalyser();
+        this.fftData = new Uint8Array(this.anode.fftSize);
+        this.oscData = new Uint8Array(this.anode.fftSize);
+    }
+    analyze(input) {
+        this.disconnect();
+        this.createAnalyzerNode(input.context);
+        this.input = input;
+        this.input.connect(this.anode);
+        this.requestAnimationFrame();
+    }
+    disconnect() {
+        if (!this.input)
+            return;
+        this.input.disconnect(this.anode);
+        this.input = null;
+    }
+    requestAnimationFrame() {
+        window.requestAnimationFrame(_ => this.updateCanvas());
+    }
+    updateCanvas() {
+        if (!this.input)
+            return;
+        if (this.gcFFT)
+            this.drawFFT(this.gcFFT, this.canvasFFT, this.fftData, '#00FF00');
+        if (this.gcOsc)
+            this.drawOsc(this.gcOsc, this.canvasOsc, this.oscData, '#FFFF00');
+        this.requestAnimationFrame();
+    }
+    drawFFT(gc, canvas, data, color) {
+        const [w, h] = this.setupDraw(gc, canvas, data, color);
+        this.anode.getByteFrequencyData(data);
+        const dx = (data.length / 2) / canvas.width;
+        let x = 0;
+        // TODO calculate average of all samples from x to x + dx - 1
+        for (let i = 0; i < w; i++) {
+            let y = data[Math.floor(x)];
+            x += dx;
+            gc.moveTo(i, h - 1);
+            gc.lineTo(i, h - 1 - h * y / 256);
+        }
+        gc.stroke();
+        gc.closePath();
+    }
+    drawOsc(gc, canvas, data, color) {
+        const [w, h] = this.setupDraw(gc, canvas, data, color);
+        this.anode.getByteTimeDomainData(data);
+        gc.moveTo(0, h / 2);
+        let x = 0;
+        while (data[x] > 128 && x < data.length / 4)
+            x++;
+        while (data[x] < 128 && x < data.length / 4)
+            x++;
+        const dx = (data.length * 0.75) / canvas.width;
+        for (let i = 0; i < w; i++) {
+            let y = data[Math.floor(x)];
+            x += dx;
+            gc.lineTo(i, h * y / 256);
+        }
+        gc.stroke();
+        gc.closePath();
+    }
+    setupDraw(gc, canvas, data, color) {
+        const w = canvas.width;
+        const h = canvas.height;
+        gc.clearRect(0, 0, w, h);
+        gc.beginPath();
+        gc.strokeStyle = color;
+        return [w, h];
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = AudioAnalyzer;
+
+
+
+/***/ }),
+/* 16 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__keyboard__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__midi__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__piano__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__arpeggiator__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__synth_instrument__ = __webpack_require__(5);
 
 
 
@@ -3314,7 +2807,7 @@ class NoteInputs {
 
 
 /***/ }),
-/* 24 */
+/* 17 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3367,7 +2860,7 @@ class Keyboard {
 
 
 /***/ }),
-/* 25 */
+/* 18 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3410,12 +2903,12 @@ class MidiKeyboard {
 
 
 /***/ }),
-/* 26 */
+/* 19 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_popups__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_modern__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_popups__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_modern__ = __webpack_require__(0);
 
 
 const NUM_WHITES = 17;
@@ -3668,11 +3161,11 @@ class PianoKeyboard {
 
 
 /***/ }),
-/* 27 */
+/* 20 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_timer__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_timer__ = __webpack_require__(4);
 
 class Arpeggiator {
     constructor(ac) {
@@ -3797,13 +3290,13 @@ class NoteTable {
 
 
 /***/ }),
-/* 28 */
+/* 21 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_popups__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_file__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_modern__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_popups__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_file__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_modern__ = __webpack_require__(0);
 
 
 
@@ -3961,11 +3454,266 @@ class Presets {
 
 
 /***/ }),
-/* 29 */
+/* 22 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__live_coding__ = __webpack_require__(14);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return instruments; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return effects; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return tracks; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_instrument__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__synth_timer__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__track__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__effects__ = __webpack_require__(24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__scales__ = __webpack_require__(31);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__log__ = __webpack_require__(47);
+
+
+
+
+
+
+class LCInstrument extends __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /* Instrument */] {
+    param(pname, value, rampTime, exponential = true) {
+        let names = pname.split('/');
+        if (names.length < 2)
+            throw new Error(`Instrument parameters require "node/param" format`);
+        let node = names[0];
+        let name = names[1];
+        if (value === undefined) {
+            let prm = this.voices[0].getParameterNode(node, name);
+            return prm.value;
+        }
+        for (let v of this.voices) {
+            let prm = v.getParameterNode(node, name);
+            this.updateValue(prm, value, rampTime, exponential);
+        }
+        return this;
+    }
+    paramNames() {
+        let pnames = [];
+        let v = this.voices[0];
+        for (let nname of Object.getOwnPropertyNames(v.nodes))
+            for (let pname in v.nodes[nname])
+                if (v.nodes[nname][pname] instanceof AudioParam)
+                    pnames.push(nname + '/' + pname);
+        return pnames;
+    }
+    updateValue(prm, value, rampTime, exponential = true) {
+        if (rampTime === undefined) {
+            prm._value = value;
+            prm.value = value;
+        }
+        else {
+            let ctx = this.voices[0].synth.ac;
+            if (exponential) {
+                prm.exponentialRampToValueAtTime(value, ctx.currentTime + rampTime);
+            }
+            else {
+                prm.linearRampToValueAtTime(value, ctx.currentTime + rampTime);
+            }
+        }
+    }
+}
+/* unused harmony export LCInstrument */
+
+class LiveCoding {
+    constructor(context, presets, synthUI) {
+        this.context = context;
+        this.presets = presets;
+        this.synthUI = synthUI;
+        this.timer = new __WEBPACK_IMPORTED_MODULE_1__synth_timer__["a" /* Timer */](context, 60, 0.2);
+        this.timer.start(time => timerCB(this.timer, time));
+    }
+    instrument(preset, name, numVoices = 4) {
+        let prst = getPreset(this.presets, preset);
+        let instr = new LCInstrument(this.context, prst, numVoices, this.synthUI.outNode);
+        instr.name = prst.name;
+        instr.duration = findNoteDuration(prst);
+        instruments[name || instr.name] = instr;
+        return instr;
+    }
+    effect(name, newName) {
+        let eff = Object(__WEBPACK_IMPORTED_MODULE_3__effects__["a" /* createEffect */])(this.context, name);
+        effects[newName || name] = eff;
+        return eff;
+    }
+    track(name, cb) {
+        let t = new __WEBPACK_IMPORTED_MODULE_2__track__["a" /* Track */](this.context, this.synthUI.outNode, this.timer);
+        t.name = name;
+        if (tracks[name])
+            nextTracks[name] = t;
+        else
+            tracks[name] = t;
+        if (cb)
+            cb(t);
+        return t;
+    }
+    loop_track(name, cb) {
+        let t = this.track(name, cb);
+        t.loop = true;
+        return t;
+    }
+    scale(note, type, octaves) {
+        return Object(__WEBPACK_IMPORTED_MODULE_4__scales__["b" /* makeScale */])(note, type, octaves);
+    }
+    log(...args) {
+        Object(__WEBPACK_IMPORTED_MODULE_5__log__["c" /* logToPanel */])(true, false, ...args);
+        return this;
+    }
+    log_enable(flag = true) {
+        Object(__WEBPACK_IMPORTED_MODULE_5__log__["b" /* enableLog */])(flag);
+        return this;
+    }
+    log_clear() {
+        Object(__WEBPACK_IMPORTED_MODULE_5__log__["a" /* clearLog */])();
+        return this;
+    }
+    bpm(value) {
+        if (value === undefined)
+            return this.timer.bpm;
+        this.timer.bpm = value;
+        return this;
+    }
+    stop() {
+        eachTrack(t => t.stop());
+        return this;
+    }
+    pause() {
+        eachTrack(t => t.pause());
+        return this;
+    }
+    continue() {
+        eachTrack(t => t.continue());
+        return this;
+    }
+    reset() {
+        eachTrack(t => {
+            if (t._effect)
+                t._effect.input.disconnect();
+            t.delete();
+        });
+        return this;
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = LiveCoding;
+
+function getPreset(presets, preset) {
+    if (typeof preset == 'number') {
+        let maxPrst = presets.presets.length;
+        if (preset < 1 || preset > maxPrst)
+            throw new Error(`The preset number should be between 1 and ${maxPrst}`);
+        return presets.presets[preset - 1];
+    }
+    else if (typeof preset == 'string') {
+        for (let prs of presets.presets)
+            if (prs.name == preset)
+                return prs;
+        throw new Error(`Preset "${preset}" does not exist`);
+    }
+    return preset;
+}
+function findNoteDuration(preset) {
+    let duration = 0;
+    for (let node of preset.nodeData) {
+        if (node.type == 'ADSR') {
+            let d = node.params.attack + node.params.decay;
+            if (d > duration)
+                duration = d;
+        }
+    }
+    if (duration)
+        duration += 0.01;
+    return duration;
+}
+let instruments = {};
+let effects = {};
+let tracks = {};
+let nextTracks = {};
+function eachTrack(cb) {
+    let tnames = Object.getOwnPropertyNames(tracks);
+    for (let tname of tnames)
+        cb(tracks[tname]);
+}
+function timerCB(timer, time) {
+    eachTrack(t => playTrack(timer, t, time));
+}
+function playTrack(timer, track, time) {
+    let played;
+    do {
+        played = false;
+        if (shouldTrackEnd(track))
+            break;
+        track = tracks[track.name];
+        let note = track.notes[track.notect];
+        if (track.startTime + note.time <= time) {
+            playNote(track, note, timer, track.startTime);
+            played = true;
+            track.notect++;
+        }
+    } while (played);
+}
+function playNote(track, note, timer, startTime) {
+    if (note.options)
+        setOptions(note.options);
+    if (note.number < 1)
+        return;
+    Object(__WEBPACK_IMPORTED_MODULE_5__log__["c" /* logToPanel */])(false, true, Object(__WEBPACK_IMPORTED_MODULE_5__log__["e" /* txt2html */])(`Note: {log-bold|${note.number}} {log-instr|${note.instrument.name}} {log-track|${track.name}}`));
+    note.instrument.noteOn(note.number, note.velocity, startTime + note.time);
+    let duration = note.duration
+        || note.instrument.duration || timer.noteDuration;
+    note.instrument.noteOff(note.number, note.velocity, startTime + note.time + duration);
+}
+function setOptions(opts) {
+    if (opts.effect) {
+        let e = opts.effect;
+        for (let pname of Object.getOwnPropertyNames(opts))
+            if (pname != 'effect')
+                e.param(pname, opts[pname]);
+    }
+    else if (opts.instrument) {
+        let i = opts.instrument;
+        for (let pname of Object.getOwnPropertyNames(opts))
+            if (pname != 'instrument')
+                i.param(pname, opts[pname]);
+    }
+}
+function shouldTrackEnd(track) {
+    if (track.stopped)
+        return true;
+    if (track.notect < track.notes.length)
+        return false;
+    track.notect = 0;
+    if (track.shouldStop) {
+        track.stopped = true;
+        track.shouldStop = false;
+        return true;
+    }
+    if (nextTracks[track.name]) {
+        let nextTrack = nextTracks[track.name];
+        nextTrack.startTime = track.startTime + track.time;
+        tracks[track.name] = nextTrack;
+        delete nextTracks[track.name];
+        return false;
+    }
+    if (track.loop) {
+        track.startTime += track.time;
+        track.loopCount++;
+        return false;
+    }
+    else {
+        delete tracks[track.name];
+        return true;
+    }
+}
+
+
+/***/ }),
+/* 23 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__live_coding__ = __webpack_require__(22);
 
 class TrackControl {
     constructor(ac, out, timer) {
@@ -4097,13 +3845,13 @@ class Track extends TrackControl {
 
 
 /***/ }),
-/* 30 */
+/* 24 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* unused harmony export registerProvider */
 /* harmony export (immutable) */ __webpack_exports__["a"] = createEffect;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__tuna_tuna__ = __webpack_require__(31);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__tuna_tuna__ = __webpack_require__(25);
 
 class BaseEffect {
     constructor(ac, name) {
@@ -4209,7 +3957,7 @@ function createEffect(ac, name) {
 
 
 /***/ }),
-/* 31 */
+/* 25 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -6339,13 +6087,14 @@ Tuna.toString = Tuna.prototype.toString = function () {
 
 
 /***/ }),
-/* 32 */
+/* 26 */,
+/* 27 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = registerActions;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__editor__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__editor_buffers__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__editor__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__editor_buffers__ = __webpack_require__(32);
 
 
 function registerActions(editor, monaco) {
@@ -6490,12 +6239,242 @@ class EditorActions {
 
 
 /***/ }),
+/* 28 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = setupRoutes;
+let oldPage;
+let mainRoute;
+function setupRoutes(initialRoute) {
+    window.onhashchange = showPageFromHash;
+    mainRoute = initialRoute;
+    showPageFromHash();
+    return loadPages();
+}
+function showPageFromHash() {
+    const hash = location.hash || mainRoute;
+    $('#page > div').hide();
+    $(hash).show().css('outline', 'none').focus();
+    if (oldPage)
+        $(document).trigger('route:hide', oldPage);
+    $(document).trigger('route:show', hash);
+    oldPage = hash;
+    window.scrollTo(0, 0);
+}
+function loadPages() {
+    return new Promise(resolve => {
+        $.get('live-coding.html', data => {
+            $('#live-coding').empty().append(data);
+            resolve();
+        });
+    });
+}
+
+
+/***/ }),
+/* 29 */,
+/* 30 */,
+/* 31 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Note; });
+/* harmony export (immutable) */ __webpack_exports__["b"] = makeScale;
+let Note = {
+    C0: 12, Cs0: 13, Db0: 13, D0: 14, Ds0: 15, Eb0: 15,
+    E0: 16, F0: 17, Fs0: 18, Gb0: 18, G0: 19, Gs0: 20,
+    Ab0: 20, A0: 21, As0: 22, Bb0: 22, B0: 23,
+    C1: 24, Cs1: 25, Db1: 25, D1: 26, Ds1: 27, Eb1: 27,
+    E1: 28, F1: 29, Fs1: 30, Gb1: 30, G1: 31, Gs1: 32,
+    Ab1: 32, A1: 33, As1: 34, Bb1: 34, B1: 35,
+    C2: 36, Cs2: 37, Db2: 37, D2: 38, Ds2: 39, Eb2: 39,
+    E2: 40, F2: 41, Fs2: 42, Gb2: 42, G2: 43, Gs2: 44,
+    Ab2: 44, A2: 45, As2: 46, Bb2: 46, B2: 47,
+    C3: 48, Cs3: 49, Db3: 49, D3: 50, Ds3: 51, Eb3: 51,
+    E3: 52, F3: 53, Fs3: 54, Gb3: 54, G3: 55, Gs3: 56,
+    Ab3: 56, A3: 57, As3: 58, Bb3: 58, B3: 59,
+    C4: 60, Cs4: 61, Db4: 61, D4: 62, Ds4: 63, Eb4: 63,
+    E4: 64, F4: 65, Fs4: 66, Gb4: 66, G4: 67, Gs4: 68,
+    Ab4: 68, A4: 69, As4: 70, Bb4: 70, B4: 71,
+    C5: 72, Cs5: 73, Db5: 73, D5: 74, Ds5: 75, Eb5: 75,
+    E5: 76, F5: 77, Fs5: 78, Gb5: 78, G5: 79, Gs5: 80,
+    Ab5: 80, A5: 81, As5: 82, Bb5: 82, B5: 83,
+    C6: 84, Cs6: 85, Db6: 85, D6: 86, Ds6: 87, Eb6: 87,
+    E6: 88, F6: 89, Fs6: 90, Gb6: 90, G6: 91, Gs6: 92,
+    Ab6: 92, A6: 93, As6: 94, Bb6: 94, B6: 95,
+    C7: 96, Cs7: 97, Db7: 97, D7: 98, Ds7: 99, Eb7: 99,
+    E7: 100, F7: 101, Fs7: 102, Gb7: 102, G7: 103, Gs7: 104,
+    Ab7: 104, A7: 105, As7: 106, Bb7: 106, B7: 107,
+    C8: 108, Cs8: 109, Db8: 109, D8: 110, Ds8: 111, Eb8: 111,
+    E8: 112, F8: 113, Fs8: 114, Gb8: 114, G8: 115, Gs8: 116,
+    Ab8: 116, A8: 117, As8: 118, Bb8: 118, B8: 119
+};
+const NoteDeltas = {
+    major: [0, 2, 4, 5, 7, 9, 11, 12],
+    major_pentatonic: [0, 2, 4, 7, 9, 12],
+    minor: [0, 2, 3, 5, 7, 8, 10, 12],
+    minor_pentatonic: [0, 3, 5, 7, 10, 12],
+    chromatic: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+};
+function makeSingleScale(note, type) {
+    let deltas = NoteDeltas[type];
+    if (!deltas)
+        throw new Error(`Scale type "${type}" does not exist`);
+    let r = [];
+    for (let delta of deltas)
+        r.push(note + delta);
+    return r.ring();
+}
+function makeScale(note, type = 'major', octaves = 1) {
+    if (octaves <= 1)
+        return makeSingleScale(note, type);
+    let r = [].ring();
+    for (let oct = 0; oct < octaves; oct++) {
+        r = r.concat(makeSingleScale(note + oct * 12, type));
+        if (oct < octaves - 1)
+            r = r.butlast();
+    }
+    return r;
+}
+
+
+/***/ }),
+/* 32 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = handleBuffers;
+/* harmony export (immutable) */ __webpack_exports__["c"] = prevBuffer;
+/* harmony export (immutable) */ __webpack_exports__["b"] = nextBuffer;
+const NUM_BUFFERS = 8;
+let currentBuffer = 1;
+// -------------------- Buffer navigation --------------------
+function handleBuffers(editor) {
+    handleEditorStorage(editor);
+    for (let i = 1; i <= NUM_BUFFERS; i++)
+        registerButton(i, editor);
+}
+function prevBuffer(editor) {
+    let num = currentBuffer - 1;
+    if (num < 1)
+        num = NUM_BUFFERS;
+    bufferChanged(num, editor);
+}
+function nextBuffer(editor) {
+    let num = currentBuffer + 1;
+    if (num > NUM_BUFFERS)
+        num = 1;
+    bufferChanged(num, editor);
+}
+function registerButton(id, editor) {
+    getButton$(id).click(_ => bufferChanged(id, editor));
+}
+function getButton$(id) {
+    return $('#walc-buffer-' + id);
+}
+function updateButtons(disableId, enableId) {
+    getButton$(disableId)
+        .removeClass('btn-info')
+        .addClass('btn-primary');
+    getButton$(enableId)
+        .removeClass('btn-primary')
+        .addClass('btn-info');
+}
+function bufferChanged(num, editor) {
+    updateButtons(currentBuffer, num);
+    storeBuffer(currentBuffer, getEditorText(editor));
+    setEditorText(editor, loadBuffer(num));
+    currentBuffer = num;
+    editor.focus();
+    editor.revealLine(1); // TODO store cursor positions
+}
+// -------------------- Buffer storage management --------------------
+function handleEditorStorage(editor) {
+    recoverStoredCode(editor);
+    watchCodeAndStoreIt(editor);
+}
+function recoverStoredCode(editor) {
+    let code = loadBuffer(currentBuffer);
+    if (code)
+        setEditorText(editor, code);
+}
+function watchCodeAndStoreIt(editor) {
+    let storedCode = getEditorText(editor);
+    setInterval(() => {
+        let code = getEditorText(editor);
+        if (storedCode == code)
+            return;
+        storeBuffer(currentBuffer, code);
+        storedCode = code;
+    }, 1000);
+}
+// -------------------- Helpers --------------------
+function storeBuffer(num, txt) {
+    localStorage.setItem('code_buffer_' + num, txt);
+}
+function loadBuffer(num) {
+    return localStorage.getItem('code_buffer_' + num) || '';
+}
+function setEditorText(editor, text) {
+    editor.getModel().setValue(text);
+}
+function getEditorText(editor) {
+    return editor.getModel().getValue();
+}
+
+
+/***/ }),
 /* 33 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return random; });
+const seedrandom = __webpack_require__(38);
+let random = {
+    seed(newSeed) {
+        if (newSeed !== undefined)
+            setSeedNumber(newSeed);
+        return seedNumber;
+    },
+    float(from, to) {
+        if (to === undefined)
+            return rng() * from;
+        return from + rng() * (to - from);
+    },
+    integer(from, to) {
+        return from + Math.floor(rng() * (to - from + 1));
+    },
+    dice(sides) {
+        return this.integer(1, sides);
+    },
+    one_in(times) {
+        return this.dice(times) === 1;
+    },
+    choose(...args) {
+        let arr = [];
+        for (let a of args)
+            arr = arr.concat(a);
+        return arr[this.dice(arr.length) - 1];
+    }
+};
+let seedNumber = 0;
+let rng;
+function setSeedNumber(newSeed) {
+    let seed = (newSeed + 123456789).toString();
+    rng = seedrandom(seed);
+    seedNumber = newSeed;
+}
+setSeedNumber(0);
+
+
+/***/ }),
+/* 34 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = setupRing;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__random__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__random__ = __webpack_require__(33);
 
 class Ring extends Array {
     constructor() {
@@ -6615,7 +6594,53 @@ function copytick(from, to) {
 
 
 /***/ }),
-/* 34 */
+/* 35 */
+/***/ (function(module, exports) {
+
+module.exports = function() {
+	throw new Error("define cannot be used indirect");
+};
+
+
+/***/ }),
+/* 36 */
+/***/ (function(module, exports) {
+
+module.exports = function(module) {
+	if(!module.webpackPolyfill) {
+		module.deprecate = function() {};
+		module.paths = [];
+		// module.parent = undefined by default
+		if(!module.children) module.children = [];
+		Object.defineProperty(module, "loaded", {
+			enumerable: true,
+			get: function() {
+				return module.l;
+			}
+		});
+		Object.defineProperty(module, "id", {
+			enumerable: true,
+			get: function() {
+				return module.i;
+			}
+		});
+		module.webpackPolyfill = 1;
+	}
+	return module;
+};
+
+
+/***/ }),
+/* 37 */
+/***/ (function(module, exports) {
+
+/* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {/* globals __webpack_amd_options__ */
+module.exports = __webpack_amd_options__;
+
+/* WEBPACK VAR INJECTION */}.call(exports, {}))
+
+/***/ }),
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // A library of seedable RNGs implemented in Javascript.
@@ -6630,17 +6655,17 @@ function copytick(from, to) {
 // alea, a 53-bit multiply-with-carry generator by Johannes Baagøe.
 // Period: ~2^116
 // Reported to pass all BigCrush tests.
-var alea = __webpack_require__(35);
+var alea = __webpack_require__(39);
 
 // xor128, a pure xor-shift generator by George Marsaglia.
 // Period: 2^128-1.
 // Reported to fail: MatrixRank and LinearComp.
-var xor128 = __webpack_require__(36);
+var xor128 = __webpack_require__(40);
 
 // xorwow, George Marsaglia's 160-bit xor-shift combined plus weyl.
 // Period: 2^192-2^32
 // Reported to fail: CollisionOver, SimpPoker, and LinearComp.
-var xorwow = __webpack_require__(37);
+var xorwow = __webpack_require__(41);
 
 // xorshift7, by François Panneton and Pierre L'ecuyer, takes
 // a different approach: it adds robustness by allowing more shifts
@@ -6648,7 +6673,7 @@ var xorwow = __webpack_require__(37);
 // with 256 bits, that passes BigCrush with no systmatic failures.
 // Period 2^256-1.
 // No systematic BigCrush failures reported.
-var xorshift7 = __webpack_require__(38);
+var xorshift7 = __webpack_require__(42);
 
 // xor4096, by Richard Brent, is a 4096-bit xor-shift with a
 // very long period that also adds a Weyl generator. It also passes
@@ -6657,18 +6682,18 @@ var xorshift7 = __webpack_require__(38);
 // collisions.
 // Period: 2^4128-2^32.
 // No systematic BigCrush failures reported.
-var xor4096 = __webpack_require__(39);
+var xor4096 = __webpack_require__(43);
 
 // Tyche-i, by Samuel Neves and Filipe Araujo, is a bit-shifting random
 // number generator derived from ChaCha, a modern stream cipher.
 // https://eden.dei.uc.pt/~sneves/pubs/2011-snfa2.pdf
 // Period: ~2^127
 // No systematic BigCrush failures reported.
-var tychei = __webpack_require__(40);
+var tychei = __webpack_require__(44);
 
 // The original ARC4-based prng included in this library.
 // Period: ~2^1600
-var sr = __webpack_require__(41);
+var sr = __webpack_require__(45);
 
 sr.alea = alea;
 sr.xor128 = xor128;
@@ -6681,7 +6706,7 @@ module.exports = sr;
 
 
 /***/ }),
-/* 35 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(module) {var __WEBPACK_AMD_DEFINE_RESULT__;// A port of an algorithm by Johannes Baagøe <baagoe@baagoe.com>, 2010
@@ -6785,7 +6810,7 @@ function Mash() {
 
 if (module && module.exports) {
   module.exports = impl;
-} else if (__webpack_require__(0) && __webpack_require__(3)) {
+} else if (__webpack_require__(35) && __webpack_require__(37)) {
   !(__WEBPACK_AMD_DEFINE_RESULT__ = (function() { return impl; }).call(exports, __webpack_require__, exports, module),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 } else {
@@ -6795,15 +6820,15 @@ if (module && module.exports) {
 })(
   this,
   (typeof module) == 'object' && module,    // present in node.js
-  __webpack_require__(0)   // present with an AMD loader
+  __webpack_require__(35)   // present with an AMD loader
 );
 
 
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(36)(module)))
 
 /***/ }),
-/* 36 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(module) {var __WEBPACK_AMD_DEFINE_RESULT__;// A Javascript implementaion of the "xor128" prng algorithm by
@@ -6874,7 +6899,7 @@ function impl(seed, opts) {
 
 if (module && module.exports) {
   module.exports = impl;
-} else if (__webpack_require__(0) && __webpack_require__(3)) {
+} else if (__webpack_require__(35) && __webpack_require__(37)) {
   !(__WEBPACK_AMD_DEFINE_RESULT__ = (function() { return impl; }).call(exports, __webpack_require__, exports, module),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 } else {
@@ -6884,15 +6909,15 @@ if (module && module.exports) {
 })(
   this,
   (typeof module) == 'object' && module,    // present in node.js
-  __webpack_require__(0)   // present with an AMD loader
+  __webpack_require__(35)   // present with an AMD loader
 );
 
 
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(36)(module)))
 
 /***/ }),
-/* 37 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(module) {var __WEBPACK_AMD_DEFINE_RESULT__;// A Javascript implementaion of the "xorwow" prng algorithm by
@@ -6968,7 +6993,7 @@ function impl(seed, opts) {
 
 if (module && module.exports) {
   module.exports = impl;
-} else if (__webpack_require__(0) && __webpack_require__(3)) {
+} else if (__webpack_require__(35) && __webpack_require__(37)) {
   !(__WEBPACK_AMD_DEFINE_RESULT__ = (function() { return impl; }).call(exports, __webpack_require__, exports, module),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 } else {
@@ -6978,15 +7003,15 @@ if (module && module.exports) {
 })(
   this,
   (typeof module) == 'object' && module,    // present in node.js
-  __webpack_require__(0)   // present with an AMD loader
+  __webpack_require__(35)   // present with an AMD loader
 );
 
 
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(36)(module)))
 
 /***/ }),
-/* 38 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(module) {var __WEBPACK_AMD_DEFINE_RESULT__;// A Javascript implementaion of the "xorshift7" algorithm by
@@ -7074,7 +7099,7 @@ function impl(seed, opts) {
 
 if (module && module.exports) {
   module.exports = impl;
-} else if (__webpack_require__(0) && __webpack_require__(3)) {
+} else if (__webpack_require__(35) && __webpack_require__(37)) {
   !(__WEBPACK_AMD_DEFINE_RESULT__ = (function() { return impl; }).call(exports, __webpack_require__, exports, module),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 } else {
@@ -7084,14 +7109,14 @@ if (module && module.exports) {
 })(
   this,
   (typeof module) == 'object' && module,    // present in node.js
-  __webpack_require__(0)   // present with an AMD loader
+  __webpack_require__(35)   // present with an AMD loader
 );
 
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(36)(module)))
 
 /***/ }),
-/* 39 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(module) {var __WEBPACK_AMD_DEFINE_RESULT__;// A Javascript implementaion of Richard Brent's Xorgens xor4096 algorithm.
@@ -7229,7 +7254,7 @@ function impl(seed, opts) {
 
 if (module && module.exports) {
   module.exports = impl;
-} else if (__webpack_require__(0) && __webpack_require__(3)) {
+} else if (__webpack_require__(35) && __webpack_require__(37)) {
   !(__WEBPACK_AMD_DEFINE_RESULT__ = (function() { return impl; }).call(exports, __webpack_require__, exports, module),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 } else {
@@ -7239,13 +7264,13 @@ if (module && module.exports) {
 })(
   this,                                     // window object or global
   (typeof module) == 'object' && module,    // present in node.js
-  __webpack_require__(0)   // present with an AMD loader
+  __webpack_require__(35)   // present with an AMD loader
 );
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(36)(module)))
 
 /***/ }),
-/* 40 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(module) {var __WEBPACK_AMD_DEFINE_RESULT__;// A Javascript implementaion of the "Tyche-i" prng algorithm by
@@ -7338,7 +7363,7 @@ function impl(seed, opts) {
 
 if (module && module.exports) {
   module.exports = impl;
-} else if (__webpack_require__(0) && __webpack_require__(3)) {
+} else if (__webpack_require__(35) && __webpack_require__(37)) {
   !(__WEBPACK_AMD_DEFINE_RESULT__ = (function() { return impl; }).call(exports, __webpack_require__, exports, module),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 } else {
@@ -7348,15 +7373,15 @@ if (module && module.exports) {
 })(
   this,
   (typeof module) == 'object' && module,    // present in node.js
-  __webpack_require__(0)   // present with an AMD loader
+  __webpack_require__(35)   // present with an AMD loader
 );
 
 
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(36)(module)))
 
 /***/ }),
-/* 41 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;/*
@@ -7595,7 +7620,7 @@ if ((typeof module) == 'object' && module.exports) {
   module.exports = seedrandom;
   // When in node.js, try using crypto package for autoseeding.
   try {
-    nodecrypto = __webpack_require__(42);
+    nodecrypto = __webpack_require__(46);
   } catch (ex) {}
 } else if (true) {
   !(__WEBPACK_AMD_DEFINE_RESULT__ = (function() { return seedrandom; }).call(exports, __webpack_require__, exports, module),
@@ -7610,42 +7635,53 @@ if ((typeof module) == 'object' && module.exports) {
 
 
 /***/ }),
-/* 42 */
+/* 46 */
 /***/ (function(module, exports) {
 
 /* (ignored) */
 
 /***/ }),
-/* 43 */
+/* 47 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = setupRoutes;
-let oldPage;
-let mainRoute;
-function setupRoutes(initialRoute) {
-    window.onhashchange = showPageFromHash;
-    mainRoute = initialRoute;
-    showPageFromHash();
-    return loadPages();
+/* harmony export (immutable) */ __webpack_exports__["c"] = logToPanel;
+/* harmony export (immutable) */ __webpack_exports__["b"] = enableLog;
+/* harmony export (immutable) */ __webpack_exports__["d"] = preventLogParentScroll;
+/* harmony export (immutable) */ __webpack_exports__["e"] = txt2html;
+/* harmony export (immutable) */ __webpack_exports__["a"] = clearLog;
+let logEnabled = true;
+let logCount = 0;
+const MAX_LOG_LINES = 1000;
+function logToPanel(always, asHTML, ...args) {
+    if (!always && !logEnabled)
+        return;
+    if (logCount++ > MAX_LOG_LINES)
+        $('#walc-log-content > *:first-child').remove();
+    let txt = args.join(', ');
+    let div = $('<div>');
+    if (asHTML)
+        div.html(txt);
+    else
+        div.text(txt);
+    $('#walc-log-content').append(div);
+    $('#walc-log-container').scrollTop(Number.MAX_SAFE_INTEGER);
 }
-function showPageFromHash() {
-    const hash = location.hash || mainRoute;
-    $('#page > div').hide();
-    $(hash).show().css('outline', 'none').focus();
-    if (oldPage)
-        $(document).trigger('route:hide', oldPage);
-    $(document).trigger('route:show', hash);
-    oldPage = hash;
-    window.scrollTo(0, 0);
+function enableLog(flag) {
+    logEnabled = flag;
 }
-function loadPages() {
-    return new Promise(resolve => {
-        $.get('live-coding.html', data => {
-            $('#live-coding').empty().append(data);
-            resolve();
-        });
+function preventLogParentScroll() {
+    $('#walc-log-container').bind('wheel', function (e) {
+        let evt = e.originalEvent;
+        this.scrollTop += evt.deltaY;
+        e.preventDefault();
     });
+}
+function txt2html(s) {
+    return s.replace(/\{([^\{\|]+)\|([^\{\|]+)}/g, (x, y, z) => `<span class="${y}">${z}</span>`);
+}
+function clearLog() {
+    $('#walc-log-content').empty();
 }
 
 

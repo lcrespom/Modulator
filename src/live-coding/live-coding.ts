@@ -8,6 +8,8 @@ import { Track } from './track'
 import { Effect, createEffect } from './effects'
 import { makeScale } from './scales'
 import { Ring } from './rings'
+import { enableLog, logToPanel, txt2html, clearLog } from './log'
+
 
 export type TrackCallback = (t: Track) => void
 
@@ -108,13 +110,19 @@ export class LiveCoding {
 		return makeScale(note, type, octaves)
 	}
 
-	use_log(flag = true) {
-		logEnabled = flag
+	log(...args: any[]) {
+		logToPanel(true, false, ...args)
 		return this
 	}
 
-	log(...args: any[]) {
-		logToPanel(true, false, ...args)
+	log_enable(flag = true) {
+		enableLog(flag)
+		return this
+	}
+
+	log_clear() {
+		clearLog()
+		return this
 	}
 
 	bpm(value?: number) {
@@ -230,21 +238,6 @@ export let effects: EffectTable = {}
 export let tracks: TrackTable = {}
 
 let nextTracks: TrackTable = {}
-let logEnabled = false
-let logCount = 0
-const MAX_LOG_LINES = 1000
-
-function logToPanel(enable: boolean, asHTML: boolean, ...args: any[]) {
-	if (!enable) return
-	if (logCount++ > MAX_LOG_LINES)
-		$('#walc-log-content > *:first-child').remove()
-	let txt = args.join(', ')
-	let div = $('<div>')
-	if (asHTML) div.html(txt)
-	else div.text(txt)
-	$('#walc-log-content').append(div)
-	$('#walc-log-container').scrollTop(Number.MAX_SAFE_INTEGER)
-}
 
 function eachTrack(cb: (t: Track) => void) {
 	let tnames = Object.getOwnPropertyNames(tracks)
@@ -264,17 +257,19 @@ function playTrack(timer: Timer, track: Track, time: number) {
 		track = tracks[track.name]
 		let note = track.notes[track.notect]
 		if (track.startTime + note.time <= time) {
-			playNote(note, timer, track.startTime)
+			playNote(track, note, timer, track.startTime)
 			played = true
 			track.notect++
 		}
 	} while (played)
 }
 
-function playNote(note: NoteInfo, timer: Timer, startTime: number) {
+function playNote(track: Track, note: NoteInfo, timer: Timer, startTime: number) {
 	if (note.options) setOptions(note.options)
 	if (note.number < 1) return
-	logToPanel(logEnabled, false, `Note: ${note.number} - ${note.instrument.name}`)
+	logToPanel(false, true, txt2html(
+		`Note: {log-bold|${note.number}} {log-instr|${note.instrument.name}} {log-track|${track.name}}`
+	))
 	note.instrument.noteOn(
 		note.number, note.velocity, startTime + note.time)
 	let duration = note.duration

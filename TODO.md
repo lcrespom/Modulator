@@ -36,8 +36,14 @@
 	- [ ] Examples
 	- [ ] Document API
 - Synth API
+	- [ ] Improve LiveCoding startup/shutdown
+		- [ ] Stop timer at lc.cancel()
+		- [ ] Start timer when running code for first time
+		- [ ] lc.init(async function() { ... }) to perform sample initialization
+		- [ ] Start playing only after await lc.init has returned
 	- [ ] Sample loading + playing API
 		- Use upload samples button - see https://davidwalsh.name/multiple-file-upload
+		- Load samples from URL: users should place sample loading API in lc.init
 	- [ ] Track solo / unsolo
 	- [ ] Track synchronization via cue/sync methods
 		- Cue to post message
@@ -65,7 +71,8 @@
 	- [ ] Add more panels
 		- [x] osc & fft
 		- [x] log
-		- [ ] Colors in logs, e.g. note data
+			- [x] Colors in logs, e.g. note data
+			- [ ] Log more events: instr/track/effect creation, track end, track loop, etc
 		- [ ] Info
 			- [ ] Tracks: name + status: timeline, mute/solo, stopped
 			- [ ] Effects: name + params

@@ -42,10 +42,12 @@ interface LiveCoding {
 	loop_track(name: string, cb?: TrackCallback): Track
 	/** Creates a ring of notes of a given scale */
 	scale(note: number, type?: string, octaves?: number): Ring<number>
-	/** Enables or disables logging of note events */
-	use_log(enable?: boolean): this
 	/** Prints the specified data to the log */
 	log(...args: any[]): this
+	/** Enables or disables logging of events */
+	log_enable(flag?: boolean): this
+	/** Clears the log output */
+	log_clear(): this
 	/** Change global BPM */
 	bpm(value?: number): number | this
 	/** Stops all looping track at the end of their loop */

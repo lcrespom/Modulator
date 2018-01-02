@@ -457,6 +457,18 @@ input[type=range][orient=vertical] {
 	padding: 8px;
 }
 
+.log-bold {
+	font-weight: bold;
+}
+
+.log-track {
+	color: blue;
+}
+
+.log-instr {
+	color: #F92672;
+}
+
 /*----- Dark theme -----*/
 
 body.dark {
@@ -478,3 +490,11 @@ body.dark {
 	background-color: red;
 }
 
+.dark .log-bold {
+	font-weight: inherit;
+	color: white;
+}
+
+.dark .log-track {
+	color: cyan;
+}
