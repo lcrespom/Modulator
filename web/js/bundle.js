@@ -3557,8 +3557,7 @@ class LiveCoding {
         return this;
     }
     log(...args) {
-        console.log(...args);
-        return this;
+        logToPanel(true, ...args);
     }
     bpm(value) {
         if (value === undefined)
@@ -3622,10 +3621,11 @@ let effects = {};
 let tracks = {};
 let nextTracks = {};
 let logEnabled = false;
-function log(...args) {
-    if (!logEnabled)
+function logToPanel(enable, ...args) {
+    if (!enable)
         return;
-    console.log(...args);
+    let txt = args.join(', ');
+    $('#walc-log-content').append('<div>' + txt + '</div>');
 }
 function eachTrack(cb) {
     let tnames = Object.getOwnPropertyNames(tracks);
@@ -3655,7 +3655,7 @@ function playNote(note, timer, startTime) {
         setOptions(note.options);
     if (note.number < 1)
         return;
-    log(`Note: ${note.number} - ${note.instrument.name}`);
+    logToPanel(logEnabled, `Note: ${note.number} - ${note.instrument.name}`);
     note.instrument.noteOn(note.number, note.velocity, startTime + note.time);
     let duration = note.duration
         || note.instrument.duration || timer.noteDuration;

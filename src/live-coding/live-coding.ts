@@ -114,8 +114,7 @@ export class LiveCoding {
 	}
 
 	log(...args: any[]) {
-		console.log(...args)
-		return this
+		logToPanel(true, ...args)
 	}
 
 	bpm(value?: number) {
@@ -233,9 +232,10 @@ export let tracks: TrackTable = {}
 let nextTracks: TrackTable = {}
 let logEnabled = false
 
-function log(...args: any[]) {
-	if (!logEnabled) return
-	console.log(...args)
+function logToPanel(enable: boolean, ...args: any[]) {
+	if (!enable) return
+	let txt = args.join(', ')
+	$('#walc-log-content').append('<div>' + txt + '</div>')
 }
 
 function eachTrack(cb: (t: Track) => void) {
@@ -266,7 +266,7 @@ function playTrack(timer: Timer, track: Track, time: number) {
 function playNote(note: NoteInfo, timer: Timer, startTime: number) {
 	if (note.options) setOptions(note.options)
 	if (note.number < 1) return
-	log(`Note: ${note.number} - ${note.instrument.name}`)
+	logToPanel(logEnabled, `Note: ${note.number} - ${note.instrument.name}`)
 	note.instrument.noteOn(
 		note.number, note.velocity, startTime + note.time)
 	let duration = note.duration
