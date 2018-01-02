@@ -114,7 +114,7 @@ export class LiveCoding {
 	}
 
 	log(...args: any[]) {
-		logToPanel(true, ...args)
+		logToPanel(true, false, ...args)
 	}
 
 	bpm(value?: number) {
@@ -234,12 +234,15 @@ let logEnabled = false
 let logCount = 0
 const MAX_LOG_LINES = 1000
 
-function logToPanel(enable: boolean, ...args: any[]) {
+function logToPanel(enable: boolean, asHTML: boolean, ...args: any[]) {
 	if (!enable) return
 	if (logCount++ > MAX_LOG_LINES)
 		$('#walc-log-content > *:first-child').remove()
 	let txt = args.join(', ')
-	$('#walc-log-content').append('<div>' + txt + '</div>')
+	let div = $('<div>')
+	if (asHTML) div.html(txt)
+	else div.text(txt)
+	$('#walc-log-content').append(div)
 	$('#walc-log-container').scrollTop(Number.MAX_SAFE_INTEGER)
 }
 
@@ -271,7 +274,7 @@ function playTrack(timer: Timer, track: Track, time: number) {
 function playNote(note: NoteInfo, timer: Timer, startTime: number) {
 	if (note.options) setOptions(note.options)
 	if (note.number < 1) return
-	logToPanel(logEnabled, `Note: ${note.number} - ${note.instrument.name}`)
+	logToPanel(logEnabled, false, `Note: ${note.number} - ${note.instrument.name}`)
 	note.instrument.noteOn(
 		note.number, note.velocity, startTime + note.time)
 	let duration = note.duration
