@@ -3530,7 +3530,9 @@ class LiveCoding {
         let instr = new LCInstrument(this.context, prst, numVoices, this.synthUI.outNode);
         instr.name = prst.name;
         instr.duration = findNoteDuration(prst);
-        instruments[name || instr.name] = instr;
+        if (name)
+            instr.name = name;
+        instruments[instr.name] = instr;
         return instr;
     }
     effect(name, newName) {
@@ -3697,11 +3699,13 @@ function shouldTrackEnd(track) {
         return false;
     }
     if (track.loop) {
+        Object(__WEBPACK_IMPORTED_MODULE_5__log__["d" /* logToPanel */])(false, true, Object(__WEBPACK_IMPORTED_MODULE_5__log__["f" /* txt2html */])(`Track [log-track|${track.name}] has looped`));
         track.startTime += track.time;
         track.loopCount++;
         return false;
     }
     else {
+        Object(__WEBPACK_IMPORTED_MODULE_5__log__["d" /* logToPanel */])(false, true, Object(__WEBPACK_IMPORTED_MODULE_5__log__["f" /* txt2html */])(`Track [log-track|${track.name}] has ended`));
         delete tracks[track.name];
         return true;
     }
@@ -7686,7 +7690,7 @@ function preventLogParentScroll() {
     });
 }
 function txt2html(s) {
-    return s.replace(/\{([^\{\|]+)\|([^\{\|]+)}/g, (x, y, z) => `<span class="${y}">${z}</span>`);
+    return s.replace(/\[([^\]\|]+)\|([^\]\|]+)\]/g, (x, y, z) => `<span class="${y}">${z}</span>`);
 }
 function clearLog() {
     $('#walc-log-content').empty();
@@ -7696,10 +7700,10 @@ function logNote(note, track) {
     if (noteName && noteName.length < 3)
         noteName += ' ';
     let snote = noteName
-        ? `{log-bold|${noteName}} (${note.number})`
-        : `{log-bold|${note.number}}`;
-    let sinstr = `{log-instr|${note.instrument.name}}`;
-    let strack = `{log-track|${track.name}}`;
+        ? `[log-bold|${noteName}] (${note.number})`
+        : `[log-bold|${note.number}]`;
+    let sinstr = `[log-instr|${note.instrument.name}]`;
+    let strack = `[log-track|${track.name}]`;
     logToPanel(false, true, txt2html(`Note: ${snote} ${sinstr} ${strack}`));
 }
 

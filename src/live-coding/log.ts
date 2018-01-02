@@ -32,7 +32,7 @@ export function preventLogParentScroll() {
 }
 
 export function txt2html(s: string) {
-	return s.replace(/\{([^\{\|]+)\|([^\{\|]+)}/g,
+	return s.replace(/\[([^\]\|]+)\|([^\]\|]+)\]/g,
 		(x, y, z) => `<span class="${y}">${z}</span>`
 	)
 }
@@ -45,10 +45,10 @@ export function logNote(note: NoteInfo, track: Track) {
 	let noteName = (<any>Note)[note.number]
 	if (noteName && noteName.length < 3) noteName += ' '
 	let snote = noteName
-		? `{log-bold|${noteName}} (${note.number})`
-		: `{log-bold|${note.number}}`
-	let sinstr = `{log-instr|${note.instrument.name}}`
-	let strack = `{log-track|${track.name}}`
+		? `[log-bold|${noteName}] (${note.number})`
+		: `[log-bold|${note.number}]`
+	let sinstr = `[log-instr|${note.instrument.name}]`
+	let strack = `[log-track|${track.name}]`
 	logToPanel(false, true, txt2html(
 		`Note: ${snote} ${sinstr} ${strack}`
 	))

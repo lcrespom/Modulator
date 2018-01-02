@@ -8,7 +8,7 @@ import { Track } from './track'
 import { Effect, createEffect } from './effects'
 import { makeScale } from './scales'
 import { Ring } from './rings'
-import { enableLog, logToPanel, clearLog, logNote } from './log'
+import { enableLog, logToPanel, clearLog, logNote, txt2html } from './log'
 
 
 export type TrackCallback = (t: Track) => void
@@ -79,7 +79,8 @@ export class LiveCoding {
 			this.context, prst, numVoices, this.synthUI.outNode)
 		instr.name = prst.name
 		instr.duration = findNoteDuration(prst)
-		instruments[name || instr.name] = instr
+		if (name) instr.name = name
+		instruments[instr.name] = instr
 		return instr
 	}
 
@@ -306,11 +307,13 @@ function shouldTrackEnd(track: Track) {
 		return false
 	}
 	if (track.loop) {
+		logToPanel(false, true, txt2html(`Track [log-track|${track.name}] has looped`))
 		track.startTime += track.time
 		track.loopCount++
 		return false
 	}
 	else {
+		logToPanel(false, true, txt2html(`Track [log-track|${track.name}] has ended`))
 		delete tracks[track.name]
 		return true
 	}
