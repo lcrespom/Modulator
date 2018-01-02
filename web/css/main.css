@@ -455,7 +455,7 @@ input[type=range][orient=vertical] {
 #walc-log-content {
 	font-family: Menlo, Monaco, "Courier New", monospace;
 	padding: 8px;
-	white-space: pre;
+	white-space: pre-wrap;
 }
 
 .log-bold {

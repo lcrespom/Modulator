@@ -131,7 +131,7 @@ function getErrorLocation(e: any) {
 
 function showError(msg: string, line: number, col: number) {
 	logToPanel(true, true, txt2html(
-		`{log-bold|Runtime error}: "${msg}" at line ${line}, column ${col}`
+		`[log-bold|Runtime error]: "${msg}" at line ${line}, column ${col}`
 	))
 	editor.revealLineInCenter(line)
 	let errorRange = getErrorRange(editor.getModel().getLineContent(line), col)
