@@ -39,8 +39,8 @@
 	- [ ] Improve LiveCoding startup/shutdown
 		- [ ] Stop timer at lc.cancel()
 		- [ ] Start timer when running code for first time
-		- [ ] lc.init(async function() { ... }) to perform sample initialization
-		- [ ] Start playing only after await lc.init has returned
+		- [x] lc.init(async function() { ... }) to perform sample initialization
+		- [x] Start playing only after await lc.init has returned
 	- [ ] Sample loading + playing API
 		- Use upload samples button - see https://davidwalsh.name/multiple-file-upload
 		- Load samples from URL: users should place sample loading API in lc.init

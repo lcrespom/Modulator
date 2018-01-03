@@ -37,9 +37,9 @@ interface LiveCoding {
 	/** Creates an effect */
 	effect(name: string, newName?: string): Effect
 	/** Creates a named track */
-	track(name: string, cb?: TrackCallback): Track
+	track(name: string, cb: TrackCallback): this
 	/** Creates a looping track */
-	loop_track(name: string, cb?: TrackCallback): Track
+	loop_track(name: string, cb: TrackCallback): this
 	/** Creates a ring of notes of a given scale */
 	scale(note: number, type?: string, octaves?: number): Ring<number>
 	/** Prints the specified data to the log */
@@ -58,6 +58,10 @@ interface LiveCoding {
 	continue(): this
 	/** Stops and deletes all tracks */
 	reset(): this
+	/** Initializes any required resources, such as sample downloading.
+	Tracks will not start playing until **initFunc** has finished all
+	its tasks. */
+	init(initFunc: () => void): this
 }
 
 

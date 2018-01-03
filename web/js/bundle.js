@@ -1653,6 +1653,7 @@ function txt2html(s) {
     return s.replace(/\[([^\]\|]+)\|([^\]\|]+)\]/g, (x, y, z) => `<span class="${y}">${z}</span>`);
 }
 function clearLog() {
+    logCount = 0;
     $('#walc-log-content').empty();
 }
 function logNote(note, track) {
@@ -3871,6 +3872,14 @@ class Presets {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__effects__ = __webpack_require__(32);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__scales__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__log__ = __webpack_require__(13);
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 
 
 
@@ -3945,21 +3954,21 @@ class LiveCoding {
         __WEBPACK_IMPORTED_MODULE_3__scheduler__["b" /* effects */][newName || name] = eff;
         return eff;
     }
-    track(name, cb) {
-        let t = new __WEBPACK_IMPORTED_MODULE_2__track__["a" /* Track */](this.context, this.synthUI.outNode, this.timer);
-        t.name = name;
-        if (__WEBPACK_IMPORTED_MODULE_3__scheduler__["f" /* tracks */][name])
-            __WEBPACK_IMPORTED_MODULE_3__scheduler__["d" /* nextTracks */][name] = t;
-        else
-            __WEBPACK_IMPORTED_MODULE_3__scheduler__["f" /* tracks */][name] = t;
-        if (cb)
+    track(name, cb, loop = false) {
+        onInitialized(() => {
+            let t = new __WEBPACK_IMPORTED_MODULE_2__track__["a" /* Track */](this.context, this.synthUI.outNode, this.timer);
+            t.loop = loop;
+            t.name = name;
+            if (__WEBPACK_IMPORTED_MODULE_3__scheduler__["f" /* tracks */][name])
+                __WEBPACK_IMPORTED_MODULE_3__scheduler__["d" /* nextTracks */][name] = t;
+            else
+                __WEBPACK_IMPORTED_MODULE_3__scheduler__["f" /* tracks */][name] = t;
             cb(t);
-        return t;
+        });
+        return this;
     }
     loop_track(name, cb) {
-        let t = this.track(name, cb);
-        t.loop = true;
-        return t;
+        return this.track(name, cb, true);
     }
     scale(note, type, octaves) {
         return Object(__WEBPACK_IMPORTED_MODULE_5__scales__["b" /* makeScale */])(note, type, octaves);
@@ -4002,9 +4011,28 @@ class LiveCoding {
         });
         return this;
     }
+    init(initFunc) {
+        return __awaiter(this, void 0, void 0, function* () {
+            initializing = true;
+            yield initFunc();
+            let trackCB;
+            while (trackCB = initListeners.pop())
+                trackCB();
+            initializing = false;
+            return this;
+        });
+    }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = LiveCoding;
 
+let initializing = false;
+let initListeners = [];
+function onInitialized(cb) {
+    if (!initializing)
+        cb();
+    else
+        initListeners.push(cb);
+}
 function getPreset(presets, preset) {
     if (typeof preset == 'number') {
         let maxPrst = presets.presets.length;

@@ -90,21 +90,22 @@ export class LiveCoding {
 		return eff
 	}
 
-	track(name: string, cb?: TrackCallback) {
-		let t = new Track(this.context, this.synthUI.outNode, this.timer)
-		t.name = name
-		if (tracks[name])
-			nextTracks[name] = t
-		else
-			tracks[name] = t
-		if (cb) cb(t)
-		return t
+	track(name: string, cb: TrackCallback, loop = false) {
+		onInitialized(() => {
+			let t = new Track(this.context, this.synthUI.outNode, this.timer)
+			t.loop = loop
+			t.name = name
+				if (tracks[name])
+				nextTracks[name] = t
+			else
+				tracks[name] = t
+			cb(t)
+		})
+		return this
 	}
 
-	loop_track(name: string, cb?: TrackCallback) {
-		let t = this.track(name, cb)
-		t.loop = true
-		return t
+	loop_track(name: string, cb: TrackCallback) {
+		return this.track(name, cb, true)
 	}
 
 	scale(note: number, type?: string, octaves?: number): Ring<number> {
@@ -155,8 +156,16 @@ export class LiveCoding {
 		})
 		return this
 	}
-}
 
+	async init(initFunc: () => void) {
+		initializing = true
+		await initFunc()
+		let trackCB
+		while (trackCB = initListeners.pop()) trackCB()
+		initializing = false
+		return this
+	}
+}
 
 interface InstrumentOptions {
 	instrument: LCInstrument
@@ -171,7 +180,20 @@ interface EffectOptions {
 export type NoteOptions = InstrumentOptions | EffectOptions
 
 
+
 // ------------------------- Privates -------------------------
+
+// ---------- Initialization ----------
+
+type Callback = () => void
+
+let initializing = false
+let initListeners: Callback[] = []
+
+function onInitialized(cb: Callback) {
+	if (!initializing) cb()
+	else initListeners.push(cb)
+}
 
 // ---------- Helpers ----------
 
