@@ -24,7 +24,7 @@ export function enableLog(flag: boolean) {
 }
 
 export function preventLogParentScroll() {
-	$('#walc-log-container').bind('wheel', function(e) {
+	$('#walc-log-container').bind('mousewheel', function(e) {
 		let evt = <WheelEvent>e.originalEvent
 		this.scrollTop += evt.deltaY
 		e.preventDefault()

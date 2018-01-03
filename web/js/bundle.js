@@ -1643,7 +1643,7 @@ function enableLog(flag) {
     logEnabled = flag;
 }
 function preventLogParentScroll() {
-    $('#walc-log-container').bind('wheel', function (e) {
+    $('#walc-log-container').bind('mousewheel', function (e) {
         let evt = e.originalEvent;
         this.scrollTop += evt.deltaY;
         e.preventDefault();
@@ -1918,7 +1918,7 @@ function setupGlobals(lc) {
     Object(__WEBPACK_IMPORTED_MODULE_2__rings__["a" /* setupRing */])();
 }
 function preventParentScroll(elem) {
-    $(elem).bind('wheel', e => e.preventDefault());
+    $(elem).bind('mousewheel', e => e.preventDefault());
     Object(__WEBPACK_IMPORTED_MODULE_7__log__["e" /* preventLogParentScroll */])();
 }
 function addTypeScriptDefinitions(defs) {

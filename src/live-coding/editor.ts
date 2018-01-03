@@ -74,7 +74,7 @@ function setupGlobals(lc: LiveCoding) {
 }
 
 function preventParentScroll(elem: HTMLElement) {
-	$(elem).bind('wheel', e => e.preventDefault())
+	$(elem).bind('mousewheel', e => e.preventDefault())
 	preventLogParentScroll()
 }
 
