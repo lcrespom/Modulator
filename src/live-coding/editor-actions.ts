@@ -71,21 +71,21 @@ export function registerActions(editor: any, monaco: any) {
 }
 
 function registerButtons(editorActions: EditorActions) {
+	let refocus = (x: any) => editorActions.editor.focus()
 	// ----- Left buttons ----
-	$('#walc-font-sm').click(_ => editorActions.reduceFont())
-	$('#walc-font-lg').click(_ => editorActions.enlargeFont())
-	$('#walc-stop').click(_ => editorActions.stopAllTracks())
+	$('#walc-run-all').click(_ => refocus(editorActions.runAllCode()))
+	$('#walc-run-sel').click(_ => refocus(editorActions.runSomeCode()))
+	$('#walc-stop').click(_ => refocus(editorActions.stopAllTracks()))
 	// ----- Right buttons -----
-	$('#walc-toggle-theme').click(_ => editorActions.toggleTheme())
-	$('#walc-run-all').click(_ => editorActions.runAllCode())
-	$('#walc-run-sel').click(_ => editorActions.runSomeCode())
+	$('#walc-toggle-theme').click(_ => refocus(editorActions.toggleTheme()))
+	$('#walc-font-sm').click(_ => refocus(editorActions.reduceFont()))
+	$('#walc-font-lg').click(_ => refocus(editorActions.enlargeFont()))
 }
 
 function setColorTheme(editorActions: EditorActions) {
 	let theme = localStorage.walc_prefs_theme
 	if (theme == 'dark') editorActions.toggleTheme()
 }
-
 
 declare let lc: LiveCoding
 declare let monaco: any
