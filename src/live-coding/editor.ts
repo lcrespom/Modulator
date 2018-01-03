@@ -1,7 +1,7 @@
 import { Presets } from '../synthUI/presets'
 import { SynthUI } from '../synthUI/synthUI'
 
-import { LiveCoding, instruments, effects, tracks } from './live-coding'
+import { LiveCoding } from './live-coding'
 import { registerActions } from './editor-actions'
 import { setupRing } from './rings'
 import { Note } from './scales'
@@ -9,6 +9,7 @@ import { random } from './random'
 import { handleBuffers } from './editor-buffers'
 import { AudioAnalyzer } from '../synthUI/analyzer'
 import { preventLogParentScroll, logToPanel, txt2html } from './log'
+import { instruments, effects, tracks } from './scheduler'
 
 
 let sinkDiv = document.createElement('div')

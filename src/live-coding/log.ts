@@ -1,6 +1,6 @@
-import { NoteInfo } from './live-coding'
 import { Track } from './track'
 import { Note } from './scales'
+import { NoteInfo } from './scheduler'
 
 let logEnabled = true
 let logCount = 0

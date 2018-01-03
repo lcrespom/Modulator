@@ -516,3 +516,7 @@ body.dark {
 .dark .log-track {
 	color: #66D9EF;
 }
+
+.dark .walc-running {
+	background-color: #0A0;
+}
