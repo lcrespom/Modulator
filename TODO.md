@@ -36,6 +36,9 @@
 	- [ ] Examples
 	- [ ] Document API
 - Synth API
+	- [ ] Do not require an instrument for track playing
+		- Use either the first instrument in the instruments table
+		- If instrument table is empty, use some default preset
 	- [ ] Add many more instruments
 		- See https://github.com/surikov/webaudiofont
 	- [ ] Sample loading + playing API

@@ -1,11 +1,23 @@
 import { Instrument } from '../synth/instrument'
 
-import { LCInstrument, NoteOptions } from './live-coding'
+import { LCInstrument } from './live-coding'
 import { Effect } from './effects'
 import { Track } from './track'
 import { Timer } from '../synth/timer'
 import { logNote, logToPanel, txt2html } from './log'
 
+
+interface InstrumentOptions {
+	instrument: LCInstrument
+	[k: string]: number | LCInstrument
+}
+
+interface EffectOptions {
+	effect: Effect
+	[k: string]: number | Effect
+}
+
+export type NoteOptions = InstrumentOptions | EffectOptions
 
 export interface NoteInfo {
 	instrument: LCInstrument
@@ -32,6 +44,7 @@ export let instruments: InstrumentTable = {}
 export let effects: EffectTable = {}
 export let tracks: TrackTable = {}
 export let nextTracks: TrackTable = {}
+
 
 export function timerTickHandler(timer: Timer, time: number) {
 	eachTrack(t => playTrack(timer, t, time))

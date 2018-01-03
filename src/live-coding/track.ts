@@ -1,8 +1,8 @@
 import { Timer } from '../synth/timer'
 
-import { LCInstrument, NoteOptions } from './live-coding'
+import { LCInstrument } from './live-coding'
 import { Effect } from './effects'
-import { tracks, NoteInfo } from './scheduler';
+import { tracks, NoteInfo, NoteOptions } from './scheduler'
 
 
 class TrackControl {

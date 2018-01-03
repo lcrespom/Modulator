@@ -167,19 +167,6 @@ export class LiveCoding {
 	}
 }
 
-interface InstrumentOptions {
-	instrument: LCInstrument
-	[k: string]: number | LCInstrument
-}
-
-interface EffectOptions {
-	effect: Effect
-	[k: string]: number | Effect
-}
-
-export type NoteOptions = InstrumentOptions | EffectOptions
-
-
 
 // ------------------------- Privates -------------------------
 
