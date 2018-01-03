@@ -203,7 +203,7 @@ class WavetableInstrument implements LCInstrument {
 	noteOn(midi: number, velocity: number, when?: number): void {
 		if (when === undefined) when = this.ctx.currentTime
 		wtPlayer.queueWaveTable(
-			this.ctx, this.destination, this.preset, when, midi, 0.5
+			this.ctx, this.destination, this.preset, when, midi, this.duration || 0.5
 		)
 	}
 

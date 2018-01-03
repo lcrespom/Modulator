@@ -6533,7 +6533,7 @@ class WavetableInstrument {
     noteOn(midi, velocity, when) {
         if (when === undefined)
             when = this.ctx.currentTime;
-        wtPlayer.queueWaveTable(this.ctx, this.destination, this.preset, when, midi, 0.5);
+        wtPlayer.queueWaveTable(this.ctx, this.destination, this.preset, when, midi, this.duration || 0.5);
     }
     noteOff(midi, velocity, when) {
         // TODO look at WebAudioFontPlayer API to see how to stop a note
