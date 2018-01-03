@@ -36,11 +36,8 @@
 	- [ ] Examples
 	- [ ] Document API
 - Synth API
-	- [ ] Improve LiveCoding startup/shutdown
-		- [ ] Stop timer at lc.cancel()
-		- [ ] Start timer when running code for first time
-		- [x] lc.init(async function() { ... }) to perform sample initialization
-		- [x] Start playing only after await lc.init has returned
+	- [ ] Add many more instruments
+		- See https://github.com/surikov/webaudiofont
 	- [ ] Sample loading + playing API
 		- Use upload samples button - see https://davidwalsh.name/multiple-file-upload
 		- Load samples from URL: users should place sample loading API in lc.init
@@ -53,6 +50,10 @@
 		- [x] Rings
 		- [x] Scales
 		- [x] Random helpers (shuffle, etc => use deterministic seed)
+	- [x] LiveCoding startup/shutdown
+		- [x] lc.init(async function() { ... }) to perform sample initialization
+		- [x] Start playing only after await lc.init has returned
+		- Probably not required for sample loading if provided by lc instance
 	- [x] Custom effect support: predefined and user-defined
 	- [x] Ramps in track gain and effects
 	- [x] Global pause / stop / continue
