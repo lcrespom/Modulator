@@ -69,11 +69,15 @@
 	- [ ] Smarter code completion for parameters, effect names, etc.
 		- Use completion provider, see https://microsoft.github.io/monaco-editor/playground.html#extending-language-services-completion-provider-example
 - Editor
+	- [ ] Store more data in localStorage
+		- [ ] Color theme
+		- [ ] Selected buffer
+		- [ ] Cursor location for each buffer
 	- [ ] Add more panels
 		- [x] osc & fft
 		- [x] log
 			- [x] Colors in logs, e.g. note data
-			- [ ] Log more events: instr/track/effect creation, track end, track loop, etc
+			- [ ] Log more events: instr/track/effect creation, etc
 			- [ ] Make log_enable receive two parameters: `log_notes` and `log_events`
 		- [ ] Info
 			- [ ] Tracks: name + status: timeline, mute/solo, stopped
