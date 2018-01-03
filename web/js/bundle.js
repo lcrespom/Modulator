@@ -6390,7 +6390,7 @@ Tuna.toString = Tuna.prototype.toString = function () {
 /* harmony export (immutable) */ __webpack_exports__["a"] = createInstrument;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_instrument__ = __webpack_require__(8);
 
-class LCInstrument extends __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /* Instrument */] {
+class ModulatorInstrument extends __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /* Instrument */] {
     param(pname, value, rampTime, exponential = true) {
         let names = pname.split('/');
         if (names.length < 2)
@@ -6432,12 +6432,12 @@ class LCInstrument extends __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /
         }
     }
 }
-/* unused harmony export LCInstrument */
+/* unused harmony export ModulatorInstrument */
 
 function createInstrument(lc, // This is ugly and should be refactored
     preset, name, numVoices = 4) {
     let prst = getPreset(lc.presets, preset);
-    let instr = new LCInstrument(lc.context, prst, numVoices, lc.synthUI.outNode);
+    let instr = new ModulatorInstrument(lc.context, prst, numVoices, lc.synthUI.outNode);
     instr.name = prst.name;
     instr.duration = findNoteDuration(prst);
     return instr;
@@ -6470,6 +6470,39 @@ function findNoteDuration(preset) {
         duration += 0.01;
     return duration;
 }
+/* Next
+async function adjustPreset(player, preset) {
+    return new Promise(resolve => player.adjustPreset(ctx, preset, resolve))
+}
+
+async function fetchPreset(name) {
+    let url = `wavetables/${name}_sf2_file.json`;
+    let r = await fetch(url)
+    let j = await r.json()
+    return j
+}
+
+async function loadInstrument(name) {
+    let preset = await fetchPreset(name)
+    ctx = window.ctx || new AudioContext()
+    window.ctx = ctx
+    player = new WebAudioFontPlayer()
+    await adjustPreset(player, preset)
+    return preset
+}
+
+function playInstrument(preset, pitch) {
+    player.queueWaveTable(ctx, ctx.destination, preset, ctx.currentTime + 0, pitch, 0.4);
+    player.queueWaveTable(ctx, ctx.destination, preset, ctx.currentTime + 0.4, pitch, 0.2);
+    player.queueWaveTable(ctx, ctx.destination, preset, ctx.currentTime + 0.6, pitch, 0.2);
+    player.queueWaveTable(ctx, ctx.destination, preset, ctx.currentTime + 0.8, pitch, 4);
+}
+
+async function main() {
+    let preset = await loadInstrument('0000_Aspirin')
+    playInstrument(preset, 7 + 12 * 3)
+}
+*/ 
 
 
 /***/ }),

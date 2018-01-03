@@ -86,6 +86,7 @@
 			- [ ] Click on effect/instrument to display params in params panel
 		- [ ] instruments and parameters => click to edit parameters in separate panel
 	- [x] Button row
+		- [ ] FFW / RWD
 		- [ ] Upload / Download code
 		- [ ] Upload samples
 		- [x] Stop / pause / continue

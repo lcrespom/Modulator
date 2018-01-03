@@ -2,8 +2,15 @@ import { Instrument } from '../synth/instrument'
 import { Presets } from '../synthUI/presets'
 import { LiveCoding } from './live-coding'
 
+export interface LCInstrument {
+	name: string
+	duration: number
+	param(pname: string, value?: number,
+		rampTime?: number, exponential?: boolean): number | this
+	paramNames(): string[]
+}
 
-export class LCInstrument extends Instrument {
+export class ModulatorInstrument extends Instrument implements LCInstrument {
 	name: string
 	duration: number
 
@@ -57,7 +64,7 @@ export function createInstrument(
 		name?: string,
 		numVoices = 4) {
 	let prst = getPreset(lc.presets, preset)
-	let instr = new LCInstrument(
+	let instr = new ModulatorInstrument(
 		lc.context, prst, numVoices, lc.synthUI.outNode)
 	instr.name = prst.name
 	instr.duration = findNoteDuration(prst)
@@ -100,3 +107,38 @@ function findNoteDuration(preset: any) {
 	if (duration) duration += 0.01
 	return duration
 }
+
+
+/* Next
+async function adjustPreset(player, preset) {
+    return new Promise(resolve => player.adjustPreset(ctx, preset, resolve))
+}
+
+async function fetchPreset(name) {
+	let url = `wavetables/${name}_sf2_file.json`;
+	let r = await fetch(url)
+	let j = await r.json()
+    return j
+}
+
+async function loadInstrument(name) {
+    let preset = await fetchPreset(name)
+    ctx = window.ctx || new AudioContext()
+    window.ctx = ctx
+    player = new WebAudioFontPlayer()
+    await adjustPreset(player, preset)
+    return preset
+}
+
+function playInstrument(preset, pitch) {
+    player.queueWaveTable(ctx, ctx.destination, preset, ctx.currentTime + 0, pitch, 0.4);
+    player.queueWaveTable(ctx, ctx.destination, preset, ctx.currentTime + 0.4, pitch, 0.2);
+    player.queueWaveTable(ctx, ctx.destination, preset, ctx.currentTime + 0.6, pitch, 0.2);
+    player.queueWaveTable(ctx, ctx.destination, preset, ctx.currentTime + 0.8, pitch, 4);
+}
+
+async function main() {
+    let preset = await loadInstrument('0000_Aspirin')
+    playInstrument(preset, 7 + 12 * 3)
+}
+*/
