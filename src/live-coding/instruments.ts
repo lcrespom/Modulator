@@ -1,4 +1,6 @@
 import { Instrument } from '../synth/instrument'
+import { Presets } from '../synthUI/presets'
+import { LiveCoding } from './live-coding'
 
 
 export class LCInstrument extends Instrument {
@@ -49,4 +51,52 @@ export class LCInstrument extends Instrument {
 	}
 }
 
+export function createInstrument(
+		lc: LiveCoding,	// This is ugly and should be refactored
+		preset: number | string | PresetData,
+		name?: string,
+		numVoices = 4) {
+	let prst = getPreset(lc.presets, preset)
+	let instr = new LCInstrument(
+		lc.context, prst, numVoices, lc.synthUI.outNode)
+	instr.name = prst.name
+	instr.duration = findNoteDuration(prst)
+	return instr
+}
 
+// ---------- Helpers ----------
+
+export interface PresetData {
+	name: string
+	nodes: any[]
+	nodeData: any[]
+	modulatorType: string
+}
+
+function getPreset(presets: Presets, preset: number | string | PresetData) {
+	if (typeof preset == 'number') {
+		let maxPrst = presets.presets.length
+		if (preset < 1 || preset > maxPrst)
+			throw new Error(`The preset number should be between 1 and ${maxPrst}`)
+		return presets.presets[preset - 1]
+	}
+	else if (typeof preset == 'string') {
+		for (let prs of presets.presets)
+		if (prs.name == preset) return prs
+		throw new Error(`Preset "${preset}" does not exist`)
+	}
+	return preset
+}
+
+function findNoteDuration(preset: any) {
+	let duration = 0
+	for (let node of preset.nodeData) {
+		if (node.type == 'ADSR') {
+			let d = node.params.attack + node.params.decay
+			if (d > duration)
+				duration = d
+		}
+	}
+	if (duration) duration += 0.01
+	return duration
+}

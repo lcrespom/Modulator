@@ -9,7 +9,7 @@ import { Effect, createEffect } from './effects'
 import { makeScale } from './scales'
 import { logToPanel, enableLog, clearLog } from './log'
 import { Ring } from './rings'
-import { LCInstrument } from './instruments'
+import { LCInstrument, PresetData, createInstrument } from './instruments'
 
 
 export type TrackCallback = (t: Track) => void
@@ -25,12 +25,9 @@ export class LiveCoding {
 		this.timer.start(time => timerTickHandler(this.timer, time))
 	}
 
-	instrument(preset: number | string | PresetData, name?: string, numVoices = 4) {
-		let prst = getPreset(this.presets, preset)
-		let instr = new LCInstrument(
-			this.context, prst, numVoices, this.synthUI.outNode)
-		instr.name = prst.name
-		instr.duration = findNoteDuration(prst)
+	instrument(preset: number | string | PresetData,
+		name?: string, numVoices = 4) {
+		let instr = createInstrument(this, preset, name, numVoices)
 		if (name) instr.name = name
 		instruments[instr.name] = instr
 		return instr
@@ -132,41 +129,4 @@ let initListeners: Callback[] = []
 function onInitialized(cb: Callback) {
 	if (!initializing) cb()
 	else initListeners.push(cb)
-}
-
-// ---------- Helpers ----------
-
-interface PresetData {
-	name: string
-	nodes: any[]
-	nodeData: any[]
-	modulatorType: string
-}
-
-function getPreset(presets: Presets, preset: number | string | PresetData) {
-	if (typeof preset == 'number') {
-		let maxPrst = presets.presets.length
-		if (preset < 1 || preset > maxPrst)
-			throw new Error(`The preset number should be between 1 and ${maxPrst}`)
-		return presets.presets[preset - 1]
-	}
-	else if (typeof preset == 'string') {
-		for (let prs of presets.presets)
-		if (prs.name == preset) return prs
-		throw new Error(`Preset "${preset}" does not exist`)
-	}
-	return preset
-}
-
-function findNoteDuration(preset: any) {
-	let duration = 0
-	for (let node of preset.nodeData) {
-		if (node.type == 'ADSR') {
-			let d = node.params.attack + node.params.decay
-			if (d > duration)
-				duration = d
-		}
-	}
-	if (duration) duration += 0.01
-	return duration
 }

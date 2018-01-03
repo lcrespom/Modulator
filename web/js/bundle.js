@@ -1847,8 +1847,8 @@ class AudioAnalyzer {
 /* harmony export (immutable) */ __webpack_exports__["c"] = flashRange;
 /* harmony export (immutable) */ __webpack_exports__["b"] = doRunCode;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__live_coding__ = __webpack_require__(30);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__editor_actions__ = __webpack_require__(34);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__rings__ = __webpack_require__(35);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__editor_actions__ = __webpack_require__(35);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__rings__ = __webpack_require__(36);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__scales__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__random__ = __webpack_require__(18);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__editor_buffers__ = __webpack_require__(17);
@@ -2130,7 +2130,7 @@ function getEditorText(editor) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return random; });
-const seedrandom = __webpack_require__(36);
+const seedrandom = __webpack_require__(37);
 let random = {
     seed(newSeed) {
         if (newSeed !== undefined)
@@ -2185,7 +2185,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__piano_noteInputs__ = __webpack_require__(24);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__synthUI_presets__ = __webpack_require__(29);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__live_coding_editor__ = __webpack_require__(16);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_routes__ = __webpack_require__(45);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_routes__ = __webpack_require__(46);
 /**
  * Main entry point: setup synth editor and keyboard listener.
  */
@@ -3887,7 +3887,7 @@ class Presets {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__effects__ = __webpack_require__(32);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__scales__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__log__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__instruments__ = __webpack_require__(48);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__instruments__ = __webpack_require__(34);
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -3912,10 +3912,7 @@ class LiveCoding {
         this.timer.start(time => Object(__WEBPACK_IMPORTED_MODULE_2__scheduler__["e" /* timerTickHandler */])(this.timer, time));
     }
     instrument(preset, name, numVoices = 4) {
-        let prst = getPreset(this.presets, preset);
-        let instr = new __WEBPACK_IMPORTED_MODULE_6__instruments__["a" /* LCInstrument */](this.context, prst, numVoices, this.synthUI.outNode);
-        instr.name = prst.name;
-        instr.duration = findNoteDuration(prst);
+        let instr = Object(__WEBPACK_IMPORTED_MODULE_6__instruments__["a" /* createInstrument */])(this, preset, name, numVoices);
         if (name)
             instr.name = name;
         __WEBPACK_IMPORTED_MODULE_2__scheduler__["c" /* instruments */][instr.name] = instr;
@@ -4004,34 +4001,6 @@ function onInitialized(cb) {
         cb();
     else
         initListeners.push(cb);
-}
-function getPreset(presets, preset) {
-    if (typeof preset == 'number') {
-        let maxPrst = presets.presets.length;
-        if (preset < 1 || preset > maxPrst)
-            throw new Error(`The preset number should be between 1 and ${maxPrst}`);
-        return presets.presets[preset - 1];
-    }
-    else if (typeof preset == 'string') {
-        for (let prs of presets.presets)
-            if (prs.name == preset)
-                return prs;
-        throw new Error(`Preset "${preset}" does not exist`);
-    }
-    return preset;
-}
-function findNoteDuration(preset) {
-    let duration = 0;
-    for (let node of preset.nodeData) {
-        if (node.type == 'ADSR') {
-            let d = node.params.attack + node.params.decay;
-            if (d > duration)
-                duration = d;
-        }
-    }
-    if (duration)
-        duration += 0.01;
-    return duration;
 }
 
 
@@ -6418,6 +6387,96 @@ Tuna.toString = Tuna.prototype.toString = function () {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = createInstrument;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_instrument__ = __webpack_require__(8);
+
+class LCInstrument extends __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /* Instrument */] {
+    param(pname, value, rampTime, exponential = true) {
+        let names = pname.split('/');
+        if (names.length < 2)
+            throw new Error(`Instrument parameters require "node/param" format`);
+        let node = names[0];
+        let name = names[1];
+        if (value === undefined) {
+            let prm = this.voices[0].getParameterNode(node, name);
+            return prm.value;
+        }
+        for (let v of this.voices) {
+            let prm = v.getParameterNode(node, name);
+            this.updateValue(prm, value, rampTime, exponential);
+        }
+        return this;
+    }
+    paramNames() {
+        let pnames = [];
+        let v = this.voices[0];
+        for (let nname of Object.getOwnPropertyNames(v.nodes))
+            for (let pname in v.nodes[nname])
+                if (v.nodes[nname][pname] instanceof AudioParam)
+                    pnames.push(nname + '/' + pname);
+        return pnames;
+    }
+    updateValue(prm, value, rampTime, exponential = true) {
+        if (rampTime === undefined) {
+            prm._value = value;
+            prm.value = value;
+        }
+        else {
+            let ctx = this.voices[0].synth.ac;
+            if (exponential) {
+                prm.exponentialRampToValueAtTime(value, ctx.currentTime + rampTime);
+            }
+            else {
+                prm.linearRampToValueAtTime(value, ctx.currentTime + rampTime);
+            }
+        }
+    }
+}
+/* unused harmony export LCInstrument */
+
+function createInstrument(lc, // This is ugly and should be refactored
+    preset, name, numVoices = 4) {
+    let prst = getPreset(lc.presets, preset);
+    let instr = new LCInstrument(lc.context, prst, numVoices, lc.synthUI.outNode);
+    instr.name = prst.name;
+    instr.duration = findNoteDuration(prst);
+    return instr;
+}
+function getPreset(presets, preset) {
+    if (typeof preset == 'number') {
+        let maxPrst = presets.presets.length;
+        if (preset < 1 || preset > maxPrst)
+            throw new Error(`The preset number should be between 1 and ${maxPrst}`);
+        return presets.presets[preset - 1];
+    }
+    else if (typeof preset == 'string') {
+        for (let prs of presets.presets)
+            if (prs.name == preset)
+                return prs;
+        throw new Error(`Preset "${preset}" does not exist`);
+    }
+    return preset;
+}
+function findNoteDuration(preset) {
+    let duration = 0;
+    for (let node of preset.nodeData) {
+        if (node.type == 'ADSR') {
+            let d = node.params.attack + node.params.decay;
+            if (d > duration)
+                duration = d;
+        }
+    }
+    if (duration)
+        duration += 0.01;
+    return duration;
+}
+
+
+/***/ }),
+/* 35 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = registerActions;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__editor__ = __webpack_require__(16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__editor_buffers__ = __webpack_require__(17);
@@ -6572,7 +6631,7 @@ class EditorActions {
 
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -6697,7 +6756,7 @@ function copytick(from, to) {
 
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // A library of seedable RNGs implemented in Javascript.
@@ -6712,17 +6771,17 @@ function copytick(from, to) {
 // alea, a 53-bit multiply-with-carry generator by Johannes Baagøe.
 // Period: ~2^116
 // Reported to pass all BigCrush tests.
-var alea = __webpack_require__(37);
+var alea = __webpack_require__(38);
 
 // xor128, a pure xor-shift generator by George Marsaglia.
 // Period: 2^128-1.
 // Reported to fail: MatrixRank and LinearComp.
-var xor128 = __webpack_require__(38);
+var xor128 = __webpack_require__(39);
 
 // xorwow, George Marsaglia's 160-bit xor-shift combined plus weyl.
 // Period: 2^192-2^32
 // Reported to fail: CollisionOver, SimpPoker, and LinearComp.
-var xorwow = __webpack_require__(39);
+var xorwow = __webpack_require__(40);
 
 // xorshift7, by François Panneton and Pierre L'ecuyer, takes
 // a different approach: it adds robustness by allowing more shifts
@@ -6730,7 +6789,7 @@ var xorwow = __webpack_require__(39);
 // with 256 bits, that passes BigCrush with no systmatic failures.
 // Period 2^256-1.
 // No systematic BigCrush failures reported.
-var xorshift7 = __webpack_require__(40);
+var xorshift7 = __webpack_require__(41);
 
 // xor4096, by Richard Brent, is a 4096-bit xor-shift with a
 // very long period that also adds a Weyl generator. It also passes
@@ -6739,18 +6798,18 @@ var xorshift7 = __webpack_require__(40);
 // collisions.
 // Period: 2^4128-2^32.
 // No systematic BigCrush failures reported.
-var xor4096 = __webpack_require__(41);
+var xor4096 = __webpack_require__(42);
 
 // Tyche-i, by Samuel Neves and Filipe Araujo, is a bit-shifting random
 // number generator derived from ChaCha, a modern stream cipher.
 // https://eden.dei.uc.pt/~sneves/pubs/2011-snfa2.pdf
 // Period: ~2^127
 // No systematic BigCrush failures reported.
-var tychei = __webpack_require__(42);
+var tychei = __webpack_require__(43);
 
 // The original ARC4-based prng included in this library.
 // Period: ~2^1600
-var sr = __webpack_require__(43);
+var sr = __webpack_require__(44);
 
 sr.alea = alea;
 sr.xor128 = xor128;
@@ -6763,7 +6822,7 @@ module.exports = sr;
 
 
 /***/ }),
-/* 37 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(module) {var __WEBPACK_AMD_DEFINE_RESULT__;// A port of an algorithm by Johannes Baagøe <baagoe@baagoe.com>, 2010
@@ -6885,7 +6944,7 @@ if (module && module.exports) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)(module)))
 
 /***/ }),
-/* 38 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(module) {var __WEBPACK_AMD_DEFINE_RESULT__;// A Javascript implementaion of the "xor128" prng algorithm by
@@ -6974,7 +7033,7 @@ if (module && module.exports) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)(module)))
 
 /***/ }),
-/* 39 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(module) {var __WEBPACK_AMD_DEFINE_RESULT__;// A Javascript implementaion of the "xorwow" prng algorithm by
@@ -7068,7 +7127,7 @@ if (module && module.exports) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)(module)))
 
 /***/ }),
-/* 40 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(module) {var __WEBPACK_AMD_DEFINE_RESULT__;// A Javascript implementaion of the "xorshift7" algorithm by
@@ -7173,7 +7232,7 @@ if (module && module.exports) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)(module)))
 
 /***/ }),
-/* 41 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(module) {var __WEBPACK_AMD_DEFINE_RESULT__;// A Javascript implementaion of Richard Brent's Xorgens xor4096 algorithm.
@@ -7327,7 +7386,7 @@ if (module && module.exports) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)(module)))
 
 /***/ }),
-/* 42 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(module) {var __WEBPACK_AMD_DEFINE_RESULT__;// A Javascript implementaion of the "Tyche-i" prng algorithm by
@@ -7438,7 +7497,7 @@ if (module && module.exports) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)(module)))
 
 /***/ }),
-/* 43 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;/*
@@ -7677,7 +7736,7 @@ if ((typeof module) == 'object' && module.exports) {
   module.exports = seedrandom;
   // When in node.js, try using crypto package for autoseeding.
   try {
-    nodecrypto = __webpack_require__(44);
+    nodecrypto = __webpack_require__(45);
   } catch (ex) {}
 } else if (true) {
   !(__WEBPACK_AMD_DEFINE_RESULT__ = (function() { return seedrandom; }).call(exports, __webpack_require__, exports, module),
@@ -7692,13 +7751,13 @@ if ((typeof module) == 'object' && module.exports) {
 
 
 /***/ }),
-/* 44 */
+/* 45 */
 /***/ (function(module, exports) {
 
 /* (ignored) */
 
 /***/ }),
-/* 45 */
+/* 46 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -7729,61 +7788,6 @@ function loadPages() {
         });
     });
 }
-
-
-/***/ }),
-/* 46 */,
-/* 47 */,
-/* 48 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_instrument__ = __webpack_require__(8);
-
-class LCInstrument extends __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /* Instrument */] {
-    param(pname, value, rampTime, exponential = true) {
-        let names = pname.split('/');
-        if (names.length < 2)
-            throw new Error(`Instrument parameters require "node/param" format`);
-        let node = names[0];
-        let name = names[1];
-        if (value === undefined) {
-            let prm = this.voices[0].getParameterNode(node, name);
-            return prm.value;
-        }
-        for (let v of this.voices) {
-            let prm = v.getParameterNode(node, name);
-            this.updateValue(prm, value, rampTime, exponential);
-        }
-        return this;
-    }
-    paramNames() {
-        let pnames = [];
-        let v = this.voices[0];
-        for (let nname of Object.getOwnPropertyNames(v.nodes))
-            for (let pname in v.nodes[nname])
-                if (v.nodes[nname][pname] instanceof AudioParam)
-                    pnames.push(nname + '/' + pname);
-        return pnames;
-    }
-    updateValue(prm, value, rampTime, exponential = true) {
-        if (rampTime === undefined) {
-            prm._value = value;
-            prm.value = value;
-        }
-        else {
-            let ctx = this.voices[0].synth.ac;
-            if (exponential) {
-                prm.exponentialRampToValueAtTime(value, ctx.currentTime + rampTime);
-            }
-            else {
-                prm.linearRampToValueAtTime(value, ctx.currentTime + rampTime);
-            }
-        }
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = LCInstrument;
-
 
 
 /***/ })
