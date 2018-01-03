@@ -71,8 +71,8 @@
 - Editor
 	- [ ] Store more data in localStorage
 		- [ ] Color theme
-		- [ ] Selected buffer
-		- [ ] Cursor location for each buffer
+		- [x] Selected buffer
+		- [x] Font size and cursor location for each buffer
 	- [ ] Add more panels
 		- [x] osc & fft
 		- [x] log
