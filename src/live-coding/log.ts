@@ -38,6 +38,7 @@ export function txt2html(s: string) {
 }
 
 export function clearLog() {
+	logCount = 0
 	$('#walc-log-content').empty()
 }
 
