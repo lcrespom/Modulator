@@ -11,6 +11,7 @@ export interface LCInstrument {
 	noteOn(midi: number, velocity: number, when?: number): void
 	noteOff(midi: number, velocity: number, when?: number): void
 	connect(node: AudioNode): void
+	initialize(): void
 }
 
 
@@ -66,6 +67,7 @@ function wavetableInstrProvider(
 	name?: string,
 	numVoices = 4) {
 	let instr = new WavetableInstrument(lc.context, preset)
+	instr.initialize()	// TODO should be called by live-coding
 	instr.name = name || preset
 	return instr
 }
@@ -76,6 +78,8 @@ function wavetableInstrProvider(
 class ModulatorInstrument extends Instrument implements LCInstrument {
 	name: string
 	duration: number
+
+	initialize() {}
 
 	param(pname: string, value?: number, rampTime?: number, exponential = true) {
 		let names = pname.split('/')
@@ -204,6 +208,7 @@ class WavetableInstrument implements LCInstrument {
 	}
 
 	noteOff(midi: number, velocity: number, when?: number): void {
+		// TODO look at WebAudioFontPlayer API to see how to stop a note
 	}
 
 	private async adjustPreset(preset: object) {
@@ -229,37 +234,3 @@ class WavetableInstrument implements LCInstrument {
 declare let WebAudioFontPlayer: any
 
 let wtPlayer = new WebAudioFontPlayer()
-
-/*
-async function adjustPreset(player, preset) {
-    return new Promise(resolve => player.adjustPreset(ctx, preset, resolve))
-}
-
-async function fetchPreset(name) {
-	let url = `wavetables/${name}_sf2_file.json`;
-	let r = await fetch(url)
-	let j = await r.json()
-    return j
-}
-
-async function loadInstrument(name) {
-    let preset = await fetchPreset(name)
-    ctx = window.ctx || new AudioContext()
-    window.ctx = ctx
-    player = new WebAudioFontPlayer()
-    await adjustPreset(player, preset)
-    return preset
-}
-
-function playInstrument(preset, pitch) {
-    player.queueWaveTable(ctx, ctx.destination, preset, ctx.currentTime + 0, pitch, 0.4);
-    player.queueWaveTable(ctx, ctx.destination, preset, ctx.currentTime + 0.4, pitch, 0.2);
-    player.queueWaveTable(ctx, ctx.destination, preset, ctx.currentTime + 0.6, pitch, 0.2);
-    player.queueWaveTable(ctx, ctx.destination, preset, ctx.currentTime + 0.8, pitch, 4);
-}
-
-async function main() {
-    let preset = await loadInstrument('0000_Aspirin')
-    playInstrument(preset, 7 + 12 * 3)
-}
-*/
