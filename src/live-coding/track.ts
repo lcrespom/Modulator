@@ -78,10 +78,7 @@ export class Track extends TrackControl {
 	_transpose = 0
 
 	instrument(inst: LCInstrument) {
-		for (let v of inst.voices) {
-			v.synth.outGainNode.disconnect()
-			v.synth.outGainNode.connect(this._gain)
-		}
+		inst.connect(this._gain)
 		this.inst = inst
 		return this
 	}

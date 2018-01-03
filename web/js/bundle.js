@@ -4071,10 +4071,7 @@ class Track extends TrackControl {
         this._transpose = 0;
     }
     instrument(inst) {
-        for (let v of inst.voices) {
-            v.synth.outGainNode.disconnect();
-            v.synth.outGainNode.connect(this._gain);
-        }
+        inst.connect(this._gain);
         this.inst = inst;
         return this;
     }
@@ -6387,9 +6384,43 @@ Tuna.toString = Tuna.prototype.toString = function () {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* unused harmony export registerProvider */
 /* harmony export (immutable) */ __webpack_exports__["a"] = createInstrument;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_instrument__ = __webpack_require__(8);
 
+let providers = {
+    Modulator: modulatorInstrProvider,
+    wavetable: wavetableInstrProvider
+};
+function registerProvider(prefix, provider) {
+    providers[prefix] = provider;
+}
+function createInstrument(lc, // This is ugly and should be refactored
+    preset, name, numVoices = 4) {
+    if (typeof preset != 'string')
+        return modulatorInstrProvider(lc, preset, name, numVoices);
+    if (preset.indexOf('/') < 0)
+        preset = 'Modulator/' + preset;
+    let [prefix, iname] = preset.split('/');
+    let provider = providers[prefix];
+    if (!provider)
+        throw new Error(`Instrument "${preset}" not found: unknown prefix "${provider}"`);
+    return provider(lc, iname, name, numVoices);
+}
+function modulatorInstrProvider(lc, // This is ugly and should be refactored
+    preset, name, numVoices = 4) {
+    let prst = getPreset(lc.presets, preset);
+    let instr = new ModulatorInstrument(lc.context, prst, numVoices, lc.synthUI.outNode);
+    instr.name = name || prst.name;
+    instr.duration = findNoteDuration(prst);
+    return instr;
+}
+function wavetableInstrProvider(lc, preset, name, numVoices = 4) {
+    let instr = new WavetableInstrument();
+    instr.name = name || preset;
+    return instr;
+}
+// ------------------------- Modulator instrument -------------------------
 class ModulatorInstrument extends __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /* Instrument */] {
     param(pname, value, rampTime, exponential = true) {
         let names = pname.split('/');
@@ -6416,6 +6447,12 @@ class ModulatorInstrument extends __WEBPACK_IMPORTED_MODULE_0__synth_instrument_
                     pnames.push(nname + '/' + pname);
         return pnames;
     }
+    connect(node) {
+        for (let v of this.voices) {
+            v.synth.outGainNode.disconnect();
+            v.synth.outGainNode.connect(node);
+        }
+    }
     updateValue(prm, value, rampTime, exponential = true) {
         if (rampTime === undefined) {
             prm._value = value;
@@ -6431,16 +6468,6 @@ class ModulatorInstrument extends __WEBPACK_IMPORTED_MODULE_0__synth_instrument_
             }
         }
     }
-}
-/* unused harmony export ModulatorInstrument */
-
-function createInstrument(lc, // This is ugly and should be refactored
-    preset, name, numVoices = 4) {
-    let prst = getPreset(lc.presets, preset);
-    let instr = new ModulatorInstrument(lc.context, prst, numVoices, lc.synthUI.outNode);
-    instr.name = prst.name;
-    instr.duration = findNoteDuration(prst);
-    return instr;
 }
 function getPreset(presets, preset) {
     if (typeof preset == 'number') {
@@ -6469,6 +6496,20 @@ function findNoteDuration(preset) {
     if (duration)
         duration += 0.01;
     return duration;
+}
+// ------------------------- Wavetable instrument -------------------------
+class WavetableInstrument {
+    param(pname, value, rampTime, exponential = true) {
+        return this;
+    }
+    paramNames() {
+        let pnames = [];
+        return pnames;
+    }
+    connect(node) {
+    }
+    noteOn(midi, velocity, when) { }
+    noteOff(midi, velocity, when) { }
 }
 /* Next
 async function adjustPreset(player, preset) {
@@ -6502,7 +6543,7 @@ async function main() {
     let preset = await loadInstrument('0000_Aspirin')
     playInstrument(preset, 7 + 12 * 3)
 }
-*/ 
+*/
 
 
 /***/ }),

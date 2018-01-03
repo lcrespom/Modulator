@@ -117,8 +117,6 @@ export class LiveCoding {
 }
 
 
-// ------------------------- Privates -------------------------
-
 // ---------- Initialization ----------
 
 type Callback = () => void

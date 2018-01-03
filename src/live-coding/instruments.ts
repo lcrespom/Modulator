@@ -8,9 +8,72 @@ export interface LCInstrument {
 	param(pname: string, value?: number,
 		rampTime?: number, exponential?: boolean): number | this
 	paramNames(): string[]
+	noteOn(midi: number, velocity: number, when?: number): void
+	noteOff(midi: number, velocity: number, when?: number): void
+	connect(node: AudioNode): void
 }
 
-export class ModulatorInstrument extends Instrument implements LCInstrument {
+
+// ---------- Providers ----------
+
+type InstrumentProvider = (lc: LiveCoding,
+	preset: string, name?: string, numVoices?: number) => LCInstrument
+
+interface InstrProviderTable {
+	[prefix: string]: InstrumentProvider
+}
+
+let providers: InstrProviderTable = {
+	Modulator: modulatorInstrProvider,
+	wavetable: wavetableInstrProvider
+}
+
+export function registerProvider(prefix: string, provider: InstrumentProvider) {
+	providers[prefix] = provider
+}
+
+export function createInstrument(
+	lc: LiveCoding,	// This is ugly and should be refactored
+	preset: number | string | PresetData,
+	name?: string,
+	numVoices = 4) {
+	if (typeof preset != 'string')
+		return modulatorInstrProvider(lc, preset, name, numVoices)
+	if (preset.indexOf('/') < 0) preset = 'Modulator/' + preset
+	let [prefix, iname] = preset.split('/')
+	let provider = providers[prefix]
+	if (!provider) throw new Error(
+		`Instrument "${preset}" not found: unknown prefix "${provider}"`)
+	return provider(lc, iname, name, numVoices)
+}
+
+function modulatorInstrProvider(
+	lc: LiveCoding,	// This is ugly and should be refactored
+	preset: number | string | PresetData,
+	name?: string,
+	numVoices = 4) {
+	let prst = getPreset(lc.presets, preset)
+	let instr = new ModulatorInstrument(
+		lc.context, prst, numVoices, lc.synthUI.outNode)
+	instr.name = name || prst.name
+	instr.duration = findNoteDuration(prst)
+	return instr
+}
+
+function wavetableInstrProvider(
+	lc: LiveCoding,
+	preset: string,
+	name?: string,
+	numVoices = 4) {
+	let instr = new WavetableInstrument()
+	instr.name = name || preset
+	return instr
+}
+
+
+// ------------------------- Modulator instrument -------------------------
+
+class ModulatorInstrument extends Instrument implements LCInstrument {
 	name: string
 	duration: number
 
@@ -41,6 +104,13 @@ export class ModulatorInstrument extends Instrument implements LCInstrument {
 		return pnames
 	}
 
+	connect(node: AudioNode) {
+		for (let v of this.voices) {
+			v.synth.outGainNode.disconnect()
+			v.synth.outGainNode.connect(node)
+		}
+	}
+
 	private updateValue(prm: AudioParam, value: number, rampTime?: number, exponential = true) {
 		if (rampTime === undefined) {
 			(<any>prm)._value = value
@@ -58,18 +128,6 @@ export class ModulatorInstrument extends Instrument implements LCInstrument {
 	}
 }
 
-export function createInstrument(
-		lc: LiveCoding,	// This is ugly and should be refactored
-		preset: number | string | PresetData,
-		name?: string,
-		numVoices = 4) {
-	let prst = getPreset(lc.presets, preset)
-	let instr = new ModulatorInstrument(
-		lc.context, prst, numVoices, lc.synthUI.outNode)
-	instr.name = prst.name
-	instr.duration = findNoteDuration(prst)
-	return instr
-}
 
 // ---------- Helpers ----------
 
@@ -108,6 +166,29 @@ function findNoteDuration(preset: any) {
 	return duration
 }
 
+
+// ------------------------- Wavetable instrument -------------------------
+
+class WavetableInstrument implements LCInstrument {
+	name: string
+	duration: number
+
+	param(pname: string, value?: number, rampTime?: number, exponential = true) {
+		return this
+	}
+
+	paramNames() {
+		let pnames: string[] = []
+		return pnames
+	}
+
+	connect(node: AudioNode) {
+	}
+
+	noteOn(midi: number, velocity: number, when?: number): void {}
+
+	noteOff(midi: number, velocity: number, when?: number): void {}
+}
 
 /* Next
 async function adjustPreset(player, preset) {

@@ -29,7 +29,7 @@ export interface NoteInfo {
 }
 
 interface InstrumentTable {
-	[instrName: string]: Instrument
+	[instrName: string]: LCInstrument
 }
 
 interface EffectTable {
