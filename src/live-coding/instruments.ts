@@ -65,7 +65,7 @@ function wavetableInstrProvider(
 	preset: string,
 	name?: string,
 	numVoices = 4) {
-	let instr = new WavetableInstrument()
+	let instr = new WavetableInstrument(lc.context, preset)
 	instr.name = name || preset
 	return instr
 }
@@ -170,8 +170,18 @@ function findNoteDuration(preset: any) {
 // ------------------------- Wavetable instrument -------------------------
 
 class WavetableInstrument implements LCInstrument {
-	name: string
 	duration: number
+	preset: object
+	destination: AudioNode
+
+	constructor(public ctx: AudioContext, public name: string) {
+		this.duration = 0
+	}
+
+	async initialize() {
+		// TODO: notify live-coding when instrument is ready
+		this.preset = await this.loadInstrument(this.name)
+	}
 
 	param(pname: string, value?: number, rampTime?: number, exponential = true) {
 		return this
@@ -183,14 +193,44 @@ class WavetableInstrument implements LCInstrument {
 	}
 
 	connect(node: AudioNode) {
+		this.destination = node
 	}
 
-	noteOn(midi: number, velocity: number, when?: number): void {}
+	noteOn(midi: number, velocity: number, when?: number): void {
+		if (when === undefined) when = this.ctx.currentTime
+		wtPlayer.queueWaveTable(
+			this.ctx, this.destination, this.preset, when, midi, 0.5
+		)
+	}
 
-	noteOff(midi: number, velocity: number, when?: number): void {}
+	noteOff(midi: number, velocity: number, when?: number): void {
+	}
+
+	private async adjustPreset(preset: object) {
+		return new Promise(resolve =>
+			wtPlayer.adjustPreset(this.ctx, preset, resolve)
+		)
+	}
+
+	private async fetchPreset(name: string) {
+		let url = `wavetables/${name}_sf2_file.json`
+		let response = await fetch(url)
+		let data = await response.json()
+		return data
+	}
+
+	private async loadInstrument(name: string) {
+		let preset = await this.fetchPreset(name)
+		await this.adjustPreset(preset)
+		return preset
+	}
 }
 
-/* Next
+declare let WebAudioFontPlayer: any
+
+let wtPlayer = new WebAudioFontPlayer()
+
+/*
 async function adjustPreset(player, preset) {
     return new Promise(resolve => player.adjustPreset(ctx, preset, resolve))
 }

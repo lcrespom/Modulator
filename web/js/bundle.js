@@ -6387,6 +6387,14 @@ Tuna.toString = Tuna.prototype.toString = function () {
 /* unused harmony export registerProvider */
 /* harmony export (immutable) */ __webpack_exports__["a"] = createInstrument;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_instrument__ = __webpack_require__(8);
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 
 let providers = {
     Modulator: modulatorInstrProvider,
@@ -6416,7 +6424,7 @@ function modulatorInstrProvider(lc, // This is ugly and should be refactored
     return instr;
 }
 function wavetableInstrProvider(lc, preset, name, numVoices = 4) {
-    let instr = new WavetableInstrument();
+    let instr = new WavetableInstrument(lc.context, preset);
     instr.name = name || preset;
     return instr;
 }
@@ -6499,6 +6507,17 @@ function findNoteDuration(preset) {
 }
 // ------------------------- Wavetable instrument -------------------------
 class WavetableInstrument {
+    constructor(ctx, name) {
+        this.ctx = ctx;
+        this.name = name;
+        this.duration = 0;
+    }
+    initialize() {
+        return __awaiter(this, void 0, void 0, function* () {
+            // TODO: notify live-coding when instrument is ready
+            this.preset = yield this.loadInstrument(this.name);
+        });
+    }
     param(pname, value, rampTime, exponential = true) {
         return this;
     }
@@ -6507,11 +6526,38 @@ class WavetableInstrument {
         return pnames;
     }
     connect(node) {
+        this.destination = node;
     }
-    noteOn(midi, velocity, when) { }
-    noteOff(midi, velocity, when) { }
+    noteOn(midi, velocity, when) {
+        if (when === undefined)
+            when = this.ctx.currentTime;
+        wtPlayer.queueWaveTable(this.ctx, this.destination, this.preset, when, midi, 0.5);
+    }
+    noteOff(midi, velocity, when) {
+    }
+    adjustPreset(preset) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise(resolve => wtPlayer.adjustPreset(this.ctx, preset, resolve));
+        });
+    }
+    fetchPreset(name) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let url = `wavetables/${name}_sf2_file.json`;
+            let response = yield fetch(url);
+            let data = yield response.json();
+            return data;
+        });
+    }
+    loadInstrument(name) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let preset = yield this.fetchPreset(name);
+            yield this.adjustPreset(preset);
+            return preset;
+        });
+    }
 }
-/* Next
+let wtPlayer = new WebAudioFontPlayer();
+/*
 async function adjustPreset(player, preset) {
     return new Promise(resolve => player.adjustPreset(ctx, preset, resolve))
 }
