@@ -1,6 +1,6 @@
 import { Instrument } from '../synth/instrument'
 
-import { LCInstrument } from './live-coding'
+import { LCInstrument } from './instruments'
 import { Effect } from './effects'
 import { Track } from './track'
 import { Timer } from '../synth/timer'

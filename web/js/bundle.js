@@ -3881,13 +3881,13 @@ class Presets {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_instrument__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__synth_timer__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__track__ = __webpack_require__(31);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__scheduler__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__effects__ = __webpack_require__(32);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__scales__ = __webpack_require__(14);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__log__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_timer__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__track__ = __webpack_require__(31);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__scheduler__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__effects__ = __webpack_require__(32);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__scales__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__log__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__instruments__ = __webpack_require__(48);
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -3903,82 +3903,38 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 
 
 
-class LCInstrument extends __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /* Instrument */] {
-    param(pname, value, rampTime, exponential = true) {
-        let names = pname.split('/');
-        if (names.length < 2)
-            throw new Error(`Instrument parameters require "node/param" format`);
-        let node = names[0];
-        let name = names[1];
-        if (value === undefined) {
-            let prm = this.voices[0].getParameterNode(node, name);
-            return prm.value;
-        }
-        for (let v of this.voices) {
-            let prm = v.getParameterNode(node, name);
-            this.updateValue(prm, value, rampTime, exponential);
-        }
-        return this;
-    }
-    paramNames() {
-        let pnames = [];
-        let v = this.voices[0];
-        for (let nname of Object.getOwnPropertyNames(v.nodes))
-            for (let pname in v.nodes[nname])
-                if (v.nodes[nname][pname] instanceof AudioParam)
-                    pnames.push(nname + '/' + pname);
-        return pnames;
-    }
-    updateValue(prm, value, rampTime, exponential = true) {
-        if (rampTime === undefined) {
-            prm._value = value;
-            prm.value = value;
-        }
-        else {
-            let ctx = this.voices[0].synth.ac;
-            if (exponential) {
-                prm.exponentialRampToValueAtTime(value, ctx.currentTime + rampTime);
-            }
-            else {
-                prm.linearRampToValueAtTime(value, ctx.currentTime + rampTime);
-            }
-        }
-    }
-}
-/* unused harmony export LCInstrument */
-
 class LiveCoding {
     constructor(context, presets, synthUI) {
         this.context = context;
         this.presets = presets;
         this.synthUI = synthUI;
-        this.timer = new __WEBPACK_IMPORTED_MODULE_1__synth_timer__["a" /* Timer */](context, 60, 0.2);
-        this.timer.start(time => Object(__WEBPACK_IMPORTED_MODULE_3__scheduler__["e" /* timerTickHandler */])(this.timer, time));
+        this.timer = new __WEBPACK_IMPORTED_MODULE_0__synth_timer__["a" /* Timer */](context, 60, 0.2);
+        this.timer.start(time => Object(__WEBPACK_IMPORTED_MODULE_2__scheduler__["e" /* timerTickHandler */])(this.timer, time));
     }
     instrument(preset, name, numVoices = 4) {
         let prst = getPreset(this.presets, preset);
-        let instr = new LCInstrument(this.context, prst, numVoices, this.synthUI.outNode);
+        let instr = new __WEBPACK_IMPORTED_MODULE_6__instruments__["a" /* LCInstrument */](this.context, prst, numVoices, this.synthUI.outNode);
         instr.name = prst.name;
         instr.duration = findNoteDuration(prst);
         if (name)
             instr.name = name;
-        __WEBPACK_IMPORTED_MODULE_3__scheduler__["c" /* instruments */][instr.name] = instr;
+        __WEBPACK_IMPORTED_MODULE_2__scheduler__["c" /* instruments */][instr.name] = instr;
         return instr;
     }
     effect(name, newName) {
-        let eff = Object(__WEBPACK_IMPORTED_MODULE_4__effects__["a" /* createEffect */])(this.context, name);
-        __WEBPACK_IMPORTED_MODULE_3__scheduler__["b" /* effects */][newName || name] = eff;
+        let eff = Object(__WEBPACK_IMPORTED_MODULE_3__effects__["a" /* createEffect */])(this.context, name);
+        __WEBPACK_IMPORTED_MODULE_2__scheduler__["b" /* effects */][newName || name] = eff;
         return eff;
     }
     track(name, cb, loop = false) {
         onInitialized(() => {
-            let t = new __WEBPACK_IMPORTED_MODULE_2__track__["a" /* Track */](this.context, this.synthUI.outNode, this.timer);
+            let t = new __WEBPACK_IMPORTED_MODULE_1__track__["a" /* Track */](this.context, this.synthUI.outNode, this.timer);
             t.loop = loop;
             t.name = name;
-            if (__WEBPACK_IMPORTED_MODULE_3__scheduler__["f" /* tracks */][name])
-                __WEBPACK_IMPORTED_MODULE_3__scheduler__["d" /* nextTracks */][name] = t;
+            if (__WEBPACK_IMPORTED_MODULE_2__scheduler__["f" /* tracks */][name])
+                __WEBPACK_IMPORTED_MODULE_2__scheduler__["d" /* nextTracks */][name] = t;
             else
-                __WEBPACK_IMPORTED_MODULE_3__scheduler__["f" /* tracks */][name] = t;
+                __WEBPACK_IMPORTED_MODULE_2__scheduler__["f" /* tracks */][name] = t;
             cb(t);
         });
         return this;
@@ -3987,18 +3943,18 @@ class LiveCoding {
         return this.track(name, cb, true);
     }
     scale(note, type, octaves) {
-        return Object(__WEBPACK_IMPORTED_MODULE_5__scales__["b" /* makeScale */])(note, type, octaves);
+        return Object(__WEBPACK_IMPORTED_MODULE_4__scales__["b" /* makeScale */])(note, type, octaves);
     }
     log(...args) {
-        Object(__WEBPACK_IMPORTED_MODULE_6__log__["d" /* logToPanel */])(true, false, ...args);
+        Object(__WEBPACK_IMPORTED_MODULE_5__log__["d" /* logToPanel */])(true, false, ...args);
         return this;
     }
     log_enable(flag = true) {
-        Object(__WEBPACK_IMPORTED_MODULE_6__log__["b" /* enableLog */])(flag);
+        Object(__WEBPACK_IMPORTED_MODULE_5__log__["b" /* enableLog */])(flag);
         return this;
     }
     log_clear() {
-        Object(__WEBPACK_IMPORTED_MODULE_6__log__["a" /* clearLog */])();
+        Object(__WEBPACK_IMPORTED_MODULE_5__log__["a" /* clearLog */])();
         return this;
     }
     bpm(value) {
@@ -4008,19 +3964,19 @@ class LiveCoding {
         return this;
     }
     stop() {
-        Object(__WEBPACK_IMPORTED_MODULE_3__scheduler__["a" /* eachTrack */])(t => t.stop());
+        Object(__WEBPACK_IMPORTED_MODULE_2__scheduler__["a" /* eachTrack */])(t => t.stop());
         return this;
     }
     pause() {
-        Object(__WEBPACK_IMPORTED_MODULE_3__scheduler__["a" /* eachTrack */])(t => t.pause());
+        Object(__WEBPACK_IMPORTED_MODULE_2__scheduler__["a" /* eachTrack */])(t => t.pause());
         return this;
     }
     continue() {
-        Object(__WEBPACK_IMPORTED_MODULE_3__scheduler__["a" /* eachTrack */])(t => t.continue());
+        Object(__WEBPACK_IMPORTED_MODULE_2__scheduler__["a" /* eachTrack */])(t => t.continue());
         return this;
     }
     reset() {
-        Object(__WEBPACK_IMPORTED_MODULE_3__scheduler__["a" /* eachTrack */])(t => {
+        Object(__WEBPACK_IMPORTED_MODULE_2__scheduler__["a" /* eachTrack */])(t => {
             if (t._effect)
                 t._effect.input.disconnect();
             t.delete();
@@ -7773,6 +7729,61 @@ function loadPages() {
         });
     });
 }
+
+
+/***/ }),
+/* 46 */,
+/* 47 */,
+/* 48 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_instrument__ = __webpack_require__(8);
+
+class LCInstrument extends __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /* Instrument */] {
+    param(pname, value, rampTime, exponential = true) {
+        let names = pname.split('/');
+        if (names.length < 2)
+            throw new Error(`Instrument parameters require "node/param" format`);
+        let node = names[0];
+        let name = names[1];
+        if (value === undefined) {
+            let prm = this.voices[0].getParameterNode(node, name);
+            return prm.value;
+        }
+        for (let v of this.voices) {
+            let prm = v.getParameterNode(node, name);
+            this.updateValue(prm, value, rampTime, exponential);
+        }
+        return this;
+    }
+    paramNames() {
+        let pnames = [];
+        let v = this.voices[0];
+        for (let nname of Object.getOwnPropertyNames(v.nodes))
+            for (let pname in v.nodes[nname])
+                if (v.nodes[nname][pname] instanceof AudioParam)
+                    pnames.push(nname + '/' + pname);
+        return pnames;
+    }
+    updateValue(prm, value, rampTime, exponential = true) {
+        if (rampTime === undefined) {
+            prm._value = value;
+            prm.value = value;
+        }
+        else {
+            let ctx = this.voices[0].synth.ac;
+            if (exponential) {
+                prm.exponentialRampToValueAtTime(value, ctx.currentTime + rampTime);
+            }
+            else {
+                prm.linearRampToValueAtTime(value, ctx.currentTime + rampTime);
+            }
+        }
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = LCInstrument;
+
 
 
 /***/ })

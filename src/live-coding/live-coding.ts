@@ -1,66 +1,18 @@
-import { Instrument } from '../synth/instrument'
 import { Presets } from '../synthUI/presets'
 import { Timer } from '../synth/timer'
 import { SynthUI } from '../synthUI/synthUI'
 
 import { Track } from './track'
-import { instruments, timerTickHandler, effects, tracks, nextTracks, eachTrack } from './scheduler'
+import { timerTickHandler, eachTrack,
+	instruments, effects, tracks, nextTracks } from './scheduler'
 import { Effect, createEffect } from './effects'
 import { makeScale } from './scales'
 import { logToPanel, enableLog, clearLog } from './log'
 import { Ring } from './rings'
+import { LCInstrument } from './instruments'
 
 
 export type TrackCallback = (t: Track) => void
-
-export class LCInstrument extends Instrument {
-	name: string
-	duration: number
-
-	param(pname: string, value?: number, rampTime?: number, exponential = true) {
-		let names = pname.split('/')
-		if (names.length < 2) throw new Error(
-			`Instrument parameters require "node/param" format`)
-		let node = names[0]
-		let name = names[1]
-		if (value === undefined) {
-			let prm = this.voices[0].getParameterNode(node, name)
-			return prm.value
-		}
-		for (let v of this.voices) {
-			let prm: any = v.getParameterNode(node, name)
-			this.updateValue(prm, value, rampTime, exponential)
-		}
-		return this
-	}
-
-	paramNames() {
-		let pnames = []
-		let v = this.voices[0]
-		for (let nname of Object.getOwnPropertyNames(v.nodes))
-			for (let pname in v.nodes[nname])
-				if ((<any>v.nodes[nname])[pname] instanceof AudioParam)
-					pnames.push(nname + '/' + pname)
-		return pnames
-	}
-
-	private updateValue(prm: AudioParam, value: number, rampTime?: number, exponential = true) {
-		if (rampTime === undefined) {
-			(<any>prm)._value = value
-			prm.value = value
-			}
-		else {
-			let ctx = this.voices[0].synth.ac
-			if (exponential) {
-				prm.exponentialRampToValueAtTime(value, ctx.currentTime + rampTime)
-			}
-			else {
-				prm.linearRampToValueAtTime(value, ctx.currentTime + rampTime)
-			}
-		}
-	}
-}
-
 
 export class LiveCoding {
 	timer: Timer

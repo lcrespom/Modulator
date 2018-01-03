@@ -1,6 +1,6 @@
 import { Timer } from '../synth/timer'
 
-import { LCInstrument } from './live-coding'
+import { LCInstrument } from './instruments'
 import { Effect } from './effects'
 import { tracks, NoteInfo, NoteOptions } from './scheduler'
 
