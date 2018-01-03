@@ -6055,6 +6055,7 @@ function registerActions(editor, monaco) {
     const CTRL_SHIFT = monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift;
     let editorActions = new EditorActions(editor);
     registerButtons(editorActions);
+    setColorTheme(editorActions);
     // -------------------- Run code actions --------------------
     editor.addAction({
         id: 'walc-run-all',
@@ -6125,6 +6126,11 @@ function registerButtons(editorActions) {
     $('#walc-run-all').click(_ => editorActions.runAllCode());
     $('#walc-run-sel').click(_ => editorActions.runSomeCode());
 }
+function setColorTheme(editorActions) {
+    let theme = localStorage.walc_prefs_theme;
+    if (theme == 'dark')
+        editorActions.toggleTheme();
+}
 class EditorActions {
     constructor(editor) {
         this.editor = editor;
@@ -6156,6 +6162,7 @@ class EditorActions {
             monaco.editor.setTheme('vs-dark');
             $('.logo > img').attr('src', 'img/logo-white.svg');
         }
+        localStorage.walc_prefs_theme = this.lightTheme ? 'light' : 'dark';
     }
     reduceFont() {
         let fs = this.getFontSize();

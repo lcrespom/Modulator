@@ -69,10 +69,6 @@
 	- [ ] Smarter code completion for parameters, effect names, etc.
 		- Use completion provider, see https://microsoft.github.io/monaco-editor/playground.html#extending-language-services-completion-provider-example
 - Editor
-	- [ ] Store more data in localStorage
-		- [ ] Color theme
-		- [x] Selected buffer
-		- [x] Font size and cursor location for each buffer
 	- [ ] Add more panels
 		- [x] osc & fft
 		- [x] log
@@ -95,6 +91,10 @@
 		- [x] Increase / decrease font
 	- [x] Dark theme
 		- [ ] configure code colors with monokai
+	- [x] Store more data in localStorage
+		- [x] Color theme
+		- [x] Selected buffer
+		- [x] Font size and cursor location for each buffer
 	- [x] Multiple editor buffers
 	- [x] Preserve editor code across page refreshes
 	- [x] Partial run

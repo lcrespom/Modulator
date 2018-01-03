@@ -8,6 +8,7 @@ export function registerActions(editor: any, monaco: any) {
 	const CTRL_SHIFT = monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift
 	let editorActions = new EditorActions(editor)
 	registerButtons(editorActions)
+	setColorTheme(editorActions)
 	// -------------------- Run code actions --------------------
 	editor.addAction({
 		id: 'walc-run-all',
@@ -80,6 +81,11 @@ function registerButtons(editorActions: EditorActions) {
 	$('#walc-run-sel').click(_ => editorActions.runSomeCode())
 }
 
+function setColorTheme(editorActions: EditorActions) {
+	let theme = localStorage.walc_prefs_theme
+	if (theme == 'dark') editorActions.toggleTheme()
+}
+
 
 declare let lc: LiveCoding
 declare let monaco: any
@@ -119,6 +125,7 @@ class EditorActions {
 			monaco.editor.setTheme('vs-dark')
 			$('.logo > img').attr('src', 'img/logo-white.svg')
 		}
+		localStorage.walc_prefs_theme = this.lightTheme ? 'light' : 'dark'
 	}
 
 	reduceFont() {
