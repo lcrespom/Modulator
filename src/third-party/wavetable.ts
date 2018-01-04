@@ -71,7 +71,7 @@ function WebAudioFontPlayerConstructor() {
 		return envelope
 	}
 
-	this.noZeroVolume = function (n: number) {
+	this.noZeroVolume = function(n: number) {
 		if (n > this.nearZero) {
 			return n
 		} else {
@@ -137,7 +137,7 @@ function WebAudioFontPlayerConstructor() {
 		envelope.gain.linearRampToValueAtTime(this.noZeroVolume(0), when + duration + this.afterTime)
 	}
 
-	this.numValue = function (aValue: any, defValue: any) {
+	this.numValue = function(aValue: any, defValue: any) {
 		if (typeof aValue === 'number') {
 			return aValue
 		} else {
@@ -151,14 +151,7 @@ function WebAudioFontPlayerConstructor() {
 		let envelope: any = null
 		for (let i = 0; i < this.envelopes.length; i++) {
 			let e = this.envelopes[i]
-			if (e.target == target && audioContext.currentTime > e.when + e.duration + 0.1) {
-				try {
-					e.audioBufferSourceNode.disconnect()
-					e.audioBufferSourceNode.stop(0)
-					e.audioBufferSourceNode = null
-				} catch (x) {
-					// audioBufferSourceNode is dead already
-				}
+			if (this.expireEnvelope(e, audioContext)) {
 				envelope = e
 				break
 			}
@@ -167,7 +160,7 @@ function WebAudioFontPlayerConstructor() {
 			envelope = audioContext.createGain()
 			envelope.target = target
 			envelope.connect(target)
-			envelope.cancel = function (time?: number) {
+			envelope.cancel = function(time?: number) {
 				if (time === undefined) time = audioContext.currentTime
 				if (envelope.when + envelope.duration > audioContext.currentTime) {
 					envelope.gain.cancelScheduledValues(time)
@@ -178,7 +171,28 @@ function WebAudioFontPlayerConstructor() {
 			}
 			this.envelopes.push(envelope)
 		}
+		console.log('---', this.envelopes.length)
 		return envelope
+	}
+
+	this.expireEnvelope = function(e: any, ctx: AudioContext) {
+		if (ctx.currentTime > e.when + e.duration + 0.1) {
+			try {
+				e.audioBufferSourceNode.disconnect()
+				e.audioBufferSourceNode.stop(0)
+				e.audioBufferSourceNode = null
+			} catch (x) {
+				// audioBufferSourceNode is dead already
+			}
+			return true
+		}
+		return false
+	}
+
+	this.expireEnvelopes = function(ctx: AudioContext) {
+		this.envelopes = this.envelopes.filter(
+			(e: any) => !this.expireEnvelope(e, ctx)
+		)
 	}
 
 	this.adjustPreset = function(
@@ -230,7 +244,7 @@ function WebAudioFontPlayerConstructor() {
 						b = decoded.charCodeAt(i)
 						view[i] = b
 					}
-					audioContext.decodeAudioData(arraybuffer, function (audioBuffer) {
+					audioContext.decodeAudioData(arraybuffer, function(audioBuffer) {
 						zone.buffer = audioBuffer
 						preset.bufferct++
 						if (preset.bufferct >= preset.zones.length && cb) cb()

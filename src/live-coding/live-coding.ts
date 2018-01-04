@@ -27,6 +27,10 @@ export class LiveCoding {
 
 	instrument(preset: number | string | PresetData,
 		name?: string, numVoices = 4) {
+		if (typeof preset == 'string') {
+			let oldInstr = instruments[name || preset]
+			if (oldInstr) oldInstr.shutdown()
+		}
 		let instr = createInstrument(this, preset, name, numVoices)
 		if (name) instr.name = name
 		instruments[instr.name] = instr

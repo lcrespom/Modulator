@@ -3899,6 +3899,11 @@ class LiveCoding {
         this.timer.start(time => Object(__WEBPACK_IMPORTED_MODULE_2__scheduler__["e" /* timerTickHandler */])(this.timer, time));
     }
     instrument(preset, name, numVoices = 4) {
+        if (typeof preset == 'string') {
+            let oldInstr = __WEBPACK_IMPORTED_MODULE_2__scheduler__["c" /* instruments */][name || preset];
+            if (oldInstr)
+                oldInstr.shutdown();
+        }
         let instr = Object(__WEBPACK_IMPORTED_MODULE_6__instruments__["a" /* createInstrument */])(this, preset, name, numVoices);
         if (name)
             instr.name = name;
@@ -4311,6 +4316,7 @@ class ModulatorInstrument extends __WEBPACK_IMPORTED_MODULE_0__synth_instrument_
     initialize() {
         return __awaiter(this, void 0, void 0, function* () { });
     }
+    shutdown() { }
     param(pname, value, rampTime, exponential = true) {
         let names = pname.split('/');
         if (names.length < 2)
@@ -4391,6 +4397,7 @@ class WavetableInstrument {
     constructor(ctx, presetName, name) {
         this.ctx = ctx;
         this.presetName = presetName;
+        this.envelopes = [];
         this.duration = 0;
         if (name === undefined)
             name = presetName;
@@ -4401,10 +4408,15 @@ class WavetableInstrument {
             this.preset = yield this.loadInstrument(this.presetName);
         });
     }
+    shutdown() {
+        wtPlayer.expireEnvelopes(this.ctx);
+    }
     param(pname, value, rampTime, exponential = true) {
+        // TODO maybe provide ADSR
         return this;
     }
     paramNames() {
+        // TODO implement
         let pnames = [];
         return pnames;
     }
@@ -4414,10 +4426,13 @@ class WavetableInstrument {
     noteOn(midi, velocity, when) {
         if (when === undefined)
             when = this.ctx.currentTime;
-        wtPlayer.queueWaveTable(this.ctx, this.destination, this.preset, when, midi, this.duration || 0.5);
+        let envelope = wtPlayer.queueWaveTable(this.ctx, this.destination, this.preset, when, midi, 9999);
+        this.envelopes[midi] = envelope;
     }
     noteOff(midi, velocity, when) {
-        // TODO look at WebAudioFontPlayer API to see how to stop a note
+        let envelope = this.envelopes[midi];
+        if (envelope)
+            envelope.cancel(when);
     }
     adjustPreset(preset) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -8055,15 +8070,7 @@ function WebAudioFontPlayerConstructor() {
         let envelope = null;
         for (let i = 0; i < this.envelopes.length; i++) {
             let e = this.envelopes[i];
-            if (e.target == target && audioContext.currentTime > e.when + e.duration + 0.1) {
-                try {
-                    e.audioBufferSourceNode.disconnect();
-                    e.audioBufferSourceNode.stop(0);
-                    e.audioBufferSourceNode = null;
-                }
-                catch (x) {
-                    // audioBufferSourceNode is dead already
-                }
+            if (this.expireEnvelope(e, audioContext)) {
                 envelope = e;
                 break;
             }
@@ -8084,7 +8091,25 @@ function WebAudioFontPlayerConstructor() {
             };
             this.envelopes.push(envelope);
         }
+        console.log('---', this.envelopes.length);
         return envelope;
+    };
+    this.expireEnvelope = function (e, ctx) {
+        if (ctx.currentTime > e.when + e.duration + 0.1) {
+            try {
+                e.audioBufferSourceNode.disconnect();
+                e.audioBufferSourceNode.stop(0);
+                e.audioBufferSourceNode = null;
+            }
+            catch (x) {
+                // audioBufferSourceNode is dead already
+            }
+            return true;
+        }
+        return false;
+    };
+    this.expireEnvelopes = function (ctx) {
+        this.envelopes = this.envelopes.filter((e) => !this.expireEnvelope(e, ctx));
     };
     this.adjustPreset = function (audioContext, preset, cb) {
         preset.bufferct = 0;

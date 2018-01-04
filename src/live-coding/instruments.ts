@@ -14,6 +14,7 @@ export interface LCInstrument {
 	noteOff(midi: number, velocity: number, when?: number): void
 	connect(node: AudioNode): void
 	initialize(): void
+	shutdown(): void
 }
 
 
@@ -80,6 +81,7 @@ class ModulatorInstrument extends Instrument implements LCInstrument {
 	duration: number
 
 	async initialize() {}
+	shutdown() {}
 
 	param(pname: string, value?: number, rampTime?: number, exponential = true) {
 		let names = pname.split('/')
@@ -178,6 +180,7 @@ class WavetableInstrument implements LCInstrument {
 	duration: number
 	preset: object
 	destination: AudioNode
+	envelopes: any[] = []
 
 	constructor(public ctx: AudioContext, public presetName: string, name?: string) {
 		this.duration = 0
@@ -189,11 +192,17 @@ class WavetableInstrument implements LCInstrument {
 		this.preset = await this.loadInstrument(this.presetName)
 	}
 
+	shutdown() {
+		wtPlayer.expireEnvelopes(this.ctx)
+	}
+
 	param(pname: string, value?: number, rampTime?: number, exponential = true) {
+		// TODO maybe provide ADSR
 		return this
 	}
 
 	paramNames() {
+		// TODO implement
 		let pnames: string[] = []
 		return pnames
 	}
@@ -204,13 +213,15 @@ class WavetableInstrument implements LCInstrument {
 
 	noteOn(midi: number, velocity: number, when?: number): void {
 		if (when === undefined) when = this.ctx.currentTime
-		wtPlayer.queueWaveTable(
-			this.ctx, this.destination, this.preset, when, midi, this.duration || 0.5
+		let envelope = wtPlayer.queueWaveTable(
+			this.ctx, this.destination, this.preset, when, midi, 9999
 		)
+		this.envelopes[midi] = envelope
 	}
 
 	noteOff(midi: number, velocity: number, when?: number): void {
-		// TODO look at WebAudioFontPlayer API to see how to stop a note
+		let envelope = this.envelopes[midi]
+		if (envelope) envelope.cancel(when)
 	}
 
 	private async adjustPreset(preset: object) {
