@@ -20,10 +20,8 @@ function WebAudioFontPlayerConstructor() {
 			volume = 1.0
 		}
 		let zone = this.findZone(audioContext, preset, pitch)
-		if (!(zone.buffer)) {
-			console.log('empty buffer ', zone)
-			return
-		}
+		if (!(zone.buffer))
+			throw new Error('Preset is not ready: empty buffer')
 		let baseDetune = zone.originalPitch - 100.0 * zone.coarseTune - zone.fineTune
 		let playbackRate = 1.0 * Math.pow(2, (100.0 * pitch - baseDetune) / 1200.0)
 		let sampleRatio = zone.sampleRate / audioContext.sampleRate
