@@ -68,9 +68,7 @@ function wavetableInstrProvider(
 	preset: string,
 	name?: string,
 	numVoices = 4) {
-	let instr = new WavetableInstrument(lc.context, preset)
-	instr.initialize()	// TODO should be called by live-coding
-	instr.name = name || preset
+	let instr = new WavetableInstrument(lc.context, preset, name)
 	return instr
 }
 
@@ -176,17 +174,19 @@ function findNoteDuration(preset: any) {
 // ------------------------- Wavetable instrument -------------------------
 
 class WavetableInstrument implements LCInstrument {
+	name: string
 	duration: number
 	preset: object
 	destination: AudioNode
 
-	constructor(public ctx: AudioContext, public name: string) {
+	constructor(public ctx: AudioContext, public presetName: string, name?: string) {
 		this.duration = 0
+		if (name === undefined) name = presetName
+		this.name = name
 	}
 
 	async initialize() {
-		// TODO: notify live-coding when instrument is ready
-		this.preset = await this.loadInstrument(this.name)
+		this.preset = await this.loadInstrument(this.presetName)
 	}
 
 	param(pname: string, value?: number, rampTime?: number, exponential = true) {

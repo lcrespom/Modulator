@@ -3903,6 +3903,7 @@ class LiveCoding {
         if (name)
             instr.name = name;
         __WEBPACK_IMPORTED_MODULE_2__scheduler__["c" /* instruments */][instr.name] = instr;
+        initInstrument(instr);
         return instr;
     }
     effect(name, newName) {
@@ -3969,22 +3970,38 @@ class LiveCoding {
     }
     init(initFunc) {
         return __awaiter(this, void 0, void 0, function* () {
-            initializing = true;
+            pushTask();
             yield initFunc();
-            let trackCB;
-            while (trackCB = initListeners.pop())
-                trackCB();
-            initializing = false;
+            popTask();
             return this;
         });
     }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = LiveCoding;
 
-let initializing = false;
+// ---------- Instrument init ----------
+function initInstrument(instr) {
+    return __awaiter(this, void 0, void 0, function* () {
+        pushTask();
+        yield instr.initialize();
+        popTask();
+    });
+}
+let taskCount = 0;
 let initListeners = [];
+function pushTask() {
+    taskCount++;
+}
+function popTask() {
+    taskCount--;
+    if (taskCount <= 0) {
+        for (let trackCB of initListeners)
+            trackCB();
+        initListeners = [];
+    }
+}
 function onInitialized(cb) {
-    if (!initializing)
+    if (taskCount <= 0)
         cb();
     else
         initListeners.push(cb);
@@ -6415,9 +6432,7 @@ function modulatorInstrProvider(lc, // This is ugly and should be refactored
     return instr;
 }
 function wavetableInstrProvider(lc, preset, name, numVoices = 4) {
-    let instr = new WavetableInstrument(lc.context, preset);
-    instr.initialize(); // TODO should be called by live-coding
-    instr.name = name || preset;
+    let instr = new WavetableInstrument(lc.context, preset, name);
     return instr;
 }
 // ------------------------- Modulator instrument -------------------------
@@ -6500,15 +6515,17 @@ function findNoteDuration(preset) {
 }
 // ------------------------- Wavetable instrument -------------------------
 class WavetableInstrument {
-    constructor(ctx, name) {
+    constructor(ctx, presetName, name) {
         this.ctx = ctx;
-        this.name = name;
+        this.presetName = presetName;
         this.duration = 0;
+        if (name === undefined)
+            name = presetName;
+        this.name = name;
     }
     initialize() {
         return __awaiter(this, void 0, void 0, function* () {
-            // TODO: notify live-coding when instrument is ready
-            this.preset = yield this.loadInstrument(this.name);
+            this.preset = yield this.loadInstrument(this.presetName);
         });
     }
     param(pname, value, rampTime, exponential = true) {

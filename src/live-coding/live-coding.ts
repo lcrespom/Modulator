@@ -30,6 +30,7 @@ export class LiveCoding {
 		let instr = createInstrument(this, preset, name, numVoices)
 		if (name) instr.name = name
 		instruments[instr.name] = instr
+		initInstrument(instr)
 		return instr
 	}
 
@@ -107,24 +108,43 @@ export class LiveCoding {
 	}
 
 	async init(initFunc: () => void) {
-		initializing = true
+		pushTask()
 		await initFunc()
-		let trackCB
-		while (trackCB = initListeners.pop()) trackCB()
-		initializing = false
+		popTask()
 		return this
 	}
 }
+
+// ---------- Instrument init ----------
+
+async function initInstrument(instr: LCInstrument) {
+	pushTask()
+	await instr.initialize()
+	popTask()
+}
+
 
 
 // ---------- Initialization ----------
 
 type Callback = () => void
 
-let initializing = false
+let taskCount = 0
 let initListeners: Callback[] = []
 
+function pushTask() {
+	taskCount++
+}
+
+function popTask() {
+	taskCount--
+	if (taskCount <= 0) {
+		for (let trackCB of initListeners) trackCB()
+		initListeners = []
+	}
+}
+
 function onInitialized(cb: Callback) {
-	if (!initializing) cb()
+	if (taskCount <= 0) cb()
 	else initListeners.push(cb)
 }
