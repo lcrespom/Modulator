@@ -6437,7 +6437,9 @@ function wavetableInstrProvider(lc, preset, name, numVoices = 4) {
 }
 // ------------------------- Modulator instrument -------------------------
 class ModulatorInstrument extends __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /* Instrument */] {
-    initialize() { }
+    initialize() {
+        return __awaiter(this, void 0, void 0, function* () { });
+    }
     param(pname, value, rampTime, exponential = true) {
         let names = pname.split('/');
         if (names.length < 2)

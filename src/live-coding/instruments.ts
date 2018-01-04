@@ -79,7 +79,7 @@ class ModulatorInstrument extends Instrument implements LCInstrument {
 	name: string
 	duration: number
 
-	initialize() {}
+	async initialize() {}
 
 	param(pname: string, value?: number, rampTime?: number, exponential = true) {
 		let names = pname.split('/')
