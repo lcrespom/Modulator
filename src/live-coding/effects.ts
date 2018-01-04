@@ -1,4 +1,4 @@
-import { Tuna } from '../tuna/tuna'
+import { Tuna } from '../third-party/tuna'
 
 
 export interface Effect {

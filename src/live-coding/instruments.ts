@@ -1,6 +1,8 @@
 import { Instrument } from '../synth/instrument'
 import { Presets } from '../synthUI/presets'
 import { LiveCoding } from './live-coding'
+import { WebAudioFontPlayer } from '../third-party/wavetable'
+
 
 export interface LCInstrument {
 	name: string
@@ -245,7 +247,5 @@ class WavetableInstrument implements LCInstrument {
 		return preset
 	}
 }
-
-declare let WebAudioFontPlayer: any
 
 let wtPlayer = new WebAudioFontPlayer()
