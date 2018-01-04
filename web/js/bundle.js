@@ -1596,13 +1596,13 @@ function shouldTrackEnd(track) {
         return false;
     }
     if (track.loop) {
-        Object(__WEBPACK_IMPORTED_MODULE_0__log__["d" /* logToPanel */])(false, true, Object(__WEBPACK_IMPORTED_MODULE_0__log__["f" /* txt2html */])(`Track [log-track|${track.name}] has looped`));
+        Object(__WEBPACK_IMPORTED_MODULE_0__log__["d" /* logToPanel */])(false, true, Object(__WEBPACK_IMPORTED_MODULE_0__log__["e" /* txt2html */])(`Track [log-track|${track.name}] has looped`));
         track.startTime += track.time;
         track.loopCount++;
         return false;
     }
     else {
-        Object(__WEBPACK_IMPORTED_MODULE_0__log__["d" /* logToPanel */])(false, true, Object(__WEBPACK_IMPORTED_MODULE_0__log__["f" /* txt2html */])(`Track [log-track|${track.name}] has ended`));
+        Object(__WEBPACK_IMPORTED_MODULE_0__log__["d" /* logToPanel */])(false, true, Object(__WEBPACK_IMPORTED_MODULE_0__log__["e" /* txt2html */])(`Track [log-track|${track.name}] has ended`));
         delete tracks[track.name];
         return true;
     }
@@ -1616,8 +1616,7 @@ function shouldTrackEnd(track) {
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["d"] = logToPanel;
 /* harmony export (immutable) */ __webpack_exports__["b"] = enableLog;
-/* harmony export (immutable) */ __webpack_exports__["e"] = preventLogParentScroll;
-/* harmony export (immutable) */ __webpack_exports__["f"] = txt2html;
+/* harmony export (immutable) */ __webpack_exports__["e"] = txt2html;
 /* harmony export (immutable) */ __webpack_exports__["a"] = clearLog;
 /* harmony export (immutable) */ __webpack_exports__["c"] = logNote;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__scales__ = __webpack_require__(14);
@@ -1641,13 +1640,6 @@ function logToPanel(always, asHTML, ...args) {
 }
 function enableLog(flag) {
     logEnabled = flag;
-}
-function preventLogParentScroll() {
-    $('#walc-log-container').bind('mousewheel', function (e) {
-        let evt = e.originalEvent;
-        this.scrollTop += evt.deltaY;
-        e.preventDefault();
-    });
 }
 function txt2html(s) {
     return s.replace(/\[([^\]\|]+)\|([^\]\|]+)\]/g, (x, y, z) => `<span class="${y}">${z}</span>`);
@@ -1894,7 +1886,6 @@ function createEditor(ac, presets, synthUI) {
         });
         handleEditorResize(editorElem);
         Object(__WEBPACK_IMPORTED_MODULE_1__editor_actions__["a" /* registerActions */])(editor, monaco);
-        preventParentScroll(editorElem);
         editor.focus();
         Object(__WEBPACK_IMPORTED_MODULE_5__editor_buffers__["a" /* handleBuffers */])(editor);
         $(document).on('route:show', (e, h) => {
@@ -1916,10 +1907,6 @@ function setupGlobals(lc) {
     global.random = __WEBPACK_IMPORTED_MODULE_4__random__["a" /* random */];
     global.global = {};
     Object(__WEBPACK_IMPORTED_MODULE_2__rings__["a" /* setupRing */])();
-}
-function preventParentScroll(elem) {
-    $(elem).bind('mousewheel', e => e.preventDefault());
-    Object(__WEBPACK_IMPORTED_MODULE_7__log__["e" /* preventLogParentScroll */])();
 }
 function addTypeScriptDefinitions(defs) {
     monaco.languages.typescript.typescriptDefaults.addExtraLib(defs);
@@ -1970,7 +1957,7 @@ function getErrorLocation(e) {
     return null;
 }
 function showError(msg, line, col) {
-    Object(__WEBPACK_IMPORTED_MODULE_7__log__["d" /* logToPanel */])(true, true, Object(__WEBPACK_IMPORTED_MODULE_7__log__["f" /* txt2html */])(`[log-bold|Runtime error]: "${msg}" at line ${line}, column ${col}`));
+    Object(__WEBPACK_IMPORTED_MODULE_7__log__["d" /* logToPanel */])(true, true, Object(__WEBPACK_IMPORTED_MODULE_7__log__["e" /* txt2html */])(`[log-bold|Runtime error]: "${msg}" at line ${line}, column ${col}`));
     editor.revealLineInCenter(line);
     let errorRange = getErrorRange(editor.getModel().getLineContent(line), col);
     decorations = editor.deltaDecorations(decorations, [{

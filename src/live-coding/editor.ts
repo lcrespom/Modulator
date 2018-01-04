@@ -8,7 +8,7 @@ import { Note } from './scales'
 import { random } from './random'
 import { handleBuffers } from './editor-buffers'
 import { AudioAnalyzer } from '../synthUI/analyzer'
-import { preventLogParentScroll, logToPanel, txt2html } from './log'
+import { logToPanel, txt2html } from './log'
 import { instruments, effects, tracks } from './scheduler'
 
 
@@ -49,7 +49,6 @@ export function createEditor(
 		})
 		handleEditorResize(editorElem)
 		registerActions(editor, monaco)
-		preventParentScroll(editorElem)
 		editor.focus()
 		handleBuffers(editor)
 		$(document).on('route:show', (e, h) => {
@@ -71,11 +70,6 @@ function setupGlobals(lc: LiveCoding) {
 	global.random = random
 	global.global = {}
 	setupRing()
-}
-
-function preventParentScroll(elem: HTMLElement) {
-	$(elem).bind('mousewheel', e => e.preventDefault())
-	preventLogParentScroll()
 }
 
 function addTypeScriptDefinitions(defs: string) {

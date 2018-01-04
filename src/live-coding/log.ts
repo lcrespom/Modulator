@@ -23,14 +23,6 @@ export function enableLog(flag: boolean) {
 	logEnabled = flag
 }
 
-export function preventLogParentScroll() {
-	$('#walc-log-container').bind('mousewheel', function(e) {
-		let evt = <WheelEvent>e.originalEvent
-		this.scrollTop += evt.deltaY
-		e.preventDefault()
-	})
-}
-
 export function txt2html(s: string) {
 	return s.replace(/\[([^\]\|]+)\|([^\]\|]+)\]/g,
 		(x, y, z) => `<span class="${y}">${z}</span>`
