@@ -1627,6 +1627,7 @@ const MAX_LOG_LINES = 1000;
 function logToPanel(always, asHTML, ...args) {
     if (!always && !logEnabled)
         return;
+    ffTweak();
     if (logCount++ > MAX_LOG_LINES)
         $('#walc-log-content > *:first-child').remove();
     let txt = args.join(', ');
@@ -1636,7 +1637,8 @@ function logToPanel(always, asHTML, ...args) {
     else
         div.text(txt);
     $('#walc-log-content').append(div);
-    $('#walc-log-container').scrollTop(Number.MAX_SAFE_INTEGER);
+    let logContainer = $('#walc-log-container');
+    logContainer.scrollTop(MAX_LOG_LINES * 100);
 }
 function enableLog(flag) {
     logEnabled = flag;
@@ -1659,6 +1661,17 @@ function logNote(note, track) {
     let strack = `[log-track|${track.name}]`;
     logToPanel(false, true, txt2html(`Note: ${snote} ${sinstr} ${strack}`));
 }
+function ffTweak() {
+    if (tweaked)
+        return;
+    tweaked = true;
+    if (navigator.userAgent.indexOf('Firefox') < 0)
+        return;
+    let logContainer = $('#walc-log-container');
+    let h = logContainer.height();
+    logContainer.css('height', h + 'px');
+}
+let tweaked = false;
 
 
 /***/ }),
@@ -2074,12 +2087,17 @@ function handleEditorStorage(editor) {
 }
 function watchCodeAndStoreIt(editor) {
     let storedCode = getEditorText(editor);
+    let storedPos = editor.getPosition();
     setInterval(() => {
         let code = getEditorText(editor);
-        if (storedCode == code)
+        let pos = editor.getPosition();
+        if (storedCode == code
+            && storedPos.lineNumber == pos.lineNumber
+            && storedPos.column == pos.column)
             return;
         storeBuffer(currentBuffer, editor);
         storedCode = code;
+        storedPos = pos;
     }, 1000);
 }
 // -------------------- Helpers --------------------

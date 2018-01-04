@@ -9,6 +9,7 @@ const MAX_LOG_LINES = 1000
 
 export function logToPanel(always: boolean, asHTML: boolean, ...args: any[]) {
 	if (!always && !logEnabled) return
+	ffTweak()
 	if (logCount++ > MAX_LOG_LINES)
 		$('#walc-log-content > *:first-child').remove()
 	let txt = args.join(', ')
@@ -16,7 +17,8 @@ export function logToPanel(always: boolean, asHTML: boolean, ...args: any[]) {
 	if (asHTML) div.html(txt)
 	else div.text(txt)
 	$('#walc-log-content').append(div)
-	$('#walc-log-container').scrollTop(Number.MAX_SAFE_INTEGER)
+	let logContainer = $('#walc-log-container')
+	logContainer.scrollTop(MAX_LOG_LINES * 100)
 }
 
 export function enableLog(flag: boolean) {
@@ -46,3 +48,14 @@ export function logNote(note: NoteInfo, track: Track) {
 		`Note: ${snote} ${sinstr} ${strack}`
 	))
 }
+
+function ffTweak() {
+	if (tweaked) return
+	tweaked = true
+	if (navigator.userAgent.indexOf('Firefox') < 0) return
+	let logContainer = $('#walc-log-container')
+	let h = logContainer.height()
+	logContainer.css('height', h + 'px')
+}
+
+let tweaked = false

@@ -65,11 +65,16 @@ function handleEditorStorage(editor: any) {
 
 function watchCodeAndStoreIt(editor: any) {
 	let storedCode = getEditorText(editor)
+	let storedPos = editor.getPosition()
 	setInterval(() => {
 		let code = getEditorText(editor)
-		if (storedCode == code) return
+		let pos = editor.getPosition()
+		if (storedCode == code
+			&& storedPos.lineNumber == pos.lineNumber
+			&& storedPos.column == pos.column) return
 		storeBuffer(currentBuffer, editor)
 		storedCode = code
+		storedPos = pos
 	}, 1000)
 }
 
