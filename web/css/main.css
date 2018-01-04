@@ -61,7 +61,7 @@ input.rounded {
 
 /*----- General -----*/
 
-#synth, #live-coding {
+#synth {
 	margin: 10px 0;
 }
 
@@ -391,6 +391,7 @@ input[type=range][orient=vertical] {
 	width: 100%;
 	position: relative;
 	padding-left: 10px;
+	margin-top: 7px;
 }
 
 #live-coding > .app-navbar > .right-buttons {
@@ -399,7 +400,7 @@ input[type=range][orient=vertical] {
 
 .walc-editor-box {
 	min-width: 476px;
-	height: calc(100% - 20px);
+	height: calc(100% - 10px);
 	overflow: hidden;
 	flex: 1;
 	display: flex;
@@ -447,7 +448,7 @@ input[type=range][orient=vertical] {
 
 #walc-right-col {
 	width: 476px;
-	margin-bottom: 20px;
+	margin-bottom: 10px;
 	margin-left: 8px;
 	display: flex;
 	flex-direction: column;
