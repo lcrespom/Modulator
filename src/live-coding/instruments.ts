@@ -220,23 +220,9 @@ class WavetableInstrument implements LCInstrument {
 	}
 
 	private async fetchPreset(name: string) {
-		let url = `wavetables/${name}_sf2_file.json`
-		// TODO if _sf2_file.json not found, try _sf2.json
-		// But the following files have both _sf2 and _sf2_file ending:
-		// 0280_LesPaul
-		// 0290_LesPaul
-		// 0291_LesPaul
-		// 0292_LesPaul
-		// 0300_LesPaul
-		// 0301_LesPaul
-		// 0310_LesPaul
-		// Naming should be:
-		// - If it ends with _sf2 or _sf2_file, just use the name
-		// - Otherwise, append _sf2_file
-		// - If it fails, try with _sf2.
-		// 		This will make one in every 7 instruments use two requests
-		// Also, create a nicely named instrument table
-		let response = await fetch(url)
+		let response = await fetch(this.getURL(name, '_sf2_file'))
+		if (!response.ok)
+			response = await fetch(this.getURL(name, '_sf2'))
 		let data = await response.json()
 		return data
 	}
@@ -245,6 +231,21 @@ class WavetableInstrument implements LCInstrument {
 		let preset = await this.fetchPreset(name)
 		await this.adjustPreset(preset)
 		return preset
+	}
+
+	private getURL(name: string, suffix: string) {
+		// The following files have both _sf2 and _sf2_file ending:
+		// 0280_LesPaul
+		// 0290_LesPaul
+		// 0291_LesPaul
+		// 0292_LesPaul
+		// 0300_LesPaul
+		// 0301_LesPaul
+		// 0310_LesPaul
+		// Therefore it is better to load them using their full name
+		if (!name.endsWith('_sf2_file') && !name.endsWith('_sf2'))
+			name += suffix
+		return `wavetables/${name}.json`
 	}
 }
 

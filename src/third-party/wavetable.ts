@@ -167,11 +167,12 @@ function WebAudioFontPlayerConstructor() {
 			envelope = audioContext.createGain()
 			envelope.target = target
 			envelope.connect(target)
-			envelope.cancel = function () {
+			envelope.cancel = function (time?: number) {
+				if (time === undefined) time = audioContext.currentTime
 				if (envelope.when + envelope.duration > audioContext.currentTime) {
-					envelope.gain.cancelScheduledValues(0)
-					envelope.gain.setTargetAtTime(0.00001, audioContext.currentTime, 0.1)
-					envelope.when = audioContext.currentTime + 0.00001
+					envelope.gain.cancelScheduledValues(time)
+					envelope.gain.setTargetAtTime(0.00001, time, 0.1)
+					envelope.when = time + 0.00001
 					envelope.duration = 0
 				}
 			}
@@ -216,6 +217,8 @@ function WebAudioFontPlayerConstructor() {
 					}
 					float32Array[i] = n / 65536.0
 				}
+				preset.bufferct++
+				if (preset.bufferct >= preset.zones.length && cb) cb()
 			} else {
 				if (zone.file) {
 					let datalen = zone.file.length
