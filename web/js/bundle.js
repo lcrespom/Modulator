@@ -4101,7 +4101,9 @@ class Track extends TrackControl {
         return this;
     }
     play_notes(notes, times, durations) {
-        if (typeof times == 'number')
+        if (times === undefined)
+            times = [0];
+        else if (typeof times == 'number')
             times = [times];
         let rtimes = times.ring();
         if (typeof durations == 'number')

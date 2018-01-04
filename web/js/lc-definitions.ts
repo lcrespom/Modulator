@@ -102,8 +102,8 @@ interface Track {
 	volume(v: number): this
 	/** Plays a given note */
 	play(note: number, duration?: number, options?: NoteOptions): this
-	/** Plays several notes in sequence */
-	play_notes(notes: number[], times: number | number[], durations?: number | number[]): this
+	/** Plays several notes in sequence or as a chord */
+	play_notes(notes: number[], times?: number | number[], durations?: number | number[]): this
 	/** Transposes notes the specified amount */
 	transpose(notes: number): this
 	/** Changes a parameter of the current instrument */

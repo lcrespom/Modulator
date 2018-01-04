@@ -112,8 +112,9 @@ export class Track extends TrackControl {
 	}
 
 	play_notes(notes: number[],
-		times: number | number[], durations?: number | number[]) {
-		if (typeof times == 'number') times = [times]
+		times?: number | number[], durations?: number | number[]) {
+		if (times === undefined) times = [0]
+		else if (typeof times == 'number') times = [times]
 		let rtimes = times.ring()
 		if (typeof durations == 'number') durations = [durations]
 		let rdurs = durations ? durations.ring() : undefined
