@@ -1,12 +1,10 @@
 pre {
-	background-color: #272822;
-	color: #ddd;
-	border-radius: 3px;
+	background-color: white;
 	overflow: auto;
 }
 
 pre > code {
-	background-color: #272822;
+	border-radius: 3px;
 }
 
 img {

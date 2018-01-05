@@ -16,7 +16,7 @@ $(function() {
 	};
 
 	// List of languages to be highlighted
-	let langs = ['javascript', 'html', 'css', 'bash']
+	let langs = ['typescript', 'javascript', 'html', 'css', 'bash']
 
 	// Load markdown document via AJAX and highlight code
 	function loadMD(name) {
@@ -54,7 +54,7 @@ $(function() {
 				.join('\n')
 			let block = comment + '\n\n'
 			if (hasCode(code))
-				block += '```javascript' + code + '\n' + '```' + '\n\n'
+				block += '```typescript' + code + '\n' + '```' + '\n\n'
 			out += block
 		}
 		return out
