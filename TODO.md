@@ -39,8 +39,6 @@
 	- [ ] Do not require an instrument for track playing
 		- Use either the first instrument in the instruments table
 		- If instrument table is empty, use some default preset
-	- [ ] Add many more instruments
-		- See https://github.com/surikov/webaudiofont
 	- [ ] Sample loading + playing API
 		- Use upload samples button - see https://davidwalsh.name/multiple-file-upload
 		- Load samples from URL: users should place sample loading API in lc.init
@@ -57,6 +55,8 @@
 		- [x] lc.init(async function() { ... }) to perform sample initialization
 		- [x] Start playing only after await lc.init has returned
 		- Probably not required for sample loading if provided by lc instance
+	- [x] Add many more instruments
+		- See https://github.com/surikov/webaudiofont
 	- [x] Custom effect support: predefined and user-defined
 	- [x] Ramps in track gain and effects
 	- [x] Global pause / stop / continue
