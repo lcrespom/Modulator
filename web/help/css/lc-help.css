@@ -1,0 +1,24 @@
+pre {
+	background-color: #272822;
+	color: #ddd;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre > code {
+	background-color: #272822;
+}
+
+img {
+	box-shadow: 5px 5px 10px 0px #999;
+	border-radius: 3px;
+}
+
+h1 {
+	border-bottom-color: #fff;
+}
+
+h2, h3 {
+	text-align: initial;
+	border-bottom-color: #eee;
+}
