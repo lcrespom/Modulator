@@ -44,20 +44,20 @@ $(function() {
 
 	//-------------------- TS Definitions parsing --------------------
 
-	function ts2md(txt) {
+	function ts2md(txt, showCode = false) {
 		let out = ''
 		let chunks = parseCode(txt)
 		for (let chunk of chunks) {
 			if (chunk.type == 'doc')
 				out += chunk.text + '\n\n'
-			else
+			else if (showCode)
 				out += '```' + chunk.type + chunk.text + '\n' + '```' + '\n\n'
 		}
 		return out
 	}
 
 	function hasCode(code) {
-		return code.split('\n').map(l => l.trim()).join('').length > 0
+		return code && code.split('\n').map(l => l.trim()).join('').length > 0
 	}
 
 	function parseCode(code) {
@@ -68,15 +68,6 @@ $(function() {
 			if (t.length < 1) continue
 			let [comment, code] = t.split('*/')
 			chunks.push({ type: 'doc', text: comment })
-			if (!code) continue
-			code = code.split('\n')
-				// Remove single-line comments
-				.filter(l => !l.trim().startsWith('//'))
-				// Remove typescript "declare"
-				.map(l => l.startsWith('declare ') ? l.substr(8) : l)
-				// Remove interface start
-				.filter(l => !l.match(/\s*interface\s+[A-Za-z0-9_$]+\s+\{/))
-				.join('\n')
 			if (hasCode(code))
 				chunks.push({ type: 'typescript', text: code })
 		}
@@ -87,7 +78,7 @@ $(function() {
 	//-------------------- Load initial content --------------------
 
 	if (location.hash == '')
-		location.hash = '#synthlib'
+		location.hash = '#lc-definitions.ts'
 	else
 		loadMD(location.hash.substr(1))
 })

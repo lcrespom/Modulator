@@ -1,3 +1,7 @@
+#mdcontent {
+	padding: 0 1ex;
+}
+
 pre {
 	background-color: white;
 	overflow: auto;
@@ -19,6 +23,10 @@ h1 {
 h2, h3 {
 	text-align: initial;
 	border-bottom-color: #eee;
+}
+
+h4 {
+	margin: 2rem 0 -0.5rem 0;
 }
 
 h5 {

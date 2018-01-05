@@ -1,15 +1,9 @@
 /**
- # Modulator Live Coding API
- The Live Coding page lets the user enter any valid JavaScript code,
+ # Live Coding API
+ The Live Coding page lets the user enter any valid JavaScript code
  and execute it under the application environment, which exposes
  an API oriented to real-time music performance and provides access
  to the synthesizer instruments and effects.
-
- This page documents all the available API elements using the
- [TypeScript](https://www.typescriptlang.org/) language, which is a superset
- of JavaScrpit with additional type information. The API TypeScript
- definitions are used by the code editor in order to provide helpful code
- completion and error validation.
  */
 
 // ------------------------- The LiveCoding API ------------------------------
@@ -28,7 +22,7 @@ create instruments, effects and tracks, and controlling global settings.
 Its methods are the following: */
 interface LiveCoding {
 
-/** ### instrument(preset, name, numVoices)
+/** #### instrument(preset, name, numVoices)
 The instrument method creates a new instrument and stores it in the
 global instruments table. It can then be used by a track to play its notes
 with it.
@@ -51,7 +45,7 @@ preset 1 and store it in `instruments.piano` */
 	instrument(preset: number | string | PresetData,
 		name?: string, numVoices?: number): Instrument
 
-/** ### effect(name, newName)
+/** #### effect(name, newName)
 Creates an effect and stores it in the global `effects` table, available
 to be used by a track to modify its sound.
 
@@ -63,7 +57,7 @@ a WebAudio processing node or a [Tuna](https://github.com/Theodeus/tuna) effect.
  */
 	effect(name: string, newName?: string): Effect
 
-/** ### track(name, callback)
+/** #### track(name, callback)
 Creates a named track and calls the provided callback, passing the
 newly created track, ready to be used for playing notes with it.
 The track is also stored in the global `tracks` variable, so it can be
@@ -75,24 +69,65 @@ used to control it any time during playback.
 */
 	track(name: string, cb: TrackCallback): this
 
-/** Creates a looping track */
+/** #### loop_track(name, callback)
+Creates a looping track, which will play its notes and then repeat from the
+beginning until instructed to stop. The parameters are the same as with the
+`track` method.
+*/
 	loop_track(name: string, cb: TrackCallback): this
-	/** Creates a ring of notes of a given scale */
+
+/** #### scale(note, type, octaves)
+Creates a ring of notes of a given scale, starting at the specified note.
+
+##### Parameters
+- **note**: the base note of the scale, e.g. `60` or `Note.C4`
+- **type**: an optional string with the name of the scale, either one of
+	- major (default value)
+	- major_pentatonic
+	- minor
+	- minor_pentatonic
+	- chromatic
+- **octaves**: an optional number indicating how mani octaves the scale
+should cover. It defaults to 1.
+*/
 	scale(note: number, type?: string, octaves?: number): Ring<number>
-	/** Prints the specified data to the log */
+
+/** ##### log(...args)
+Prints all the arguments in the log panel. */
 	log(...args: any[]): this
-	/** Enables or disables logging of events */
+
+/** ##### log_enable(flag)
+Enables or disables logging of events such as notes being played. The
+`lc.log(...)` method always prints to the log panel, regardless of whether
+this is enabled or disabled.
+
+##### Parameters
+- **flag**: optional, defaults to `true`. If true, event tracing is enabled,
+otherwise it is disabled.
+*/
 	log_enable(flag?: boolean): this
-	/** Clears the log output */
+
+/** #### log_clear()
+Clears the log panel. */
 	log_clear(): this
-	/** Change global BPM */
+
+/** #### bpm(value)
+Queries or changes the global BPM (Beats Per Minute)
+
+##### Parameters
+- **value**: optional. If specified, the BPM is changed, and new tracks
+will use it as its timing rule. Notice that this does not affect currently
+playing tracks.
+If not specified, it returns the current BPM value.
+*/
 	bpm(value?: number): number | this
-	/** Stops all looping track at the end of their loop */
-	stop(): this
-	/** Pauses all tracks at their current position */
+
+/** Pauses all tracks at their current position */
 	pause(): this
 	/** Continues playback of stopped or paused tracks */
 	continue(): this
+	/** Stops all looping track at the end of their loop */
+	stop(): this
 	/** Stops and deletes all tracks */
 	reset(): this
 	/** Initializes any required resources, such as sample downloading.
