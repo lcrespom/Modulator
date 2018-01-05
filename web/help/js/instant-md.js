@@ -26,7 +26,7 @@ $(function() {
 			: 'md/' + name + '.md'
 		return $.get(url)
 		.then(function(md) {
-			if (isCode) md = ts2md(md)
+			if (isCode) md = ts2md(md, true, true)
 			$('#mdcontent').html(marked(md))
 			for (var i = 0; i < langs.length; i++)
 				highlightCode(langs[i])
@@ -44,9 +44,20 @@ $(function() {
 
 	//-------------------- TS Definitions parsing --------------------
 
-	function ts2md(txt, showCode = false) {
+	function ts2md(txt, showCode = false, codeFirst = false) {
 		let out = ''
 		let chunks = parseCode(txt)
+		if (codeFirst) {
+			for (let i = 1; i < chunks.length; i++) {
+				let currChunk = chunks[i]
+				let prevChunk = chunks[i - 1]
+				if (currChunk.type != 'doc' && prevChunk.type == 'doc') {
+					chunks[i] = prevChunk
+					chunks[i - 1] = currChunk
+					i++
+				}
+			}
+		}
 		for (let chunk of chunks) {
 			if (chunk.type == 'doc')
 				out += chunk.text + '\n\n'
@@ -66,12 +77,30 @@ $(function() {
 		for (let t of a) {
 			t = t.trim()
 			if (t.length < 1) continue
+			t = removeLineComments(t)
 			let [comment, code] = t.split('*/')
+			comment = convertParams(comment)
 			chunks.push({ type: 'doc', text: comment })
 			if (hasCode(code))
 				chunks.push({ type: 'typescript', text: code })
 		}
 		return chunks
+	}
+
+	function removeLineComments(txt) {
+		return txt
+			.split('\n')
+			.filter(l => !l.trim().startsWith('//'))
+			.join('\n')
+	}
+
+	function convertParams(txt) {
+		return txt
+			.split('\n')
+			.map(l => l.trim())
+			.map(l => l.startsWith('- ') ? '    ' + l : l)
+			.map(l => l.replace(/@param\s+(\w+)/, '- **$1**:'))
+			.join('\n')
 	}
 
 

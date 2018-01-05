@@ -25,14 +25,14 @@ h2, h3 {
 	border-bottom-color: #eee;
 }
 
-h4 {
-	margin: 2rem 0 -0.5rem 0;
+pre > code.hljs {
+	margin: 2em 0 0 0
 }
 
-h5 {
-	margin: 0 0 -1ex 0;
-}
-
-code.hljs {
+ul {
 	margin-top: -1ex;
+}
+
+ul > li > ul {
+	margin-top: 0;
 }
