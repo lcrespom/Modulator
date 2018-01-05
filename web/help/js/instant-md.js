@@ -70,7 +70,12 @@ $(function() {
 			chunks.push({ type: 'doc', text: comment })
 			if (!code) continue
 			code = code.split('\n')
+				// Remove single-line comments
 				.filter(l => !l.trim().startsWith('//'))
+				// Remove typescript "declare"
+				.map(l => l.startsWith('declare ') ? l.substr(8) : l)
+				// Remove interface start
+				.filter(l => !l.match(/\s*interface\s+[A-Za-z0-9_$]+\s+\{/))
 				.join('\n')
 			if (hasCode(code))
 				chunks.push({ type: 'typescript', text: code })

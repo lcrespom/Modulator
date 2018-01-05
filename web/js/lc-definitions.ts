@@ -1,48 +1,81 @@
 /**
  # Modulator Live Coding API
+ The Live Coding page lets the user enter any valid JavaScript code,
+ and execute it under the application environment, which exposes
+ an API oriented to real-time music performance and provides access
+ to the synthesizer instruments and effects.
+
+ This page documents all the available API elements using the
+ [TypeScript](https://www.typescriptlang.org/) language, which is a superset
+ of JavaScrpit with additional type information. The API TypeScript
+ definitions are used by the code editor in order to provide helpful code
+ completion and error validation.
  */
-
-// -------------------- Globals -------------------------
-
-/** The live coding API entry point, used to create instruments,
- effects and tracks, and controlling global settings */
-declare let lc: LiveCoding
-
-/** A *predictable* random number generator which will always return
-the same sequence of numbers from the start of the program. */
-declare let random: Random
-
-/** A global area to store any data to be used across executions */
-declare let global: any
-
-/** Holds all instruments created by lc.instrument() */
-declare let instruments: {
-	[instrName: string]: Instrument
-}
-
-/** Holds all effects created by lc.effect() */
-declare let effects: {
-	[effectName: string]: Effect
-}
-
-/** Holds all tracks created by lc.track() or lc.loop_track() */
-declare let tracks: {
-	[trackName: string]: TrackControl
-}
-
 
 // ------------------------- The LiveCoding API ------------------------------
 
+/**
+## LiveCoding
+The `lc` global variable implements the LiveCoding interface, and can
+be used to invoke its methods. For example, `lc.bpm(120)` will set the
+global BPM to 120 Beats Per Minute.
+*/
+declare let lc: LiveCoding
+
+/**
+The **LiveCoding** interface provides the main API entry point, and is used to
+create instruments, effects and tracks, and controlling global settings.
+Its methods are the following: */
 interface LiveCoding {
-	/** The AudioContext, for the daring ones */
-	context: AudioContext
-	/** Creates an instrument from a preset name, number or data */
-	instrument(preset: number | string | PresetData, name?: string, numVoices?: number): Instrument
-	/** Creates an effect */
+
+/** ### instrument(preset, name, numVoices)
+The instrument method creates a new instrument and stores it in the
+global instruments table. It can then be used by a track to play its notes
+with it.
+
+##### Parameters
+- **preset**: it can have different uses depending on its type
+	- **number**: the preset number, as displayed in the *Presets*
+	box in the main Modulator page.
+	- **string**: the preset name - either as displayed in the *Presets*
+	box or a wavetable instrument name.
+	- **object**: a JSON object in the format of a preset downloaded from
+	Modulator.
+- **name**: an optional instrument name. This name will be used to store
+it in the `instruments` table, e.g. if name == 'flute', then
+`instruments.flute` will hold an instance to the instrument.
+- **numVoices**: an optional number of voices
+
+**Example**: `lc.instrument(1, 'piano')` will create a new instrument from
+preset 1 and store it in `instruments.piano` */
+	instrument(preset: number | string | PresetData,
+		name?: string, numVoices?: number): Instrument
+
+/** ### effect(name, newName)
+Creates an effect and stores it in the global `effects` table, available
+to be used by a track to modify its sound.
+
+##### Parameters
+- **name**: a name that identifies the effect. It can either be
+a WebAudio processing node or a [Tuna](https://github.com/Theodeus/tuna) effect.
+- **newName**: an optional name to be used to store the effect in the global
+`effects` table.
+ */
 	effect(name: string, newName?: string): Effect
-	/** Creates a named track */
+
+/** ### track(name, callback)
+Creates a named track and calls the provided callback, passing the
+newly created track, ready to be used for playing notes with it.
+The track is also stored in the global `tracks` variable, so it can be
+used to control it any time during playback.
+
+##### Parameters
+- **name**: the track name, used to store it in the global `tracks` table.
+- **cb**: a callback function receiving the track as the parameter.
+*/
 	track(name: string, cb: TrackCallback): this
-	/** Creates a looping track */
+
+/** Creates a looping track */
 	loop_track(name: string, cb: TrackCallback): this
 	/** Creates a ring of notes of a given scale */
 	scale(note: number, type?: string, octaves?: number): Ring<number>
@@ -66,8 +99,33 @@ interface LiveCoding {
 	Tracks will not start playing until **initFunc** has finished all
 	its tasks. */
 	init(initFunc: () => void): this
+	/** The AudioContext, for the daring ones */
+	// tslint:disable-next-line:member-ordering
+	context: AudioContext
 }
 
+
+/** A *predictable* random number generator which will always return
+the same sequence of numbers from the start of the program. */
+declare let random: Random
+
+/** A global area to store any data to be used across executions */
+declare let global: any
+
+/** Holds all instruments created by lc.instrument() */
+declare let instruments: {
+	[instrName: string]: Instrument
+}
+
+/** Holds all effects created by lc.effect() */
+declare let effects: {
+	[effectName: string]: Effect
+}
+
+/** Holds all tracks created by lc.track() or lc.loop_track() */
+declare let tracks: {
+	[trackName: string]: TrackControl
+}
 
 // -------------------- Instruments, effects and tracks -------------------------
 
