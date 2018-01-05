@@ -1,3 +1,7 @@
+/**
+ # Modulator Live Coding API
+ */
+
 // -------------------- Globals -------------------------
 
 /** The live coding API entry point, used to create instruments,
