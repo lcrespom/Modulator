@@ -335,21 +335,28 @@ interface Random {
 
 // -------------------- Other structures -------------------------
 
-/**  */
+/** The callback function type used by `lc.track()` and `lc.loop_track()`. */
 type TrackCallback = (t: Track) => void
 
+/** Options that can be passed to track.play() in order to change
+instrument parameters. */
 interface InstrumentOptions {
 	instrument: Instrument
 	[k: string]: number | Instrument
 }
 
+/** Options that can be passed to track.play() in order to change
+effect parameters. */
 interface EffectOptions {
 	effect: Effect
 	[k: string]: number | Effect
 }
 
+/** Options that can be passed to track.play() in order to change
+effect or instrument parameters. */
 type NoteOptions = InstrumentOptions | EffectOptions
 
+/** Structure used by a preset JSON data saved from Modulator synth. */
 interface PresetData {
 	name: string
 	nodes: any[]
