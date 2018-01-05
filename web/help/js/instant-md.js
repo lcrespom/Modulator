@@ -41,21 +41,17 @@ $(function() {
 		})
 	}
 
+
+	//-------------------- TS Definitions parsing --------------------
+
 	function ts2md(txt) {
 		let out = ''
-		let a = txt.split('/**')
-		for (let t of a) {
-			t = t.trim()
-			if (t.length < 1) continue
-			let [comment, code] = t.split('*/')
-			if (!code) continue
-			code = code.split('\n')
-				.filter(l => !l.trim().startsWith('//'))
-				.join('\n')
-			let block = comment + '\n\n'
-			if (hasCode(code))
-				block += '```typescript' + code + '\n' + '```' + '\n\n'
-			out += block
+		let chunks = parseCode(txt)
+		for (let chunk of chunks) {
+			if (chunk.type == 'doc')
+				out += chunk.text + '\n\n'
+			else
+				out += '```' + chunk.type + chunk.text + '\n' + '```' + '\n\n'
 		}
 		return out
 	}
@@ -64,7 +60,27 @@ $(function() {
 		return code.split('\n').map(l => l.trim()).join('').length > 0
 	}
 
-	// Load initial content
+	function parseCode(code) {
+		let a = code.split('/**')
+		let chunks = []
+		for (let t of a) {
+			t = t.trim()
+			if (t.length < 1) continue
+			let [comment, code] = t.split('*/')
+			chunks.push({ type: 'doc', text: comment })
+			if (!code) continue
+			code = code.split('\n')
+				.filter(l => !l.trim().startsWith('//'))
+				.join('\n')
+			if (hasCode(code))
+				chunks.push({ type: 'typescript', text: code })
+		}
+		return chunks
+	}
+
+
+	//-------------------- Load initial content --------------------
+
 	if (location.hash == '')
 		location.hash = '#synthlib'
 	else
