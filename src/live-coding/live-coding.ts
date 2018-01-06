@@ -3,8 +3,8 @@ import { Timer } from '../synth/timer'
 import { SynthUI } from '../synthUI/synthUI'
 
 import { Track } from './track'
-import { timerTickHandler, eachTrack,
-	instruments, effects, tracks, nextTracks } from './scheduler'
+import { timerTickHandler, eachTrack, scheduleTrack,
+	instruments, effects, userTracks } from './scheduler'
 import { Effect, createEffect } from './effects'
 import { makeScale } from './scales'
 import { logToPanel, enableLog, clearLog } from './log'
@@ -45,14 +45,12 @@ export class LiveCoding {
 	}
 
 	track(name: string, cb: TrackCallback, loop = false) {
+		let t = new Track(this.context, this.synthUI.outNode, this.timer)
+		t.loop = loop
+		t.name = name
+		userTracks[name] = t
 		onInitialized(() => {
-			let t = new Track(this.context, this.synthUI.outNode, this.timer)
-			t.loop = loop
-			t.name = name
-				if (tracks[name])
-				nextTracks[name] = t
-			else
-				tracks[name] = t
+			scheduleTrack(t)
 			cb(t)
 		})
 		return this

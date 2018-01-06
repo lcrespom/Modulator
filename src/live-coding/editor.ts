@@ -9,7 +9,7 @@ import { random } from './random'
 import { handleBuffers } from './editor-buffers'
 import { AudioAnalyzer } from '../synthUI/analyzer'
 import { logToPanel, txt2html } from './log'
-import { instruments, effects, tracks } from './scheduler'
+import { instruments, effects, userTracks } from './scheduler'
 
 
 let sinkDiv = document.createElement('div')
@@ -65,7 +65,7 @@ function setupGlobals(lc: LiveCoding) {
 	global.lc = lc
 	global.instruments = instruments
 	global.effects = effects
-	global.tracks = tracks
+	global.tracks = userTracks
 	global.Note = Note
 	global.random = random
 	global.global = {}

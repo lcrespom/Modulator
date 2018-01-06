@@ -2,7 +2,7 @@ import { Timer } from '../synth/timer'
 
 import { LCInstrument } from './instruments'
 import { Effect } from './effects'
-import { tracks, NoteInfo, NoteOptions } from './scheduler'
+import { tracks, NoteInfo, NoteOptions, userTracks } from './scheduler'
 
 
 class TrackControl {
@@ -62,6 +62,7 @@ class TrackControl {
 	delete() {
 		this.mute()
 		delete tracks[this.name]
+		delete userTracks[this.name]
 	}
 }
 
@@ -70,6 +71,7 @@ export class Track extends TrackControl {
 	notect = 0
 	notes: NoteInfo[] = []
 	time = 0
+	latency = 0.1
 	loop = false
 	loopCount = 0
 	inst: LCInstrument
@@ -103,7 +105,7 @@ export class Track extends TrackControl {
 		this.notes.push({
 			instrument: this.inst,
 			number: note + this._transpose,
-			time: this.time,
+			time: this.time + this.latency,
 			velocity: this.velocity,
 			duration,
 			options

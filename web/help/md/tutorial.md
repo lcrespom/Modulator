@@ -49,7 +49,11 @@ lc.track('bass_line', t => t
 
 Both versions of the code have the same effect; it is a user's choice which one to use.
 
-The calls to `play` and `sleep` track methods inside the user function are used to schedule notes to be played by the track at their appropriate times. The live coding engine sets up a background process that is continuously checking what is the next note to play at a given time.
+The calls to `play` and `sleep` track methods inside the user function are used to schedule notes to be played by the track at their appropriate times:
+- The `play` method is used to specify the note number to be played. The method expects a note number, but the `Note` object stores the numbers of all notes from C0 to B8. Sharps and flats are also available. For example, `Note.Cs4` stands for C sharp, octave 4, and `Note.Bb3` stands for B flat, octave 3.
+- The `sleep` method is used to specify the time, in seconds, to wait until the next note is played.
+
+The live coding engine sets up a background process that is continuously checking what is the note to play at a given time.
 
 
 ## Keyboard shortcuts
@@ -57,7 +61,32 @@ To execute the code in our editor, we can click the play button on the top-left 
 
 This keyboard combination is very useful, but sometimes you will need to execute only a line of code, or a group of lines. For that, you can use the second button at the top right of the editor, or the more convenient `Ctrl+Enter` keyboard combination (`Cmd+Enter` for Mac users). If you have some lines of code selected, it will execute the selected code. Otherwise, it will execute the line of code where the cursor is located.
 
+If at any moment you want to immediately stop all audio, you can press the stop button or press `Ctrl+.` (`Cmd+.` for the fancy Mac users).
+
 
 ## Looping
 
+Let's now try the following code:
 
+```javascript
+// Load an instrument from Modulator patches and change its default name
+let i = lc.instrument('TB-303', 'lead')
+// Create a track and play 3 notes in sequence
+lc.loop_track('melody', t => t
+	.instrument(instruments.lead)
+	.play(Note.E4).sleep(0.25)
+	.play(Note.C4).sleep(0.25)
+	.play(Note.G3).sleep(0.25)
+	.play(Note.C3).sleep(0.25)
+)
+```
+
+When you run it, you will see that it loops endlesly. You can click the stop button any time to end all sound playback.
+
+At any moment we have access to this looping melody track in the `tracks.melody` object. Every time a track is created, it is added to the global `tracks` object with the user-provided name.
+
+Let's modify the volume of the looping track. Write the following code below the previous code:
+
+```javascript
+tracks.melody.gain(0.1, 3)
+```

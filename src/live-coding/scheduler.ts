@@ -42,8 +42,9 @@ interface TrackTable {
 
 export let instruments: InstrumentTable = {}
 export let effects: EffectTable = {}
+export let userTracks: TrackTable = {}
 export let tracks: TrackTable = {}
-export let nextTracks: TrackTable = {}
+let nextTracks: TrackTable = {}
 
 
 export function timerTickHandler(timer: Timer, time: number) {
@@ -54,6 +55,13 @@ export function eachTrack(cb: (t: Track) => void) {
 	let tnames = Object.getOwnPropertyNames(tracks)
 	for (let tname of tnames)
 		cb(tracks[tname])
+}
+
+export function scheduleTrack(t: Track) {
+	if (tracks[t.name])
+		nextTracks[t.name] = t
+	else
+		tracks[t.name] = t
 }
 
 function playTrack(timer: Timer, track: Track, time: number) {
@@ -109,6 +117,7 @@ function shouldTrackEnd(track: Track) {
 		let nextTrack = nextTracks[track.name]
 		nextTrack.startTime = track.startTime + track.time
 		tracks[track.name] = nextTrack
+		userTracks[track.name] = nextTrack
 		delete nextTracks[track.name]
 		return false
 	}
@@ -123,6 +132,7 @@ function shouldTrackEnd(track: Track) {
 		logToPanel(false, true, txt2html(
 			`Track [log-track|${track.name}] has ended`))
 		delete tracks[track.name]
+		delete userTracks[track.name]
 		return true
 	}
 }
