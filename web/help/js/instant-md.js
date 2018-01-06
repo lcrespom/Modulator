@@ -108,12 +108,10 @@ $(function() {
 		return oldChunks.reduce(
 			(chunks, chunk) => {
 				if (chunk.type != 'doc') {
+					addHeader(chunks, chunk, 'interface', '## ') ||
 					addHeader(chunks, chunk,
-						'interface', t => '## ' + t) ||
-					addHeader(chunks, chunk,
-						'declare let', t => '## Global variable: ' + t) ||
-					addHeader(chunks, chunk,
-						'const enum', t => '## Enum: ' + t)
+						'declare let', '## Global variable: ') ||
+					addHeader(chunks, chunk, 'const enum', '## Enum: ')
 					}
 				chunks.push(chunk)
 				return chunks
@@ -121,11 +119,11 @@ $(function() {
 		)
 	}
 
-	function addHeader(chunks, chunk, prefix, cb) {
-		let regex = '\\s*' + prefix + '\\s+(\\w+)'
+	function addHeader(chunks, chunk, match, prefix) {
+		let regex = '\\s*' + match + '\\s+(\\w+)'
 		let m = chunk.text.match(regex)
 		if (m && m[1]) {
-			chunks.push({ type: 'doc', text: cb(m[1]) })
+			chunks.push({ type: 'doc', text: prefix + m[1] })
 			return true
 		}
 		return false
