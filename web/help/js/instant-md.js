@@ -58,6 +58,7 @@ $(function() {
 				}
 			}
 		}
+		chunks = addHeaders(chunks)
 		for (let chunk of chunks) {
 			if (chunk.type == 'doc')
 				out += chunk.text + '\n\n'
@@ -103,6 +104,32 @@ $(function() {
 			.join('\n')
 	}
 
+	function addHeaders(oldChunks) {
+		return oldChunks.reduce(
+			(chunks, chunk) => {
+				if (chunk.type != 'doc') {
+					addHeader(chunks, chunk,
+						'interface', t => '## ' + t) ||
+					addHeader(chunks, chunk,
+						'declare let', t => '## Global variable: ' + t) ||
+					addHeader(chunks, chunk,
+						'const enum', t => '## Enum: ' + t)
+					}
+				chunks.push(chunk)
+				return chunks
+			}, []
+		)
+	}
+
+	function addHeader(chunks, chunk, prefix, cb) {
+		let regex = '\\s*' + prefix + '\\s+(\\w+)'
+		let m = chunk.text.match(regex)
+		if (m && m[1]) {
+			chunks.push({ type: 'doc', text: cb(m[1]) })
+			return true
+		}
+		return false
+	}
 
 	//-------------------- Load initial content --------------------
 

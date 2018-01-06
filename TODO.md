@@ -34,7 +34,7 @@
 	- [ ] Publish in GitHub pages
 	- [ ] Tutorial
 	- [ ] Examples
-	- [ ] Document API
+	- [x] Document API
 - Synth API
 	- [ ] Do not require an instrument for track playing
 		- Use either the first instrument in the instruments table

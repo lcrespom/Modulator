@@ -5,7 +5,7 @@
  an API oriented to real-time music performance and provides access
  to the synthesizer instruments and effects.
 
-This page documents all the available API elements using the
+This document describes all the available API elements using the
 [TypeScript](https://www.typescriptlang.org/) language, which is a superset
 of JavaScrpit with additional type information. The API TypeScript
 definitions are used by the code editor in order to provide helpful code
@@ -264,7 +264,7 @@ interface TrackControl {
 	mute(): this
 	/** Unmutes the track. */
 	unmute(): this
-	/** Sets global gain for all notes. */
+	/** Sets global gain (volume) for all notes. */
 	gain(value: number, rampTime?: number): this
 	/** Stops a looping track at the end of the loop. */
 	stop(): this
