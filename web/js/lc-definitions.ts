@@ -134,14 +134,29 @@ its notes should sound. The **instrument** interface provides methods for
 fine-tuning its parameters.
  */
 interface Instrument {
-	/** Name of the preset used to create the instrument */
+	/** The instrument name is the name of the preset used to create
+	the instrument, unless the user provided a different name when
+	creating it.
+	 */
 	name: string
-	/** Default note duration, in seconds */
+	/** Default note duration, in seconds. This determines how long
+	the sound is held during note playback.
+	 */
 	duration: number
-	/** Gets or sets the value of a parameter */
+	/** Gets or sets the value of an instrument parameter.
+	If no value is provided, then the current parameter value is returned.
+	If a value is provided, the instrument parameter is modified, probably altering how the instrument will sound.
+	@param pname Parameter name. The parameter names of an instrument can be obtained using the paramNames method.
+	@param value Optional. If provided, the new parameter value to be set.
+	@param rampTime Optional. If provided, the parameter will be modified gradually, progressing from its current value to the new one
+	during the specified amount of time.
+	@param exponential Optional. If specified, determines whether the ramp is
+	linear (parameter set to false) or exponential (parameter set to true).
+	The default ramp is exponential, so that the ramp takes longer at smaller values.
+	 */
 	param(pname: string, value?: number,
 		rampTime?: number, exponential?): number | this
-	/** Returns a list of parameter names */
+	/** Returns the list of parameter names available to be changed with the `param` method. */
 	paramNames(): string[]
 }
 
@@ -155,12 +170,22 @@ The **Effect** interface provides methods for changing its parameters,
 either at the start of a song or interactively during playback.
 */
 interface Effect {
-	/** The effect's name */
+	/** The effect's name. */
 	name: string
-	/** Gets or sets the value of a parameter */
+	/** Gets or sets the value of an effect parameter.
+	If no value is provided, then the current parameter value is returned.
+	If a value is provided, the effect parameter is modified, probably altering how the effect transforms the sound.
+	@param pname Parameter name. The parameter names of an effect can be obtained using the paramNames method.
+	@param value Optional. If provided, the new parameter value to be set.
+	@param rampTime Optional. If provided, the parameter will be modified gradually, progressing from its current value to the new one
+	during the specified amount of time.
+	@param exponential Optional. If specified, determines whether the ramp is
+	linear (parameter set to false) or exponential (parameter set to true).
+	The default ramp is exponential, so that the ramp takes longer at smaller values.
+	 */
 	param(name: string, value?: number,
 		rampTime?: number, exponential?: boolean): number | this
-	/** Returns a list of parameter names */
+	/** Returns the list of parameter names available to be changed with the `param` method. */
 	paramNames(): string[]
 }
 
@@ -169,32 +194,64 @@ declare let tracks: {
 	[trackName: string]: TrackControl
 }
 
-/** The **Track** interface provides access to time-based functions
- such as playing notes, waiting for a specified time, etc. */
+/** The **Track** interface provides access to time-based functions such as playing notes, waiting for a specified time, etc.
+When `lc.track()` or `lc.loop_track()` is invoked, this is the callback parameter.
+An example of the usage pattern is the following:
+```javascript
+	lc.loop_track('lead', t => t
+		.instrument(instruments.piano)
+		.play(Note.C4).sleep(1)
+		.play(Note.E4).sleep(1)
+		.play(Note.G4).sleep(1)
+	)
+```
+  */
 interface Track {
 	/** For looping tracks, counts how many times the loop has executed. */
 	loopCount: number
-	/** Sets the instrument to play in the track. */
+	/** Sets the instrument to be used by the notes played in the track. */
 	instrument(inst: Instrument): this
-	/** Adds an effect to the track. All sound played in the track will be
-	immediately altered by the effect. */
+	/** Adds an effect to the track. All sound played in the track will be immediately altered by the effect.
+	Multiple effects can be added to a track, but once an effect has been added, it cannot be removed.
+	@param e The effect to be added.
+	*/
 	effect(e: Effect): this
-	/** Sets the volume to use in the track. */
+	/** Sets the volume to use in the track for playing the subsequent notes. */
 	volume(v: number): this
-	/** Plays a given note. */
+	/** Plays a given note.
+	@param note The note MIDI number.
+	The Note enum can be used for convenience - for example, Note.A3 is easier to remember than 57.
+	@param duration Optional. The time in seconds during which the note sound will be held.
+	If not specified, the default instrument.duration value is used.
+	This time should not be confused with the sleep time: a note can sound while other notes are being played.
+	The duration determines how long a note sounds,
+	while the sleep time (provided by the sleep method) determines when will the next note start.
+	@param options Optional. A NoteOptions object specifying parameter names and values to be changed in a given instrument or effect.
+	*/
 	play(note: number, duration?: number, options?: NoteOptions): this
-	/** Plays several notes in sequence or as a chord. */
+	/** Plays several notes in sequence or as a chord.
+	@param notes the array of notes to be played.
+	@param times Optional. If not specified, notes will be played as a chord, i.e., all at the same time.
+	If specified, notes will be played one after the other after the specified time (if parameter is a number)
+	or times (if the parameter is an array)
+	@param durations Optional. If specified, the duration or durations to be used for each note.
+	 */
 	play_notes(notes: number[], times?: number | number[], durations?: number | number[]): this
-	/** Transposes notes the specified amount. */
+	/** Transposes the notes to be played after this point in the specified amount of semitones. */
 	transpose(notes: number): this
-	/** Changes a parameter of the current instrument. */
+	/** Changes a parameter of the current instrument.
+	@param pname The parameter name.
+	@param value The new value to be set.
+	 */
 	param(pname: string, value: number): this
-	/** Changes parameters of instrument or effect. */
+	/** Changes parameters of instrument or effect.
+	@param options A NoteOptions object specifying parameter names and values to be changed in a given instrument or effect.
+	 */
 	params(options: NoteOptions): this
-	/** Waits the specified time in seconds before playing the next note. */
+	/** Waits the specified **time** in seconds before playing the next note. */
 	sleep(time: number): this
-	/** Repeats the enclosed code a given number of times. */
-	repeat(times: number, cb: (i: number) => void): this
+	/** Repeats the provided callback a given number of times. */
+	repeat(times: number, cb: (i?: number) => void): this
 }
 
 /** The **TrackControl** interface provides access to a playing track in order
