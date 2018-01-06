@@ -137,7 +137,7 @@ $(function() {
 	//-------------------- Load initial content --------------------
 
 	if (location.hash == '')
-		location.hash = '#lc-definitions.ts'
+		location.hash = '#tutorial'
 	else
 		loadMD(location.hash.substr(1))
 })
