@@ -26,7 +26,12 @@ $(function() {
 			: 'md/' + name + '.md'
 		return $.get(url)
 		.then(function(md) {
-			if (isCode) md = ts2md(md, true, true)
+			if (isCode) {
+				$('body').addClass('lc-api')
+				md = ts2md(md, true, true)
+			} else {
+				$('body').removeClass('lc-api')
+			}
 			$('#mdcontent').html(marked(md))
 			for (var i = 0; i < langs.length; i++)
 				highlightCode(langs[i])

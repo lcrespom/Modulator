@@ -1,3 +1,5 @@
+// tslint:disable:max-line-length
+
 /**
  # Live Coding API
  The Live Coding page lets the user enter any valid JavaScript code
@@ -12,7 +14,7 @@ definitions are used by the code editor in order to provide helpful code
 completion and error validation.
  */
 
- // ------------------------- The LiveCoding API ------------------------------
+// ------------------------- The LiveCoding API ------------------------------
 
 /**
 The `lc` global variable implements the LiveCoding interface, and can be used to invoke its methods.
@@ -30,19 +32,15 @@ interface LiveCoding {
 	If a number is used, it corresponds to the present number as displayed in the *Presets* box in the main Modulator page.
 	If a string is used, it corresponds either to the preset as displayed in the *Presets* box or a wavetable instrument name.
 	If an object is used, it should be a JSON object in the format of a preset downloaded from	Modulator.
-	@param name An optional instrument name. This name will be used to store it in the `instruments` table.
-	For example, if name == 'flute', then `instruments.flute` will hold an instance to the instrument.
-	@param numVoices an optional number of voices to be used by the instrument.
-	It defaults to 4 voices, meaning that 4 independent notes can be played simultaneously.
+	@param name An optional instrument name. This name will be used to store it in the `instruments` table. For example, if name == 'flute', then `instruments.flute` will hold an instance to the instrument.
+	@param numVoices an optional number of voices to be used by the instrument. It defaults to 4 voices, meaning that 4 independent notes can be played simultaneously.
 	*/
 	instrument(preset: number | string | PresetData,
 		name?: string, numVoices?: number): Instrument
 
 	/** Creates an effect and stores it in the global `effects` table, available to be used by a track to modify its sound.
-	@param name a name that identifies the effect.
-	It can either be a WebAudio processing node or a [Tuna](https://github.com/Theodeus/tuna) effect.
-	@param newName an optional name to be used to store the effect in the global
-	`effects` table.
+	@param name a name that identifies the effect. It can either be a WebAudio processing node or a [Tuna](https://github.com/Theodeus/tuna) effect.
+	@param newName an optional name to be used to store the effect in the global `effects` table.
 	*/
 	effect(name: string, newName?: string): Effect
 
@@ -68,8 +66,7 @@ interface LiveCoding {
 	- minor
 	- minor_pentatonic
 	- chromatic
-	@param octaves An optional number indicating how mani octaves the scale
-	should cover. It defaults to 1.
+	@param octaves An optional number indicating how mani octaves the scale should cover. It defaults to 1.
 	*/
 	scale(note: number, type?: string, octaves?: number): Ring<number>
 
@@ -86,9 +83,7 @@ interface LiveCoding {
 	log_clear(): this
 
 	/** Queries or changes the global BPM (Beats Per Minute).
-	@param value if specified, the BPM is changed, and new tracks will use it as its timing rule.
-	Notice that this does not affect currently playing tracks.
-	If not specified, it returns the current BPM value.
+	@param value if specified, the BPM is changed, and new tracks will use it as its timing rule. Notice that this does not affect currently playing tracks. If not specified, it returns the current BPM value.
 	*/
 	bpm(value?: number): number | this
 
@@ -148,10 +143,8 @@ interface Instrument {
 	If a value is provided, the instrument parameter is modified, probably altering how the instrument will sound.
 	@param pname Parameter name. The parameter names of an instrument can be obtained using the paramNames method.
 	@param value Optional. If provided, the new parameter value to be set.
-	@param rampTime Optional. If provided, the parameter will be modified gradually, progressing from its current value to the new one
-	during the specified amount of time.
-	@param exponential Optional. If specified, determines whether the ramp is
-	linear (parameter set to false) or exponential (parameter set to true).
+	@param rampTime Optional. If provided, the parameter will be modified gradually, progressing from its current value to the new one during the specified amount of time.
+	@param exponential Optional. If specified, determines whether the ramp is linear (parameter set to false) or exponential (parameter set to true).
 	The default ramp is exponential, so that the ramp takes longer at smaller values.
 	 */
 	param(pname: string, value?: number,
@@ -177,10 +170,8 @@ interface Effect {
 	If a value is provided, the effect parameter is modified, probably altering how the effect transforms the sound.
 	@param pname Parameter name. The parameter names of an effect can be obtained using the paramNames method.
 	@param value Optional. If provided, the new parameter value to be set.
-	@param rampTime Optional. If provided, the parameter will be modified gradually, progressing from its current value to the new one
-	during the specified amount of time.
-	@param exponential Optional. If specified, determines whether the ramp is
-	linear (parameter set to false) or exponential (parameter set to true).
+	@param rampTime Optional. If provided, the parameter will be modified gradually, progressing from its current value to the new one during the specified amount of time.
+	@param exponential Optional. If specified, determines whether the ramp is linear (parameter set to false) or exponential (parameter set to true).
 	The default ramp is exponential, so that the ramp takes longer at smaller values.
 	 */
 	param(name: string, value?: number,
@@ -219,21 +210,17 @@ interface Track {
 	/** Sets the volume to use in the track for playing the subsequent notes. */
 	volume(v: number): this
 	/** Plays a given note.
-	@param note The note MIDI number.
-	The Note enum can be used for convenience - for example, Note.A3 is easier to remember than 57.
+	@param note The note MIDI number. The Note enum can be used for convenience - for example, Note.A3 is easier to remember than 57.
 	@param duration Optional. The time in seconds during which the note sound will be held.
 	If not specified, the default instrument.duration value is used.
-	This time should not be confused with the sleep time: a note can sound while other notes are being played.
-	The duration determines how long a note sounds,
-	while the sleep time (provided by the sleep method) determines when will the next note start.
+	This time should not be confused with the sleep time: a note can sound while other notes are being played. The duration determines how long a note sounds, while the sleep time (provided by the sleep method) determines when will the next note start.
 	@param options Optional. A NoteOptions object specifying parameter names and values to be changed in a given instrument or effect.
 	*/
 	play(note: number, duration?: number, options?: NoteOptions): this
 	/** Plays several notes in sequence or as a chord.
 	@param notes the array of notes to be played.
 	@param times Optional. If not specified, notes will be played as a chord, i.e., all at the same time.
-	If specified, notes will be played one after the other after the specified time (if parameter is a number)
-	or times (if the parameter is an array)
+	If specified, notes will be played one after the other after the specified time (if parameter is a number) or times (if the parameter is an array)
 	@param durations Optional. If specified, the duration or durations to be used for each note.
 	 */
 	play_notes(notes: number[], times?: number | number[], durations?: number | number[]): this

@@ -522,3 +522,8 @@ body.dark {
 .dark .walc-running {
 	background-color: #0A0;
 }
+
+.dark .editor-cover {
+	opacity: 0.7;
+	background-color: black;
+}
