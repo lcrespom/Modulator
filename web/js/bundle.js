@@ -4101,7 +4101,7 @@ class Track extends TrackControl {
         this.notect = 0;
         this.notes = [];
         this.time = 0;
-        this.latency = 0.1;
+        this.latency = 0.25;
         this.loop = false;
         this.loopCount = 0;
         this.velocity = 1;

@@ -69,9 +69,7 @@ If at any moment you want to immediately stop all audio, you can press the stop 
 Let's now try the following code:
 
 ```javascript
-// Load an instrument from Modulator patches and change its default name
 let i = lc.instrument('TB-303', 'lead')
-// Create a track and play 3 notes in sequence
 lc.loop_track('melody', t => t
 	.instrument(instruments.lead)
 	.play(Note.E4).sleep(0.25)
@@ -81,12 +79,65 @@ lc.loop_track('melody', t => t
 )
 ```
 
-When you run it, you will see that it loops endlesly. You can click the stop button any time to end all sound playback.
+When you run it, you will hear that it loops endlesly. You can click the stop button any time to end all sound playback. The `lc.loop_track` method is identical to `lc.track`, but creates a looping track that repeats itself over and over. Creating looping tracks and then interactively changing and manipulating them is the main technique for performing live musing, hence the ***Live Coding*** name.
 
-At any moment we have access to this looping melody track in the `tracks.melody` object. Every time a track is created, it is added to the global `tracks` object with the user-provided name.
+
+## Updating a playing track
+
+At any moment, we have access to this looping melody track in the `tracks.melody` object. Every time a track is created, it is added to the global `tracks` object with the user-provided name.
 
 Let's modify the volume of the looping track. Write the following code below the previous code:
 
 ```javascript
-tracks.melody.gain(0.1, 3)
+tracks.melody.gain(0, 5)
 ```
+
+Now place the cursor in that line and press `Ctrl+Enter` (or `Cmd+Enter` if Mac). You should notice how the track volume gradually decreases to 0 during 5 seconds.
+
+Let's now raise the volume to 0.5 in one second. Add the following line and run it:
+
+```javascript
+tracks.melody.gain(0.5, 1)
+```
+
+Finally, lets stop the track loop by running the following code:
+
+```javascript
+tracks.melody.stop()
+```
+
+You will notice that the track plays until the end of the loop, and then stops.
+
+Tracks in the `tracks` object have a different set of methods than during the track creation step
+
+
+## Replacing a looping track
+Not let's start over: click the stop button and select and run the code that creates the loop:
+
+```javascript
+lc.loop_track('melody', t => t
+	.instrument(instruments.lead)
+	.play(Note.E4).sleep(0.25)
+	.play(Note.C4).sleep(0.25)
+	.play(Note.G3).sleep(0.25)
+	.play(Note.C3).sleep(0.25)
+)
+```
+
+Now let's edit the code and change the first note, E4 into D4. Select the code block, from `lc.loop_track(...` to its matching `)` and hit `Ctrl+Enter` (or `Cmd+Enter`).
+After the current loop ends, the track melody changes accordingly.
+
+What we have just done is creating a new version of the track. The live coding engine schedules the new track to be played at the end of the current loop, and then that track keeps looping.
+
+
+
+<!--
+
+## Effects
+
+## Scales
+
+## Rings
+
+## Randomness
+-->
