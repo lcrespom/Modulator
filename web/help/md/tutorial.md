@@ -84,7 +84,7 @@ When you run it, you will hear that it loops endlesly. You can click the stop bu
 
 ## Updating a playing track
 
-At any moment, we have access to this looping melody track in the `tracks.melody` object. Every time a track is created, it is added to the global `tracks` object with the user-provided name.
+Because we have named our track `melody`, we have access to this looping melody track in the `tracks.melody` object at any time we want to use it. Every time a track is created, it is added to the global `tracks` object with the user-provided name.
 
 Let's modify the volume of the looping track. Write the following code below the previous code:
 
@@ -124,11 +124,12 @@ lc.loop_track('melody', t => t
 )
 ```
 
-Now let's edit the code and change the first note, E4 into D4. Select the code block, from `lc.loop_track(...` to its matching `)` and hit `Ctrl+Enter` (or `Cmd+Enter`).
-After the current loop ends, the track melody changes accordingly.
+Now let's edit the code and change the first note, E4, into D4. Select the code block, from `lc.loop_track(` to its matching `)` and hit `Ctrl+Enter` (or `Cmd+Enter`).
+After the current loop ends, the track melody will change accordingly.
 
 What we have just done is creating a new version of the track. The live coding engine schedules the new track to be played at the end of the current loop, and then that track keeps looping.
 
+It is important that the track name is maintained. Otherwise, a new independent track will start playing immediately.
 
 
 <!--
