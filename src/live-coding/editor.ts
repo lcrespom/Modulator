@@ -170,6 +170,7 @@ export function flashRange(range: any) {
 }
 
 export function doRunCode(code: string) {
+	random.seed(random.seed())
 	setupAnalyzers()
 	try {
 		decorations = editor.deltaDecorations(decorations, [])

@@ -255,15 +255,15 @@ You will hear all the notes of the C major scale, from C3 to C4. The parameters 
 
 
 ## Rings
-There is a lot of interesting things we can do with arrays of notes to create melodies, such as inverting them, selecting some notes at the start or end, shuffling them, etc. For that purpose, the Live Coding API provides the `Ring` class, which extends the `Array` class with additional convenient methods.
+There is a lot of interesting things we can do with arrays of notes to create melodies, such as transposing them, selecting some notes at the start or end, shuffling them, etc. For that purpose, the Live Coding API provides the `Ring` class, which extends the `Array` class with additional convenient methods.
 
-The `lc.scale` method actually returns a Ring object, not just an Array. You can also create a ring from an array by invoking its `ring()` method. For example:
+The `lc.scale` method actually returns a Ring object, not just an Array. You can also create a ring from an array by invoking its `ring()` method. For example, the following code creates a ring containing the numbers from 60 to 63:
 
 ```javascript
 let r = [60, 61, 62, 63].ring()
 ```
 
-Creates a ring containing the numbers from 60 to 63. Let's try some random notes:
+Let's play a scale:
 
 ```javascript
 lc.instrument('TB-303', 'lead')
@@ -274,7 +274,25 @@ lc.loop_track('melody', t => t
 )
 ```
 
+This loop plays all the notes in the pentatonic scale. It makes use of the `tick` method of the Ring class, which selects one element at a time and increments the counter. Once the element counter has reached the end of the array, it will go back to the start, hence the *ring* name.
 
+We can play around with ring methods for fancy melodies, for example:
+
+```javascript
+lc.instrument('TB-303', 'lead')
+instruments.lead.duration = 0.1
+let notes = lc.scale(Note.C3, 'major_pentatonic')
+lc.track('melody', t => t
+	.instrument(instruments.lead)
+	.play_notes(notes.reflect(), 0.25)
+)
+```
+
+The `reflect` method inverts the contents of the ring and appends it to its end, without repeating the last note of the original ring.
+
+Or we can replace the `notes.reflect()` call with `notes.shuffle()` which will randomly shuffle the notes of the scale. There are many more methods available that you can check in the live coding [API](#lc-definitions.ts).
+
+## Randomness
 <!--
 
 ## Logging

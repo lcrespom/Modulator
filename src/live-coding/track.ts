@@ -71,7 +71,7 @@ export class Track extends TrackControl {
 	notect = 0
 	notes: NoteInfo[] = []
 	time = 0
-	latency = 0.1
+	latency = 0.2
 	loop = false
 	loopCount = 0
 	inst: LCInstrument

@@ -2025,6 +2025,7 @@ function flashRange(range) {
     }, 100);
 }
 function doRunCode(code) {
+    __WEBPACK_IMPORTED_MODULE_4__random__["a" /* random */].seed(__WEBPACK_IMPORTED_MODULE_4__random__["a" /* random */].seed());
     setupAnalyzers();
     try {
         decorations = editor.deltaDecorations(decorations, []);
@@ -4104,7 +4105,7 @@ class Track extends TrackControl {
         this.notect = 0;
         this.notes = [];
         this.time = 0;
-        this.latency = 0.1;
+        this.latency = 0.2;
         this.loop = false;
         this.loopCount = 0;
         this.velocity = 1;
