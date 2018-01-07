@@ -33,7 +33,7 @@
 	- [ ] Merge with master
 	- [ ] Publish in GitHub pages
 	- [x] Tutorial
-	- [ ] Examples
+	- [x] Examples
 	- [x] Document API
 - Synth API
 	- [ ] Do not require an instrument for track playing
@@ -71,6 +71,7 @@
 	- [ ] Prevent instrument and effect instances to be shared across tracks
 	- [ ] Smarter code completion for parameters, effect names, etc.
 		- Use completion provider, see https://microsoft.github.io/monaco-editor/playground.html#extending-language-services-completion-provider-example
+		- Auto-complete existing instruments, effects, tracks and globals.
 - Editor
 	- [ ] Add more panels
 		- [x] osc & fft
