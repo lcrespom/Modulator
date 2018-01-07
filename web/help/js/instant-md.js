@@ -35,6 +35,7 @@ $(function() {
 			$('#mdcontent').html(marked(md))
 			for (var i = 0; i < langs.length; i++)
 				highlightCode(langs[i])
+			makeAbsoluteLinksOpenInSeparateTab()
 		})
 	}
 
@@ -46,6 +47,15 @@ $(function() {
 		})
 	}
 
+	// This function does exactly what its names says
+	function makeAbsoluteLinksOpenInSeparateTab() {
+		$('a').each((i, e) => {
+			let $e = $(e)
+			let href = $e.attr('href')
+			if (href.indexOf('://') >= 0)
+				$e.attr('target', '_blank')
+		})
+	}
 
 	//-------------------- TS Definitions parsing --------------------
 
