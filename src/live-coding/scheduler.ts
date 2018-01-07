@@ -59,7 +59,6 @@ export function eachTrack(cb: (t: Track) => void) {
 
 export function scheduleTrack(t: Track) {
 	t.startTime = t.ac.currentTime
-	t.callback(t)
 	if (tracks[t.name])
 		nextTracks[t.name] = t
 	else
@@ -121,7 +120,6 @@ function shouldTrackEnd(track: Track) {
 		tracks[track.name] = nextTrack
 		userTracks[track.name] = nextTrack
 		delete nextTracks[track.name]
-		nextTrack.callback(nextTrack)
 		return false
 	}
 	if (track.loop) {

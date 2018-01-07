@@ -3,7 +3,6 @@ import { Timer } from '../synth/timer'
 import { LCInstrument } from './instruments'
 import { Effect } from './effects'
 import { tracks, NoteInfo, NoteOptions, userTracks } from './scheduler'
-import { TrackCallback } from './live-coding';
 
 
 class TrackControl {
@@ -78,7 +77,6 @@ export class Track extends TrackControl {
 	velocity = 1
 	_effect: Effect
 	_transpose = 0
-	callback: TrackCallback
 
 	instrument(inst: LCInstrument) {
 		inst.connect(this._gain)

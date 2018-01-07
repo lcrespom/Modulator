@@ -1541,7 +1541,6 @@ function eachTrack(cb) {
 }
 function scheduleTrack(t) {
     t.startTime = t.ac.currentTime;
-    t.callback(t);
     if (tracks[t.name])
         nextTracks[t.name] = t;
     else
@@ -1604,7 +1603,6 @@ function shouldTrackEnd(track) {
         tracks[track.name] = nextTrack;
         userTracks[track.name] = nextTrack;
         delete nextTracks[track.name];
-        nextTrack.callback(nextTrack);
         return false;
     }
     if (track.loop) {
@@ -3952,8 +3950,10 @@ class LiveCoding {
         t.loop = loop;
         t.name = name;
         __WEBPACK_IMPORTED_MODULE_2__scheduler__["g" /* userTracks */][name] = t;
-        t.callback = cb;
-        onInitialized(() => Object(__WEBPACK_IMPORTED_MODULE_2__scheduler__["d" /* scheduleTrack */])(t));
+        onInitialized(() => {
+            Object(__WEBPACK_IMPORTED_MODULE_2__scheduler__["d" /* scheduleTrack */])(t);
+            cb(t);
+        });
         return this;
     }
     loop_track(name, cb) {

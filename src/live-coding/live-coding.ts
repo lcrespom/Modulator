@@ -49,8 +49,10 @@ export class LiveCoding {
 		t.loop = loop
 		t.name = name
 		userTracks[name] = t
-		t.callback = cb
-		onInitialized(() => scheduleTrack(t))
+		onInitialized(() => {
+			scheduleTrack(t)
+			cb(t)
+		})
 		return this
 	}
 
