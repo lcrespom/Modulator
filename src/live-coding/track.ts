@@ -3,6 +3,7 @@ import { Timer } from '../synth/timer'
 import { LCInstrument } from './instruments'
 import { Effect } from './effects'
 import { tracks, NoteInfo, NoteOptions, userTracks } from './scheduler'
+import { TrackCallback } from './live-coding';
 
 
 class TrackControl {
@@ -77,14 +78,18 @@ export class Track extends TrackControl {
 	velocity = 1
 	_effect: Effect
 	_transpose = 0
+	callback: TrackCallback
+	playing = false
 
 	instrument(inst: LCInstrument) {
+		if (this.playing) return this
 		inst.connect(this._gain)
 		this.inst = inst
 		return this
 	}
 
 	effect(e: Effect) {
+		if (this.playing) return this
 		let dst = this._effect ? this._effect.output : this._gain
 		dst.disconnect()
 		dst.connect(e.input)

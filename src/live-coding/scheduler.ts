@@ -63,6 +63,8 @@ export function scheduleTrack(t: Track) {
 		nextTracks[t.name] = t
 	else
 		tracks[t.name] = t
+	t.callback(t)
+	t.playing = true
 }
 
 function playTrack(timer: Timer, track: Track, time: number) {
@@ -127,6 +129,9 @@ function shouldTrackEnd(track: Track) {
 			`Track [log-track|${track.name}] has looped`))
 		track.startTime += track.time
 		track.loopCount++
+		track.notes = []
+		track.time = 0
+		track.callback(track)
 		return false
 	}
 	else {

@@ -1545,6 +1545,8 @@ function scheduleTrack(t) {
         nextTracks[t.name] = t;
     else
         tracks[t.name] = t;
+    t.callback(t);
+    t.playing = true;
 }
 function playTrack(timer, track, time) {
     let played;
@@ -1609,6 +1611,9 @@ function shouldTrackEnd(track) {
         Object(__WEBPACK_IMPORTED_MODULE_0__log__["d" /* logToPanel */])(false, true, Object(__WEBPACK_IMPORTED_MODULE_0__log__["e" /* txt2html */])(`Track [log-track|${track.name}] has looped`));
         track.startTime += track.time;
         track.loopCount++;
+        track.notes = [];
+        track.time = 0;
+        track.callback(track);
         return false;
     }
     else {
@@ -3950,10 +3955,8 @@ class LiveCoding {
         t.loop = loop;
         t.name = name;
         __WEBPACK_IMPORTED_MODULE_2__scheduler__["g" /* userTracks */][name] = t;
-        onInitialized(() => {
-            Object(__WEBPACK_IMPORTED_MODULE_2__scheduler__["d" /* scheduleTrack */])(t);
-            cb(t);
-        });
+        t.callback = cb;
+        onInitialized(() => Object(__WEBPACK_IMPORTED_MODULE_2__scheduler__["d" /* scheduleTrack */])(t));
         return this;
     }
     loop_track(name, cb) {
@@ -4106,13 +4109,18 @@ class Track extends TrackControl {
         this.loopCount = 0;
         this.velocity = 1;
         this._transpose = 0;
+        this.playing = false;
     }
     instrument(inst) {
+        if (this.playing)
+            return this;
         inst.connect(this._gain);
         this.inst = inst;
         return this;
     }
     effect(e) {
+        if (this.playing)
+            return this;
         let dst = this._effect ? this._effect.output : this._gain;
         dst.disconnect();
         dst.connect(e.input);
