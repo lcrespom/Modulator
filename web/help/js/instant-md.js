@@ -36,6 +36,7 @@ $(function() {
 			for (var i = 0; i < langs.length; i++)
 				highlightCode(langs[i])
 			makeAbsoluteLinksOpenInSeparateTab()
+			makeTOC($('#toc-list'))
 		})
 	}
 
@@ -55,6 +56,20 @@ $(function() {
 			if (href.indexOf('://') >= 0)
 				$e.attr('target', '_blank')
 		})
+	}
+
+	function makeTOC(toc) {
+		toc.empty()
+		$('h2').each((i, e) => {
+			let $e = $(e)
+			let item = $('<li>'	+ $e.text() + '</a></li>')
+			toc.append(item)
+			item.click(_ => e.scrollIntoView())
+		})
+		if ($('h2').length > 0)
+			$('#in-this-page').show()
+		else
+			$('#in-this-page').hide()
 	}
 
 	//-------------------- TS Definitions parsing --------------------

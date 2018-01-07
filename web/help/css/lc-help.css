@@ -1,5 +1,38 @@
+#main {
+	position: relative;
+}
+
+#toc {
+	position: fixed;
+	width: 10rem;
+	padding-right: 1rem;
+	border-right: 2px solid #eee;
+	height: calc(100% - 2rem);
+	overflow-y: auto;
+}
+
+#toc-list, #toc-pages {
+	list-style: none;
+	padding-left: 1ex;
+	padding-top: 1rem;
+}
+
+#content {
+	position: absolute;
+	left: 12rem;
+	width: calc(100% - 12rem);
+}
+
 #mdcontent {
+	max-width: 48rem;
 	padding: 0 1ex;
+	margin: 0 auto;
+}
+
+#toc-list > li {
+	margin-bottom: 1ex;
+	color: #3498db;
+	cursor: pointer;
 }
 
 pre {

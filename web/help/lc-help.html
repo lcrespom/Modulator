@@ -20,8 +20,21 @@
 	<script src="js/instant-md.js"></script>
 </head>
 <body>
-	<div id="mdcontent"></div>
-	<div style="height: 30ex"></div>
+	<div id="main">
+		<div id="toc">
+			<b>Pages</b>
+			<ul id="toc-pages">
+				<li><a href="#about">About</a></li>
+				<li><a href="#tutorial">Tutorial</a></li>
+				<li><a href="#lc-definitions.ts">API reference</a></li>
+			</ul>
+			<b id="in-this-page">In this page</b>
+			<ul id="toc-list"></ul>
+		</div>
+		<div id="content">
+			<div id="mdcontent"></div>
+		</div>
+	</div>
 </body>
 
 </html>
