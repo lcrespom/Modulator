@@ -32,7 +32,7 @@
 - Document and publish
 	- [ ] Merge with master
 	- [ ] Publish in GitHub pages
-	- [ ] Tutorial
+	- [x] Tutorial
 	- [ ] Examples
 	- [x] Document API
 - Synth API

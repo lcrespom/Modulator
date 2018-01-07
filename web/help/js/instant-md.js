@@ -147,7 +147,7 @@ $(function() {
 	//-------------------- Load initial content --------------------
 
 	if (location.hash == '')
-		location.hash = '#tutorial'
+		location.hash = '#about'
 	else
 		loadMD(location.hash.substr(1))
 })
