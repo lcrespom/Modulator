@@ -82,8 +82,8 @@ export class Track extends TrackControl {
 	playing = false
 
 	instrument(inst: LCInstrument) {
-		if (this.playing) return this
-		inst.connect(this._gain)
+		if (!this.playing)
+			inst.connect(this._gain)
 		this.inst = inst
 		return this
 	}
