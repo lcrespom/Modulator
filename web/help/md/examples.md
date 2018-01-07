@@ -47,7 +47,7 @@ lc.loop_track('left_hand', t => t
 )
 ```
 
-## Rythm box
+## Rhythm box
 
 ```javascript
 lc.bpm(100)
