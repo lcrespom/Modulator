@@ -1540,6 +1540,8 @@ function eachTrack(cb) {
         cb(tracks[tname]);
 }
 function scheduleTrack(t) {
+    t.startTime = t.ac.currentTime;
+    t.callback(t);
     if (tracks[t.name])
         nextTracks[t.name] = t;
     else
@@ -1602,6 +1604,7 @@ function shouldTrackEnd(track) {
         tracks[track.name] = nextTrack;
         userTracks[track.name] = nextTrack;
         delete nextTracks[track.name];
+        nextTrack.callback(nextTrack);
         return false;
     }
     if (track.loop) {
@@ -3949,10 +3952,8 @@ class LiveCoding {
         t.loop = loop;
         t.name = name;
         __WEBPACK_IMPORTED_MODULE_2__scheduler__["g" /* userTracks */][name] = t;
-        onInitialized(() => {
-            Object(__WEBPACK_IMPORTED_MODULE_2__scheduler__["d" /* scheduleTrack */])(t);
-            cb(t);
-        });
+        t.callback = cb;
+        onInitialized(() => Object(__WEBPACK_IMPORTED_MODULE_2__scheduler__["d" /* scheduleTrack */])(t));
         return this;
     }
     loop_track(name, cb) {
@@ -4056,7 +4057,6 @@ class TrackControl {
         this._gain = ac.createGain();
         this._gain.connect(out);
         this.lastGain = this._gain.gain.value;
-        this.startTime = this.ac.currentTime;
     }
     mute() {
         this.lastGain = this._gain.gain.value;
@@ -4101,7 +4101,7 @@ class Track extends TrackControl {
         this.notect = 0;
         this.notes = [];
         this.time = 0;
-        this.latency = 0.25;
+        this.latency = 0.1;
         this.loop = false;
         this.loopCount = 0;
         this.velocity = 1;

@@ -3,6 +3,7 @@ import { Timer } from '../synth/timer'
 import { LCInstrument } from './instruments'
 import { Effect } from './effects'
 import { tracks, NoteInfo, NoteOptions, userTracks } from './scheduler'
+import { TrackCallback } from './live-coding';
 
 
 class TrackControl {
@@ -18,7 +19,6 @@ class TrackControl {
 		this._gain = ac.createGain()
 		this._gain.connect(out)
 		this.lastGain = this._gain.gain.value
-		this.startTime = this.ac.currentTime
 	}
 
 	mute() {
@@ -71,13 +71,14 @@ export class Track extends TrackControl {
 	notect = 0
 	notes: NoteInfo[] = []
 	time = 0
-	latency = 0.25
+	latency = 0.1
 	loop = false
 	loopCount = 0
 	inst: LCInstrument
 	velocity = 1
 	_effect: Effect
 	_transpose = 0
+	callback: TrackCallback
 
 	instrument(inst: LCInstrument) {
 		inst.connect(this._gain)
