@@ -290,12 +290,16 @@ lc.track('melody', t => t
 
 The `reflect` method inverts the contents of the ring and appends it to its end, without repeating the last note of the original ring.
 
-Or we can replace the `notes.reflect()` call with `notes.shuffle()` which will randomly shuffle the notes of the scale. There are many more methods available that you can check in the live coding [API](#lc-definitions.ts).
+Or we can replace the `notes.reflect()` call with `notes.shuffle()` which will randomly shuffle the notes of the scale. There are many more ring manipulation methods available that you can check in the live coding [API](#lc-definitions.ts).
+
 
 ## Randomness
-<!--
 
-## Logging
+We have seen that the `shuffle` method randomly reorders the elements of a ring.
+We also have the `choose` method, which randomly selects an element.
 
-## Randomness
--->
+There is a `random` object that is avaliable for generating random numbers. For example, `random.integer(50, 70)` returns a random integer between 50 and 70, both inclusive. Or you can call `random.dice(6)` to get a random number between 1 and 6. As usual, you can check the [API](#lc-definitions.ts) for all the available methods.
+
+For music composition, randomness is helpful, but once we have found a nice random pattern, we want to be able to repeat it again. That is why Modulator uses a predictable random number generator, which is reset every time some code is run.
+
+So if you run a track containing `notes.shuffle()` and then run it again, it will shuffle the notes exactly the same way as before. If you want it to shuffle differently, you must call `random.seed` and pass it an arbitrary seed number, such as `random.seed(123)`. You will then see that your notes are shuffled differently, but every time you run the same code the shuffling will be identical. And that is convenient, because once we have found an intreresting random melody after testing different seed values, we will want to keep it.
