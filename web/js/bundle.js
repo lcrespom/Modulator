@@ -4463,7 +4463,7 @@ class WavetableInstrument {
     noteOn(midi, velocity, when) {
         if (when === undefined)
             when = this.ctx.currentTime;
-        let envelope = wtPlayer.queueWaveTable(this.ctx, this.destination, this.preset, when, midi, 9999);
+        let envelope = wtPlayer.queueWaveTable(this.ctx, this.destination, this.preset, when, midi, 9999, velocity);
         this.envelopes[midi] = envelope;
     }
     noteOff(midi, velocity, when) {
@@ -4494,13 +4494,8 @@ class WavetableInstrument {
     }
     getURL(name, suffix) {
         // The following files have both _sf2 and _sf2_file ending:
-        // 0280_LesPaul
-        // 0290_LesPaul
-        // 0291_LesPaul
-        // 0292_LesPaul
-        // 0300_LesPaul
-        // 0301_LesPaul
-        // 0310_LesPaul
+        // 		0280_LesPaul, 0290_LesPaul, 0291_LesPaul, 0292_LesPaul
+        // 		0300_LesPaul, 0301_LesPaul, 0310_LesPaul
         // Therefore it is better to load them using their full name
         if (!name.endsWith('_sf2_file') && !name.endsWith('_sf2'))
             name += suffix;

@@ -214,7 +214,7 @@ class WavetableInstrument implements LCInstrument {
 	noteOn(midi: number, velocity: number, when?: number): void {
 		if (when === undefined) when = this.ctx.currentTime
 		let envelope = wtPlayer.queueWaveTable(
-			this.ctx, this.destination, this.preset, when, midi, 9999
+			this.ctx, this.destination, this.preset, when, midi, 9999, velocity
 		)
 		this.envelopes[midi] = envelope
 	}
@@ -246,13 +246,8 @@ class WavetableInstrument implements LCInstrument {
 
 	private getURL(name: string, suffix: string) {
 		// The following files have both _sf2 and _sf2_file ending:
-		// 0280_LesPaul
-		// 0290_LesPaul
-		// 0291_LesPaul
-		// 0292_LesPaul
-		// 0300_LesPaul
-		// 0301_LesPaul
-		// 0310_LesPaul
+		// 		0280_LesPaul, 0290_LesPaul, 0291_LesPaul, 0292_LesPaul
+		// 		0300_LesPaul, 0301_LesPaul, 0310_LesPaul
 		// Therefore it is better to load them using their full name
 		if (!name.endsWith('_sf2_file') && !name.endsWith('_sf2'))
 			name += suffix
