@@ -13,7 +13,8 @@
 
 #toc-list, #toc-pages {
 	list-style: none;
-	padding-left: 1ex;
+	padding-left: 1.5em;
+	text-indent: -1em;
 	padding-top: 1rem;
 }
 
@@ -33,6 +34,7 @@
 	margin-bottom: 1ex;
 	color: #3498db;
 	cursor: pointer;
+	line-height: 2.3ex;
 }
 
 pre {
