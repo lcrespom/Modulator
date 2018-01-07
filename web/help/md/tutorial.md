@@ -233,11 +233,51 @@ lc.loop_track('melody', t => t
 Notice the difference? You can play with the parameters to change the delay times, mix levels, etc. The parameter names are specified in the same page where the effects are documented.
 
 
-<!--
-
 ## Scales
+Although the tutorial has not explained the `track.play_notes` method, it has been used in a couple of examples; `play_notes` is similar to `play`, but instead of a single note it accepts an array of notes, and an optional time or array of times.
+
+For example, `track.playNotes([Note.C3, Note.E3], 1)` will play C3 and E3 in sequence, separated by 1 second time. If no time parameter is specified, then all notes are played at the same time, that is, as a chord.
+
+The `lc.scale` method can be used to create arrays of notes according to a given scale. Let's try the following code:
+
+```javascript
+lc.instrument('Bells', 'bells')
+lc.track('melody', t => t
+    .instrument(instruments.bells)
+    .play_notes(lc.scale(Note.C3), 0.8)
+)
+```
+
+You will hear all the notes of the C major scale, from C3 to C4. The parameters of `lc.scale` are the following:
+- A mandatory note number
+- An optional scale name, either "major", "minor", "major_pentatonic", "minor\_pentatonic" and "chromatic". It defaults to "major".
+- An optional number of octaves, defaulting to 1.
+
 
 ## Rings
+There is a lot of interesting things we can do with arrays of notes to create melodies, such as inverting them, selecting some notes at the start or end, shuffling them, etc. For that purpose, the Live Coding API provides the `Ring` class, which extends the `Array` class with additional convenient methods.
+
+The `lc.scale` method actually returns a Ring object, not just an Array. You can also create a ring from an array by invoking its `ring()` method. For example:
+
+```javascript
+let r = [60, 61, 62, 63].ring()
+```
+
+Creates a ring containing the numbers from 60 to 63. Let's try some random notes:
+
+```javascript
+lc.instrument('TB-303', 'lead')
+let notes = lc.scale(Note.C3, 'major_pentatonic')
+lc.loop_track('melody', t => t
+	.instrument(instruments.lead)
+	.play(notes.tick()).sleep(0.5)
+)
+```
+
+
+<!--
+
+## Logging
 
 ## Randomness
 -->
