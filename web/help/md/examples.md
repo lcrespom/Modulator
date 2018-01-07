@@ -47,6 +47,57 @@ lc.loop_track('left_hand', t => t
 )
 ```
 
+## Rythm box
+
+```javascript
+lc.bpm(100)
+lc.instrument('wavetable/12835_0_Chaos_sf2_file', 'drum')
+lc.instrument('wavetable/12839_0_Chaos_sf2_file', 'clap')
+lc.instrument('wavetable/12842_0_Chaos_sf2_file', 'chihat')
+lc.instrument('wavetable/12846_0_Chaos_sf2_file', 'ohihat')
+for (let i in instruments) instruments[i].duration = 1
+
+function cleanup_patts(patts) {
+    for (let i in patts) patts[i] = patts[i].replace(/ /g, '')
+}
+
+function isLowerCase(ch) {
+    return ch >= 'a' && ch <= 'z'
+}
+
+function playPatterns(t, patts, notes) {
+    let ct = 0
+    cleanup_patts(patts)
+    let played = true
+    while (played) {
+        played = false
+        for (let iname in patts) {
+            let patt = patts[iname]
+            let ch = patt[ct]
+            if (ch && ch != '-') t
+                .instrument(instruments[iname])
+                .volume(isLowerCase(ch) ? 0.5 : 1)
+                .play(notes[iname])
+            if (ch)
+                played = true
+        }
+        if (played) t.sleep(0.25)
+        ct += 1
+    }
+}
+
+lc.loop_track('drums', t =>
+    playPatterns(t, {
+        drum:   'X--- x--- X--- x---',
+        clap:   '---- X--- ---- X---',
+        chihat: '-x-- -x-x -x-- xxxx',
+        ohihat: '---x ---- ---x ----'
+    }, {
+        drum: 35, clap: 39, chihat: 42, ohihat: 46
+    })
+)
+```
+
 
 ## Blade Runner - Vangelis
 
