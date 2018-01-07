@@ -69,7 +69,7 @@ If at any moment you want to immediately stop all audio, you can press the stop 
 Let's now try the following code:
 
 ```javascript
-let i = lc.instrument('TB-303', 'lead')
+lc.instrument('TB-303', 'lead')
 lc.loop_track('melody', t => t
 	.instrument(instruments.lead)
 	.play(Note.E4).sleep(0.25)
@@ -131,6 +131,55 @@ What we have just done is creating a new version of the track. The live coding e
 
 It is important that the track name is maintained. Otherwise, a new independent track will start playing immediately.
 
+## Multiple tracks
+
+Now, play the previous loop again, and while it is playing copy and run the following code:
+
+```javascript
+lc.instrument('Tesla', 'bass')
+lc.loop_track('bassLine', t => t
+    .instrument(instruments.bass)
+    .play(Note.C3).sleep(2)
+    .play(Note.G3).sleep(2)
+)
+```
+
+You can hear two independent instruments playing independent loops. By calling `lc.track` or `lc.loop_track` multiple times and using different track names, we can create multi-track songs. Each track can then be controlled independently using the `tracks.`*`track_name`* property, where *`track_name`* is the name given to the track in the `lc.track` or `lc.loop_track` call.
+
+## Instruments
+
+In the examples above we have seen that instruments are created by calling `lc.instrument` and are assigned to tracks by calling `track.instrument`.
+
+In the examples above, we have created instruments by providing a *patch name* to the `lc.instrument` call, e.g. `'Fat Bass'` or `'TB-303'`. The names of these patches correspond to the patches you find in the Modulator [Synth](../#synth) page. You can also provide the patch number, e.g. `lc.instrument(2, 'lead')` will create an instrument from patch number `2` and store it in `instruments.lead`.
+
+### General Midi standard instruments
+You can design great sounds with Modulator's synthesizer. But if you want immediately available instruments, you can also use [General Midi](https://en.wikipedia.org/wiki/General_MIDI) standard instruments. Since those instruments are created from tables of pre-recorded waves, their instrument names are prefixed with `wavetable/` and followed by a standard General Midi number (and then some extra text that we'll explain later). Let's see an example:
+
+```javascript
+lc.instrument('wavetable/0000_Aspirin', 'piano')
+instruments.piano.duration = 3
+let chord = [Note.C3, Note.E3, Note.G3]
+lc.track('wavetable_test', t => t
+    .instrument(instruments.piano)
+    .play_notes(chord, 0.5)
+    .sleep(0.5)
+    .play_notes(chord)
+)
+```
+
+If you try that code out, you will hear it sounds just like a real piano. That is because the instrument is created by recording the sound of a real piano at different pitches. This technique is called [Wavetable Synthesis](https://en.wikipedia.org/wiki/Wavetable_synthesis).
+
+The General Midi standard defines 128 different instruments and 47 different percussion sounds. Modulator is taking advantage of the great [WebAudioFont](https://surikov.github.io/webaudiofont/) library by [Srgy Surkv](https://github.com/surikov), which maintains a curated list of GM instruments from different synthesizer models.
+
+How do we know which instrument names are available to use in our `lc.instrument` calls? The (long) list of all possible instrument names is available in [this page](https://surikov.github.io/webaudiofontdata/sound/). For example, for the first instrument, **Acoustic Grand Piano: Piano**, we have 11 different versions of the same sound: `0000_Aspirin_sf2_file`, `0000_Chaos_sf2_file`, etc.
+
+You can play the different instruments in that page and once you have decided for one, just use the instrument name with the `wavetable/` prefix and without the `.html` suffix. For example:
+
+```javascript
+lc.instrument('wavetable/0750_Chaos', 'flute')
+```
+
+Loads a pan flute sound and stores it in `instruments.flute`.
 
 <!--
 
