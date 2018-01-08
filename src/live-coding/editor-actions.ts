@@ -1,6 +1,7 @@
 import { doRunCode, flashRange } from './editor'
 import { LiveCoding } from './live-coding'
 import { prevBuffer, nextBuffer } from './editor-buffers'
+import { loadSamples } from './instruments'
 
 
 export function registerActions(editor: any) {
@@ -89,10 +90,10 @@ function registerDnD() {
 		e.preventDefault()
 		e.stopPropagation()
 	})
-	.on('drop', e => console.log(
-		// TODO: gather sample data and prepare buffers
-		(<DragEvent>e.originalEvent).dataTransfer.files
-	))
+	.on('drop', e => {
+		let files = (<DragEvent>e.originalEvent).dataTransfer.files
+		loadSamples(files)
+	})
 }
 
 

@@ -55,6 +55,8 @@ function upload(event: JQuery.Event, cb: UploadCallback, readFunc: string) {
 	if (!files || files.length <= 0) return cb('', '')
 	const file = files[0]
 	const reader = new FileReader()
-	reader.onload = (loadEvt: any)  => cb(loadEvt.target.result, file);
+	reader.onload = (loadEvt: any) => cb(loadEvt.target.result, file);
+	// let func = (<any>reader)[readFunc]
+	// func.bind(reader)(file)
 	(<any>reader)[readFunc](file)
 }

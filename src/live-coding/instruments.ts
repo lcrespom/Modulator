@@ -2,7 +2,7 @@ import { Instrument } from '../synth/instrument'
 import { Presets } from '../synthUI/presets'
 import { LiveCoding } from './live-coding'
 import { WebAudioFontPlayer } from '../third-party/wavetable'
-import { logToPanel, txt2html } from './log';
+import { logToPanel, txt2html } from './log'
 
 
 export interface LCInstrument {
@@ -30,8 +30,10 @@ interface InstrProviderTable {
 
 let providers: InstrProviderTable = {
 	Modulator: modulatorInstrProvider,
-	wavetable: wavetableInstrProvider
+	wavetable: wavetableInstrProvider,
+	sample: sampleInstrProvider
 }
+
 
 export function registerProvider(prefix: string, provider: InstrumentProvider) {
 	providers[prefix] = provider
@@ -71,6 +73,15 @@ function wavetableInstrProvider(
 	name?: string,
 	numVoices = 4) {
 	let instr = new WavetableInstrument(lc.context, preset, name)
+	return instr
+}
+
+function sampleInstrProvider(
+	lc: LiveCoding,
+	preset: string,
+	name?: string,
+	numVoices = 4) {
+	let instr = new SampleInstrument(lc.context, preset, name)
 	return instr
 }
 
@@ -267,3 +278,89 @@ class WavetableInstrument implements LCInstrument {
 }
 
 let wtPlayer = new WebAudioFontPlayer()
+
+
+// ------------------------- Samples -------------------------
+
+type SampleTable = { [name: string]: AudioBuffer }
+
+let samples: SampleTable = {}
+let context = new AudioContext()
+
+function log(txt: string) {
+	return logToPanel(true, true, txt2html(txt))
+}
+
+export function loadSamples(files: FileList) {
+	for (let i = 0; i < files.length; i++)
+		loadSample(files[i])
+}
+
+async function loadSample(file: File) {
+	if (!file.type.startsWith('audio/'))
+		return log(`[log-bold|Error]: file ${file.name} is not an audio file`)
+	let fname = removeExtension(file.name)
+	log(`Loading sample [log-instr|${fname}]...`)
+	let data = await readSampleFile(file)
+	let buffer = await decodeSample(data)
+	samples[fname] = buffer
+	log(`Sample [log-instr|${fname}] ready`)
+}
+
+async function readSampleFile(file: File) {
+	return new Promise<ArrayBuffer>(resolve => {
+		let reader = new FileReader()
+		reader.onload = (loadEvt: any) => resolve(loadEvt.target.result)
+		reader.readAsArrayBuffer(file)
+	})
+}
+
+async function decodeSample(data: ArrayBuffer) {
+	return new Promise<AudioBuffer>(resolve => {
+		context.decodeAudioData(data, resolve)
+	})
+}
+
+function removeExtension(fname: string) {
+	let pos = fname.lastIndexOf('.')
+	if (pos <= 0) return fname
+	return fname.substr(0, pos)
+}
+
+
+class SampleInstrument implements LCInstrument {
+	name: string
+	duration: number
+
+	constructor(public ctx: AudioContext, preset: string, name?: string) {
+		this.name = name || preset
+		// TODO create buffer node from samples[preset]
+	}
+
+	param(pname: string, value?: number,
+		rampTime?: number, exponential?: boolean): number | this {
+		// TODO implement
+		return this
+	}
+
+	paramNames() {
+		// TODO implement
+		let pnames: string[] = []
+		return pnames
+	}
+
+	noteOn(midi: number, velocity: number, when?: number) {
+
+	}
+
+	noteOff(midi: number, velocity: number, when?: number) {
+
+	}
+
+	connect(node: AudioNode) {
+
+	}
+
+	initialize() {}
+	shutdown() {}
+}

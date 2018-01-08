@@ -205,6 +205,8 @@ function upload(event, cb, readFunc) {
     const file = files[0];
     const reader = new FileReader();
     reader.onload = (loadEvt) => cb(loadEvt.target.result, file);
+    // let func = (<any>reader)[readFunc]
+    // func.bind(reader)(file)
     reader[readFunc](file);
 }
 
@@ -4356,6 +4358,7 @@ function createEffect(ac, name) {
 "use strict";
 /* unused harmony export registerProvider */
 /* harmony export (immutable) */ __webpack_exports__["a"] = createInstrument;
+/* harmony export (immutable) */ __webpack_exports__["b"] = loadSamples;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_instrument__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__third_party_wavetable__ = __webpack_require__(50);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__log__ = __webpack_require__(13);
@@ -4372,7 +4375,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 
 let providers = {
     Modulator: modulatorInstrProvider,
-    wavetable: wavetableInstrProvider
+    wavetable: wavetableInstrProvider,
+    sample: sampleInstrProvider
 };
 function registerProvider(prefix, provider) {
     providers[prefix] = provider;
@@ -4399,6 +4403,10 @@ function modulatorInstrProvider(lc, // This is ugly and should be refactored
 }
 function wavetableInstrProvider(lc, preset, name, numVoices = 4) {
     let instr = new WavetableInstrument(lc.context, preset, name);
+    return instr;
+}
+function sampleInstrProvider(lc, preset, name, numVoices = 4) {
+    let instr = new SampleInstrument(lc.context, preset, name);
     return instr;
 }
 // ------------------------- Modulator instrument -------------------------
@@ -4560,6 +4568,73 @@ class WavetableInstrument {
     }
 }
 let wtPlayer = new __WEBPACK_IMPORTED_MODULE_1__third_party_wavetable__["a" /* WebAudioFontPlayer */]();
+let samples = {};
+let context = new AudioContext();
+function log(txt) {
+    return Object(__WEBPACK_IMPORTED_MODULE_2__log__["e" /* logToPanel */])(true, true, Object(__WEBPACK_IMPORTED_MODULE_2__log__["f" /* txt2html */])(txt));
+}
+function loadSamples(files) {
+    for (let i = 0; i < files.length; i++)
+        loadSample(files[i]);
+}
+function loadSample(file) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!file.type.startsWith('audio/'))
+            return log(`[log-bold|Error]: file ${file.name} is not an audio file`);
+        let fname = removeExtension(file.name);
+        log(`Loading sample [log-instr|${fname}]...`);
+        let data = yield readSampleFile(file);
+        let buffer = yield decodeSample(data);
+        samples[fname] = buffer;
+        log(`Sample [log-instr|${fname}] ready`);
+    });
+}
+function readSampleFile(file) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise(resolve => {
+            let reader = new FileReader();
+            reader.onload = (loadEvt) => resolve(loadEvt.target.result);
+            reader.readAsArrayBuffer(file);
+        });
+    });
+}
+function decodeSample(data) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise(resolve => {
+            context.decodeAudioData(data, resolve);
+        });
+    });
+}
+function removeExtension(fname) {
+    let pos = fname.lastIndexOf('.');
+    if (pos <= 0)
+        return fname;
+    return fname.substr(0, pos);
+}
+class SampleInstrument {
+    constructor(ctx, preset, name) {
+        this.ctx = ctx;
+        this.name = name || preset;
+        // TODO create buffer node from samples[preset]
+    }
+    param(pname, value, rampTime, exponential) {
+        // TODO implement
+        return this;
+    }
+    paramNames() {
+        // TODO implement
+        let pnames = [];
+        return pnames;
+    }
+    noteOn(midi, velocity, when) {
+    }
+    noteOff(midi, velocity, when) {
+    }
+    connect(node) {
+    }
+    initialize() { }
+    shutdown() { }
+}
 
 
 /***/ }),
@@ -4570,6 +4645,8 @@ let wtPlayer = new __WEBPACK_IMPORTED_MODULE_1__third_party_wavetable__["a" /* W
 /* harmony export (immutable) */ __webpack_exports__["a"] = registerActions;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__editor__ = __webpack_require__(16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__editor_buffers__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__instruments__ = __webpack_require__(34);
+
 
 
 function registerActions(editor) {
@@ -4656,9 +4733,10 @@ function registerDnD() {
         e.preventDefault();
         e.stopPropagation();
     })
-        .on('drop', e => console.log(
-    // TODO: gather sample data and prepare buffers
-    e.originalEvent.dataTransfer.files));
+        .on('drop', e => {
+        let files = e.originalEvent.dataTransfer.files;
+        Object(__WEBPACK_IMPORTED_MODULE_2__instruments__["b" /* loadSamples */])(files);
+    });
 }
 class EditorActions {
     constructor(editor) {
