@@ -50,7 +50,7 @@ lc.track('bass_line', t => t
 Both versions of the code have the same effect; it is a user's choice which one to use.
 
 The calls to `play` and `sleep` track methods inside the user function are used to schedule notes to be played by the track at their appropriate times:
-- The `play` method is used to specify the note number to be played. The method expects a note number, but the `Note` object stores the numbers of all notes from C0 to B8. Sharps and flats are also available. For example, `Note.Cs4` stands for C sharp, octave 4, and `Note.Bb3` stands for B flat, octave 3.
+- The `play` method is used to specify the note to be played. The method expects a note number, but the `Note` object stores the numbers of all notes from C0 to B8. Sharps and flats are also available. For example, `Note.Cs4` stands for C sharp, octave 4, and `Note.Bb3` stands for B flat, octave 3.
 - The `sleep` method is used to specify the time, in seconds, to wait until the next note is played.
 
 The live coding engine sets up a background process that is continuously checking what is the note to play at a given time.
