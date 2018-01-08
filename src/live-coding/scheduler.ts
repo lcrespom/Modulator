@@ -4,7 +4,7 @@ import { LCInstrument } from './instruments'
 import { Effect } from './effects'
 import { Track } from './track'
 import { Timer } from '../synth/timer'
-import { logNote, logToPanel, txt2html } from './log'
+import { logNote, logToPanel, logEvent } from './log'
 
 
 interface InstrumentOptions {
@@ -125,18 +125,19 @@ function shouldTrackEnd(track: Track) {
 		return false
 	}
 	if (track.loop) {
-		logToPanel(false, true, txt2html(
-			`Track [log-track|${track.name}] has looped`))
 		track.startTime += track.time
 		track.loopCount++
+		logEvent(track, `Track [log-track|${track.name}] has looped`)
 		track.notes = []
 		track.time = 0
 		track.callback(track)
 		return false
 	}
 	else {
-		logToPanel(false, true, txt2html(
-			`Track [log-track|${track.name}] has ended`))
+		// Update latency and loopCount just for the sake of logEvent
+		track.latency = 0
+		track.loopCount++
+		logEvent(track, `Track [log-track|${track.name}] has ended`)
 		delete tracks[track.name]
 		delete userTracks[track.name]
 		return true

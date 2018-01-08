@@ -37,6 +37,7 @@ export function clearLog() {
 }
 
 export function logNote(note: NoteInfo, track: Track) {
+	let time = formatTime(track, note)
 	let noteName = (<any>Note)[note.number]
 	if (noteName && noteName.length < 3) noteName += ' '
 	let snote = noteName
@@ -45,8 +46,27 @@ export function logNote(note: NoteInfo, track: Track) {
 	let sinstr = `[log-instr|${note.instrument.name}]`
 	let strack = `[log-track|${track.name}]`
 	logToPanel(false, true, txt2html(
-		`Note: ${snote} ${sinstr} ${strack}`
+		`${time} - Note: ${snote} ${sinstr} ${strack}`
 	))
+}
+
+export function logEvent(track: Track, txt: string) {
+	let time = formatTime(track)
+	logToPanel(false, true, txt2html(`${time} - ${txt}`))
+}
+
+function formatTime(track: Track, note?: NoteInfo) {
+	let ntime = note ? note.time : 0
+	let t = ntime + track.time * track.loopCount - track.latency
+	let millis = (t % 1)
+	let smillis = millis.toLocaleString(undefined, {
+		minimumFractionDigits: 3, maximumFractionDigits: 3
+	}).substr(2)
+	t = Math.floor(t)
+	let secs = (t % 60)
+	let ssecs = secs.toLocaleString(undefined, { minimumIntegerDigits: 2 })
+	let mins = Math.floor(t / 60)
+	return `[log-time|${mins}:${ssecs}.${smillis}]`
 }
 
 function ffTweak() {

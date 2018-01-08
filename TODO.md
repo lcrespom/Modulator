@@ -78,7 +78,7 @@
 		- [x] osc & fft
 		- [x] log
 			- [x] Colors in logs, e.g. note data
-			- [ ] Trace event time information in 00:00.000 format
+			- [x] Trace event time information in 00:00.000 format
 			- [ ] Log more events: instr/track/effect creation, etc
 			- [ ] Make log_enable receive two parameters: `log_notes` and `log_events`
 		- [ ] Info

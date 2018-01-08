@@ -171,7 +171,6 @@ function WebAudioFontPlayerConstructor() {
 			}
 			this.envelopes.push(envelope)
 		}
-		console.log('---', this.envelopes.length)
 		return envelope
 	}
 

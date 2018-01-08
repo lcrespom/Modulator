@@ -489,6 +489,10 @@ input[type=range][orient=vertical] {
 	color: #F92672;
 }
 
+.log-time {
+	color: purple;
+}
+
 /*----- Dark theme -----*/
 
 body.dark {
@@ -517,6 +521,11 @@ body.dark {
 
 .dark .log-track {
 	color: #66D9EF;
+}
+
+.dark .log-time {
+	/* color: #A6E22E; */
+	color: #FD971F;
 }
 
 .dark .walc-running {
