@@ -130,8 +130,9 @@ let i_lead = lc.instrument(p_lead)
 
 lc.track('lead', t => t
     .instrument(i_lead)
+    .volume(0.5)
     .transpose(18)
-    .sleep(9.5)
+    .sleep(12)
     .play(64, 3).sleep(4)
     .play(62).sleep(2)
     .play(60).sleep(2)
@@ -150,5 +151,25 @@ lc.track('lead', t => t
     .play(52).sleep(4)
 )
 
-tracks.lead.gain(0.5)
-```
+
+lc.instrument('wavetable/12836_28_JCLive_sf2_file', 'drums')
+instruments.drums.duration = 2
+lc.effect('tuna/Delay', 'delay')
+effects.delay.param('delayTime', 50)
+effects.delay.param('wetLevel', 0.5)
+effects.delay.param('cutoff', 20000)
+lc.track('drums', t => t
+    .instrument(instruments.drums)
+    .effect(effects.delay)
+    .volume(0.7)
+    .transpose(4)
+    .sleep(8)
+    .play(42).sleep(0.5)
+    .play(36).sleep(0.5)
+    .play(42).sleep(0.5)
+    .play(36).sleep(0.5)
+    .play(42).sleep(0.5)
+    .play(36).sleep(0.5)
+    .play(42).sleep(0.5)
+    .play(36).sleep(0.5)
+)```
