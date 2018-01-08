@@ -43,8 +43,8 @@
 		- Load samples via `lc.instrument(sample/name)`
 		- Samples must have been uploaded via drag/drop
 			- Check https://css-tricks.com/drag-and-drop-file-uploading/
-		- Trace "Loading instrument *name*..." and "Instrument *name* ready" in sample and wavetable instruments
-		- Trace "Instrument *name* ready" for Modulator instruments
+		- [x] Trace "Loading instrument *name*..." and "Instrument *name* ready" in sample and wavetable instruments
+		- [x] Trace "Instrument *name* ready" for Modulator instruments
 	- [ ] Track solo / unsolo
 	- [ ] Track synchronization via cue/sync methods
 		- Cue to post message
@@ -79,7 +79,7 @@
 		- [x] log
 			- [x] Colors in logs, e.g. note data
 			- [x] Trace event time information in 00:00.000 format
-			- [ ] Log more events: instr/track/effect creation, etc
+			- [x] Log more events: instr/track/effect creation, etc
 			- [ ] Make log_enable receive two parameters: `log_notes` and `log_events`
 		- [ ] Info
 			- [ ] Tracks: name + status: timeline, mute/solo, stopped

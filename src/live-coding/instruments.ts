@@ -2,6 +2,7 @@ import { Instrument } from '../synth/instrument'
 import { Presets } from '../synthUI/presets'
 import { LiveCoding } from './live-coding'
 import { WebAudioFontPlayer } from '../third-party/wavetable'
+import { logToPanel, txt2html } from './log';
 
 
 export interface LCInstrument {
@@ -80,7 +81,11 @@ class ModulatorInstrument extends Instrument implements LCInstrument {
 	name: string
 	duration: number
 
-	async initialize() {}
+	async initialize() {
+		logToPanel(true, true,
+			txt2html(`Instrument [log-instr|${this.name}] ready`)
+		)
+	}
 	shutdown() {}
 
 	param(pname: string, value?: number, rampTime?: number, exponential = true) {
@@ -189,7 +194,13 @@ class WavetableInstrument implements LCInstrument {
 	}
 
 	async initialize() {
+		logToPanel(true, true,
+			txt2html(`Loading instrument [log-instr|${this.name}]...`)
+		)
 		this.preset = await this.loadInstrument(this.presetName)
+		logToPanel(true, true,
+			txt2html(`Instrument [log-instr|${this.name}] ready`)
+		)
 	}
 
 	shutdown() {

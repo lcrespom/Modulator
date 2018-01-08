@@ -4358,6 +4358,7 @@ function createEffect(ac, name) {
 /* harmony export (immutable) */ __webpack_exports__["a"] = createInstrument;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_instrument__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__third_party_wavetable__ = __webpack_require__(50);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__log__ = __webpack_require__(13);
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -4366,6 +4367,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+
 
 
 let providers = {
@@ -4402,7 +4404,9 @@ function wavetableInstrProvider(lc, preset, name, numVoices = 4) {
 // ------------------------- Modulator instrument -------------------------
 class ModulatorInstrument extends __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /* Instrument */] {
     initialize() {
-        return __awaiter(this, void 0, void 0, function* () { });
+        return __awaiter(this, void 0, void 0, function* () {
+            Object(__WEBPACK_IMPORTED_MODULE_2__log__["e" /* logToPanel */])(true, true, Object(__WEBPACK_IMPORTED_MODULE_2__log__["f" /* txt2html */])(`Instrument [log-instr|${this.name}] ready`));
+        });
     }
     shutdown() { }
     param(pname, value, rampTime, exponential = true) {
@@ -4493,7 +4497,9 @@ class WavetableInstrument {
     }
     initialize() {
         return __awaiter(this, void 0, void 0, function* () {
+            Object(__WEBPACK_IMPORTED_MODULE_2__log__["e" /* logToPanel */])(true, true, Object(__WEBPACK_IMPORTED_MODULE_2__log__["f" /* txt2html */])(`Loading instrument [log-instr|${this.name}]...`));
             this.preset = yield this.loadInstrument(this.presetName);
+            Object(__WEBPACK_IMPORTED_MODULE_2__log__["e" /* logToPanel */])(true, true, Object(__WEBPACK_IMPORTED_MODULE_2__log__["f" /* txt2html */])(`Instrument [log-instr|${this.name}] ready`));
         });
     }
     shutdown() {
