@@ -75,7 +75,7 @@ interface LiveCoding {
 
 	/** Enables or disables logging of events such as notes being played.
 	The `lc.log(...)` method always prints to the log panel, regardless of whether this is enabled or disabled.
-	@param flag Optional, defaults to true. If true, event tracing is enabled,otherwise it is disabled.
+	@param flag Optional, defaults to true. If true, event tracing is enabled, otherwise it is disabled.
 	*/
 	log_enable(flag?: boolean): this
 

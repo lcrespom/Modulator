@@ -3,12 +3,13 @@ import { LiveCoding } from './live-coding'
 import { prevBuffer, nextBuffer } from './editor-buffers'
 
 
-export function registerActions(editor: any, monaco: any) {
+export function registerActions(editor: any) {
 	const CTRL_ALT = monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd
 	const CTRL_SHIFT = monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift
 	let editorActions = new EditorActions(editor)
 	registerButtons(editorActions)
 	setColorTheme(editorActions)
+	registerDnD()
 	// -------------------- Run code actions --------------------
 	editor.addAction({
 		id: 'walc-run-all',
@@ -38,9 +39,7 @@ export function registerActions(editor: any, monaco: any) {
 	editor.addAction({
 		id: 'walc-font-sm',
 		label: 'Reduce code font',
-		keybindings: [
-			CTRL_ALT | monaco.KeyCode.US_COMMA, CTRL_ALT | monaco.KeyCode.US_MINUS
-		],
+		keybindings: [CTRL_ALT | monaco.KeyCode.US_COMMA],
 		contextMenuGroupId: 'modulator',
 		contextMenuOrder: 4,
 		run: () => editorActions.reduceFont()
@@ -48,9 +47,7 @@ export function registerActions(editor: any, monaco: any) {
 	editor.addAction({
 		id: 'walc-font-lg',
 		label: 'Enlarge code font',
-		keybindings: [
-			CTRL_ALT | monaco.KeyCode.US_DOT, CTRL_ALT | monaco.KeyCode.US_EQUAL
-		],
+		keybindings: [CTRL_ALT | monaco.KeyCode.US_DOT],
 		contextMenuGroupId: 'modulator',
 		contextMenuOrder: 5,
 		run: () => editorActions.enlargeFont()
@@ -86,6 +83,18 @@ function setColorTheme(editorActions: EditorActions) {
 	let theme = localStorage.walc_prefs_theme
 	if (theme == 'dark') editorActions.toggleTheme()
 }
+
+function registerDnD() {
+	$('body').on('drag dragstart dragend dragover dragenter dragleave drop', e => {
+		e.preventDefault()
+		e.stopPropagation()
+	})
+	.on('drop', e => console.log(
+		// TODO: gather sample data and prepare buffers
+		(<DragEvent>e.originalEvent).dataTransfer.files
+	))
+}
+
 
 declare let lc: LiveCoding
 declare let monaco: any

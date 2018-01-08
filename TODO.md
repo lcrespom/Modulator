@@ -42,7 +42,7 @@
 	- [ ] Sample loading + playing API
 		- Load samples via `lc.instrument(sample/name)`
 		- Samples must have been uploaded via drag/drop
-		- Use upload samples button - see https://davidwalsh.name/multiple-file-upload
+			- Check https://css-tricks.com/drag-and-drop-file-uploading/
 		- Trace "Loading instrument *name*..." and "Instrument *name* ready" in sample and wavetable instruments
 		- Trace "Instrument *name* ready" for Modulator instruments
 	- [ ] Track solo / unsolo

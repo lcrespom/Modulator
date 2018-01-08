@@ -48,7 +48,7 @@ export function createEditor(
 			// fontSize: 15
 		})
 		handleEditorResize(editorElem)
-		registerActions(editor, monaco)
+		registerActions(editor)
 		editor.focus()
 		handleBuffers(editor)
 		setupCompletion()
