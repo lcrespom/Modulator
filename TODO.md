@@ -68,10 +68,8 @@
 	- [x] Tracks with loops & loop update after end of current
 	- [x] Make synth use the velocity parameter in noteOn
 	- [x] BPM API
+	- [x] Smarter code completion for parameters, effect names, etc.
 	- [ ] Prevent instrument and effect instances to be shared across tracks
-	- [ ] Smarter code completion for parameters, effect names, etc.
-		- Use completion provider, see https://microsoft.github.io/monaco-editor/playground.html#extending-language-services-completion-provider-example
-		- Auto-complete existing instruments, effects, tracks and globals.
 - Editor
 	- [ ] Add more panels
 		- [x] osc & fft

@@ -51,6 +51,7 @@ export function createEditor(
 		registerActions(editor, monaco)
 		editor.focus()
 		handleBuffers(editor)
+		setupCompletion()
 		$(document).on('route:show', (e, h) => {
 			if (h != '#live-coding') return
 			editor.focus()
@@ -80,6 +81,35 @@ function setupDefinitions() {
 	fetch('js/lc-definitions.ts')
 	.then(response => response.text())
 	.then(addTypeScriptDefinitions)
+}
+
+function createProposals(name: string, obj: any) {
+	let members = []
+	if (name.endsWith('s')) name = name.substr(0, name.length - 1)
+	for (let pname in obj) members.push({
+		label: pname,
+		kind: monaco.languages.CompletionItemKind.Field,
+		documentation: `The ${pname} ${name}`,
+		insertText: pname
+	})
+	return members
+}
+
+function setupCompletion() {
+	monaco.languages.registerCompletionItemProvider('typescript', {
+		provideCompletionItems: function(model: any, pos: any) {
+			let lnum = pos.lineNumber
+			let txt = model.getValueInRange({
+				startLineNumber: lnum, startColumn: 1,
+				endLineNumber: lnum, endColumn: pos.column
+			})
+			let globals: any = { instruments, effects, tracks: userTracks, global }
+			for (let name in globals)
+				if (txt.endsWith(name + '.'))
+					return createProposals(name, globals[name])
+			return []
+		}
+	})
 }
 
 function handleEditorResize(elem: HTMLElement) {

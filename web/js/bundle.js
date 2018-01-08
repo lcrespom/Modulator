@@ -1917,6 +1917,7 @@ function createEditor(ac, presets, synthUI) {
         Object(__WEBPACK_IMPORTED_MODULE_1__editor_actions__["a" /* registerActions */])(editor, monaco);
         editor.focus();
         Object(__WEBPACK_IMPORTED_MODULE_5__editor_buffers__["a" /* handleBuffers */])(editor);
+        setupCompletion();
         $(document).on('route:show', (e, h) => {
             if (h != '#live-coding')
                 return;
@@ -1944,6 +1945,35 @@ function setupDefinitions() {
     fetch('js/lc-definitions.ts')
         .then(response => response.text())
         .then(addTypeScriptDefinitions);
+}
+function createProposals(name, obj) {
+    let members = [];
+    if (name.endsWith('s'))
+        name = name.substr(0, name.length - 1);
+    for (let pname in obj)
+        members.push({
+            label: pname,
+            kind: monaco.languages.CompletionItemKind.Field,
+            documentation: `The ${pname} ${name}`,
+            insertText: pname
+        });
+    return members;
+}
+function setupCompletion() {
+    monaco.languages.registerCompletionItemProvider('typescript', {
+        provideCompletionItems: function (model, pos) {
+            let lnum = pos.lineNumber;
+            let txt = model.getValueInRange({
+                startLineNumber: lnum, startColumn: 1,
+                endLineNumber: lnum, endColumn: pos.column
+            });
+            let globals = { instruments: __WEBPACK_IMPORTED_MODULE_8__scheduler__["c" /* instruments */], effects: __WEBPACK_IMPORTED_MODULE_8__scheduler__["b" /* effects */], tracks: __WEBPACK_IMPORTED_MODULE_8__scheduler__["g" /* userTracks */], global };
+            for (let name in globals)
+                if (txt.endsWith(name + '.'))
+                    return createProposals(name, globals[name]);
+            return [];
+        }
+    });
 }
 function handleEditorResize(elem) {
     let edw = elem.clientWidth;
