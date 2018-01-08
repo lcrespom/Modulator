@@ -294,7 +294,6 @@ Or we can replace the `notes.reflect()` call with `notes.shuffle()` which will r
 
 
 ## Randomness
-
 We have seen that the `shuffle` method randomly reorders the elements of a ring.
 We also have the `choose` method, which randomly selects an element.
 
@@ -303,3 +302,17 @@ There is a `random` object that is avaliable for generating random numbers. For 
 For music composition, randomness is helpful, but once we have found a nice random pattern, we want to be able to repeat it again. That is why Modulator uses a predictable random number generator, which is reset every time some code is run.
 
 So if you run a track containing `notes.shuffle()` and then run it again, it will shuffle the notes exactly the same way as before. If you want it to shuffle differently, you must call `random.seed` and pass it an arbitrary seed number, such as `random.seed(123)`. You will then see that your notes are shuffled differently, but every time you run the same code the shuffling will be identical. And that is convenient, because once we have found an intreresting random melody after testing different seed values, we will want to keep it.
+
+## Logging
+When something does not work as expected, it is very handy to write some data to the log window and see what is going on.
+We can use the `lc.log` method and pass any arguments we want, and they will be appended to the Log box at the right of the code. For example:
+
+```javascript
+lc.log('Current BPM: ' + lc.bpm())
+```
+
+Will log the current BPM.
+
+Because notes and other track events are being added to the log when music is playing, you can disable event tracing by invoking `lc.log_enable(false)`, and enable it back with `lc.log_enable(true)`.
+
+Finally, if you want to clear the log box, you can invoke `lc.clear_log()`.
