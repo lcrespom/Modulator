@@ -40,8 +40,11 @@
 		- Use either the first instrument in the instruments table
 		- If instrument table is empty, use some default preset
 	- [ ] Sample loading + playing API
+		- Load samples via `lc.instrument(sample/name)`
+		- Samples must have been uploaded via drag/drop
 		- Use upload samples button - see https://davidwalsh.name/multiple-file-upload
-		- Load samples from URL: users should place sample loading API in lc.init
+		- Trace "Loading instrument *name*..." and "Instrument *name* ready" in sample and wavetable instruments
+		- Trace "Instrument *name* ready" for Modulator instruments
 	- [ ] Track solo / unsolo
 	- [ ] Track synchronization via cue/sync methods
 		- Cue to post message
@@ -75,6 +78,7 @@
 		- [x] osc & fft
 		- [x] log
 			- [x] Colors in logs, e.g. note data
+			- [ ] Trace event time information in 00:00.000 format
 			- [ ] Log more events: instr/track/effect creation, etc
 			- [ ] Make log_enable receive two parameters: `log_notes` and `log_events`
 		- [ ] Info
