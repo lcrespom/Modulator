@@ -92,6 +92,7 @@
 			- [x] Colors in logs, e.g. note data
 			- [x] Trace event time information in 00:00.000 format
 			- [x] Log more events: instr/track/effect creation, etc
+			- [ ] Stop event tracing after error, restore it after next run
 			- [ ] Make log_enable receive two parameters: `log_notes` and `log_events`
 	- [x] Button row
 		- [ ] FFW / RWD
