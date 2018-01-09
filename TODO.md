@@ -42,7 +42,7 @@
 	- [x] Document API
 - Synth API
 	- [ ] Do not require an instrument for track playing
-		- Use either the first instrument in the instruments table
+		- Use the first instrument in the instruments table
 		- If instrument table is empty, use some default preset
 	- [ ] Track synchronization via cue/sync methods
 		- Cue to post message

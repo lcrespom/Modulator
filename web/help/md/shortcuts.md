@@ -14,6 +14,6 @@
 - `Ctrl+Shift+.`: move to next buffer.
 
 ## Font size
-- `Ctrl+Alt+,`: decrease font size.
-- `Ctrl+Alt+.`: increase font size.
+- `Ctrl+Alt+,`: decrease editor font size for the current buffer.
+- `Ctrl+Alt+.`: increase editor font size for the current buffer.
 
