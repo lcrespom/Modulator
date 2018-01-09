@@ -332,12 +332,16 @@ class SampleInstrument implements LCInstrument {
 	destination: AudioNode
 	baseNote = 69
 	ignoreNote = true
+	loops = 1
+	loopStart = 0
+	loopEnd = 1000
 
 	constructor(public ctx: AudioContext, preset: string, name?: string) {
 		this.buffer = samples[preset]
 		if (!this.buffer) throw new Error(`Sample '${preset}' not found`)
 		this.name = name || preset
 		this.duration = this.buffer.duration
+		this.loopEnd = this.duration
 	}
 
 	async initialize() {
@@ -358,25 +362,21 @@ class SampleInstrument implements LCInstrument {
 	}
 
 	paramNames() {
-		// TODO 'loop', 'loopStart', 'loopEnd', 'attack' and 'release'
-		return ['baseNote', 'ignoreNote']
+		// TODO 'attack' and 'release'
+		return ['baseNote', 'ignoreNote', 'loops', 'loopStart', 'loopEnd']
 	}
 
 	noteOn(midi: number, velocity: number, when?: number) {
-		this.src = this.ctx.createBufferSource()
-		this.src.buffer = this.buffer
-		let dst = this.destination
-		if (velocity != 1) {
-			let gain = this.ctx.createGain()
-			gain.gain.value = velocity
-			gain.connect(dst)
-			dst = gain
-		}
-		this.src.connect(dst)
+		let bufferNode = this.ctx.createBufferSource()
+		this.src = bufferNode
+		bufferNode.buffer = this.buffer
+		let dst = this.connectGain(velocity)
+		bufferNode.connect(dst)
 		let ratio = this.ignoreNote ? 1 : this.midi2Ratio(midi)
-		this.src.playbackRate.value = ratio
+		bufferNode.playbackRate.value = ratio
 		this.duration = this.buffer.duration / ratio
-		this.src.start(when)
+		this.setupLooping(ratio)
+		bufferNode.start(when)
 	}
 
 	noteOff(midi: number, velocity: number, when?: number) {
@@ -390,6 +390,24 @@ class SampleInstrument implements LCInstrument {
 	private midi2Ratio(midi: number): number {
 		const semitone = Math.pow(2, 1 / 12)
 		return Math.pow(semitone, midi - this.baseNote)
+	}
+
+	private connectGain(velocity: number) {
+		let dst = this.destination
+		if (velocity == 1) return dst
+		let gain = this.ctx.createGain()
+		gain.gain.value = velocity
+		gain.connect(dst)
+		return gain
+	}
+
+	private setupLooping(ratio: number) {
+		if (this.loops == 1) return
+		this.src.loop = true
+		this.src.loopStart = this.loopStart
+		this.src.loopEnd = this.loopEnd
+		this.duration = this.loopEnd + (this.loopEnd - this.loopStart) * (this.loops - 1)
+		this.duration = this.duration / ratio
 	}
 
 

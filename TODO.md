@@ -1,5 +1,10 @@
 # ToDo
 
+## Testing
+- [ ] Test in Safari
+- [x] Test in FireFox
+- [ ] Engage betatesters
+
 ## Bugs
 - [ ] Node deletion only works once
 - [ ] Loading a synth with two ADSR nodes generates horrible sounds
