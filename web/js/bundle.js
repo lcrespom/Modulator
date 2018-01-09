@@ -4390,7 +4390,7 @@ function createInstrument(lc, // This is ugly and should be refactored
     let [prefix, iname] = preset.split('/');
     let provider = providers[prefix];
     if (!provider)
-        throw new Error(`Instrument "${preset}" not found: unknown prefix "${provider}"`);
+        throw new Error(`Instrument '${preset}' not found: unknown prefix '${provider}'`);
     return provider(lc, iname, name, numVoices);
 }
 function modulatorInstrProvider(lc, // This is ugly and should be refactored
@@ -4413,7 +4413,7 @@ function sampleInstrProvider(lc, preset, name, numVoices = 4) {
 class ModulatorInstrument extends __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /* Instrument */] {
     initialize() {
         return __awaiter(this, void 0, void 0, function* () {
-            Object(__WEBPACK_IMPORTED_MODULE_2__log__["e" /* logToPanel */])(true, true, Object(__WEBPACK_IMPORTED_MODULE_2__log__["f" /* txt2html */])(`Instrument [log-instr|${this.name}] ready`));
+            logInstrReady(this.name);
         });
     }
     shutdown() { }
@@ -4505,9 +4505,9 @@ class WavetableInstrument {
     }
     initialize() {
         return __awaiter(this, void 0, void 0, function* () {
-            Object(__WEBPACK_IMPORTED_MODULE_2__log__["e" /* logToPanel */])(true, true, Object(__WEBPACK_IMPORTED_MODULE_2__log__["f" /* txt2html */])(`Loading instrument [log-instr|${this.name}]...`));
+            log(`Loading instrument [log-instr|${this.name}]...`);
             this.preset = yield this.loadInstrument(this.presetName);
-            Object(__WEBPACK_IMPORTED_MODULE_2__log__["e" /* logToPanel */])(true, true, Object(__WEBPACK_IMPORTED_MODULE_2__log__["f" /* txt2html */])(`Instrument [log-instr|${this.name}] ready`));
+            logInstrReady(this.name);
         });
     }
     shutdown() {
@@ -4546,6 +4546,11 @@ class WavetableInstrument {
             let response = yield fetch(this.getURL(name, '_sf2_file'));
             if (!response.ok)
                 response = yield fetch(this.getURL(name, '_sf2'));
+            if (!response.ok) {
+                let msg = `wavetable preset '${name}' not found`;
+                log('[log-bold|Error]: ' + msg);
+                throw new Error(msg);
+            }
             let data = yield response.json();
             return data;
         });
@@ -4570,9 +4575,6 @@ class WavetableInstrument {
 let wtPlayer = new __WEBPACK_IMPORTED_MODULE_1__third_party_wavetable__["a" /* WebAudioFontPlayer */]();
 let samples = {};
 let context = new AudioContext();
-function log(txt) {
-    return Object(__WEBPACK_IMPORTED_MODULE_2__log__["e" /* logToPanel */])(true, true, Object(__WEBPACK_IMPORTED_MODULE_2__log__["f" /* txt2html */])(txt));
-}
 function loadSamples(files) {
     for (let i = 0; i < files.length; i++)
         loadSample(files[i]);
@@ -4614,26 +4616,66 @@ function removeExtension(fname) {
 class SampleInstrument {
     constructor(ctx, preset, name) {
         this.ctx = ctx;
+        this.baseNote = 69;
+        this.ignoreNote = true;
+        this.buffer = samples[preset];
+        if (!this.buffer)
+            throw new Error(`Sample '${preset}' not found`);
         this.name = name || preset;
-        // TODO create buffer node from samples[preset]
+        this.duration = this.buffer.duration;
     }
+    initialize() {
+        return __awaiter(this, void 0, void 0, function* () {
+            logInstrReady(this.name);
+        });
+    }
+    shutdown() { }
     param(pname, value, rampTime, exponential) {
-        // TODO implement
+        if (this.paramNames().indexOf(pname) < 0)
+            throw new Error(`Parameter '${pname}' not found in instrument '${this.name}'`);
+        let that = this;
+        if (value === undefined)
+            return that[pname];
+        that[pname] = value;
         return this;
     }
     paramNames() {
-        // TODO implement
-        let pnames = [];
-        return pnames;
+        // TODO 'loop', 'loopStart', 'loopEnd', 'attack' and 'release'
+        return ['baseNote', 'ignoreNote'];
     }
     noteOn(midi, velocity, when) {
+        this.src = this.ctx.createBufferSource();
+        this.src.buffer = this.buffer;
+        let dst = this.destination;
+        if (velocity != 1) {
+            let gain = this.ctx.createGain();
+            gain.gain.value = velocity;
+            gain.connect(dst);
+            dst = gain;
+        }
+        this.src.connect(dst);
+        let ratio = this.ignoreNote ? 1 : this.midi2Ratio(midi);
+        this.src.playbackRate.value = ratio;
+        this.duration = this.buffer.duration / ratio;
+        this.src.start(when);
     }
     noteOff(midi, velocity, when) {
+        this.src.stop(when);
     }
     connect(node) {
+        this.destination = node;
     }
-    initialize() { }
-    shutdown() { }
+    midi2Ratio(midi) {
+        const semitone = Math.pow(2, 1 / 12);
+        return Math.pow(semitone, midi - this.baseNote);
+    }
+}
+// ------------------------- Log helper -------------------------
+function log(txt) {
+    return Object(__WEBPACK_IMPORTED_MODULE_2__log__["e" /* logToPanel */])(true, true, Object(__WEBPACK_IMPORTED_MODULE_2__log__["f" /* txt2html */])(txt));
+}
+function logInstrReady(name) {
+    log(`Instrument [log-instr|${name}] ready`);
 }
 
 

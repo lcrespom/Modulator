@@ -147,7 +147,7 @@ interface Instrument {
 	@param exponential Optional. If specified, determines whether the ramp is linear (parameter set to false) or exponential (parameter set to true).
 	The default ramp is exponential, so that the ramp takes longer at smaller values.
 	 */
-	param(pname: string, value?: number,
+	param(pname: string, value?: number | boolean,
 		rampTime?: number, exponential?): number | this
 	/** Returns the list of parameter names available to be changed with the `param` method. */
 	paramNames(): string[]
@@ -174,7 +174,7 @@ interface Effect {
 	@param exponential Optional. If specified, determines whether the ramp is linear (parameter set to false) or exponential (parameter set to true).
 	The default ramp is exponential, so that the ramp takes longer at smaller values.
 	 */
-	param(name: string, value?: number,
+	param(name: string, value?: number | boolean,
 		rampTime?: number, exponential?: boolean): number | this
 	/** Returns the list of parameter names available to be changed with the `param` method. */
 	paramNames(): string[]

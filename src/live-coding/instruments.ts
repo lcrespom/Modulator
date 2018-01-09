@@ -50,7 +50,7 @@ export function createInstrument(
 	let [prefix, iname] = preset.split('/')
 	let provider = providers[prefix]
 	if (!provider) throw new Error(
-		`Instrument "${preset}" not found: unknown prefix "${provider}"`)
+		`Instrument '${preset}' not found: unknown prefix '${provider}'`)
 	return provider(lc, iname, name, numVoices)
 }
 
@@ -93,10 +93,9 @@ class ModulatorInstrument extends Instrument implements LCInstrument {
 	duration: number
 
 	async initialize() {
-		logToPanel(true, true,
-			txt2html(`Instrument [log-instr|${this.name}] ready`)
-		)
+		logInstrReady(this.name)
 	}
+
 	shutdown() {}
 
 	param(pname: string, value?: number, rampTime?: number, exponential = true) {
@@ -205,13 +204,9 @@ class WavetableInstrument implements LCInstrument {
 	}
 
 	async initialize() {
-		logToPanel(true, true,
-			txt2html(`Loading instrument [log-instr|${this.name}]...`)
-		)
+		log(`Loading instrument [log-instr|${this.name}]...`)
 		this.preset = await this.loadInstrument(this.presetName)
-		logToPanel(true, true,
-			txt2html(`Instrument [log-instr|${this.name}] ready`)
-		)
+		logInstrReady(this.name)
 	}
 
 	shutdown() {
@@ -256,6 +251,11 @@ class WavetableInstrument implements LCInstrument {
 		let response = await fetch(this.getURL(name, '_sf2_file'))
 		if (!response.ok)
 			response = await fetch(this.getURL(name, '_sf2'))
+		if (!response.ok) {
+			let msg = `wavetable preset '${name}' not found`
+			log('[log-bold|Error]: ' + msg)
+			throw new Error(msg)
+		}
 		let data = await response.json()
 		return data
 	}
@@ -286,10 +286,6 @@ type SampleTable = { [name: string]: AudioBuffer }
 
 let samples: SampleTable = {}
 let context = new AudioContext()
-
-function log(txt: string) {
-	return logToPanel(true, true, txt2html(txt))
-}
 
 export function loadSamples(files: FileList) {
 	for (let i = 0; i < files.length; i++)
@@ -331,36 +327,81 @@ function removeExtension(fname: string) {
 class SampleInstrument implements LCInstrument {
 	name: string
 	duration: number
+	src: AudioBufferSourceNode
+	buffer: AudioBuffer
+	destination: AudioNode
+	baseNote = 69
+	ignoreNote = true
 
 	constructor(public ctx: AudioContext, preset: string, name?: string) {
+		this.buffer = samples[preset]
+		if (!this.buffer) throw new Error(`Sample '${preset}' not found`)
 		this.name = name || preset
-		// TODO create buffer node from samples[preset]
+		this.duration = this.buffer.duration
 	}
+
+	async initialize() {
+		logInstrReady(this.name)
+	}
+
+	shutdown() {}
 
 	param(pname: string, value?: number,
 		rampTime?: number, exponential?: boolean): number | this {
-		// TODO implement
+		if (this.paramNames().indexOf(pname) < 0)
+			throw new Error(
+				`Parameter '${pname}' not found in instrument '${this.name}'`)
+		let that: any = this
+		if (value === undefined) return that[pname]
+		that[pname] = value
 		return this
 	}
 
 	paramNames() {
-		// TODO implement
-		let pnames: string[] = []
-		return pnames
+		// TODO 'loop', 'loopStart', 'loopEnd', 'attack' and 'release'
+		return ['baseNote', 'ignoreNote']
 	}
 
 	noteOn(midi: number, velocity: number, when?: number) {
-
+		this.src = this.ctx.createBufferSource()
+		this.src.buffer = this.buffer
+		let dst = this.destination
+		if (velocity != 1) {
+			let gain = this.ctx.createGain()
+			gain.gain.value = velocity
+			gain.connect(dst)
+			dst = gain
+		}
+		this.src.connect(dst)
+		let ratio = this.ignoreNote ? 1 : this.midi2Ratio(midi)
+		this.src.playbackRate.value = ratio
+		this.duration = this.buffer.duration / ratio
+		this.src.start(when)
 	}
 
 	noteOff(midi: number, velocity: number, when?: number) {
-
+		this.src.stop(when)
 	}
 
 	connect(node: AudioNode) {
-
+		this.destination = node
 	}
 
-	initialize() {}
-	shutdown() {}
+	private midi2Ratio(midi: number): number {
+		const semitone = Math.pow(2, 1 / 12)
+		return Math.pow(semitone, midi - this.baseNote)
+	}
+
+
+}
+
+
+// ------------------------- Log helper -------------------------
+
+function log(txt: string) {
+	return logToPanel(true, true, txt2html(txt))
+}
+
+function logInstrReady(name: string) {
+	log(`Instrument [log-instr|${name}] ready`)
 }

@@ -39,21 +39,21 @@
 	- [ ] Do not require an instrument for track playing
 		- Use either the first instrument in the instruments table
 		- If instrument table is empty, use some default preset
-	- [ ] Sample loading + playing API
-		- Load samples via `lc.instrument(sample/name)`
-		- Samples must have been uploaded via drag/drop
-			- Check https://css-tricks.com/drag-and-drop-file-uploading/
-		- [x] Trace "Loading instrument *name*..." and "Instrument *name* ready" in sample and wavetable instruments
-		- [x] Trace "Instrument *name* ready" for Modulator instruments
-	- [ ] Track solo / unsolo
 	- [ ] Track synchronization via cue/sync methods
 		- Cue to post message
 		- Synch to wait for message
+	- [ ] Track solo / unsolo
 	- [x] Copy from Sonic Pi
 		- [x] Notes
 		- [x] Rings
 		- [x] Scales
 		- [x] Random helpers (shuffle, etc => use deterministic seed)
+	- [x] Sample loading + playing API
+		- Load samples via `lc.instrument(sample/name)`
+		- Samples must have been uploaded via drag/drop
+			- Check https://css-tricks.com/drag-and-drop-file-uploading/
+		- [x] Trace "Loading instrument *name*..." and "Instrument *name* ready" in sample and wavetable instruments
+		- [x] Trace "Instrument *name* ready" for Modulator instruments
 	- [x] LiveCoding startup/shutdown
 		- [x] lc.init(async function() { ... }) to perform sample initialization
 		- [x] Start playing only after await lc.init has returned
@@ -75,12 +75,6 @@
 	- [ ] Prevent instrument and effect instances to be shared across tracks
 - Editor
 	- [ ] Add more panels
-		- [x] osc & fft
-		- [x] log
-			- [x] Colors in logs, e.g. note data
-			- [x] Trace event time information in 00:00.000 format
-			- [x] Log more events: instr/track/effect creation, etc
-			- [ ] Make log_enable receive two parameters: `log_notes` and `log_events`
 		- [ ] Info
 			- [ ] Tracks: name + status: timeline, mute/solo, stopped
 			- [ ] Effects: name + params
@@ -88,10 +82,14 @@
 			- [ ] Samples
 			- [ ] Click on effect/instrument to display params in params panel
 		- [ ] instruments and parameters => click to edit parameters in separate panel
+		- [x] osc & fft
+		- [x] log
+			- [x] Colors in logs, e.g. note data
+			- [x] Trace event time information in 00:00.000 format
+			- [x] Log more events: instr/track/effect creation, etc
+			- [ ] Make log_enable receive two parameters: `log_notes` and `log_events`
 	- [x] Button row
 		- [ ] FFW / RWD
-		- [ ] Upload / Download code
-		- [ ] Upload samples
 		- [x] Stop / pause / continue
 		- [x] Help / live coding API / tutorial
 		- [x] Run code / Run line|selection
