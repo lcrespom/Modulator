@@ -3,7 +3,8 @@
 ## Testing
 - [ ] Test in Safari
 - [x] Test in FireFox
-- [ ] Engage betatesters
+- [x] Engage betatesters
+- [ ] Review documentation in spellchecker
 
 ## Bugs
 - [ ] Node deletion only works once

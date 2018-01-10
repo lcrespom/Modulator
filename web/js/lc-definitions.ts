@@ -99,6 +99,12 @@ interface LiveCoding {
 	/** Immediately stops and deletes all tracks. */
 	reset(): this
 
+	/** Registers a listener function that will be invoked every time
+	a note is played. The function wll receive an object with all the
+	information about the note to be played.
+	 */
+	listen(listenFunc: NoteListener)
+
 	/** This is an advanced, very optional method to be used only in case some external resources must be manually initialized.
 	In most cases, the LiveCoding API will handle this process behind the scenes.
 	The passed function callback should be used to load or setup asynchronous resources such as sample downloading.
@@ -200,6 +206,8 @@ An example of the usage pattern is the following:
 interface Track {
 	/** For looping tracks, counts how many times the loop has executed. */
 	loopCount: number
+	/** The track name, as given in `lc.track` and `lc.loop_track`. */
+	name: string
 	/** Sets the instrument to be used by the notes played in the track. */
 	instrument(inst: Instrument): this
 	/** Adds an effect to the track. All sound played in the track will be immediately altered by the effect.
@@ -399,6 +407,27 @@ interface EffectOptions {
 /** Options that can be passed to track.play() in order to change
 effect or instrument parameters. */
 type NoteOptions = InstrumentOptions | EffectOptions
+
+/** The interface to be implemented by the function passed to `lc.listen`. */
+type NoteListener = (note: NoteInfo) => void
+
+/** Information on a note being played, passed to the NoteListener function. */
+interface NoteInfo {
+	/** The track that triggered the note. */
+	track: Track
+	/** The instrument to be used for playing this note. */
+	instrument: Instrument
+	/** The note number. */
+	number: number
+	/** The time at which the note is being played. */
+	time: number
+	/** The note volume. */
+	velocity: number
+	/** The note duration. */
+	duration?: number
+	/** Optional parameter settings for the note. */
+	options?: NoteOptions
+}
 
 /** Structure used by a preset JSON data saved from Modulator synth. */
 interface PresetData {

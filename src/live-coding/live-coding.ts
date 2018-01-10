@@ -4,7 +4,7 @@ import { SynthUI } from '../synthUI/synthUI'
 
 import { Track } from './track'
 import { timerTickHandler, eachTrack, scheduleTrack,
-	instruments, effects, userTracks } from './scheduler'
+	instruments, effects, userTracks, NoteListener, listenNotes } from './scheduler'
 import { Effect, createEffect } from './effects'
 import { makeScale } from './scales'
 import { logToPanel, enableLog, clearLog } from './log'
@@ -104,6 +104,11 @@ export class LiveCoding {
 			if (t._effect) t._effect.input.disconnect()
 			t.delete()
 		})
+		return this
+	}
+
+	listen(listenFunc: NoteListener) {
+		listenNotes(listenFunc)
 		return this
 	}
 

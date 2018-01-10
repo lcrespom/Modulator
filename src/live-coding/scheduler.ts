@@ -20,6 +20,7 @@ interface EffectOptions {
 export type NoteOptions = InstrumentOptions | EffectOptions
 
 export interface NoteInfo {
+	track: Track
 	instrument: LCInstrument
 	number: number
 	time: number
@@ -27,6 +28,8 @@ export interface NoteInfo {
 	duration?: number
 	options?: NoteOptions
 }
+
+export type NoteListener = (note: NoteInfo) => void
 
 interface InstrumentTable {
 	[instrName: string]: LCInstrument
@@ -44,8 +47,20 @@ export let instruments: InstrumentTable = {}
 export let effects: EffectTable = {}
 export let userTracks: TrackTable = {}
 export let tracks: TrackTable = {}
-let nextTracks: TrackTable = {}
 
+let nextTracks: TrackTable = {}
+let noteInfoListener = function(n: NoteInfo) {}
+
+
+export function scheduleTrack(t: Track) {
+	t.startTime = t.ac.currentTime
+	if (tracks[t.name])
+		nextTracks[t.name] = t
+	else
+		tracks[t.name] = t
+	t.callback(t)
+	t.playing = true
+}
 
 export function timerTickHandler(timer: Timer, time: number) {
 	eachTrack(t => playTrack(timer, t, time))
@@ -57,14 +72,8 @@ export function eachTrack(cb: (t: Track) => void) {
 		cb(tracks[tname])
 }
 
-export function scheduleTrack(t: Track) {
-	t.startTime = t.ac.currentTime
-	if (tracks[t.name])
-		nextTracks[t.name] = t
-	else
-		tracks[t.name] = t
-	t.callback(t)
-	t.playing = true
+export function listenNotes(listener: NoteListener) {
+	noteInfoListener = listener
 }
 
 function playTrack(timer: Timer, track: Track, time: number) {
@@ -86,6 +95,7 @@ function playNote(track: Track, note: NoteInfo, timer: Timer, startTime: number)
 	if (note.options) setOptions(note.options)
 	if (note.number < 1) return
 	logNote(note, track)
+	noteInfoListener(note)	// TODO time accuracy could be improved
 	note.instrument.noteOn(
 		note.number, note.velocity, startTime + note.time)
 	let duration = note.duration
