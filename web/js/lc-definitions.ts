@@ -66,7 +66,7 @@ interface LiveCoding {
 	- minor
 	- minor_pentatonic
 	- chromatic
-	@param octaves An optional number indicating how mani octaves the scale should cover. It defaults to 1.
+	@param octaves An optional number indicating how many octaves the scale should cover. It defaults to 1.
 	*/
 	scale(note: number, type?: string, octaves?: number): Ring<number>
 
@@ -100,7 +100,7 @@ interface LiveCoding {
 	reset(): this
 
 	/** Registers a listener function that will be invoked every time
-	a note is played. The function wll receive an object with all the
+	a note is played. The function will receive an object with all the
 	information about the note to be played.
 	 */
 	listen(listenFunc: NoteListener)
@@ -306,10 +306,10 @@ interface Ring<T> extends Array<T> {
 	stretch(n: number): Ring<T>
 	/** Repeats the entire ring **n** times. */
 	repeat(n: number): Ring<T>
-	/** Adds the ring to a reversed version of itself . */
+	/** Adds the ring to a reversed version of itself. */
 	mirror(): Ring<T>
 	/** Adds the ring to a reversed version of itself,
-	without duplicating the middle value . */
+	without duplicating the middle value. */
 	reflect(): Ring<T>
 	/** Returns a new ring with all elements multiplied by **n**
 	(assumes ring contains numbers only). */

@@ -79,7 +79,7 @@ lc.loop_track('melody', t => t
 )
 ```
 
-When you run it, you will hear that it loops endlesly. You can click the stop button any time to end all sound playback. The `lc.loop_track` method is identical to `lc.track`, but creates a looping track that repeats itself over and over. Creating looping tracks and then interactively changing and manipulating them is the main technique for performing live musing, hence the ***Live Coding*** name.
+When you run it, you will hear that it loops endlessly. You can click the stop button any time to end all sound playback. The `lc.loop_track` method is identical to `lc.track`, but creates a looping track that repeats itself over and over. Creating looping tracks and then interactively changing and manipulating them is the main technique for performing live musing, hence the ***Live Coding*** name.
 
 
 ## Updating a playing track
@@ -100,7 +100,7 @@ Let's now raise the volume to 0.5 in one second. Add the following line and run 
 tracks.melody.gain(0.5, 1)
 ```
 
-Finally, lets stop the track loop by running the following code:
+Finally, let's stop the track loop by running the following code:
 
 ```javascript
 tracks.melody.stop()
@@ -321,11 +321,11 @@ Or we can replace the `notes.reflect()` call with `notes.shuffle()` which will r
 We have seen that the `shuffle` method randomly reorders the elements of a ring.
 We also have the `choose` method, which randomly selects an element.
 
-There is a `random` object that is avaliable for generating random numbers. For example, `random.integer(50, 70)` returns a random integer between 50 and 70, both inclusive. Or you can call `random.dice(6)` to get a random number between 1 and 6. As usual, you can check the [API](#lc-definitions.ts) for all the available methods.
+There is a `random` object that is available for generating random numbers. For example, `random.integer(50, 70)` returns a random integer between 50 and 70, both inclusive. Or you can call `random.dice(6)` to get a random number between 1 and 6. As usual, you can check the [API](#lc-definitions.ts) for all the available methods.
 
 For music composition, randomness is helpful, but once we have found a nice random pattern, we want to be able to repeat it again. That is why Modulator uses a predictable random number generator, which is reset every time some code is run.
 
-So if you run a track containing `notes.shuffle()` and then run it again, it will shuffle the notes exactly the same way as before. If you want it to shuffle differently, you must call `random.seed` and pass it an arbitrary seed number, such as `random.seed(123)`. You will then see that your notes are shuffled differently, but every time you run the same code the shuffling will be identical. And that is convenient, because once we have found an intreresting random melody after testing different seed values, we will want to keep it.
+So if you run a track containing `notes.shuffle()` and then run it again, it will shuffle the notes exactly the same way as before. If you want it to shuffle differently, you must call `random.seed` and pass it an arbitrary seed number, such as `random.seed(123)`. You will then see that your notes are shuffled differently, but every time you run the same code the shuffling will be identical. And that is convenient, because once we have found an interesting random melody after testing different seed values, we will want to keep it.
 
 ## Logging
 When something does not work as expected, it is very handy to write some data to the log window and see what is going on.

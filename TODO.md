@@ -4,7 +4,7 @@
 - [ ] Test in Safari
 - [x] Test in FireFox
 - [x] Engage betatesters
-- [ ] Review documentation in spellchecker
+- [x] Review documentation in spellchecker
 - [ ] Upgrade jQuery to v3 and re-test (thoroughly)
 
 ## Bugs
@@ -37,7 +37,7 @@
 
 ## Live Coding
 - Document and publish
-	- [ ] Merge with master
+	- [x] Merge with master
 	- [ ] Publish in GitHub pages
 	- [x] Tutorial
 	- [x] Examples
