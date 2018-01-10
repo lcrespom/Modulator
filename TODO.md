@@ -5,6 +5,7 @@
 - [x] Test in FireFox
 - [x] Engage betatesters
 - [ ] Review documentation in spellchecker
+- [ ] Upgrade jQuery to v3 and re-test (thoroughly)
 
 ## Bugs
 - [ ] Node deletion only works once

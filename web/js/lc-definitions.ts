@@ -437,3 +437,5 @@ interface PresetData {
 	modulatorType: string
 }
 
+/** The jQuery object */
+declare let $: any
