@@ -78,13 +78,13 @@ declare class P5 {
     //
     //   required param "x" follows an optional param
     //
-    // directionalLight(v1: number|any[]|string|P5.Color, v2?: number, v3?: number, a?: number, x: number|P5.Vector, y?: number, z?: number): p5
+    directionalLight(...args: any[]): P5
 
     // TODO: Fix pointLight() errors in src/3d/light.js:
     //
     //   required param "x" follows an optional param
     //
-    // pointLight(v1: number|any[]|string|P5.Color, v2?: number, v3?: number, a?: number, x: number|P5.Vector, y?: number, z?: number): p5
+    pointLight(...args: any[]): P5
 
     // src/3d/material.js
 
@@ -151,7 +151,7 @@ declare class P5 {
     //   param "c2" has invalid type: Array/Number
     //   return has invalid type: Array/Number
     //
-    // lerpColor(c1: Array/Number, c2: Array/Number, amt: number): Array/Number
+    lerpColor(c1: any, c2: any, amt: number): any
 
     /**
      * Extracts the HSL lightness value from a color or pixel array.
@@ -189,7 +189,7 @@ declare class P5 {
     //   param "max3" has invalid type: Number|Constant
     //   param "maxA" has invalid type: Number|Constant
     //
-    // colorMode(mode: number|Constant, max1?: number|Constant, max2?: number|Constant, max3?: number|Constant, maxA?: number|Constant): void
+    colorMode(mode: any, max1?: any, max2?: any, max3?: any, maxA?: any): void
 
     /**
      * Sets the color used to fill shapes.
@@ -254,7 +254,7 @@ declare class P5 {
     //
     //   param "mode" has invalid type: Number/Constant
     //
-    // ellipseMode(mode: Number/Constant): p5
+    ellipseMode(mode?: any): P5
 
     /**
      * Draws all geometry with jagged (aliased) edges.
@@ -265,7 +265,7 @@ declare class P5 {
     //
     //   param "mode" has invalid type: Number/Constant
     //
-    // rectMode(mode: Number/Constant): p5
+    rectMode(...args: any[]): P5
 
     /**
      * Draws all geometry with smooth (anti-aliased) edges.
@@ -276,13 +276,13 @@ declare class P5 {
     //
     //   param "cap" has invalid type: Number/Constant
     //
-    // strokeCap(cap: Number/Constant): p5
+    strokeCap(...args: any[]): P5
 
     // TODO: Fix strokeJoin() errors in src/core/attributes.js:
     //
     //   param "join" has invalid type: Number/Constant
     //
-    // strokeJoin(join: Number/Constant): p5
+    strokeJoin(...args: any[]): P5
 
     /**
      * Sets the width of the stroke used for lines, points, and the border
@@ -407,7 +407,7 @@ declare class P5 {
     //
     //   param "type" has invalid type: Number/Constant
     //
-    // cursor(type: Number/Constant, x?: number, y?: number): void
+    cursor(...args: any[]): void
 
     /**
      * Specifies the number of frames to be displayed every second.
@@ -516,7 +516,7 @@ declare class P5 {
     //
     //   param "mode" has invalid type: String/Constant
     //
-    // blendMode(mode: String/Constant): void
+    blendMode(...args: any[]): void
 
     // src/core/structure.js
 
@@ -569,7 +569,7 @@ declare class P5 {
     //
     //   param "s" has invalid type: Number | P5.Vector | Array
     //
-    // scale(s: Number | P5.Vector | Array, y?: number, z?: number): p5
+    scale(s: any, y?: number, z?: number): P5
 
     /**
      * Shears a shape around the x-axis the amount specified by the angle
@@ -596,11 +596,8 @@ declare class P5 {
      */
     beginContour():any
 
-    // TODO: Fix beginShape() errors in src/core/vertex.js:
-    //
-    //   param "kind" has invalid type: Number/Constant
-    //
-    // beginShape(kind: Number/Constant): any
+	/** Begins a shape */
+    beginShape(kind?: number | string): any
 
     /**
      * Specifies vertex coordinates for Bezier curves.
@@ -618,11 +615,8 @@ declare class P5 {
      */
     endContour():any
 
-    // TODO: Fix endShape() errors in src/core/vertex.js:
-    //
-    //   param "mode" has invalid type: Number/Constant
-    //
-    // endShape(mode: Number/Constant): any
+	/** Ends a shape */
+    endShape(mode?: string | number): any
 
     /**
      * Specifies vertex coordinates for quadratic Bezier curves.
@@ -961,7 +955,7 @@ declare class P5 {
     //   param "filename" has invalid type: [String]
     //   param "extension" has invalid type: [String]
     //
-    // saveCanvas(canvas: [selectedCanvas], filename: [String], extension: [String]): void
+    saveCanvas(canvas: [any], filename: [String], extension: [String]): void
 
     /**
      * Capture a sequence of frames that can be used to create a movie.
@@ -975,7 +969,7 @@ declare class P5 {
     //   param "successCallback" has invalid type: Function(P5.Image)
     //   param "failureCallback" has invalid type: Function(Event)
     //
-    // loadImage(path: string, successCallback?: Function(P5.Image), failureCallback?: Function(Event)): P5.Image
+    loadImage(path: string, successCallback?: any, failureCallback?: any): P5.Image
 
     /**
      * Draw an image to the main canvas of the p5js sketch
@@ -1006,13 +1000,13 @@ declare class P5 {
     //
     //   param "srcImage" has invalid type: P5.Image|undefined
     //
-    // blend(srcImage: P5.Image|undefined, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number, blendMode: number): void
+    blend(srcImage: P5.Image|undefined, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number, blendMode: number): void
 
     // TODO: Fix copy() errors in src/image/pixels.js:
     //
     //   param "srcImage" has invalid type: P5.Image|undefined
     //
-    // copy(srcImage: P5.Image|undefined, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void
+    copy(srcImage: P5.Image|undefined, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void
 
     /**
      * Applies a filter to the canvas.
@@ -1042,7 +1036,7 @@ declare class P5 {
     //
     //   param "w" is defined multiple times
     //
-    // updatePixels(x?: number, y?: number, w?: number, w?: number): void
+    updatePixels(x?: number, y?: number, w?: number, ww?: number): void
 
     // src/io/files.js
 
@@ -1067,7 +1061,7 @@ declare class P5 {
     //
     //   param "options" has invalid type: String|Strings
     //
-    // loadTable(filename: string, options?: string|Strings, callback?: () => any): any
+    loadTable(filename: string, options?: any, callback?: () => any): any
 
     /**
      * Reads the contents of a file and creates an XML object with its values.
@@ -1095,7 +1089,7 @@ declare class P5 {
     //   param "filename" has invalid type: [String]
     //   param "options" has invalid type: [Boolean/String]
     //
-    // save(objectOrFilename: [Object|String], filename: [String], options: [Boolean/String]): void
+    save(objectOrFilename: [Object|String], filename: [String], options: any): void
 
     /**
      * Writes the contents of an Array or a JSON object to a .json file.
@@ -1135,7 +1129,7 @@ declare class P5 {
     //   required param "x2" follows an optional param
     //   required param "y2" follows an optional param
     //
-    // dist(x1: number, y1: number, z1?: number, x2: number, y2: number, z2?: number): number
+    dist(x1: number, y1: number, z1?: number, x2?: number, y2?: number, z2?: number): number
 
     /**
      * Returns Euler's number e (2.71828...) raised to the power of the n
@@ -1301,7 +1295,7 @@ declare class P5 {
     //
     //   param "mode" has invalid type: Number/Constant
     //
-    // angleMode(mode: Number/Constant): void
+    angleMode(mode: any): void
 
     // src/typography/attributes.js
 
@@ -1310,7 +1304,7 @@ declare class P5 {
     //   param "horizAlign" has invalid type: Number/Constant
     //   param "vertAlign" has invalid type: Number/Constant
     //
-    // textAlign(horizAlign: Number/Constant, vertAlign: Number/Constant): number
+    textAlign(horizAlign: any, vertAlign: any): number
 
     /**
      * Sets/gets the spacing, in pixels, between lines of text.
@@ -1326,7 +1320,7 @@ declare class P5 {
     //
     //   param "theStyle" has invalid type: Number/Constant
     //
-    // textStyle(theStyle: Number/Constant): any|string
+    textStyle(theStyle: any): any|string
 
     /**
      * Calculates and returns the width of any character or text string.
@@ -1552,7 +1546,7 @@ declare class P5 {
     //
     //   return has invalid type: Object/P5.Element|Null
     //
-    // select(name: string, container?: string): Object/P5.Element|Null
+    select(name: string, container?: string): any
 
     /**
      * Searches the page for elements with the given class or tag name (using the '.' prefix
@@ -1836,7 +1830,7 @@ declare namespace P5 {
         //
         //   param "callback" is defined multiple times
         //
-        // drop(callback: () => any, callback: () => any): P5.Element
+        drop(callback1: () => any, callback2: () => any): P5.Element
 
         // lib/addons/P5.dom.js
 
@@ -1923,8 +1917,7 @@ declare namespace P5 {
         //
         //   required param "whether" follows an optional param
         //
-        // constructor(elt: string, pInst?: any, whether: boolean)
-
+        constructor(elt: string, pInst?: any, whether?: boolean)
     }
 
     // src/core/P5.Renderer.js
@@ -1934,8 +1927,7 @@ declare namespace P5 {
         //
         //   required param "whether" follows an optional param
         //
-        // constructor(elt: string, pInst?: any, whether: boolean)
-
+        constructor(elt: string, pInst?: any, whether?: boolean)
     }
 
     // src/image/P5.Image.js
@@ -1970,13 +1962,13 @@ declare namespace P5 {
         //   param "w" has invalid type: Integer|undefined
         //   param "h" has invalid type: Integer|undefined
         //
-        // updatePixels(x: number|undefined, y: number|undefined, w: number|undefined, h: number|undefined): void
+        updatePixels(x: number|undefined, y: number|undefined, w: number|undefined, h: number|undefined): void
 
         // TODO: Fix get() errors in src/image/P5.Image.js:
         //
         //   return has invalid type: Array/Color | P5.Image
         //
-        // get(x?: number, y?: number, w?: number, h?: number): Array/Color | P5.Image
+        get(x?: number, y?: number, w?: number, h?: number): any
 
         /**
          * Set the color of a single pixel or write an image into
@@ -1993,7 +1985,7 @@ declare namespace P5 {
         //
         //   param "srcImage" has invalid type: P5.Image|undefined
         //
-        // copy(srcImage: P5.Image|undefined, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void
+        copy(srcImage: P5.Image|undefined, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void
 
         /**
          * Masks part of an image from displaying by loading another
@@ -2006,13 +1998,13 @@ declare namespace P5 {
         //
         //   param "value" has invalid type: Number|undefined
         //
-        // filter(operation: string, value: number|undefined): void
+        filter(operation: string, value: number|undefined): void
 
         // TODO: Fix blend() errors in src/image/P5.Image.js:
         //
         //   param "srcImage" has invalid type: P5.Image|undefined
         //
-        // blend(srcImage: P5.Image|undefined, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number, blendMode: number): void
+        blend(srcImage: P5.Image|undefined, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number, blendMode: number): void
 
         /**
          * Saves the image to a file and force the browser to download it.
@@ -2046,7 +2038,7 @@ declare namespace P5 {
         //
         //   return has invalid type: TableRow
         //
-        // getRow(rowID: number): TableRow
+        getRow(rowID: number): TableRow
 
         /**
          * Gets all rows from the table.
@@ -2057,7 +2049,7 @@ declare namespace P5 {
         //
         //   return has invalid type: TableRow
         //
-        // findRow(value: string, column: number|string): TableRow
+        findRow(value: string, column: number|string): TableRow
 
         /**
          * Finds the rows in the Table that contain the value
@@ -2069,7 +2061,7 @@ declare namespace P5 {
         //
         //   return has invalid type: TableRow
         //
-        // matchRow(regexp: string, column: string|number): TableRow
+        matchRow(regexp: string, column: string|number): TableRow
 
         /**
          * Finds the first row in the Table that matches the regular
@@ -2327,7 +2319,7 @@ declare namespace P5 {
         //
         //   required param "amt" follows an optional param
         //
-        // lerp(x: P5.Vector, y?: P5.Vector, z?: P5.Vector, amt: number): P5.Vector
+        lerp(x: P5.Vector, y?: P5.Vector, z?: P5.Vector, amt?: number): P5.Vector
 
         /**
          * Return a representation of this vector as a float array.
@@ -2500,7 +2492,7 @@ declare namespace P5 {
         //
         //   param "file" has invalid type: File
         //
-        // constructor(file: File, pInst?: any)
+        constructor(file: File, pInst?: any)
 
         /**
          * Underlying File object.

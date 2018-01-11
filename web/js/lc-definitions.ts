@@ -440,4 +440,3 @@ interface PresetData {
 
 /** The jQuery object, in case DOM manipulations are required. */
 declare let $: any
-
