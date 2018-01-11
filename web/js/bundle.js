@@ -1976,6 +1976,10 @@ function setupDefinitions() {
     fetch('js/lc-definitions.ts')
         .then(response => response.text())
         .then(addTypeScriptDefinitions);
+    if (document.location.pathname.endsWith('p5j.html'))
+        fetch('js/p5.d.ts')
+            .then(response => response.text())
+            .then(addTypeScriptDefinitions);
 }
 function createProposals(name, obj) {
     let members = [];

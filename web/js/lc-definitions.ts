@@ -441,5 +441,3 @@ interface PresetData {
 /** The jQuery object, in case DOM manipulations are required. */
 declare let $: any
 
-/** The p5 object gives access to the [p5j](https://p5js.org/) API, for drawing real-time 2D and 3D graphics, as long as the [p5j.html](../p5j.html) page is loaded instead of index.html. */
-declare let p5: any
