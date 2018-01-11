@@ -1,0 +1,58 @@
+<!doctype html>
+
+<head>
+	<meta charset="utf-8">
+	<title>Modulator</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="css/bootstrap/bootstrap.min.css">
+	<link rel="stylesheet" href="css/bootstrap/bootstrap-theme.min.css">
+	<link rel="stylesheet" href="css/nanoscroller.css">
+	<link rel="stylesheet" type="text/css" href="css/main.css">
+	<link rel="shortcut icon" href="modulator32.ico" />
+</head>
+
+<body>
+<script>
+	if (localStorage.walc_prefs_theme == 'dark')
+		document.body.classList.add('dark')
+</script>
+
+<div id="page">
+
+<div id="live-coding" tabindex="1" style="display:none">Live Coding goes here</div>
+
+<div id="synth" class="mod-no-outline" tabindex="2">
+	Loading...
+</div>
+
+</div><!-- end of full page (synth or livecoding) -->
+
+<script src="js/vendor/jquery-1.11.2.min.js"></script>
+<script src="js/vendor/jquery-ui.min.js"></script>
+<script src="js/vendor/bootstrap.min.js"></script>
+<script src="js/vendor/jquery.nanoscroller.min.js"></script>
+<script src="js/vendor/p5/p5.min.js"></script>
+<script src="js/vendor/monaco/min/vs/loader.js"></script>
+<script src="js/bundle.js"></script>
+
+<script>
+function setup() {
+	let p5cnv = createCanvas(windowWidth, windowHeight)
+	createCanvasParent().append($(p5cnv.canvas).detach())
+}
+
+function createCanvasParent() {
+	let page = $('body')
+	let p5c = $('<div id="p5-container" />')
+	page.append(p5c)
+	p5c.css({
+		position: 'fixed', left: '0', right: '0', top: '0', bottom: '0',
+		'pointer-events': 'none',
+		'z-index': 100
+	})
+	return p5c
+}
+</script>	
+
+</body>
+</html>

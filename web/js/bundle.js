@@ -1965,6 +1965,7 @@ function setupGlobals(lc) {
     global.tracks = __WEBPACK_IMPORTED_MODULE_8__scheduler__["h" /* userTracks */];
     global.Note = __WEBPACK_IMPORTED_MODULE_3__scales__["a" /* Note */];
     global.random = __WEBPACK_IMPORTED_MODULE_4__random__["a" /* random */];
+    global.p5 = global;
     global.global = {};
     Object(__WEBPACK_IMPORTED_MODULE_2__rings__["a" /* setupRing */])();
 }

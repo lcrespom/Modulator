@@ -231,7 +231,8 @@ interface Track {
 	If specified, notes will be played one after the other after the specified time (if parameter is a number) or times (if the parameter is an array)
 	@param durations Optional. If specified, the duration or durations to be used for each note.
 	 */
-	play_notes(notes: number[], times?: number | number[], durations?: number | number[]): this
+	play_notes(notes: number[],
+		times?: number | number[], durations?: number | number[]): this
 	/** Transposes the notes to be played after this point in the specified amount of semitones. */
 	transpose(notes: number): this
 	/** Changes a parameter of the current instrument.
@@ -437,5 +438,8 @@ interface PresetData {
 	modulatorType: string
 }
 
-/** The jQuery object */
+/** The jQuery object, in case DOM manipulations are required. */
 declare let $: any
+
+/** The p5 object gives access to the [p5j](https://p5js.org/) API, for drawing real-time 2D and 3D graphics, as long as the [p5j.html](../p5j.html) page is loaded instead of index.html. */
+declare let p5: any

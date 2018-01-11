@@ -69,6 +69,7 @@ function setupGlobals(lc: LiveCoding) {
 	global.tracks = userTracks
 	global.Note = Note
 	global.random = random
+	global.p5 = global
 	global.global = {}
 	setupRing()
 }
