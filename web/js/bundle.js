@@ -2622,10 +2622,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 
-const graphCanvas = $('#graph-canvas')[0];
-const ac = createAudioContext();
-const synthUI = new __WEBPACK_IMPORTED_MODULE_0__synthUI_synthUI__["a" /* SynthUI */](ac, graphCanvas, $('#node-params'), $('#audio-graph-fft'), $('#audio-graph-osc'));
-setupPanels();
+let graphCanvas;
+let ac;
+let synthUI;
+Object(__WEBPACK_IMPORTED_MODULE_4__utils_routes__["a" /* setupRoutes */])('#synth').then(_ => {
+    graphCanvas = $('#graph-canvas')[0];
+    ac = createAudioContext();
+    synthUI = new __WEBPACK_IMPORTED_MODULE_0__synthUI_synthUI__["a" /* SynthUI */](ac, graphCanvas, $('#node-params'), $('#audio-graph-fft'), $('#audio-graph-osc'));
+    setupPanels();
+});
 function createAudioContext() {
     const CtxClass = window.AudioContext || window.webkitAudioContext;
     return new CtxClass();
@@ -2639,7 +2644,7 @@ function setupPanels() {
     $(function () {
         $('#synth').focus();
     });
-    Object(__WEBPACK_IMPORTED_MODULE_4__utils_routes__["a" /* setupRoutes */])('#synth').then(_ => Object(__WEBPACK_IMPORTED_MODULE_3__live_coding_editor__["a" /* createEditor */])(ac, prsts, synthUI));
+    Object(__WEBPACK_IMPORTED_MODULE_3__live_coding_editor__["a" /* createEditor */])(ac, prsts, synthUI);
     $(document).on('route:show', (e, h) => {
         if (h == '#synth')
             prsts.selectBestNode();
@@ -8656,9 +8661,15 @@ function showPageFromHash() {
     window.scrollTo(0, 0);
 }
 function loadPages() {
+    return Promise.all([
+        loadPage('live-coding'),
+        loadPage('synth')
+    ]);
+}
+function loadPage(pname) {
     return new Promise(resolve => {
-        $.get('live-coding.html', data => {
-            $('#live-coding').empty().append(data);
+        $.get(pname + '.html', data => {
+            $('#' + pname).empty().append(data);
             resolve();
         });
     });

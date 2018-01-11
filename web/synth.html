@@ -1,0 +1,186 @@
+<!-- Top row with title and a couple of buttons -->
+<div class="app-navbar">
+	<div class="left-buttons">
+		<a href="#synth" class="btn btn-primary btn-sm active">Synth</a>
+		&nbsp;
+		<a href="#live-coding" class="btn btn-primary btn-sm">Code</a>
+	</div>
+	<div class="logo">
+		<img src="img/logo.svg">
+	</div>
+	<div class="right-buttons">
+		<a href="http://github.com/lcrespom/Modulator" target="_blank"
+			class="btn btn-primary btn-sm">Repo</a>
+		&nbsp;
+		<a href="help.html" target="_blank"
+			class="btn btn-primary btn-sm">Help</a>
+	</div>
+</div>
+
+
+<!-- Main app area -->
+<div class="main">
+
+	<div class="graph-row">
+		<!-- ------------- Graph canvas ------------- -->
+		<div class="graph-box">
+			<h5 class="bg-primary box-header">Audio Node Graph</h5>
+			<div class="canvas-box">
+				<canvas id="graph-canvas" class="graph" width="700" height="422"></canvas>
+			</div>
+		</div><!--
+
+		--------------- Node palette ---------------
+	--><div class="palette graph-box">
+			<h5 class="bg-primary box-header">Palette</h5>
+			<div class="nano">
+				<div class="nano-content">
+
+					<div class="palette-section">Sources</div>
+					<div class="node node-src" data-type="Oscillator">
+						<div class="node-text">Osc</div>
+					</div>
+					<div class="node node-src" data-type="Buffer">
+						<div class="node-text">Buffer</div>
+					</div>
+					<div class="node node-src" data-type="Noise">
+						<div class="node-text">Noise</div>
+					</div>
+					<div class="node node-src" data-type="LineIn">
+						<div class="node-text">Line In</div>
+					</div>
+					<div class="node node-src" data-type="SoundBank">
+						<div class="node-text">Sound<br/>Bank</div>
+					</div>
+
+					<div class="palette-section">Effects</div>
+					<div class="node node-effect" data-type="Gain">
+						<div class="node-text">Gain</div>
+					</div>
+					<div class="node node-effect" data-type="Filter">
+						<div class="node-text">Filter</div>
+					</div>
+					<div class="node node-effect" data-type="Delay">
+						<div class="node-text">Delay</div>
+					</div>
+					<div class="node node-effect" data-type="StereoPan">
+						<div class="node-text">Pan</div>
+					</div>
+					<div class="node node-effect" data-type="Compressor">
+						<div class="node-text">Compr</div>
+					</div>
+					<div class="node node-effect" data-type="Detuner">
+						<div class="node-text">Pitch</br>Shifter</div>
+					</div>
+
+					<div class="palette-section">Controllers</div>
+					<div class="node node-ctrl" data-type="LFO">
+						<div class="node-text">LFO</div>
+					</div>
+					<div class="node node-ctrl" data-type="GainCtrl">
+						<div class="node-text">Gain<br>Control</div>
+					</div>
+					<div class="node node-ctrl" data-type="ADSR">
+						<div class="node-text">ADSR</div>
+					</div>
+					<div class="node node-ctrl" data-type="NoiseCtrl">
+						<div class="node-text">Noise</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="graph-row">
+		<!-- ------------- Current node parameters ------------- -->
+		<div class="params-box graph-box">
+			<h5 class="bg-primary box-header" id="node-params-hdr">Node Parameters</h5>
+			<div id="node-params"></div>
+		</div><!--
+		--------------- Presets ---------------
+	 --><div class="presets-box graph-box">
+			<h5 class="bg-primary box-header">Presets</h5>
+			<div id="presets">
+				<div style="margin: 20px 30px 0px 30px; position: relative">
+					<button id="prev-preset-but" class="btn btn-primary">
+						<span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+					</button>
+					<button id="preset-num" class="btn btn-default">
+						1
+					</button>
+					<button id="next-preset-but" class="btn btn-primary"
+						style="position: absolute; right: 0">
+						<span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+					</button>
+					<div class="preset-selector">
+						<select size="2">
+						</select>
+					</div>
+				</div>
+				<div style="margin: 20px">
+					<input id="preset-name">
+				</div>
+				<div style="margin: 45px 10px 0px 10px; position: relative">
+					<span id="load-but" class="btn btn-primary upload">
+					    <input type="file" id="load-file">
+						Load&nbsp;
+						<span class="glyphicon glyphicon-open" aria-hidden="true"></span>
+					</span>
+					<button id="save-but" class="btn btn-primary"
+						style="position: absolute; right: 0">
+						Save&nbsp;
+						<span class="glyphicon glyphicon-save" aria-hidden="true"></span>
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="graph-row" style="margin-top: -5px">
+		<!-- ------------- Piano keyboard ------------- -->
+		<div class="graph-box">
+			<h5 class="bg-primary box-header">Piano Keyboard</h5>
+			<div id="piano" class="piano-box"></div>
+			<div id="piano-buttons" style="position: relative">
+				<span style="float:left">
+					<button id="prev-octave-but" class="btn btn-primary btn-sm">
+						-
+					</button>
+					<div id="octave-label" style="display: inline-block; width: 20px; text-align: center">C3</div>
+					<button id="next-octave-but" class="btn btn-primary btn-sm">
+						+
+					</button>
+				</span>
+				<div class="portamento-box">
+  					<input value="0" min="0" max="1" step="0.001" type="range" style="width: 120px;">
+					<span style="font-size: 90%; position: absolute; top: 15px; right: 25px">
+						Portamento
+					</span>
+				</div>
+				<div class="arpeggio-box">
+  					<input value="0.5" min="0" max="1" step="0.001" type="range" style="width: 120px;">
+					<span style="font-size: 90%; position: absolute; top: 15px; right: 33px">
+						Arpeggio
+					</span>
+					<button class="btn btn-primary btn-xs btn-arpeggio-ud"
+						style="position: absolute; left: 126px; top: 5px; width: 24px">-</button>
+					<button class="btn btn-primary btn-xs btn-arpeggio-oct"
+						style="position: absolute; left: 156px; top: 5px; width: 24px">1</button>
+				</div>
+				<button id="poly-but" class="btn btn-primary btn-sm"
+					style="position: absolute; right: 10px; width: 45px; padding-left: 5px; padding-right: 5px">
+					Mono
+				</button>
+			</div>
+		</div><!--
+		-------------------- Wave analyzers --------------------
+	 --><div class="graph-box" style="margin-left: 10px">
+			<h5 class="bg-primary box-header">Graph</h5>
+			<div id="audio-graph-fft" class="audio-graph">
+			</div>
+			<div id="audio-graph-osc" class="audio-graph">
+			</div>
+		</div>
+	</div>
+</div><!-- end of main -->
+

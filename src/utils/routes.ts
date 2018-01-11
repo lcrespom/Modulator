@@ -1,7 +1,7 @@
 let oldPage: string
 let mainRoute: string
 
-export function setupRoutes(initialRoute: string): Promise<void> {
+export function setupRoutes(initialRoute: string) {
 	window.onhashchange = showPageFromHash
 	mainRoute = initialRoute
 	showPageFromHash()
@@ -18,10 +18,17 @@ function showPageFromHash() {
 	window.scrollTo(0, 0)
 }
 
-function loadPages(): Promise<void> {
+function loadPages() {
+	return Promise.all([
+		loadPage('live-coding'),
+		loadPage('synth')
+	])
+}
+
+function loadPage(pname: string) {
 	return new Promise<void>(resolve => {
-		$.get('live-coding.html', data => {
-			$('#live-coding').empty().append(data)
+		$.get(pname + '.html', data => {
+			$('#' + pname).empty().append(data)
 			resolve()
 		})
 	})

@@ -9,12 +9,17 @@ import { createEditor } from './live-coding/editor'
 import { setupRoutes } from './utils/routes'
 
 
-const graphCanvas = <HTMLCanvasElement>$('#graph-canvas')[0]
-const ac = createAudioContext()
-const synthUI = new SynthUI(ac, graphCanvas,
-	$('#node-params'), $('#audio-graph-fft'), $('#audio-graph-osc'))
-setupPanels()
+let graphCanvas: HTMLCanvasElement
+let ac: AudioContext
+let synthUI: SynthUI
 
+setupRoutes('#synth').then(_ => {
+	graphCanvas = <HTMLCanvasElement>$('#graph-canvas')[0]
+	ac = createAudioContext()
+	synthUI = new SynthUI(ac, graphCanvas,
+		$('#node-params'), $('#audio-graph-fft'), $('#audio-graph-osc'))
+	setupPanels()
+})
 
 function createAudioContext(): AudioContext {
 	const CtxClass: any = window.AudioContext || window.webkitAudioContext
@@ -30,12 +35,11 @@ function setupPanels() {
 	$(function() {
 		$('#synth').focus()
 	})
-	setupRoutes('#synth').then(_ => createEditor(ac, prsts, synthUI))
+	createEditor(ac, prsts, synthUI)
 	$(document).on('route:show', (e, h) => {
 		if (h == '#synth') prsts.selectBestNode()
 	})
 }
-
 
 function setupPalette() {
 	$(function() {
@@ -43,6 +47,5 @@ function setupPalette() {
 		nano.nanoScroller({ preventPageScrolling: true })
 	})
 }
-
 
 declare var window: ModernWindow
