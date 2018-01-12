@@ -81,10 +81,6 @@
 	- [x] Smarter code completion for parameters, effect names, etc.
 	- [ ] Prevent instrument and effect instances to be shared across tracks
 - Editor
-	- [ ] Code sharing
-		- [ ] Grab code from any URL and paste it in the editor. If there
-			is existing code in the buffer, comment it out.
-			Users can publish code anywhere as long as the server accepts CORS.
 	- [ ] Add more panels
 		- [ ] Info
 			- [ ] Tracks: name + status: timeline, mute/solo, stopped
@@ -108,6 +104,10 @@
 		- [x] Increase / decrease font
 	- [x] Dark theme
 		- [ ] configure code colors with monokai
+	- [x] Code sharing
+		- [x] Grab code from any URL and paste it in the editor. If there
+			is existing code in the buffer, comment it out.
+			Users can publish code anywhere as long as the server accepts CORS.
 	- [x] Store more data in localStorage
 		- [x] Color theme
 		- [x] Selected buffer

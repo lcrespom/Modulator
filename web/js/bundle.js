@@ -1943,31 +1943,33 @@ function loadMonaco(cb) {
 }
 function createEditor(ac, presets, synthUI) {
     setupGlobals(new __WEBPACK_IMPORTED_MODULE_0__live_coding__["a" /* LiveCoding */](ac, presets, synthUI));
-    loadMonaco(function () {
-        let editorElem = byId('walc-code-editor');
-        setupDefinitions();
-        editor = monaco.editor.create(editorElem, {
-            value: '',
-            language: 'typescript',
-            lineNumbers: false,
-            renderLineHighlight: 'none',
-            minimap: { enabled: false }
-            // fontSize: 15
-        });
-        handleEditorResize(editorElem);
-        Object(__WEBPACK_IMPORTED_MODULE_1__editor_actions__["a" /* registerActions */])(editor);
-        editor.focus();
-        Object(__WEBPACK_IMPORTED_MODULE_5__editor_buffers__["a" /* handleBuffers */])(editor);
-        setupCompletion();
-        $(document).on('route:show', (e, h) => {
-            if (h != '#live-coding')
-                return;
-            editor.focus();
-            window.scrollTo(0, 0);
-        });
-        _synthUI = synthUI;
-        analyzer = new __WEBPACK_IMPORTED_MODULE_6__synthUI_analyzer__["a" /* AudioAnalyzer */]($('#walc-graph-fft'), $('#walc-graph-osc'));
+    _synthUI = synthUI;
+    return new Promise(resolve => loadMonaco(() => resolve(setupEditor())));
+}
+function setupEditor() {
+    let editorElem = byId('walc-code-editor');
+    setupDefinitions();
+    editor = monaco.editor.create(editorElem, {
+        value: '',
+        language: 'typescript',
+        lineNumbers: false,
+        renderLineHighlight: 'none',
+        minimap: { enabled: false }
+        // fontSize: 15
     });
+    handleEditorResize(editorElem);
+    Object(__WEBPACK_IMPORTED_MODULE_1__editor_actions__["a" /* registerActions */])(editor);
+    editor.focus();
+    Object(__WEBPACK_IMPORTED_MODULE_5__editor_buffers__["a" /* handleBuffers */])(editor);
+    setupCompletion();
+    $(document).on('route:show', (e, h) => {
+        if (h != '#live-coding')
+            return;
+        editor.focus();
+        window.scrollTo(0, 0);
+    });
+    analyzer = new __WEBPACK_IMPORTED_MODULE_6__synthUI_analyzer__["a" /* AudioAnalyzer */]($('#walc-graph-fft'), $('#walc-graph-osc'));
+    return editor;
 }
 function setupGlobals(lc) {
     global.lc = lc;
@@ -2630,6 +2632,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__synthUI_presets__ = __webpack_require__(30);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__live_coding_editor__ = __webpack_require__(16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_routes__ = __webpack_require__(47);
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 /**
  * Main entry point: setup synth editor and keyboard listener.
  */
@@ -2645,7 +2655,8 @@ Object(__WEBPACK_IMPORTED_MODULE_4__utils_routes__["a" /* setupRoutes */])('#syn
     graphCanvas = $('#graph-canvas')[0];
     ac = createAudioContext();
     synthUI = new __WEBPACK_IMPORTED_MODULE_0__synthUI_synthUI__["a" /* SynthUI */](ac, graphCanvas, $('#node-params'), $('#audio-graph-fft'), $('#audio-graph-osc'));
-    setupPanels();
+    setupPanels()
+        .then(editor => checkSearch(editor));
 });
 function createAudioContext() {
     const CtxClass = window.AudioContext || window.webkitAudioContext;
@@ -2660,16 +2671,45 @@ function setupPanels() {
     $(function () {
         $('#synth').focus();
     });
-    Object(__WEBPACK_IMPORTED_MODULE_3__live_coding_editor__["a" /* createEditor */])(ac, prsts, synthUI);
     $(document).on('route:show', (e, h) => {
         if (h == '#synth')
             prsts.selectBestNode();
     });
+    return Object(__WEBPACK_IMPORTED_MODULE_3__live_coding_editor__["a" /* createEditor */])(ac, prsts, synthUI);
 }
 function setupPalette() {
     $(function () {
         let nano = $('.nano');
         nano.nanoScroller({ preventPageScrolling: true });
+    });
+}
+function checkSearch(editor) {
+    if (!location.search || location.search.length <= 0
+        || !location.search.startsWith('?'))
+        return;
+    let sdata = location.search.substr(1).split('&');
+    let result = {};
+    for (let param of sdata) {
+        let [k, v] = param.split('=');
+        result[k] = v;
+    }
+    applySearch(result, editor);
+}
+function applySearch(search, editor) {
+    if (search.codeURL)
+        fetchCode(search.codeURL, editor);
+}
+function fetchCode(url, editor) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let r = yield fetch(url);
+        if (!r.ok)
+            return;
+        let code = yield r.text();
+        location.hash = '#live-coding';
+        let edtxt = editor.getModel().getValue() || '';
+        if (edtxt.trim().length > 0 && !edtxt.trim().startsWith('/*'))
+            edtxt = '\n/*\n' + edtxt + '\n*/\n';
+        editor.getModel().setValue(code + edtxt);
     });
 }
 
