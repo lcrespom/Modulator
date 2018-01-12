@@ -4,7 +4,7 @@ import { LCInstrument } from './instruments'
 import { Effect } from './effects'
 import { Track } from './track'
 import { Timer } from '../synth/timer'
-import { logNote, logToPanel, logEvent } from './log'
+import { logNote, logToPanel, logEvent, txt2html } from './log'
 
 
 interface InstrumentOptions {
@@ -140,7 +140,15 @@ function shouldTrackEnd(track: Track) {
 		logEvent(track, `Track [log-track|${track.name}] has looped`)
 		track.notes = []
 		track.time = 0
-		track.callback(track)
+		try {
+			track.callback(track)
+		} catch (e) {
+			track.loop = false
+			logToPanel(true, true, txt2html(
+				`[log-bold|Runtime error]: "${e.message}" in track "${track.name}" - looping stopped`
+			))
+			console.error(e)
+		}
 		return false
 	}
 	else {
