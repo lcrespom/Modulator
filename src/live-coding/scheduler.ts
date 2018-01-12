@@ -4,7 +4,7 @@ import { LCInstrument } from './instruments'
 import { Effect } from './effects'
 import { Track } from './track'
 import { Timer } from '../synth/timer'
-import { logNote, logToPanel, logEvent } from './log'
+import { logNote, logEvent } from './log'
 
 
 interface InstrumentOptions {
