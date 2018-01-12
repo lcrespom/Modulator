@@ -221,7 +221,7 @@ declare class P5 {
     /**
      * Draws an ellipse (oval) to the screen.
      */
-    ellipse(a:number, b:number, c:number, d:number): P5
+    ellipse(a:number, b:number, c:number, d?:number): P5
 
     /**
      * Draws a line (a direct path between two points) to the screen.
