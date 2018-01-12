@@ -107,6 +107,7 @@ export class Track extends TrackControl {
 		if (!this.inst) throw new Error(
 			`Must call instrument before playing a note or setting parameters`)
 		this.notes.push({
+			track: this,
 			instrument: this.inst,
 			number: note + this._transpose,
 			time: this.time + this.latency,

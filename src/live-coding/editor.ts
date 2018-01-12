@@ -34,32 +34,37 @@ function loadMonaco(cb: () => void) {
 }
 
 export function createEditor(
-	ac: AudioContext, presets: Presets, synthUI: SynthUI) {
+	ac: AudioContext, presets: Presets, synthUI: SynthUI): Promise<any> {
 	setupGlobals(new LiveCoding(ac, presets, synthUI))
-	loadMonaco(function() {
-		let editorElem = byId('walc-code-editor')
-		setupDefinitions()
-		editor = monaco.editor.create(editorElem, {
-			value: '',
-			language: 'typescript',
-			lineNumbers: false,
-			renderLineHighlight: 'none',
-			minimap: { enabled: false }
-			// fontSize: 15
-		})
-		handleEditorResize(editorElem)
-		registerActions(editor)
-		editor.focus()
-		handleBuffers(editor)
-		setupCompletion()
-		$(document).on('route:show', (e, h) => {
-			if (h != '#live-coding') return
-			editor.focus()
-			window.scrollTo(0, 0)
-		})
-		_synthUI = synthUI
-		analyzer = new AudioAnalyzer($('#walc-graph-fft'), $('#walc-graph-osc'))
+	_synthUI = synthUI
+	return new Promise(resolve =>
+		loadMonaco(() => resolve(setupEditor()))
+	)
+}
+
+function setupEditor() {
+	let editorElem = byId('walc-code-editor')
+	setupDefinitions()
+	editor = monaco.editor.create(editorElem, {
+		value: '',
+		language: 'typescript',
+		lineNumbers: false,
+		renderLineHighlight: 'none',
+		minimap: { enabled: false }
+		// fontSize: 15
 	})
+	handleEditorResize(editorElem)
+	registerActions(editor)
+	editor.focus()
+	handleBuffers(editor)
+	setupCompletion()
+	$(document).on('route:show', (e, h) => {
+		if (h != '#live-coding') return
+		editor.focus()
+		window.scrollTo(0, 0)
+	})
+	analyzer = new AudioAnalyzer($('#walc-graph-fft'), $('#walc-graph-osc'))
+	return editor
 }
 
 function setupGlobals(lc: LiveCoding) {
@@ -69,6 +74,7 @@ function setupGlobals(lc: LiveCoding) {
 	global.tracks = userTracks
 	global.Note = Note
 	global.random = random
+	global.p5 = global
 	global.global = {}
 	setupRing()
 }
@@ -81,6 +87,10 @@ function setupDefinitions() {
 	fetch('js/lc-definitions.ts')
 	.then(response => response.text())
 	.then(addTypeScriptDefinitions)
+	if (document.location.pathname.endsWith('p5j.html'))
+		fetch('js/p5.d.ts')
+		.then(response => response.text())
+		.then(addTypeScriptDefinitions)
 }
 
 function createProposals(name: string, obj: any) {

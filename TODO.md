@@ -3,7 +3,9 @@
 ## Testing
 - [ ] Test in Safari
 - [x] Test in FireFox
-- [ ] Engage betatesters
+- [x] Engage betatesters
+- [x] Review documentation in spellchecker
+- [ ] Upgrade jQuery to v3 and re-test (thoroughly)
 
 ## Bugs
 - [ ] Node deletion only works once
@@ -35,7 +37,7 @@
 
 ## Live Coding
 - Document and publish
-	- [ ] Merge with master
+	- [x] Merge with master
 	- [ ] Publish in GitHub pages
 	- [x] Tutorial
 	- [x] Examples
@@ -92,7 +94,7 @@
 			- [x] Colors in logs, e.g. note data
 			- [x] Trace event time information in 00:00.000 format
 			- [x] Log more events: instr/track/effect creation, etc
-			- [ ] Stop event tracing after error, restore it after next run
+			- [x] Stop event tracing after error, restore it after next run
 			- [ ] Make log_enable receive two parameters: `log_notes` and `log_events`
 	- [x] Button row
 		- [ ] FFW / RWD
@@ -102,6 +104,10 @@
 		- [x] Increase / decrease font
 	- [x] Dark theme
 		- [ ] configure code colors with monokai
+	- [x] Code sharing
+		- [x] Grab code from any URL and paste it in the editor. If there
+			is existing code in the buffer, comment it out.
+			Users can publish code anywhere as long as the server accepts CORS.
 	- [x] Store more data in localStorage
 		- [x] Color theme
 		- [x] Selected buffer

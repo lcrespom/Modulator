@@ -31,8 +31,29 @@
 <script src="js/vendor/jquery-ui.min.js"></script>
 <script src="js/vendor/bootstrap.min.js"></script>
 <script src="js/vendor/jquery.nanoscroller.min.js"></script>
+<script src="js/vendor/p5/p5.min.js"></script>
 <script src="js/vendor/monaco/min/vs/loader.js"></script>
 <script src="js/bundle.js"></script>
+
+<script>
+function setup() {
+	let p5cnv = createCanvas(windowWidth, windowHeight)
+	createCanvasParent().append($(p5cnv.canvas).detach())
+}
+
+function createCanvasParent() {
+	let page = $('body')
+	let p5c = $('<div id="p5-container" />')
+	page.append(p5c)
+	p5c.css({
+		position: 'fixed', left: '0', right: '0', top: '0', bottom: '0',
+		'pointer-events': 'none',
+		'z-index': 100
+		// background: 'linear-gradient(rgba(0,0,0,1), rgba(0,0,0,0))'
+	})
+	return p5c
+}
+</script>	
 
 </body>
 </html>

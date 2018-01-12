@@ -79,7 +79,7 @@ lc.loop_track('melody', t => t
 )
 ```
 
-When you run it, you will hear that it loops endlesly. You can click the stop button any time to end all sound playback. The `lc.loop_track` method is identical to `lc.track`, but creates a looping track that repeats itself over and over. Creating looping tracks and then interactively changing and manipulating them is the main technique for performing live musing, hence the ***Live Coding*** name.
+When you run it, you will hear that it loops endlessly. You can click the stop button any time to end all sound playback. The `lc.loop_track` method is identical to `lc.track`, but creates a looping track that repeats itself over and over. Creating looping tracks and then interactively changing and manipulating them is the main technique for performing live musing, hence the ***Live Coding*** name.
 
 
 ## Updating a playing track
@@ -100,7 +100,7 @@ Let's now raise the volume to 0.5 in one second. Add the following line and run 
 tracks.melody.gain(0.5, 1)
 ```
 
-Finally, lets stop the track loop by running the following code:
+Finally, let's stop the track loop by running the following code:
 
 ```javascript
 tracks.melody.stop()
@@ -321,11 +321,11 @@ Or we can replace the `notes.reflect()` call with `notes.shuffle()` which will r
 We have seen that the `shuffle` method randomly reorders the elements of a ring.
 We also have the `choose` method, which randomly selects an element.
 
-There is a `random` object that is avaliable for generating random numbers. For example, `random.integer(50, 70)` returns a random integer between 50 and 70, both inclusive. Or you can call `random.dice(6)` to get a random number between 1 and 6. As usual, you can check the [API](#lc-definitions.ts) for all the available methods.
+There is a `random` object that is available for generating random numbers. For example, `random.integer(50, 70)` returns a random integer between 50 and 70, both inclusive. Or you can call `random.dice(6)` to get a random number between 1 and 6. As usual, you can check the [API](#lc-definitions.ts) for all the available methods.
 
 For music composition, randomness is helpful, but once we have found a nice random pattern, we want to be able to repeat it again. That is why Modulator uses a predictable random number generator, which is reset every time some code is run.
 
-So if you run a track containing `notes.shuffle()` and then run it again, it will shuffle the notes exactly the same way as before. If you want it to shuffle differently, you must call `random.seed` and pass it an arbitrary seed number, such as `random.seed(123)`. You will then see that your notes are shuffled differently, but every time you run the same code the shuffling will be identical. And that is convenient, because once we have found an intreresting random melody after testing different seed values, we will want to keep it.
+So if you run a track containing `notes.shuffle()` and then run it again, it will shuffle the notes exactly the same way as before. If you want it to shuffle differently, you must call `random.seed` and pass it an arbitrary seed number, such as `random.seed(123)`. You will then see that your notes are shuffled differently, but every time you run the same code the shuffling will be identical. And that is convenient, because once we have found an interesting random melody after testing different seed values, we will want to keep it.
 
 ## Logging
 When something does not work as expected, it is very handy to write some data to the log window and see what is going on.
@@ -340,3 +340,95 @@ Will log the current BPM.
 Because notes and other track events are being added to the log when music is playing, you can disable event tracing by invoking `lc.log_enable(false)`, and enable it back with `lc.log_enable(true)`.
 
 Finally, if you want to clear the log box, you can invoke `lc.clear_log()`.
+
+
+## Drawing graphics
+Because the live coding environment uses JavaScript, you are not limited to playing music. You can run any valid JavaScript such as drawing graphics or manipulating any other element of the browser.
+
+In particular, Modulator can load the [p5j](https://p5js.org/) graphics library, which provides a very accesible API for drawing graphics on screen. Because this library is quite big, Modulator does not load it by default; if you want to use it, you must open Modulator using the [p5j.html](../p5j.html) link instead of the default one. Make sure you have started the application from that link before you test the graphical examples explained below.
+
+For convenience, all the p5j functions are encapsulated into the **p5** object, and the editor provides code completion and API documentation of its functions.
+
+For drawing with p5, we just need to provide some code in a *draw* function. Let's start with a bouncing-ball example:
+
+```javascript
+let x = 100, y = 100, vx = 10, vy = 10, r = 50
+
+p5.draw = function() {
+	p5.clear()			// Clears the canvas
+	p5.fill(255, 0, 0)	// Let's use the red color
+	p5.ellipse(x, y, r)	// Draws a circle
+	x += vx
+	if (x - r < 0 || x + r > p5.width) vx = -vx
+	y += vy
+	if (y - r < 0 || y + r > p5.height) vy = -vy
+}
+```
+
+When you run the code above, you should see a red ball bouncing across the page.
+If you want to stop the animation, you can reload your browser page, or also run an empty draw function, such as:
+
+```javascript
+p5.draw = function() { p5.clear() }
+```
+
+When you open Modulator using the [p5j.html](../p5j.html) link, it runs the following additional initialization steps:
+1. Load the p5j JavaScript library.
+2. Create a transparent panel in front of the page.
+3. Create the p5j canvas and place it on the transparent panel.
+4. Load the p5 API documentation into the editor's memory and make it available in the **p5** object.
+
+Now p5j will continuously invoke the *draw* function, by default around 60 times per second. Any drawing code you write there will be executed, and if you gradually modify your drawing by changing some data such as the circle's position, it will animate the graphics.
+
+### Synchronizing music and graphics
+We can animate graphics by making them follow the sound events generated by the rest of our code. For that purpose, the LiveCoding API provides a `listen` method that invokes a user's function every time a note is played. For example:
+
+```javascript
+lc.listen(note =>
+	lc.log('Note played', note.instrument.name, note.number)
+)
+```
+
+If you first run some musical code and then add and run the code above, you should see how your 'Note played' text appears in the log window every time a note is played.
+
+Let's exploit that feature in order to make our graphics *dance* to the music's rhythm. We can associate figures with instruments and animate them every time a note is played. In our `listen` function we will store all notes in an array, and in our `draw` function we will retrieve the notes from the array and animate our graphics accordingly. Here is an example of such technique:
+
+```javascript
+// Musical part
+lc.bpm(60)
+lc.instrument('wavetable/12835_0_Chaos_sf2_file', 'drum').duration = 1
+lc.instrument('wavetable/12839_0_Chaos_sf2_file', 'clap').duration = 1
+lc.loop_track('rhythm', t => t
+    .instrument(instruments.clap).play(39).sleep(0.25)
+    .instrument(instruments.clap).play(39).sleep(0.25)
+    .instrument(instruments.drum).play(35).sleep(0.5)
+    .instrument(instruments.clap).play(39).sleep(0.5)
+    .instrument(instruments.drum).play(35).sleep(0.5)
+)
+
+global.notes = []
+lc.listen(note => global.notes.push(note))
+
+
+// Graphical part
+let r1 = 80, r2 = 80
+let x1 = p5.width * 0.3, x2 = p5.width * 0.7, y = p5.height / 2
+p5.draw = function() {
+    // Note tracking
+    let n
+    while (n = global.notes.pop()) {
+        if (n.instrument.name == 'drum') r1 = 250
+        if (n.instrument.name == 'clap') r2 = 250
+    }
+    if (r1 > 80) r1 -= 10
+    if (r2 > 80) r2 -= 10
+    // Animation
+    p5.clear()
+    p5.fill(255, 0, 0)
+    p5.ellipse(x1, y, r1)
+    p5.fill(0, 128, 255)
+    p5.ellipse(x2, y, r2)
+}
+```
+
+Imagine all the possibilities!

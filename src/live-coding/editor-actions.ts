@@ -86,7 +86,7 @@ function setColorTheme(editorActions: EditorActions) {
 }
 
 function registerDnD() {
-	$('body').on('drag dragstart dragend dragover dragenter dragleave drop', e => {
+	$('#live-coding').on('drag dragstart dragend dragover dragenter dragleave drop', e => {
 		e.preventDefault()
 		e.stopPropagation()
 	})

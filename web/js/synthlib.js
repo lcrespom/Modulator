@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 46);
+/******/ 	return __webpack_require__(__webpack_require__.s = 48);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -109,6 +109,351 @@ function focusable(elem) {
 /***/ }),
 
 /***/ 10:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_modern__ = __webpack_require__(1);
+
+/**
+ * Handles common AudioNode cloning, used by oscillator and buffered data nodes.
+ */
+class BaseNoteHandler {
+    constructor(ndata) {
+        this.kbTrigger = false;
+        this.releaseTime = 0;
+        this.ndata = ndata;
+        this.outTracker = new OutputTracker(ndata.anode);
+    }
+    noteOn(midi, gain, ratio, when) { }
+    noteOff(midi, gain, when) { }
+    clone() {
+        // Create clone
+        let ctor = this.ndata.nodeDef.constructor;
+        if (!ctor)
+            return null;
+        const anode = this.ndata.anode.context[ctor]();
+        // Copy parameters
+        for (const pname of Object.keys(this.ndata.nodeDef.params)) {
+            const param = this.ndata.anode[pname];
+            if (param instanceof AudioParam)
+                anode[pname].value = param.value;
+            else if (param !== null && param !== undefined)
+                anode[pname] = param;
+        }
+        // Copy output connections
+        for (const out of this.outTracker.outputs) {
+            let o2 = out;
+            if (o2.custom && o2.anode)
+                o2 = o2.anode;
+            anode.connect(o2);
+        }
+        // Copy control input connections
+        for (const inData of this.ndata.getInputs()) {
+            inData.anode.connect(anode[inData.controlParam]);
+        }
+        // TODO should copy snapshot of list of inputs and outputs
+        // ...in case user connects or disconnects during playback
+        return anode;
+    }
+    disconnect(anode) {
+        // Disconnect outputs
+        for (const out of this.outTracker.outputs)
+            anode.disconnect(out);
+        // Disconnect control inputs
+        for (const inData of this.ndata.getInputs()) {
+            inData.anode.disconnect(anode[inData.controlParam]);
+        }
+    }
+    rampParam(param, ratio, when) {
+        const portamento = this.ndata.synth.portamento;
+        const newv = param.value * ratio;
+        param._value = newv; // Required for ADSR to capture the correct value
+        if (portamento.time > 0 && portamento.ratio > 0) {
+            const oldv = param.value * portamento.ratio;
+            param.cancelScheduledValues(when);
+            param.linearRampToValueAtTime(oldv, when);
+            param.exponentialRampToValueAtTime(newv, when + portamento.time);
+        }
+        else
+            param.setValueAtTime(newv, when);
+    }
+}
+/* unused harmony export BaseNoteHandler */
+
+/**
+ * Handles note events for an OscillatorNode
+ */
+class OscNoteHandler extends BaseNoteHandler {
+    noteOn(midi, gain, ratio, when) {
+        if (this.oscClone)
+            this.oscClone.stop(when);
+        this.oscClone = this.clone();
+        this.rampParam(this.oscClone.frequency, ratio, when);
+        this.oscClone.start(when);
+        this.lastNote = midi;
+    }
+    noteOff(midi, gain, when) {
+        if (midi != this.lastNote)
+            return; // Avoid multple keys artifacts in mono mode
+        this.oscClone.stop(when + this.releaseTime);
+    }
+}
+/* unused harmony export OscNoteHandler */
+
+/**
+ * Handles note events for an LFO node. This is identical to a regular
+ * oscillator node, but the note does not affect the oscillator frequency
+ */
+class LFONoteHandler extends OscNoteHandler {
+    rampParam(param, ratio, when) {
+        // Disable portamento for LFO
+        param.setValueAtTime(param.value, when);
+    }
+}
+/* unused harmony export LFONoteHandler */
+
+/**
+ * Handles note events for an AudioBufferSourceNode
+ */
+class BufferNoteHandler extends BaseNoteHandler {
+    noteOn(midi, gain, ratio, when) {
+        if (this.absn)
+            this.absn.stop(when);
+        const buf = this.ndata.anode._buffer;
+        if (!buf)
+            return; // Buffer still loading or failed
+        this.absn = this.clone();
+        this.absn.buffer = buf;
+        const pbr = this.absn.playbackRate;
+        const newRate = pbr.value * ratio;
+        this.rampParam(pbr, pbr.value * ratio, when);
+        this.absn.start(when);
+        this.lastNote = midi;
+    }
+    noteOff(midi, gain, when) {
+        if (midi != this.lastNote)
+            return;
+        this.absn.stop(when + this.releaseTime);
+    }
+}
+/* unused harmony export BufferNoteHandler */
+
+/**
+ * Performs computations about ramps so they can be easily rescheduled
+ */
+class Ramp {
+    constructor(v1, v2, t1, t2) {
+        this.v1 = v1;
+        this.v2 = v2;
+        this.t1 = t1;
+        this.t2 = t2;
+    }
+    inside(t) {
+        return this.t1 < this.t2 && this.t1 <= t && t <= this.t2;
+    }
+    cut(t) {
+        const newv = this.v1 + (this.v2 - this.v1) * (t - this.t1) / (this.t2 - this.t1);
+        return new Ramp(this.v1, newv, this.t1, t);
+    }
+    run(p, follow = false) {
+        if (this.t2 - this.t1 <= 0) {
+            p.setValueAtTime(this.v2, this.t2);
+        }
+        else {
+            if (!follow)
+                p.setValueAtTime(this.v1, this.t1);
+            p.linearRampToValueAtTime(this.v2, this.t2);
+        }
+    }
+}
+/* unused harmony export Ramp */
+
+/**
+ * Handles note events for a custom ADSR node
+ */
+class ADSRNoteHandler extends BaseNoteHandler {
+    constructor(ndata) {
+        super(ndata);
+        this.kbTrigger = true;
+        const adsr = this.getADSR();
+        const oldMethod = adsr.disconnect;
+        adsr.disconnect = (dest) => {
+            this.loopParams(param => {
+                if (param == dest)
+                    param.setValueAtTime(param._value, adsr.context.currentTime);
+            });
+            oldMethod(dest);
+        };
+    }
+    getADSR() {
+        let anode = this.ndata.anode;
+        return anode;
+    }
+    get releaseTime() {
+        const adsr = this.getADSR();
+        return adsr.release;
+    }
+    set releaseTime(relTime) { }
+    noteOn(midi, gain, ratio, when) {
+        this.lastNote = midi;
+        const adsr = this.getADSR();
+        this.loopParams(param => {
+            const v = this.getParamValue(param);
+            const initial = (1 - adsr.depth) * v;
+            const sustain = v * adsr.sustain + initial * (1 - adsr.sustain);
+            const now = adsr.context.currentTime;
+            param.cancelScheduledValues(now);
+            if (when > now)
+                this.rescheduleRamp(param, param._release, now);
+            param._attack = new Ramp(initial, v, when, when + adsr.attack);
+            param._decay = new Ramp(v, sustain, when + adsr.attack, when + adsr.attack + adsr.decay);
+            param._attack.run(param);
+            param._decay.run(param, true);
+        });
+    }
+    noteOff(midi, gain, when) {
+        if (midi != this.lastNote)
+            return; // Avoid multple keys artifacts in mono mode
+        const adsr = this.getADSR();
+        this.loopParams(param => {
+            let v = this.getRampValueAtTime(param, when);
+            if (v === null)
+                v = this.getParamValue(param) * adsr.sustain;
+            const finalv = (1 - adsr.depth) * v;
+            param.cancelScheduledValues(when);
+            const now = adsr.context.currentTime;
+            if (when > now)
+                // tslint:disable-next-line:no-unused-expression
+                this.rescheduleRamp(param, param._attack, now) ||
+                    this.rescheduleRamp(param, param._decay, now);
+            param._release = new Ramp(v, finalv, when, when + adsr.release);
+            param._release.run(param);
+        });
+    }
+    rescheduleRamp(param, ramp, now) {
+        if (ramp && ramp.inside(now)) {
+            ramp.cut(now).run(param);
+            return true;
+        }
+        return false;
+    }
+    getRampValueAtTime(param, t) {
+        let ramp;
+        if (param._attack && param._attack.inside(t))
+            return param._attack.cut(t).v2;
+        if (param._decay && param._decay.inside(t))
+            return param._decay.cut(t).v2;
+        return null;
+    }
+    loopParams(cb) {
+        for (const out of this.outTracker.outputs)
+            if (out instanceof AudioParam)
+                cb(out);
+    }
+    getParamValue(p) {
+        if (p._value === undefined)
+            p._value = p.value;
+        return p._value;
+    }
+}
+/* unused harmony export ADSRNoteHandler */
+
+/**
+ * Handles note events for any node that allows calling start() after stop(),
+ * such as custom nodes.
+ */
+class RestartableNoteHandler extends BaseNoteHandler {
+    constructor() {
+        super(...arguments);
+        this.playing = false;
+    }
+    noteOn(midi, gain, ratio, when) {
+        const anode = this.ndata.anode;
+        if (this.playing)
+            anode.stop(when);
+        this.playing = true;
+        anode.start(when);
+        this.lastNote = midi;
+    }
+    noteOff(midi, gain, when) {
+        if (midi != this.lastNote)
+            return;
+        this.playing = false;
+        const anode = this.ndata.anode;
+        anode.stop(when + this.releaseTime);
+    }
+}
+/* unused harmony export RestartableNoteHandler */
+
+/**
+ * Handles note events for the SoundBank source node
+ */
+class SoundBankNoteHandler extends BaseNoteHandler {
+    noteOn(midi, gain, ratio, when) {
+        const bufs = this.ndata.anode['_buffers'];
+        const absn = this.clone();
+        absn.buffer = bufs[midi % bufs.length];
+        absn.start(when);
+    }
+    noteOff(midi, gain, when) { }
+}
+/* unused harmony export SoundBankNoteHandler */
+
+// -------------------- Exported note handlers --------------------
+/**
+ * Exports available note handlers so they are used by their respective
+ * nodes from the palette.
+ */
+const NoteHandlers = {
+    'osc': OscNoteHandler,
+    'buffer': BufferNoteHandler,
+    'ADSR': ADSRNoteHandler,
+    'LFO': LFONoteHandler,
+    'restartable': RestartableNoteHandler,
+    'soundBank': SoundBankNoteHandler
+};
+/* harmony export (immutable) */ __webpack_exports__["a"] = NoteHandlers;
+
+// -------------------- Private classes --------------------
+/**
+ * Tracks a node output connections and disconnections, to be used
+ * when cloning, removing or controlling nodes.
+ */
+class OutputTracker {
+    constructor(anode) {
+        this.outputs = [];
+        this.onBefore(anode, 'connect', this.connect, (oldf, obj, args) => {
+            if (args[0].custom && args[0].anode)
+                args[0] = args[0].anode;
+            oldf.apply(obj, args);
+        });
+        this.onBefore(anode, 'disconnect', this.disconnect);
+    }
+    connect(np) {
+        this.outputs.push(np);
+    }
+    disconnect(np) {
+        Object(__WEBPACK_IMPORTED_MODULE_0__utils_modern__["d" /* removeArrayElement */])(this.outputs, np);
+    }
+    onBefore(obj, fname, funcToCall, cb) {
+        const oldf = obj[fname];
+        const self = this;
+        obj[fname] = function () {
+            funcToCall.apply(self, arguments);
+            if (cb)
+                cb(oldf, obj, arguments);
+            else
+                oldf.apply(obj, arguments);
+        };
+    }
+}
+/* unused harmony export OutputTracker */
+
+
+
+/***/ }),
+
+/***/ 11:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -279,7 +624,7 @@ let palette = {
 
 /***/ }),
 
-/***/ 11:
+/***/ 12:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -523,15 +868,15 @@ function upload(event, cb, readFunc) {
 
 /***/ }),
 
-/***/ 46:
+/***/ 48:
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(47);
+module.exports = __webpack_require__(49);
 
 
 /***/ }),
 
-/***/ 47:
+/***/ 49:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -556,10 +901,10 @@ global.Modulator.Timer = __WEBPACK_IMPORTED_MODULE_1__synth_timer__["a" /* Timer
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__notes__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__palette__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__notes__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__palette__ = __webpack_require__(11);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_modern__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__customNodes__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__customNodes__ = __webpack_require__(12);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_file__ = __webpack_require__(4);
 
 
@@ -1043,351 +1388,6 @@ class SynthLoader {
                 this.synth.disconnectNodes(input, node);
     }
 }
-
-
-/***/ }),
-
-/***/ 9:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_modern__ = __webpack_require__(1);
-
-/**
- * Handles common AudioNode cloning, used by oscillator and buffered data nodes.
- */
-class BaseNoteHandler {
-    constructor(ndata) {
-        this.kbTrigger = false;
-        this.releaseTime = 0;
-        this.ndata = ndata;
-        this.outTracker = new OutputTracker(ndata.anode);
-    }
-    noteOn(midi, gain, ratio, when) { }
-    noteOff(midi, gain, when) { }
-    clone() {
-        // Create clone
-        let ctor = this.ndata.nodeDef.constructor;
-        if (!ctor)
-            return null;
-        const anode = this.ndata.anode.context[ctor]();
-        // Copy parameters
-        for (const pname of Object.keys(this.ndata.nodeDef.params)) {
-            const param = this.ndata.anode[pname];
-            if (param instanceof AudioParam)
-                anode[pname].value = param.value;
-            else if (param !== null && param !== undefined)
-                anode[pname] = param;
-        }
-        // Copy output connections
-        for (const out of this.outTracker.outputs) {
-            let o2 = out;
-            if (o2.custom && o2.anode)
-                o2 = o2.anode;
-            anode.connect(o2);
-        }
-        // Copy control input connections
-        for (const inData of this.ndata.getInputs()) {
-            inData.anode.connect(anode[inData.controlParam]);
-        }
-        // TODO should copy snapshot of list of inputs and outputs
-        // ...in case user connects or disconnects during playback
-        return anode;
-    }
-    disconnect(anode) {
-        // Disconnect outputs
-        for (const out of this.outTracker.outputs)
-            anode.disconnect(out);
-        // Disconnect control inputs
-        for (const inData of this.ndata.getInputs()) {
-            inData.anode.disconnect(anode[inData.controlParam]);
-        }
-    }
-    rampParam(param, ratio, when) {
-        const portamento = this.ndata.synth.portamento;
-        const newv = param.value * ratio;
-        param._value = newv; // Required for ADSR to capture the correct value
-        if (portamento.time > 0 && portamento.ratio > 0) {
-            const oldv = param.value * portamento.ratio;
-            param.cancelScheduledValues(when);
-            param.linearRampToValueAtTime(oldv, when);
-            param.exponentialRampToValueAtTime(newv, when + portamento.time);
-        }
-        else
-            param.setValueAtTime(newv, when);
-    }
-}
-/* unused harmony export BaseNoteHandler */
-
-/**
- * Handles note events for an OscillatorNode
- */
-class OscNoteHandler extends BaseNoteHandler {
-    noteOn(midi, gain, ratio, when) {
-        if (this.oscClone)
-            this.oscClone.stop(when);
-        this.oscClone = this.clone();
-        this.rampParam(this.oscClone.frequency, ratio, when);
-        this.oscClone.start(when);
-        this.lastNote = midi;
-    }
-    noteOff(midi, gain, when) {
-        if (midi != this.lastNote)
-            return; // Avoid multple keys artifacts in mono mode
-        this.oscClone.stop(when + this.releaseTime);
-    }
-}
-/* unused harmony export OscNoteHandler */
-
-/**
- * Handles note events for an LFO node. This is identical to a regular
- * oscillator node, but the note does not affect the oscillator frequency
- */
-class LFONoteHandler extends OscNoteHandler {
-    rampParam(param, ratio, when) {
-        // Disable portamento for LFO
-        param.setValueAtTime(param.value, when);
-    }
-}
-/* unused harmony export LFONoteHandler */
-
-/**
- * Handles note events for an AudioBufferSourceNode
- */
-class BufferNoteHandler extends BaseNoteHandler {
-    noteOn(midi, gain, ratio, when) {
-        if (this.absn)
-            this.absn.stop(when);
-        const buf = this.ndata.anode._buffer;
-        if (!buf)
-            return; // Buffer still loading or failed
-        this.absn = this.clone();
-        this.absn.buffer = buf;
-        const pbr = this.absn.playbackRate;
-        const newRate = pbr.value * ratio;
-        this.rampParam(pbr, pbr.value * ratio, when);
-        this.absn.start(when);
-        this.lastNote = midi;
-    }
-    noteOff(midi, gain, when) {
-        if (midi != this.lastNote)
-            return;
-        this.absn.stop(when + this.releaseTime);
-    }
-}
-/* unused harmony export BufferNoteHandler */
-
-/**
- * Performs computations about ramps so they can be easily rescheduled
- */
-class Ramp {
-    constructor(v1, v2, t1, t2) {
-        this.v1 = v1;
-        this.v2 = v2;
-        this.t1 = t1;
-        this.t2 = t2;
-    }
-    inside(t) {
-        return this.t1 < this.t2 && this.t1 <= t && t <= this.t2;
-    }
-    cut(t) {
-        const newv = this.v1 + (this.v2 - this.v1) * (t - this.t1) / (this.t2 - this.t1);
-        return new Ramp(this.v1, newv, this.t1, t);
-    }
-    run(p, follow = false) {
-        if (this.t2 - this.t1 <= 0) {
-            p.setValueAtTime(this.v2, this.t2);
-        }
-        else {
-            if (!follow)
-                p.setValueAtTime(this.v1, this.t1);
-            p.linearRampToValueAtTime(this.v2, this.t2);
-        }
-    }
-}
-/* unused harmony export Ramp */
-
-/**
- * Handles note events for a custom ADSR node
- */
-class ADSRNoteHandler extends BaseNoteHandler {
-    constructor(ndata) {
-        super(ndata);
-        this.kbTrigger = true;
-        const adsr = this.getADSR();
-        const oldMethod = adsr.disconnect;
-        adsr.disconnect = (dest) => {
-            this.loopParams(param => {
-                if (param == dest)
-                    param.setValueAtTime(param._value, adsr.context.currentTime);
-            });
-            oldMethod(dest);
-        };
-    }
-    getADSR() {
-        let anode = this.ndata.anode;
-        return anode;
-    }
-    get releaseTime() {
-        const adsr = this.getADSR();
-        return adsr.release;
-    }
-    set releaseTime(relTime) { }
-    noteOn(midi, gain, ratio, when) {
-        this.lastNote = midi;
-        const adsr = this.getADSR();
-        this.loopParams(param => {
-            const v = this.getParamValue(param);
-            const initial = (1 - adsr.depth) * v;
-            const sustain = v * adsr.sustain + initial * (1 - adsr.sustain);
-            const now = adsr.context.currentTime;
-            param.cancelScheduledValues(now);
-            if (when > now)
-                this.rescheduleRamp(param, param._release, now);
-            param._attack = new Ramp(initial, v, when, when + adsr.attack);
-            param._decay = new Ramp(v, sustain, when + adsr.attack, when + adsr.attack + adsr.decay);
-            param._attack.run(param);
-            param._decay.run(param, true);
-        });
-    }
-    noteOff(midi, gain, when) {
-        if (midi != this.lastNote)
-            return; // Avoid multple keys artifacts in mono mode
-        const adsr = this.getADSR();
-        this.loopParams(param => {
-            let v = this.getRampValueAtTime(param, when);
-            if (v === null)
-                v = this.getParamValue(param) * adsr.sustain;
-            const finalv = (1 - adsr.depth) * v;
-            param.cancelScheduledValues(when);
-            const now = adsr.context.currentTime;
-            if (when > now)
-                // tslint:disable-next-line:no-unused-expression
-                this.rescheduleRamp(param, param._attack, now) ||
-                    this.rescheduleRamp(param, param._decay, now);
-            param._release = new Ramp(v, finalv, when, when + adsr.release);
-            param._release.run(param);
-        });
-    }
-    rescheduleRamp(param, ramp, now) {
-        if (ramp && ramp.inside(now)) {
-            ramp.cut(now).run(param);
-            return true;
-        }
-        return false;
-    }
-    getRampValueAtTime(param, t) {
-        let ramp;
-        if (param._attack && param._attack.inside(t))
-            return param._attack.cut(t).v2;
-        if (param._decay && param._decay.inside(t))
-            return param._decay.cut(t).v2;
-        return null;
-    }
-    loopParams(cb) {
-        for (const out of this.outTracker.outputs)
-            if (out instanceof AudioParam)
-                cb(out);
-    }
-    getParamValue(p) {
-        if (p._value === undefined)
-            p._value = p.value;
-        return p._value;
-    }
-}
-/* unused harmony export ADSRNoteHandler */
-
-/**
- * Handles note events for any node that allows calling start() after stop(),
- * such as custom nodes.
- */
-class RestartableNoteHandler extends BaseNoteHandler {
-    constructor() {
-        super(...arguments);
-        this.playing = false;
-    }
-    noteOn(midi, gain, ratio, when) {
-        const anode = this.ndata.anode;
-        if (this.playing)
-            anode.stop(when);
-        this.playing = true;
-        anode.start(when);
-        this.lastNote = midi;
-    }
-    noteOff(midi, gain, when) {
-        if (midi != this.lastNote)
-            return;
-        this.playing = false;
-        const anode = this.ndata.anode;
-        anode.stop(when + this.releaseTime);
-    }
-}
-/* unused harmony export RestartableNoteHandler */
-
-/**
- * Handles note events for the SoundBank source node
- */
-class SoundBankNoteHandler extends BaseNoteHandler {
-    noteOn(midi, gain, ratio, when) {
-        const bufs = this.ndata.anode['_buffers'];
-        const absn = this.clone();
-        absn.buffer = bufs[midi % bufs.length];
-        absn.start(when);
-    }
-    noteOff(midi, gain, when) { }
-}
-/* unused harmony export SoundBankNoteHandler */
-
-// -------------------- Exported note handlers --------------------
-/**
- * Exports available note handlers so they are used by their respective
- * nodes from the palette.
- */
-const NoteHandlers = {
-    'osc': OscNoteHandler,
-    'buffer': BufferNoteHandler,
-    'ADSR': ADSRNoteHandler,
-    'LFO': LFONoteHandler,
-    'restartable': RestartableNoteHandler,
-    'soundBank': SoundBankNoteHandler
-};
-/* harmony export (immutable) */ __webpack_exports__["a"] = NoteHandlers;
-
-// -------------------- Private classes --------------------
-/**
- * Tracks a node output connections and disconnections, to be used
- * when cloning, removing or controlling nodes.
- */
-class OutputTracker {
-    constructor(anode) {
-        this.outputs = [];
-        this.onBefore(anode, 'connect', this.connect, (oldf, obj, args) => {
-            if (args[0].custom && args[0].anode)
-                args[0] = args[0].anode;
-            oldf.apply(obj, args);
-        });
-        this.onBefore(anode, 'disconnect', this.disconnect);
-    }
-    connect(np) {
-        this.outputs.push(np);
-    }
-    disconnect(np) {
-        Object(__WEBPACK_IMPORTED_MODULE_0__utils_modern__["d" /* removeArrayElement */])(this.outputs, np);
-    }
-    onBefore(obj, fname, funcToCall, cb) {
-        const oldf = obj[fname];
-        const self = this;
-        obj[fname] = function () {
-            funcToCall.apply(self, arguments);
-            if (cb)
-                cb(oldf, obj, arguments);
-            else
-                oldf.apply(obj, arguments);
-        };
-    }
-}
-/* unused harmony export OutputTracker */
-
 
 
 /***/ })

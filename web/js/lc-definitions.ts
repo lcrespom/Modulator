@@ -66,7 +66,7 @@ interface LiveCoding {
 	- minor
 	- minor_pentatonic
 	- chromatic
-	@param octaves An optional number indicating how mani octaves the scale should cover. It defaults to 1.
+	@param octaves An optional number indicating how many octaves the scale should cover. It defaults to 1.
 	*/
 	scale(note: number, type?: string, octaves?: number): Ring<number>
 
@@ -98,6 +98,12 @@ interface LiveCoding {
 
 	/** Immediately stops and deletes all tracks. */
 	reset(): this
+
+	/** Registers a listener function that will be invoked every time
+	a note is played. The function will receive an object with all the
+	information about the note to be played.
+	 */
+	listen(listenFunc: NoteListener)
 
 	/** This is an advanced, very optional method to be used only in case some external resources must be manually initialized.
 	In most cases, the LiveCoding API will handle this process behind the scenes.
@@ -200,6 +206,8 @@ An example of the usage pattern is the following:
 interface Track {
 	/** For looping tracks, counts how many times the loop has executed. */
 	loopCount: number
+	/** The track name, as given in `lc.track` and `lc.loop_track`. */
+	name: string
 	/** Sets the instrument to be used by the notes played in the track. */
 	instrument(inst: Instrument): this
 	/** Adds an effect to the track. All sound played in the track will be immediately altered by the effect.
@@ -223,7 +231,8 @@ interface Track {
 	If specified, notes will be played one after the other after the specified time (if parameter is a number) or times (if the parameter is an array)
 	@param durations Optional. If specified, the duration or durations to be used for each note.
 	 */
-	play_notes(notes: number[], times?: number | number[], durations?: number | number[]): this
+	play_notes(notes: number[],
+		times?: number | number[], durations?: number | number[]): this
 	/** Transposes the notes to be played after this point in the specified amount of semitones. */
 	transpose(notes: number): this
 	/** Changes a parameter of the current instrument.
@@ -298,10 +307,10 @@ interface Ring<T> extends Array<T> {
 	stretch(n: number): Ring<T>
 	/** Repeats the entire ring **n** times. */
 	repeat(n: number): Ring<T>
-	/** Adds the ring to a reversed version of itself . */
+	/** Adds the ring to a reversed version of itself. */
 	mirror(): Ring<T>
 	/** Adds the ring to a reversed version of itself,
-	without duplicating the middle value . */
+	without duplicating the middle value. */
 	reflect(): Ring<T>
 	/** Returns a new ring with all elements multiplied by **n**
 	(assumes ring contains numbers only). */
@@ -400,6 +409,27 @@ interface EffectOptions {
 effect or instrument parameters. */
 type NoteOptions = InstrumentOptions | EffectOptions
 
+/** The interface to be implemented by the function passed to `lc.listen`. */
+type NoteListener = (note: NoteInfo) => void
+
+/** Information on a note being played, passed to the NoteListener function. */
+interface NoteInfo {
+	/** The track that triggered the note. */
+	track: Track
+	/** The instrument to be used for playing this note. */
+	instrument: Instrument
+	/** The note number. */
+	number: number
+	/** The time at which the note is being played. */
+	time: number
+	/** The note volume. */
+	velocity: number
+	/** The note duration. */
+	duration?: number
+	/** Optional parameter settings for the note. */
+	options?: NoteOptions
+}
+
 /** Structure used by a preset JSON data saved from Modulator synth. */
 interface PresetData {
 	name: string
@@ -408,3 +438,5 @@ interface PresetData {
 	modulatorType: string
 }
 
+/** The jQuery object, in case DOM manipulations are required. */
+declare let $: any

@@ -9,12 +9,18 @@ import { createEditor } from './live-coding/editor'
 import { setupRoutes } from './utils/routes'
 
 
-const graphCanvas = <HTMLCanvasElement>$('#graph-canvas')[0]
-const ac = createAudioContext()
-const synthUI = new SynthUI(ac, graphCanvas,
-	$('#node-params'), $('#audio-graph-fft'), $('#audio-graph-osc'))
-setupPanels()
+let graphCanvas: HTMLCanvasElement
+let ac: AudioContext
+let synthUI: SynthUI
 
+setupRoutes('#synth').then(_ => {
+	graphCanvas = <HTMLCanvasElement>$('#graph-canvas')[0]
+	ac = createAudioContext()
+	synthUI = new SynthUI(ac, graphCanvas,
+		$('#node-params'), $('#audio-graph-fft'), $('#audio-graph-osc'))
+	setupPanels()
+	.then(editor => checkSearch(editor))
+})
 
 function createAudioContext(): AudioContext {
 	const CtxClass: any = window.AudioContext || window.webkitAudioContext
@@ -30,12 +36,11 @@ function setupPanels() {
 	$(function() {
 		$('#synth').focus()
 	})
-	setupRoutes('#synth').then(_ => createEditor(ac, prsts, synthUI))
 	$(document).on('route:show', (e, h) => {
 		if (h == '#synth') prsts.selectBestNode()
 	})
+	return createEditor(ac, prsts, synthUI)
 }
-
 
 function setupPalette() {
 	$(function() {
@@ -44,5 +49,31 @@ function setupPalette() {
 	})
 }
 
+function checkSearch(editor: any) {
+	if (!location.search || location.search.length <= 0
+		|| ! location.search.startsWith('?')) return
+	let sdata = location.search.substr(1).split('&')
+	let result: any = {}
+	for (let param of sdata) {
+		let [k, v] = param.split('=')
+		result[k] = v
+	}
+	applySearch(result, editor)
+}
+
+function applySearch(search: any, editor: any) {
+	if (search.codeURL) fetchCode(search.codeURL, editor)
+}
+
+async function fetchCode(url: string, editor: any) {
+	let r = await fetch(url)
+	if (!r.ok) return
+	let code = await r.text()
+	location.hash = '#live-coding'
+	let edtxt = editor.getModel().getValue() || ''
+	if (edtxt.trim().length > 0 && !edtxt.trim().startsWith('/*'))
+		edtxt = '\n/*\n' + edtxt + '\n*/\n'
+	editor.getModel().setValue(code + edtxt)
+}
 
 declare var window: ModernWindow

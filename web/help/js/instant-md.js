@@ -150,7 +150,7 @@ $(function() {
 	}
 
 	function addHeader(chunks, chunk, match, prefix) {
-		let regex = '\\s*' + match + '\\s+(\\w+)'
+		let regex = '\\s*' + match + '\\s+([A-Za-z0-9_\$]+)'
 		let m = chunk.text.match(regex)
 		if (m && m[1]) {
 			chunks.push({ type: 'doc', text: prefix + m[1] })
