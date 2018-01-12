@@ -823,12 +823,13 @@ class SynthLoader {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (immutable) */ __webpack_exports__["e"] = logToPanel;
+/* harmony export (immutable) */ __webpack_exports__["f"] = logToPanel;
 /* harmony export (immutable) */ __webpack_exports__["b"] = enableLog;
-/* harmony export (immutable) */ __webpack_exports__["f"] = txt2html;
+/* harmony export (immutable) */ __webpack_exports__["c"] = isLogEnabled;
+/* harmony export (immutable) */ __webpack_exports__["g"] = txt2html;
 /* harmony export (immutable) */ __webpack_exports__["a"] = clearLog;
-/* harmony export (immutable) */ __webpack_exports__["d"] = logNote;
-/* harmony export (immutable) */ __webpack_exports__["c"] = logEvent;
+/* harmony export (immutable) */ __webpack_exports__["e"] = logNote;
+/* harmony export (immutable) */ __webpack_exports__["d"] = logEvent;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__scales__ = __webpack_require__(14);
 
 let logEnabled = true;
@@ -852,6 +853,9 @@ function logToPanel(always, asHTML, ...args) {
 }
 function enableLog(flag) {
     logEnabled = flag;
+}
+function isLogEnabled() {
+    return logEnabled;
 }
 function txt2html(s) {
     return s.replace(/\[([^\]\|]+)\|([^\]\|]+)\]/g, (x, y, z) => `<span class="${y}">${z}</span>`);
@@ -1659,7 +1663,7 @@ function playNote(track, note, timer, startTime) {
         setOptions(note.options);
     if (note.number < 1)
         return;
-    Object(__WEBPACK_IMPORTED_MODULE_0__log__["d" /* logNote */])(note, track);
+    Object(__WEBPACK_IMPORTED_MODULE_0__log__["e" /* logNote */])(note, track);
     noteInfoListener(note); // TODO time accuracy could be improved
     note.instrument.noteOn(note.number, note.velocity, startTime + note.time);
     let duration = note.duration
@@ -1702,7 +1706,7 @@ function shouldTrackEnd(track) {
     if (track.loop) {
         track.startTime += track.time;
         track.loopCount++;
-        Object(__WEBPACK_IMPORTED_MODULE_0__log__["c" /* logEvent */])(track, `Track [log-track|${track.name}] has looped`);
+        Object(__WEBPACK_IMPORTED_MODULE_0__log__["d" /* logEvent */])(track, `Track [log-track|${track.name}] has looped`);
         track.notes = [];
         track.time = 0;
         track.callback(track);
@@ -1712,7 +1716,7 @@ function shouldTrackEnd(track) {
         // Update latency and loopCount just for the sake of logEvent
         track.latency = 0;
         track.loopCount++;
-        Object(__WEBPACK_IMPORTED_MODULE_0__log__["c" /* logEvent */])(track, `Track [log-track|${track.name}] has ended`);
+        Object(__WEBPACK_IMPORTED_MODULE_0__log__["d" /* logEvent */])(track, `Track [log-track|${track.name}] has ended`);
         delete tracks[track.name];
         delete userTracks[track.name];
         return true;
@@ -2051,7 +2055,12 @@ function getErrorLocation(e) {
     return null;
 }
 function showError(msg, line, col) {
-    Object(__WEBPACK_IMPORTED_MODULE_7__log__["e" /* logToPanel */])(true, true, Object(__WEBPACK_IMPORTED_MODULE_7__log__["f" /* txt2html */])(`[log-bold|Runtime error]: "${msg}" at line ${line}, column ${col}`));
+    // Log error
+    Object(__WEBPACK_IMPORTED_MODULE_7__log__["f" /* logToPanel */])(true, true, Object(__WEBPACK_IMPORTED_MODULE_7__log__["g" /* txt2html */])(`[log-bold|Runtime error]: "${msg}" at line ${line}, column ${col}`));
+    // Store log status, then prevent logging
+    logEnabled = Object(__WEBPACK_IMPORTED_MODULE_7__log__["c" /* isLogEnabled */])();
+    Object(__WEBPACK_IMPORTED_MODULE_7__log__["b" /* enableLog */])(false);
+    // Show error range in code
     editor.revealLineInCenter(line);
     let errorRange = getErrorRange(editor.getModel().getLineContent(line), col);
     decorations = editor.deltaDecorations(decorations, [{
@@ -2073,6 +2082,7 @@ function getErrorRange(s, col) {
     return { from: 0, to: s.length + 1 };
 }
 // -------------------- Code execution --------------------
+let logEnabled;
 function flashRange(range) {
     let decs = [];
     decs = editor.deltaDecorations(decs, [{
@@ -2090,6 +2100,8 @@ function flashRange(range) {
     }, 100);
 }
 function doRunCode(code) {
+    if (logEnabled !== undefined)
+        Object(__WEBPACK_IMPORTED_MODULE_7__log__["b" /* enableLog */])(logEnabled);
     __WEBPACK_IMPORTED_MODULE_4__random__["a" /* random */].seed(__WEBPACK_IMPORTED_MODULE_4__random__["a" /* random */].seed());
     setupAnalyzers();
     try {
@@ -2444,7 +2456,7 @@ class SampleInstrument {
 }
 // ------------------------- Log helper -------------------------
 function log(txt) {
-    return Object(__WEBPACK_IMPORTED_MODULE_2__log__["e" /* logToPanel */])(true, true, Object(__WEBPACK_IMPORTED_MODULE_2__log__["f" /* txt2html */])(txt));
+    return Object(__WEBPACK_IMPORTED_MODULE_2__log__["f" /* logToPanel */])(true, true, Object(__WEBPACK_IMPORTED_MODULE_2__log__["g" /* txt2html */])(txt));
 }
 function logInstrReady(name) {
     log(`Instrument [log-instr|${name}] ready`);
@@ -4383,7 +4395,7 @@ class LiveCoding {
         return Object(__WEBPACK_IMPORTED_MODULE_4__scales__["b" /* makeScale */])(note, type, octaves);
     }
     log(...args) {
-        Object(__WEBPACK_IMPORTED_MODULE_5__log__["e" /* logToPanel */])(true, false, ...args);
+        Object(__WEBPACK_IMPORTED_MODULE_5__log__["f" /* logToPanel */])(true, false, ...args);
         return this;
     }
     log_enable(flag = true) {

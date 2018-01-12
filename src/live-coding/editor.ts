@@ -8,7 +8,7 @@ import { Note } from './scales'
 import { random } from './random'
 import { handleBuffers } from './editor-buffers'
 import { AudioAnalyzer } from '../synthUI/analyzer'
-import { logToPanel, txt2html } from './log'
+import { logToPanel, txt2html, enableLog, isLogEnabled } from './log'
 import { instruments, effects, userTracks } from './scheduler'
 
 
@@ -160,9 +160,14 @@ function getErrorLocation(e: any) {
 }
 
 function showError(msg: string, line: number, col: number) {
+	// Log error
 	logToPanel(true, true, txt2html(
 		`[log-bold|Runtime error]: "${msg}" at line ${line}, column ${col}`
 	))
+	// Store log status, then prevent logging
+	logEnabled = isLogEnabled()
+	enableLog(false)
+	// Show error range in code
 	editor.revealLineInCenter(line)
 	let errorRange = getErrorRange(editor.getModel().getLineContent(line), col)
 	decorations = editor.deltaDecorations(decorations, [{
@@ -187,6 +192,8 @@ function getErrorRange(s: string, col: number) {
 
 // -------------------- Code execution --------------------
 
+let logEnabled: boolean | undefined
+
 export function flashRange(range: any) {
 	let decs: any[] = []
 	decs = editor.deltaDecorations(decs, [{
@@ -205,6 +212,7 @@ export function flashRange(range: any) {
 }
 
 export function doRunCode(code: string) {
+	if (logEnabled !== undefined) enableLog(logEnabled)
 	random.seed(random.seed())
 	setupAnalyzers()
 	try {
