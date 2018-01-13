@@ -172,4 +172,115 @@ lc.track('drums', t => t
     .play(36).sleep(0.5)
     .play(42).sleep(0.5)
     .play(36).sleep(0.5)
-)```
+)
+```
+
+
+## Figures dancing to the rhythm
+This code makes use of the [p5j library](https://p5js.org), so it needs to be run from the [p5j.html page](../p5j.html), which loads the p5 library and sets up the drawing canvas.
+
+```javascript
+// -------------------- Graphical part --------------------
+
+p5.draw = function() {
+    p5.clear()
+    let [r1, r2, r3 ] = checkNotes()
+    movePoly(255, 0, 0, 0.2, 50, 3, r1)
+    movePoly(0, 255, 0, 0.5, -50, 4, r2)
+    movePoly(0, 0, 255, 0.8, 50, 5, r3)
+}
+
+function movePoly(r, g, b, xlat, rot, sides, radius) {
+    p5.push()
+    p5.fill(r, g, b)
+    p5.translate(p5.width * xlat, p5.height * 0.5)
+    p5.rotate(p5.frameCount / rot)
+    polygon(0, 0, radius, sides)
+    p5.pop()
+}
+
+function polygon(x, y, radius, npoints) {
+  let angle = p5.TWO_PI / npoints
+  p5.beginShape()
+  for (let a = 0; a < p5.TWO_PI; a += angle) {
+    let sx = x + p5.cos(a) * radius
+    let sy = y + p5.sin(a) * radius
+    p5.vertex(sx, sy)
+  }
+  p5.endShape('close')
+}
+
+const RD_SMALL = 80
+const RD_LARGE = 150
+const DECAY = 10
+let r1 = RD_SMALL, r2 = RD_SMALL, r3 = RD_SMALL
+
+function checkNotes() {
+    if (!global.notes) return [r1, r2, r3]
+    let n
+    while (n = global.notes.pop()) {
+        if (n.instrument.name == 'drum') r1 = RD_SMALL + RD_LARGE * n.velocity
+        if (n.instrument.name == 'clap') r3 = RD_SMALL + RD_LARGE * n.velocity
+        else r2 = 120
+    }
+    if (r1 > RD_SMALL) r1 -= DECAY
+    if (r2 > RD_SMALL) r2 -= DECAY
+    if (r3 > RD_SMALL) r3 -= DECAY
+    return [r1, r2, r3]
+}
+
+
+// -------------------- Musical part --------------------
+
+lc.bpm(90)
+lc.instrument('wavetable/12835_0_Chaos_sf2_file', 'drum')
+lc.instrument('wavetable/12839_0_Chaos_sf2_file', 'clap')
+lc.instrument('wavetable/12842_0_Chaos_sf2_file', 'chihat')
+lc.instrument('wavetable/12846_0_Chaos_sf2_file', 'ohihat')
+for (let i in instruments) instruments[i].duration = 1
+
+function cleanup_patts(patts) {
+    for (let i in patts) patts[i] = patts[i].replace(/ /g, '')
+}
+
+function isLowerCase(ch) {
+    return ch >= 'a' && ch <= 'z'
+}
+
+function playPatterns(t, patts, notes, swing = 0) {
+    let ct = 0
+    cleanup_patts(patts)
+    let played = true
+    while (played) {
+        played = false
+        for (let iname in patts) {
+            let patt = patts[iname]
+            let ch = patt[ct]
+            if (ch && ch != '-') t
+                .instrument(instruments[iname])
+                .volume(isLowerCase(ch) ? 0.5 : 1)
+                .play(notes[iname])
+            if (ch)
+                played = true
+        }
+        let stime = 0.25 * swing
+        if (ct % 2) stime = -stime
+        if (played) t.sleep(0.25 + stime)
+        ct += 1
+    }
+}
+
+lc.loop_track('drums', t =>
+    playPatterns(t, {
+        drum:   'X--- x--- X--- x---',
+        clap:   '---- X--- ---- X---',
+        chihat: '-x-- -x-x -x-- xxxx',
+        ohihat: '---x ---- ---x ----'
+    }, {
+        drum: 35, clap: 39, chihat: 42, ohihat: 46
+    }, 0)
+)
+
+global.notes = []
+lc.listen(note => global.notes.push(note))
+```
