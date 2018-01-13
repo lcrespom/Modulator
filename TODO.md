@@ -42,7 +42,9 @@
 	- [x] Tutorial
 	- [x] Examples
 	- [x] Document API
-- Synth API
+- Synth API / runtime
+	- [ ] Test 3D graphics with p5
+	- [ ] Improve note event accuracy in the listen function
 	- [ ] Do not require an instrument for track playing
 		- Use the first instrument in the instruments table
 		- If instrument table is empty, use some default preset
