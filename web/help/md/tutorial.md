@@ -432,3 +432,36 @@ p5.draw = function() {
 ```
 
 Imagine all the possibilities!
+
+## Sharing your code
+After some experimentation, you may be ready to share your code so other people can enjoy it or even use it as the base of their own compositions.
+
+The best way to make LiveCoding code available to other people is to post it on some online code-sharing service such as [GitHub](https://github.com). Specifically, GitHub supports [Gists](https://gist.github.com/), which is a very convenient way to edit and publish code snippets.
+
+Modulator is capable of reading code from any URL and displaying it in the editor, as long as the server that holds the code allows for it, and such is the case for GitHub gists. Here are the steps for sharing your code:
+1. Log in to Git and [create a new Gist](https://gist.github.com/).
+2. Paste your code in your gist.
+3. Click on the **Raw** button to get a link to a page that only contains the code.
+4. Copy the URL of that page.
+5. Take the URL of modulator, remove the `#live-coding` ending and append `?codeURL=`*`[your gist url]`*.
+6. Optionally, reduce the final URL by using a URL shortener.
+
+You can now send that URL to anyone, even people who haven't used Modulator before. When they load the URL in the browser it will open Modulator in the Live Coding page, showing the code from the gist, ready to be run by clicking on the play button.
+
+Here is an example of such process:
+1. The Gist URL of some code that plays a rhythm:
+```
+https://gist.githubusercontent.com/lcrespom/24a3a6cb171dd8915c5207d0be9e8eb4/raw/faa7984a7c58387056c635742c80dd5198eab4e3/rhythm-with-swing.js
+```
+2. Modulator's URL, without the part after the `#` at the end:
+```
+https://lcrespom.github.io/live-coding/
+```
+3. Both URLs put together with `?codeURL=` in the middle:
+```
+https://lcrespom.github.io/?codeURL=https://gist.githubusercontent.com/lcrespom/24a3a6cb171dd8915c5207d0be9e8eb4/raw/faa7984a7c58387056c635742c80dd5198eab4e3/rhythm-with-swing.js
+```
+4. The same URL after being compressed by a URL shortener service and ready to be shared:
+```
+http://bit.do/live-coding-example1
+```
