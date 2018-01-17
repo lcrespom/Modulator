@@ -1,1 +1,8921 @@
-!function(t){function e(i){if(n[i])return n[i].exports;var s=n[i]={i:i,l:!1,exports:{}};return t[i].call(s.exports,s,s.exports,e),s.l=!0,s.exports}var n={};e.m=t,e.c=n,e.d=function(t,n,i){e.o(t,n)||Object.defineProperty(t,n,{configurable:!1,enumerable:!0,get:i})},e.n=function(t){var n=t&&t.__esModule?function(){return t.default}:function(){return t};return e.d(n,"a",n),n},e.o=function(t,e){return Object.prototype.hasOwnProperty.call(t,e)},e.p="",e(e.s=20)}([function(t,e){t.exports=function(){throw new Error("define cannot be used indirect")}},function(t,e,n){"use strict";function i(t,e){return Math.log(e)/Math.log(t)}e.d=function(t,e){const n=t.indexOf(e);return!(n<0||(t.splice(n,1),0))},e.b=function(t,e,n){const o=i(s,n+1-e);return i(s,t+1-e)/o},e.c=function(t,e,n){const o=i(s,n+1-e);return e+Math.pow(s,t*o)-1},e.a=function(t){for(;null!=t&&t.tabIndex<0&&"body"!=t.nodeName.toLowerCase();)t=t.parentElement;return t||document.body};const s=2},function(t,e){t.exports=function(t){return t.webpackPolyfill||(t.deprecate=function(){},t.paths=[],t.children||(t.children=[]),Object.defineProperty(t,"loaded",{enumerable:!0,get:function(){return t.l}}),Object.defineProperty(t,"id",{enumerable:!0,get:function(){return t.i}}),t.webpackPolyfill=1),t}},function(t,e){(function(e){t.exports=e}).call(e,{})},function(t,e,n){"use strict";function i(t,e,n){let i=t.target.files;if(!i||i.length<=0)return e("","");const s=i[0],o=new FileReader;o.onload=(t=>e(t.target.result,s)),o[n](s)}e.a=function(t){let e="",n=new Uint8Array(t),i=n.byteLength;for(let t=0;t<i;t++)e+=String.fromCharCode(n[t]);return window.btoa(e)},e.b=function(t){let e=window.atob(t),n=e.length,i=new Uint8Array(n);for(let t=0;t<n;t++)i[t]=e.charCodeAt(t);return i.buffer},e.c=function(){return!window.externalHost&&"download"in $("<a>")[0]},e.d=function(t,e){const n=$("<a>");n.attr("download",t),n.attr("href","data:application/octet-stream;base64,"+btoa(e));const i=new MouseEvent("click",{view:window,bubbles:!0,cancelable:!1});n[0].dispatchEvent(i)},e.f=function(t,e){i(t,e,"readAsText")},e.e=function(t,e){i(t,e,"readAsArrayBuffer")}},function(t,e,n){"use strict";var i=n(10),s=n(11),o=n(1),a=n(12),r=n(4);const c=Math.pow(2,1/12),u=57;e.a=class{constructor(){this.isOut=!1}getInputs(){throw"Error: getInputs() function should be implemented by user"}};class l{constructor(){this.time=0,this.ratio=0}}e.b=class{constructor(t){this.customNodes={},this.paramHandlers={},this.noteHandlers=[],this.portamento=new l,this.ac=t,this.palette=s.a,this.registerCustomNode("createADSR",a.a),this.registerCustomNode("createNoise",a.e),this.registerCustomNode("createNoiseCtrl",a.d),this.registerCustomNode("createLineIn",a.c),this.registerCustomNode("createDetuner",a.b),this.registerParamHandler("BufferDataHandler",new class{constructor(){this.uiRender="renderBufferData"}initialize(t,e){}param2json(t){return r.a(t._encoded)}json2param(t,e){const n=r.b(e);t._encoded=n,t.context.decodeAudioData(n,e=>t._buffer=e)}}),this.registerParamHandler("SoundBankHandler",new class{constructor(){this.uiRender="renderSoundBank"}initialize(t,e){t._buffers=[],t._encodedBuffers=[],t._names=[]}param2json(t){const e=[],n=t._encodedBuffers,i=t._names;for(let t=0;t<i.length;t++)e.push({name:i[t],data:r.a(n[t])});return e}json2param(t,e){const n=t._buffers;n.length=0;const i=t._encodedBuffers;i.length=0;const s=t._names;s.length=0;for(let o=0;o<e.length;o++){const a=e[o];s.push(a.name);const c=r.b(a.data);i.push(c),this.decodeBuffer(t,c,n,o)}}decodeBuffer(t,e,n,i){t.context.decodeAudioData(e,t=>n[i]=t)}})}createAudioNode(t){const e=s.a[t];if(!e)return null;const n=e.custom?this.customNodes:this.ac;if(!e.constructor||!n[e.constructor])return null;const i=n[e.constructor]();return i.context||(i.context=this.ac),this.initNodeParams(i,e,t),i}initNodeData(t,e){t.synth=this,t.type=e;let n=this.createAudioNode(e);if(!n)throw new Error(`No AudioNode found for "${e}"`);t.anode=n,t.nodeDef=this.palette[e];const s=t.nodeDef.noteHandler;return s&&(t.noteHandler=new i.a[s](t),this.addNoteHandler(t.noteHandler)),n}initOutputNodeData(t,e){return t.synth=this,t.type="out",this.outGainNode=this.ac.createGain(),t.anode=this.outGainNode,t.anode.connect(e),t.nodeDef=this.palette.Speaker,t.isOut=!0,t.anode}removeNodeData(t){t.noteHandler&&this.removeNoteHandler(t.noteHandler)}connectNodes(t,e){if(t.nodeDef.control&&!e.nodeDef.control){let n=e.anode;t.controlParams=Object.keys(e.nodeDef.params).filter(t=>n[t]instanceof AudioParam),t.controlParam=t.controlParams[0],t.controlTarget=e.anode,t.anode.connect(n[t.controlParam])}else t.anode.connect(e.anode)}disconnectNodes(t,e){t.nodeDef.control&&!e.nodeDef.control?(t.controlParams=null,t.anode.disconnect(e.anode[t.controlParam])):t.anode.disconnect(e.anode)}json2NodeData(t,e){let n=e;for(const e of Object.keys(t.params)){const i=n.anode[e],s=t.params[e];n.nodeDef.params[e].handler?this.paramHandlers[n.nodeDef.params[e].handler].json2param(n.anode,s):i instanceof AudioParam?(i.value=s,i._value=s):n.anode[e]=s}}nodeData2json(t){const e={};for(const n of Object.keys(t.nodeDef.params)){const i=t.anode[n];t.nodeDef.params[n].handler?e[n]=this.paramHandlers[t.nodeDef.params[n].handler].param2json(t.anode):i instanceof AudioParam?void 0===i._value?e[n]=i.value:e[n]=i._value:e[n]=i}return{type:t.type,params:e,controlParam:t.controlParam,controlParams:t.controlParams}}midi2freqRatio(t){return Math.pow(c,t-u)}noteOn(t,e,n){n||(n=this.ac.currentTime),this.outGainNode.gain.value=e;const i=this.midi2freqRatio(t);this.setupNoteHandlers();for(const s of this.noteHandlers)s.noteOn(t,e,i,n);this.portamento.ratio=i}noteOff(t,e,n){n||(n=this.ac.currentTime);for(const i of this.noteHandlers)i.noteOff(t,e,n)}addNoteHandler(t){this.noteHandlers.push(t)}removeNoteHandler(t){Object(o.d)(this.noteHandlers,t)}setupNoteHandlers(){let t=0;for(const e of this.noteHandlers)e.kbTrigger&&e.releaseTime>t&&(t=e.releaseTime);for(const e of this.noteHandlers)e.kbTrigger||(e.releaseTime=t)}initNodeParams(t,e,n){let i=t;for(const t of Object.keys(e.params||{}))void 0===i[t]?console.warn(`Parameter '${t}' not found for node '${n}'`):i[t]instanceof AudioParam?i[t].value=e.params[t].initial:e.params[t].handler?(e.params[t].phandler=this.paramHandlers[e.params[t].handler||""],e.params[t].phandler.initialize(i,e)):i[t]=e.params[t].initial}registerCustomNode(t,e){this.customNodes[t]=(()=>new e(this.ac))}registerParamHandler(t,e){this.paramHandlers[t]=e}}},function(t,e,n){"use strict";function i(t,e,n,i){a.find(".popup-message").html(t),a.find(".modal-title").text(e||"Alert"),a.find(".popup-ok").hide(),n?a.find(".popup-close").hide():a.find(".popup-close").html("Close"),a.find(".popup-prompt > input").hide(),o=!0,a.one("hidden.bs.modal",t=>o=!1),a.modal(i)}function s(t,e,n,i){let s=!1;a.find(".popup-message").html(t),a.find(".modal-title").text(e||"Please confirm");const r=a.find(".popup-ok");r.show().click(t=>s=!0),a.find(".popup-prompt > input").hide(),a.find(".popup-close").text("Cancel"),a.one("shown.bs.modal",t=>{r.focus(),i&&i()}),a.find("form").one("submit",t=>(s=!0,r.click(),!1)),a.one("hide.bs.modal",t=>{r.off("click"),o=!1,n(s)}),o=!0,a.modal()}n.d(e,"d",function(){return o}),e.g=function(t){o=t},e.a=i,e.e=function(t,e){i(t,e,!0,{keyboard:!1})},e.b=function(){o&&a.find(".popup-ok").click()},e.c=s,e.f=function(t,e,n,i){const o=a.find(".popup-prompt > input");s(t,e,t=>{i&&i(t?o.val():null)},()=>{o.show(),o.focus(),n?(o.val(n),o[0].select()):o.val("")})};let o=!1;const a=$('\n\t<div class="normal-font modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">\n\t<div class="modal-dialog" role="document">\n\t\t<div class="modal-content">\n\t\t<div class="modal-header">\n\t\t\t<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>\n\t\t\t<h4 class="modal-title" id="myModalLabel"></h4>\n\t\t</div>\n\t\t<div class="modal-body">\n\t\t\t<div class="popup-message"></div>\n\t\t\t<form class="popup-prompt">\n\t\t\t\t<input type="text" style="width: 100%">\n\t\t\t</form>\n\t\t</div>\n\t\t<div class="modal-footer">\n\t\t\t<button type="button" class="btn btn-default popup-close" data-dismiss="modal"></button>\n\t\t\t<button type="button" class="btn btn-primary popup-ok" data-dismiss="modal">OK</button>\n\t\t</div>\n\t\t</div>\n\t</div>\n\t</div>\n');$("body").append(a)},function(t,e,n){"use strict";e.a=class{constructor(t,e=60,n=.1){this.running=!1,this.ac=t,this.noteDuration=0,this.nextNoteTime=0,this.bpm=e,this.ahead=n}get bpm(){return this._bpm}set bpm(t){this._bpm=t,this.nextNoteTime-=this.noteDuration,this.noteDuration=15/this._bpm,this.nextNoteTime+=this.noteDuration}start(t){this.running||(this.running=!0,t&&(this.cb=t),this.nextNoteTime=this.ac.currentTime,this.tick())}stop(){this.running=!1}tick(){if(this.running)for(requestAnimationFrame(this.tick.bind(this));this.nextNoteTime<this.ac.currentTime+this.ahead;)this.cb&&this.cb(this.nextNoteTime),this.nextNoteTime+=this.noteDuration}}},function(t,e,n){"use strict";var i=n(5);e.a=class{constructor(t,e,n,i){this.pressed=[],this.released=[],this.voices=[];for(let o=0;o<n;o++)this.voices.push(new s(t,e,i)),this.released.push(o);this.portamento=this.voices[0].synth.portamento,e.keyboard&&e.keyboard.portamento&&(this.portamento.time=e.keyboard.portamento);for(let t=1;t<n;t++)this.voices[t].synth.portamento=this.portamento}noteOn(t,e=1,n){const i=this.findVoice(),s=this.voices[i];this.pressed.push(i),s.noteOn(t,e,n)}noteOff(t,e=1,n){for(let i=0;i<this.voices.length;i++){const s=this.voices[i];if(s.lastNote==t){s.noteOff(t,e,n),this.released.push(i);break}}}allNotesOff(){for(const t of this.voices)t.lastNote&&t.noteOff(t.lastNote)}findVoice(){let t;if(this.released.length>0)t=this.released;else{if(!(this.pressed.length>0))throw"This should never happen";t=this.pressed}return t.splice(0,1)[0]}close(){for(const t of this.voices)t.close()}};class s{constructor(t,e,n){this.nodes={},this.loader=new class{constructor(){this.nodes=[]}load(t,e,n,s){const a=new i.b(t);let r=0;for(const t of e.nodes)this.nodes[r++]=new o(t.id);for(let t=0;t<e.nodes.length;t++)for(const n of e.nodes[t].inputs){let e=this.nodeById(n);e&&this.nodes[t].inputs.push(e)}for(let t=0;t<e.nodes.length;t++){const i=e.nodeData[t].type;let o;o="out"==i?a.initOutputNodeData(this.nodes[t],n):a.initNodeData(this.nodes[t],i),a.json2NodeData(e.nodeData[t],this.nodes[t]),this.registerNode(o,s,e.nodes[t].name)}for(const t of this.nodes)for(const e of t.inputs)a.connectNodes(e,t);return this.synth=a,a}nodeById(t){for(const e of this.nodes)if(e.id===t)return e;return null}registerNode(t,e,n){e[n]=t}close(){for(const t of this.nodes)for(const e of t.inputs)this.synth.disconnectNodes(e,t)}},this.synth=this.loader.load(t,e,n||t.destination,this.nodes),this.lastNote=0}noteOn(t,e=1,n){this.synth.noteOn(t,e,n),this.lastNote=t}noteOff(t,e=1,n){this.synth.noteOff(t,e,n),this.lastNote=0}getParameterNode(t,e){let n=this.nodes[t];if(!n)throw new Error(`Node "${t}" not found`);let i=n[e];if(!i)throw new Error(`Parameter "${e}" not found in node "${t}"`);return i}close(){this.lastNote&&this.noteOff(this.lastNote,1),this.loader.close()}}e.b=s;class o extends i.a{constructor(t){super(),this.id=t,this.inputs=[]}getInputs(){return this.inputs}}},function(t,e,n){"use strict";function i(t,e,...n){if(!t&&!r)return;!function(){if(l)return;if(l=!0,navigator.userAgent.indexOf("Firefox")<0)return;let t=$("#walc-log-container"),e=t.height();t.css("height",e+"px")}(),c++>u&&$("#walc-log-content > *:first-child").remove();let i=n.join(", "),s=$("<div>");e?s.html(i):s.text(i),$("#walc-log-content").append(s);$("#walc-log-container").scrollTop(100*u)}function s(t){return t.replace(/\[([^\]\|]+)\|([^\]\|]+)\]/g,(t,e,n)=>`<span class="${e}">${n}</span>`)}function o(t,e){let n=(e?e.time:0)+t.time*t.loopCount-t.latency,i=(n%1).toLocaleString(void 0,{minimumFractionDigits:3,maximumFractionDigits:3}).substr(2),s=((n=Math.floor(n))%60).toLocaleString(void 0,{minimumIntegerDigits:2});return`[log-time|${Math.floor(n/60)}:${s}.${i}]`}e.e=i,e.b=function(t){r=t},e.f=s,e.a=function(){c=0,$("#walc-log-content").empty()},e.d=function(t,e){let n=o(e,t),r=a.a[t.number];r&&r.length<3&&(r+=" "),i(!1,!0,s(`${n} - Note: ${r?`[log-bold|${r}] (${t.number})`:`[log-bold|${t.number}]`} ${`[log-instr|${t.instrument.name}]`} ${`[log-track|${e.name}]`}`))},e.c=function(t,e){i(!1,!0,s(`${o(t)} - ${e}`))};var a=n(14);let r=!0,c=0;const u=1e3;let l=!1},function(t,e,n){"use strict";var i=n(1);class s{constructor(t){this.kbTrigger=!1,this.releaseTime=0,this.ndata=t,this.outTracker=new class{constructor(t){this.outputs=[],this.onBefore(t,"connect",this.connect,(t,e,n)=>{n[0].custom&&n[0].anode&&(n[0]=n[0].anode),t.apply(e,n)}),this.onBefore(t,"disconnect",this.disconnect)}connect(t){this.outputs.push(t)}disconnect(t){Object(i.d)(this.outputs,t)}onBefore(t,e,n,i){const s=t[e],o=this;t[e]=function(){n.apply(o,arguments),i?i(s,t,arguments):s.apply(t,arguments)}}}(t.anode)}noteOn(t,e,n,i){}noteOff(t,e,n){}clone(){let t=this.ndata.nodeDef.constructor;if(!t)return null;const e=this.ndata.anode.context[t]();for(const t of Object.keys(this.ndata.nodeDef.params)){const n=this.ndata.anode[t];n instanceof AudioParam?e[t].value=n.value:null!==n&&void 0!==n&&(e[t]=n)}for(const t of this.outTracker.outputs){let n=t;n.custom&&n.anode&&(n=n.anode),e.connect(n)}for(const t of this.ndata.getInputs())t.anode.connect(e[t.controlParam]);return e}disconnect(t){for(const e of this.outTracker.outputs)t.disconnect(e);for(const e of this.ndata.getInputs())e.anode.disconnect(t[e.controlParam])}rampParam(t,e,n){const i=this.ndata.synth.portamento,s=t.value*e;if(t._value=s,i.time>0&&i.ratio>0){const e=t.value*i.ratio;t.cancelScheduledValues(n),t.linearRampToValueAtTime(e,n),t.exponentialRampToValueAtTime(s,n+i.time)}else t.setValueAtTime(s,n)}}class o extends s{noteOn(t,e,n,i){this.oscClone&&this.oscClone.stop(i),this.oscClone=this.clone(),this.rampParam(this.oscClone.frequency,n,i),this.oscClone.start(i),this.lastNote=t}noteOff(t,e,n){t==this.lastNote&&this.oscClone.stop(n+this.releaseTime)}}class a{constructor(t,e,n,i){this.v1=t,this.v2=e,this.t1=n,this.t2=i}inside(t){return this.t1<this.t2&&this.t1<=t&&t<=this.t2}cut(t){const e=this.v1+(this.v2-this.v1)*(t-this.t1)/(this.t2-this.t1);return new a(this.v1,e,this.t1,t)}run(t,e=!1){this.t2-this.t1<=0?t.setValueAtTime(this.v2,this.t2):(e||t.setValueAtTime(this.v1,this.t1),t.linearRampToValueAtTime(this.v2,this.t2))}}const r={osc:o,buffer:class extends s{noteOn(t,e,n,i){this.absn&&this.absn.stop(i);const s=this.ndata.anode._buffer;if(!s)return;this.absn=this.clone(),this.absn.buffer=s;const o=this.absn.playbackRate;o.value,this.rampParam(o,o.value*n,i),this.absn.start(i),this.lastNote=t}noteOff(t,e,n){t==this.lastNote&&this.absn.stop(n+this.releaseTime)}},ADSR:class extends s{constructor(t){super(t),this.kbTrigger=!0;const e=this.getADSR(),n=e.disconnect;e.disconnect=(t=>{this.loopParams(n=>{n==t&&n.setValueAtTime(n._value,e.context.currentTime)}),n(t)})}getADSR(){return this.ndata.anode}get releaseTime(){return this.getADSR().release}set releaseTime(t){}noteOn(t,e,n,i){this.lastNote=t;const s=this.getADSR();this.loopParams(t=>{const e=this.getParamValue(t),n=(1-s.depth)*e,o=e*s.sustain+n*(1-s.sustain),r=s.context.currentTime;t.cancelScheduledValues(r),i>r&&this.rescheduleRamp(t,t._release,r),t._attack=new a(n,e,i,i+s.attack),t._decay=new a(e,o,i+s.attack,i+s.attack+s.decay),t._attack.run(t),t._decay.run(t,!0)})}noteOff(t,e,n){if(t!=this.lastNote)return;const i=this.getADSR();this.loopParams(t=>{let e=this.getRampValueAtTime(t,n);null===e&&(e=this.getParamValue(t)*i.sustain);const s=(1-i.depth)*e;t.cancelScheduledValues(n);const o=i.context.currentTime;n>o&&(this.rescheduleRamp(t,t._attack,o)||this.rescheduleRamp(t,t._decay,o)),t._release=new a(e,s,n,n+i.release),t._release.run(t)})}rescheduleRamp(t,e,n){return!(!e||!e.inside(n)||(e.cut(n).run(t),0))}getRampValueAtTime(t,e){return t._attack&&t._attack.inside(e)?t._attack.cut(e).v2:t._decay&&t._decay.inside(e)?t._decay.cut(e).v2:null}loopParams(t){for(const e of this.outTracker.outputs)e instanceof AudioParam&&t(e)}getParamValue(t){return void 0===t._value&&(t._value=t.value),t._value}},LFO:class extends o{rampParam(t,e,n){t.setValueAtTime(t.value,n)}},restartable:class extends s{constructor(){super(...arguments),this.playing=!1}noteOn(t,e,n,i){const s=this.ndata.anode;this.playing&&s.stop(i),this.playing=!0,s.start(i),this.lastNote=t}noteOff(t,e,n){t==this.lastNote&&(this.playing=!1,this.ndata.anode.stop(n+this.releaseTime))}},soundBank:class extends s{noteOn(t,e,n,i){const s=this.ndata.anode._buffers,o=this.clone();o.buffer=s[t%s.length],o.start(i)}noteOff(t,e,n){}}};e.a=r},function(t,e,n){"use strict";n.d(e,"a",function(){return s});const i={initial:0,min:-1200,max:1200,linear:!0};let s={Oscillator:{constructor:"createOscillator",noteHandler:"osc",params:{frequency:{initial:220,min:20,max:2e4},detune:i,type:{initial:"sawtooth",choices:["sine","square","sawtooth","triangle"]}}},Buffer:{constructor:"createBufferSource",noteHandler:"buffer",params:{playbackRate:{initial:1,min:0,max:8},detune:i,buffer:{initial:null,handler:"BufferDataHandler"},loop:{initial:!1},loopStart:{initial:0,min:0,max:10},loopEnd:{initial:3,min:0,max:10}}},Noise:{constructor:"createNoise",noteHandler:"restartable",custom:!0,params:{gain:{initial:1,min:0,max:10}}},LineIn:{constructor:"createLineIn",custom:!0,params:{}},SoundBank:{constructor:"createBufferSource",noteHandler:"soundBank",params:{buffer:{initial:null,handler:"SoundBankHandler"}}},Gain:{constructor:"createGain",params:{gain:{initial:1,min:0,max:10,linear:!0}}},Filter:{constructor:"createBiquadFilter",params:{frequency:{initial:440,min:20,max:2e4},Q:{initial:0,min:0,max:100},detune:i,gain:{initial:0,min:-40,max:40,linear:!0},type:{initial:"lowpass",choices:["lowpass","highpass","bandpass","lowshelf","highshelf","peaking","notch","allpass"]}}},Delay:{constructor:"createDelay",params:{delayTime:{initial:1,min:0,max:5}}},StereoPan:{constructor:"createStereoPanner",params:{pan:{initial:0,min:-1,max:1,linear:!0}}},Compressor:{constructor:"createDynamicsCompressor",params:{threshold:{initial:-24,min:-100,max:0,linear:!0},knee:{initial:30,min:0,max:40,linear:!0},ratio:{initial:12,min:1,max:20,linear:!0},attack:{initial:.003,min:0,max:1},release:{initial:.25,min:0,max:1}}},Detuner:{constructor:"createDetuner",custom:!0,params:{octave:{initial:0,min:-2,max:2,linear:!0}}},LFO:{constructor:"createOscillator",noteHandler:"LFO",control:!0,params:{frequency:{initial:5,min:.01,max:200},detune:i,type:{initial:"sine",choices:["sine","square","sawtooth","triangle"]}}},GainCtrl:{constructor:"createGain",control:!0,params:{gain:{initial:10,min:0,max:100,linear:!0}}},ADSR:{constructor:"createADSR",noteHandler:"ADSR",control:!0,custom:!0,params:{attack:{initial:.2,min:0,max:10},decay:{initial:.5,min:0,max:10},sustain:{initial:.5,min:0,max:1,linear:!0},release:{initial:1,min:0,max:10},depth:{initial:1,min:0,max:1}}},NoiseCtrl:{constructor:"createNoiseCtrl",control:!0,custom:!0,params:{frequency:{initial:4,min:0,max:200},depth:{initial:20,min:0,max:200}}},Speaker:{constructor:null,params:{}}}},function(t,e,n){"use strict";class i{constructor(){this.custom=!0,this.channelCount=2,this.channelCountMode="max",this.channelInterpretation="speakers",this.numberOfInputs=0,this.numberOfOutputs=1}connect(t,e,n){return t}disconnect(t,e,n){}addEventListener(){}dispatchEvent(t){return!1}removeEventListener(){}}e.a=class extends i{constructor(){super(...arguments),this.attack=.2,this.decay=.5,this.sustain=.5,this.release=1,this.depth=1}};class s extends i{constructor(t){super(),this.gain=1,this.playing=!1,this.anode=t.createScriptProcessor(1024),this.anode.onaudioprocess=(t=>this.processAudio(t))}connect(t){return this.anode.connect(t)}disconnect(){this.anode.disconnect()}start(){this.playing=!0}stop(){this.playing=!1}processAudio(t){}}e.e=class extends s{processAudio(t){for(let e=0;e<t.outputBuffer.numberOfChannels;e++){const n=t.outputBuffer.getChannelData(e);for(let t=0;t<n.length;t++)n[t]=this.playing?this.gain*(2*Math.random()-1):0}}};e.d=class extends s{constructor(t){super(t),this.ac=t,this.frequency=4,this.depth=20,this.sct=0,this.v=0}connect(t){return this.anode.connect(t)}processAudio(t){const e=this.ac.sampleRate/this.frequency;for(let n=0;n<t.outputBuffer.numberOfChannels;n++){let i=t.outputBuffer.getChannelData(n);for(let t=0;t<i.length;t++)this.sct++,this.sct>e&&(this.v=this.depth*(2*Math.random()-1),this.sct=0),i[t]=this.v}}};e.b=class extends s{constructor(){super(...arguments),this.octave=0,this.numberOfInputs=1}processAudio(t){const e=Math.pow(2,this.octave);for(let n=0;n<t.outputBuffer.numberOfChannels;n++){let i=t.outputBuffer.getChannelData(n),s=t.inputBuffer.getChannelData(n),o=0;for(let t=0;t<i.length;t++)i[t]=s[Math.floor(o)],(o+=e)>=s.length&&(o=0)}}};e.c=class extends i{connect(t){if(this.srcNode)return this.srcNode.connect(t),this.dstNode=t,t;const e=window.navigator;e.getUserMedia=e.getUserMedia||e.webkitGetUserMedia||e.mozGetUserMedia||e.msGetUserMedia,e.getUserMedia({audio:!0},e=>{const n=t.context;this.srcNode=n.createMediaStreamSource(e);let i=t;i.custom&&i.anode&&(i=i.anode),this.srcNode.connect(i),this.dstNode=t,this.stream=e},t=>console.error(t))}disconnect(){this.srcNode.disconnect(this.dstNode)}}},function(t,e,n){"use strict";function i(t){let e=Object.getOwnPropertyNames(c);for(let n of e)t(c[n])}n.d(e,"c",function(){return o}),n.d(e,"b",function(){return a}),n.d(e,"h",function(){return r}),n.d(e,"g",function(){return c}),e.e=function(t){t.startTime=t.ac.currentTime,c[t.name]?u[t.name]=t:c[t.name]=t,t.callback(t),t.playing=!0},e.f=function(t,e){i(n=>(function(t,e,n){let i;do{if(i=!1,function(t){if(t.stopped)return!0;if(t.notect<t.notes.length)return!1;if(t.notect=0,t.shouldStop)return t.stopped=!0,t.shouldStop=!1,!0;if(u[t.name]){let e=u[t.name];return e.startTime=t.startTime+t.time,c[t.name]=e,r[t.name]=e,delete u[t.name],!1}if(t.loop){t.startTime+=t.time,t.loopCount++,Object(s.c)(t,`Track [log-track|${t.name}] has looped`),t.notes=[],t.time=0;try{t.callback(t)}catch(e){t.loop=!1,Object(s.e)(!0,!0,Object(s.f)(`[log-bold|Runtime error]: "${e.message}" in track "${t.name}" - looping stopped`)),console.error(e)}return!1}return t.latency=0,t.loopCount++,Object(s.c)(t,`Track [log-track|${t.name}] has ended`),delete c[t.name],delete r[t.name],!0}(e))break;let o=(e=c[e.name]).notes[e.notect];e.startTime+o.time<=n&&(function(t,e,n,i){if(e.options&&function(t){if(t.effect){let e=t.effect;for(let n of Object.getOwnPropertyNames(t))"effect"!=n&&e.param(n,t[n])}else if(t.instrument){let e=t.instrument;for(let n of Object.getOwnPropertyNames(t))"instrument"!=n&&e.param(n,t[n])}}(e.options),e.number<1)return;Object(s.d)(e,t),l(e),e.instrument.noteOn(e.number,e.velocity,i+e.time);let o=e.duration||e.instrument.duration||n.noteDuration;e.instrument.noteOff(e.number,e.velocity,i+e.time+o)}(e,o,t,e.startTime),i=!0,e.notect++)}while(i)})(t,n,e))},e.a=i,e.d=function(t){l=t};var s=n(9);let o={},a={},r={},c={},u={},l=function(t){}},function(t,e,n){"use strict";function i(t,e){let n=o[e];if(!n)throw new Error(`Scale type "${e}" does not exist`);let i=[];for(let e of n)i.push(t+e);return i.ring()}n.d(e,"a",function(){return s}),e.b=function(t,e="major",n=1){if(n<=1)return i(t,e);let s=[].ring();for(let o=0;o<n;o++)s=s.concat(i(t+12*o,e)),o<n-1&&(s=s.butlast());return s};let s={C0:12,Cs0:13,Db0:13,D0:14,Ds0:15,Eb0:15,E0:16,F0:17,Fs0:18,Gb0:18,G0:19,Gs0:20,Ab0:20,A0:21,As0:22,Bb0:22,B0:23,C1:24,Cs1:25,Db1:25,D1:26,Ds1:27,Eb1:27,E1:28,F1:29,Fs1:30,Gb1:30,G1:31,Gs1:32,Ab1:32,A1:33,As1:34,Bb1:34,B1:35,C2:36,Cs2:37,Db2:37,D2:38,Ds2:39,Eb2:39,E2:40,F2:41,Fs2:42,Gb2:42,G2:43,Gs2:44,Ab2:44,A2:45,As2:46,Bb2:46,B2:47,C3:48,Cs3:49,Db3:49,D3:50,Ds3:51,Eb3:51,E3:52,F3:53,Fs3:54,Gb3:54,G3:55,Gs3:56,Ab3:56,A3:57,As3:58,Bb3:58,B3:59,C4:60,Cs4:61,Db4:61,D4:62,Ds4:63,Eb4:63,E4:64,F4:65,Fs4:66,Gb4:66,G4:67,Gs4:68,Ab4:68,A4:69,As4:70,Bb4:70,B4:71,C5:72,Cs5:73,Db5:73,D5:74,Ds5:75,Eb5:75,E5:76,F5:77,Fs5:78,Gb5:78,G5:79,Gs5:80,Ab5:80,A5:81,As5:82,Bb5:82,B5:83,C6:84,Cs6:85,Db6:85,D6:86,Ds6:87,Eb6:87,E6:88,F6:89,Fs6:90,Gb6:90,G6:91,Gs6:92,Ab6:92,A6:93,As6:94,Bb6:94,B6:95,C7:96,Cs7:97,Db7:97,D7:98,Ds7:99,Eb7:99,E7:100,F7:101,Fs7:102,Gb7:102,G7:103,Gs7:104,Ab7:104,A7:105,As7:106,Bb7:106,B7:107,C8:108,Cs8:109,Db8:109,D8:110,Ds8:111,Eb8:111,E8:112,F8:113,Fs8:114,Gb8:114,G8:115,Gs8:116,Ab8:116,A8:117,As8:118,Bb8:118,B8:119};const o={major:[0,2,4,5,7,9,11,12],major_pentatonic:[0,2,4,7,9,12],minor:[0,2,3,5,7,8,10,12],minor_pentatonic:[0,3,5,7,10,12],chromatic:[0,1,2,3,4,5,6,7,8,9,10,11,12]};!function(t){for(let e of Object.getOwnPropertyNames(t))t[t[e]]=e}(s)},function(t,e,n){"use strict";e.a=class{constructor(t,e){this.canvasFFT=this.createCanvas(t),this.gcFFT=this.canvasFFT.getContext("2d"),this.canvasOsc=this.createCanvas(e),this.gcOsc=this.canvasOsc.getContext("2d")}createCanvas(t){const e=$(`<canvas width="${t.width()}" height="${t.height()}">`);return t.append(e),e[0]}createAnalyzerNode(t){this.anode||(this.anode=t.createAnalyser(),this.fftData=new Uint8Array(this.anode.fftSize),this.oscData=new Uint8Array(this.anode.fftSize))}analyze(t){this.disconnect(),this.createAnalyzerNode(t.context),this.input=t,this.input.connect(this.anode),this.requestAnimationFrame()}disconnect(){this.input&&(this.input.disconnect(this.anode),this.input=null)}requestAnimationFrame(){window.requestAnimationFrame(t=>this.updateCanvas())}updateCanvas(){this.input&&(this.gcFFT&&this.drawFFT(this.gcFFT,this.canvasFFT,this.fftData,"#00FF00"),this.gcOsc&&this.drawOsc(this.gcOsc,this.canvasOsc,this.oscData,"#FFFF00"),this.requestAnimationFrame())}drawFFT(t,e,n,i){const[s,o]=this.setupDraw(t,e,n,i);this.anode.getByteFrequencyData(n);const a=n.length/2/e.width;let r=0;for(let e=0;e<s;e++){let i=n[Math.floor(r)];r+=a,t.moveTo(e,o-1),t.lineTo(e,o-1-o*i/256)}t.stroke(),t.closePath()}drawOsc(t,e,n,i){const[s,o]=this.setupDraw(t,e,n,i);this.anode.getByteTimeDomainData(n),t.moveTo(0,o/2);let a=0;for(;n[a]>128&&a<n.length/4;)a++;for(;n[a]<128&&a<n.length/4;)a++;const r=.75*n.length/e.width;for(let e=0;e<s;e++){let i=n[Math.floor(a)];a+=r,t.lineTo(e,o*i/256)}t.stroke(),t.closePath()}setupDraw(t,e,n,i){const s=e.width,o=e.height;return t.clearRect(0,0,s,o),t.beginPath(),t.strokeStyle=i,[s,o]}}},function(module,__webpack_exports__,__webpack_require__){"use strict";function byId(t){return document.getElementById(t)||sinkDiv}function loadMonaco(t){monacoRequire.config({paths:{vs:"js/vendor/monaco/min/vs"}}),monacoRequire(["vs/editor/editor.main"],t)}function createEditor(t,e,n){return setupGlobals(new __WEBPACK_IMPORTED_MODULE_0__live_coding__.a(t,e,n)),_synthUI=n,new Promise(t=>loadMonaco(()=>t(setupEditor())))}function setupEditor(){let t=byId("walc-code-editor");return setupDefinitions(),editor=monaco.editor.create(t,{value:"",language:"typescript",lineNumbers:!1,renderLineHighlight:"none",minimap:{enabled:!1}}),handleEditorResize(t),Object(__WEBPACK_IMPORTED_MODULE_1__editor_actions__.a)(editor),editor.focus(),Object(__WEBPACK_IMPORTED_MODULE_5__editor_buffers__.a)(editor),setupCompletion(),$(document).on("route:show",(t,e)=>{"#live-coding"==e&&(editor.focus(),window.scrollTo(0,0))}),analyzer=new __WEBPACK_IMPORTED_MODULE_6__synthUI_analyzer__.a($("#walc-graph-fft"),$("#walc-graph-osc")),editor}function setupGlobals(t){global.lc=t,global.instruments=__WEBPACK_IMPORTED_MODULE_8__scheduler__.c,global.effects=__WEBPACK_IMPORTED_MODULE_8__scheduler__.b,global.tracks=__WEBPACK_IMPORTED_MODULE_8__scheduler__.h,global.Note=__WEBPACK_IMPORTED_MODULE_3__scales__.a,global.random=__WEBPACK_IMPORTED_MODULE_4__random__.a,global.p5=global,global.global={},Object(__WEBPACK_IMPORTED_MODULE_2__rings__.a)()}function addTypeScriptDefinitions(t){monaco.languages.typescript.typescriptDefaults.addExtraLib(t)}function setupDefinitions(){fetch("js/lc-definitions.ts").then(t=>t.text()).then(addTypeScriptDefinitions),document.location.pathname.endsWith("p5j.html")&&fetch("js/p5.d.ts").then(t=>t.text()).then(addTypeScriptDefinitions)}function createProposals(t,e){let n=[];t.endsWith("s")&&(t=t.substr(0,t.length-1));for(let i in e)n.push({label:i,kind:monaco.languages.CompletionItemKind.Field,documentation:`The ${i} ${t}`,insertText:i});return n}function setupCompletion(){monaco.languages.registerCompletionItemProvider("typescript",{provideCompletionItems:function(t,e){let n=e.lineNumber,i=t.getValueInRange({startLineNumber:n,startColumn:1,endLineNumber:n,endColumn:e.column}),s={instruments:__WEBPACK_IMPORTED_MODULE_8__scheduler__.c,effects:__WEBPACK_IMPORTED_MODULE_8__scheduler__.b,tracks:__WEBPACK_IMPORTED_MODULE_8__scheduler__.h,global:global};for(let t in s)if(i.endsWith(t+"."))return createProposals(t,s[t]);return[]}})}function handleEditorResize(t){let e=t.clientWidth;setInterval(n=>{let i=t.clientWidth;e!=i&&(e=i,editor.layout())},1e3)}function setupAnalyzers(){analyzer.analyze(_synthUI.outNode)}function getRuntimeErrorDecoration(t){let e=editor.getLineDecorations(t);if(!e||e.length<=0)return null;for(let t of e)if("walc-error"==t.options.className)return t;return null}function getErrorLocation(t){if(t.line)return{line:t.line,column:t.column};if(!t.stack)return null;let e=t.stack.match(/(<anonymous>|> eval):(\d+):(\d+)/);return e&&4==e.length?{line:parseInt(e[2],10),column:parseInt(e[3],10)}:null}function showError(t,e,n){Object(__WEBPACK_IMPORTED_MODULE_7__log__.e)(!0,!0,Object(__WEBPACK_IMPORTED_MODULE_7__log__.f)(`[log-bold|Runtime error]: "${t}" at line ${e}, column ${n}`)),editor.revealLineInCenter(e);let i=getErrorRange(editor.getModel().getLineContent(e),n);return decorations=editor.deltaDecorations(decorations,[{range:new monaco.Range(e,i.from,e,i.to),options:{isWholeLine:!1,className:"walc-error",hoverMessage:["**Runtime Error**",t]}}]),i}function getErrorRange(t,e){let n=(t=t.substring(e-1)).match(/\s*[\w_$]+/);return n&&void 0!==n.index&&n[0]?{from:e+n.index,to:e+n.index+n[0].length}:{from:0,to:t.length+1}}function flashRange(t){let e=[];e=editor.deltaDecorations(e,[{range:t,options:{isWholeLine:!1,className:"walc-running"}}]),setTimeout(t=>{$(".walc-running").css("background-color","inherit"),setTimeout(()=>{e=editor.deltaDecorations(e,[])},1e3)},100)}function doRunCode(code){__WEBPACK_IMPORTED_MODULE_4__random__.a.seed(__WEBPACK_IMPORTED_MODULE_4__random__.a.seed()),setupAnalyzers();try{decorations=editor.deltaDecorations(decorations,[]),eval(code)}catch(t){let e=getErrorLocation(t);e&&showError(t.message,e.line,e.column)}}__webpack_exports__.a=createEditor,__webpack_exports__.c=flashRange,__webpack_exports__.b=doRunCode;var __WEBPACK_IMPORTED_MODULE_0__live_coding__=__webpack_require__(31),__WEBPACK_IMPORTED_MODULE_1__editor_actions__=__webpack_require__(36),__WEBPACK_IMPORTED_MODULE_2__rings__=__webpack_require__(37),__WEBPACK_IMPORTED_MODULE_3__scales__=__webpack_require__(14),__WEBPACK_IMPORTED_MODULE_4__random__=__webpack_require__(19),__WEBPACK_IMPORTED_MODULE_5__editor_buffers__=__webpack_require__(18),__WEBPACK_IMPORTED_MODULE_6__synthUI_analyzer__=__webpack_require__(15),__WEBPACK_IMPORTED_MODULE_7__log__=__webpack_require__(9),__WEBPACK_IMPORTED_MODULE_8__scheduler__=__webpack_require__(13);let sinkDiv=document.createElement("div"),global=window,monacoRequire=global.require,editor,_synthUI,analyzer,decorations=[]},function(t,e,n){"use strict";function i(t,e,n,i=4){let s=function(t,e){if("number"==typeof e){let n=t.presets.length;if(e<1||e>n)throw new Error(`The preset number should be between 1 and ${n}`);return t.presets[e-1]}if("string"==typeof e){for(let n of t.presets)if(n.name==e)return n;throw new Error(`Preset "${e}" does not exist`)}return e}(t.presets,e),r=new class extends a.a{initialize(){return u(this,void 0,void 0,function*(){o(this.name)})}shutdown(){}param(t,e,n,i=!0){let s=t.split("/");if(s.length<2)throw new Error('Instrument parameters require "node/param" format');let o=s[0],a=s[1];if(void 0===e){let t=this.voices[0].getParameterNode(o,a);return t.value}for(let t of this.voices){let s=t.getParameterNode(o,a);this.updateValue(s,e,n,i)}return this}paramNames(){let t=[],e=this.voices[0];for(let n of Object.getOwnPropertyNames(e.nodes))for(let i in e.nodes[n])e.nodes[n][i]instanceof AudioParam&&t.push(n+"/"+i);return t}connect(t){for(let e of this.voices)e.synth.outGainNode.disconnect(),e.synth.outGainNode.connect(t)}updateValue(t,e,n,i=!0){if(void 0===n)t._value=e,t.value=e;else{let s=this.voices[0].synth.ac;i?t.exponentialRampToValueAtTime(e,s.currentTime+n):t.linearRampToValueAtTime(e,s.currentTime+n)}}}(t.context,s,i,t.synthUI.outNode);return r.name=n||s.name,r.duration=function(t){let e=0;for(let n of t.nodeData)if("ADSR"==n.type){let t=n.params.attack+n.params.decay;t>e&&(e=t)}e&&(e+=.01);return e}(s),r}function s(t){return Object(c.e)(!0,!0,Object(c.f)(t))}function o(t){s(`Instrument [log-instr|${t}] ready`)}e.a=function(t,e,n,s=4){if("string"!=typeof e)return i(t,e,n,s);e.indexOf("/")<0&&(e="Modulator/"+e);let[o,a]=e.split("/"),r=l[o];if(!r)throw new Error(`Instrument '${e}' not found: unknown prefix '${r}'`);return r(t,a,n,s)},e.b=function(t){for(let e=0;e<t.length;e++)!function(t){u(this,void 0,void 0,function*(){if(!t.type.startsWith("audio/"))return s(`[log-bold|Error]: file ${t.name} is not an audio file`);let e=function(t){let e=t.lastIndexOf(".");return e<=0?t:t.substr(0,e)}(t.name);s(`Loading sample [log-instr|${e}]...`);let n=yield function(t){return u(this,void 0,void 0,function*(){return new Promise(e=>{let n=new FileReader;n.onload=(t=>e(t.target.result)),n.readAsArrayBuffer(t)})})}(t),i=yield function(t){return u(this,void 0,void 0,function*(){return new Promise(e=>{f.decodeAudioData(t,e)})})}(n);d[e]=i,s(`Sample [log-instr|${e}] ready`)})}(t[e])};var a=n(8),r=n(35),c=n(9),u=this&&this.__awaiter||function(t,e,n,i){return new(n||(n=Promise))(function(s,o){function a(t){try{c(i.next(t))}catch(t){o(t)}}function r(t){try{c(i.throw(t))}catch(t){o(t)}}function c(t){t.done?s(t.value):new n(function(e){e(t.value)}).then(a,r)}c((i=i.apply(t,e||[])).next())})};let l={Modulator:i,wavetable:function(t,e,n,i=4){return new class{constructor(t,e,n){this.ctx=t,this.presetName=e,this.envelopes=[],this.duration=0,void 0===n&&(n=e),this.name=n}initialize(){return u(this,void 0,void 0,function*(){s(`Loading instrument [log-instr|${this.name}]...`),this.preset=yield this.loadInstrument(this.presetName),o(this.name)})}shutdown(){h.expireEnvelopes(this.ctx)}param(t,e,n,i=!0){return this}paramNames(){return[]}connect(t){this.destination=t}noteOn(t,e,n){void 0===n&&(n=this.ctx.currentTime);let i=h.queueWaveTable(this.ctx,this.destination,this.preset,n,t,9999,e);this.envelopes[t]=i}noteOff(t,e,n){let i=this.envelopes[t];i&&i.cancel(n)}adjustPreset(t){return u(this,void 0,void 0,function*(){return new Promise(e=>h.adjustPreset(this.ctx,t,e))})}fetchPreset(t){return u(this,void 0,void 0,function*(){let e=yield fetch(this.getURL(t,"_sf2_file"));if(e.ok||(e=yield fetch(this.getURL(t,"_sf2"))),!e.ok){let e=`wavetable preset '${t}' not found`;throw s("[log-bold|Error]: "+e),new Error(e)}let n=yield e.json();return n})}loadInstrument(t){return u(this,void 0,void 0,function*(){let e=yield this.fetchPreset(t);return yield this.adjustPreset(e),e})}getURL(t,e){return t.endsWith("_sf2_file")||t.endsWith("_sf2")||(t+=e),`wavetables/${t}.json`}}(t.context,e,n)},sample:function(t,e,n,i=4){return new class{constructor(t,e,n){if(this.ctx=t,this.baseNote=69,this.ignoreNote=!0,this.loops=1,this.loopStart=0,this.loopEnd=1e3,this.buffer=d[e],!this.buffer)throw new Error(`Sample '${e}' not found`);this.name=n||e,this.duration=this.buffer.duration,this.loopEnd=this.duration}initialize(){return u(this,void 0,void 0,function*(){o(this.name)})}shutdown(){}param(t,e,n,i){if(this.paramNames().indexOf(t)<0)throw new Error(`Parameter '${t}' not found in instrument '${this.name}'`);return void 0===e?this[t]:(this[t]=e,this)}paramNames(){return["baseNote","ignoreNote","loops","loopStart","loopEnd"]}noteOn(t,e,n){let i=this.ctx.createBufferSource();this.src=i,i.buffer=this.buffer;let s=this.connectGain(e);i.connect(s);let o=this.ignoreNote?1:this.midi2Ratio(t);i.playbackRate.value=o,this.duration=this.buffer.duration/o,this.setupLooping(o),i.start(n)}noteOff(t,e,n){this.src.stop(n)}connect(t){this.destination=t}midi2Ratio(t){const e=Math.pow(2,1/12);return Math.pow(e,t-this.baseNote)}connectGain(t){let e=this.destination;if(1==t)return e;let n=this.ctx.createGain();return n.gain.value=t,n.connect(e),n}setupLooping(t){1!=this.loops&&(this.src.loop=!0,this.src.loopStart=this.loopStart,this.src.loopEnd=this.loopEnd,this.duration=this.loopEnd+(this.loopEnd-this.loopStart)*(this.loops-1),this.duration=this.duration/t)}}(t.context,e,n)}};let h=new r.a,d={},f=new AudioContext},function(t,e,n){"use strict";function i(t){return $("#walc-buffer-"+t)}function s(t,e){!function(t,e){i(t).removeClass("btn-info").addClass("btn-primary"),i(e).removeClass("btn-primary").addClass("btn-info")}(u,t),o(u,e),a(t,e),u=t,localStorage.setItem("code_buffer_selected",""+u),e.focus()}function o(t,e){let n=r(e);localStorage.setItem("code_buffer_"+t,n);let i={fontSize:e.getConfiguration().fontInfo.fontSize,position:e.getPosition()};localStorage.setItem("code_buffer_prefs_"+t,JSON.stringify(i))}function a(t,e){!function(t,e){t.getModel().setValue(e)}(e,localStorage.getItem("code_buffer_"+t)||"");let n=localStorage.getItem("code_buffer_prefs_"+t);if(n){let t=JSON.parse(n);e.setPosition(t.position),e.revealPositionInCenterIfOutsideViewport(t.position),e.updateOptions({fontSize:t.fontSize})}}function r(t){return t.getModel().getValue()}e.a=function(t){!function(t){a(u,t),function(t){let e=r(t),n=t.getPosition();setInterval(()=>{let i=r(t),s=t.getPosition();e==i&&n.lineNumber==s.lineNumber&&n.column==s.column||(o(u,t),e=i,n=s)},1e3)}(t)}(t);for(let e=1;e<=c;e++)!function(t,e){i(t).click(n=>s(t,e))}(e,t);!function(t){let e=localStorage.getItem("code_buffer_selected")||"1",n=parseInt(e,10);isNaN(n)||s(n,t)}(t)},e.c=function(t){let e=u-1;e<1&&(e=c),s(e,t)},e.b=function(t){let e=u+1;e>c&&(e=1),s(e,t)};const c=8;let u=1},function(t,e,n){"use strict";function i(t){let e=(t+123456789).toString();o=s(e),r=t}n.d(e,"a",function(){return a});const s=n(38);let o,a={seed:t=>(void 0!==t&&i(t),r),float:(t,e)=>void 0===e?o()*t:t+o()*(e-t),integer:(t,e)=>t+Math.floor(o()*(e-t+1)),dice(t){return this.integer(1,t)},one_in(t){return 1===this.dice(t)},choose(...t){let e=[];for(let n of t)e=e.concat(n);return e[this.dice(e.length)-1]}},r=0;i(0)},function(t,e,n){t.exports=n(21)},function(t,e,n){"use strict";function i(){$(function(){let t=$(".nano");t.nanoScroller({preventPageScrolling:!0})});const t=new a.a(f),e=new r.a(f);return e.beforeSave=(e=>$.extend(e,{keyboard:t.piano.toJSON()})),e.afterLoad=(e=>t.piano.fromJSON(e.keyboard)),$(function(){$("#synth").focus()}),$(document).on("route:show",(t,n)=>{"#synth"==n&&e.selectBestNode()}),Object(c.a)(d,e,f)}function s(t){if(!location.search||location.search.length<=0||!location.search.startsWith("?"))return;let e=location.search.substr(1).split("&"),n={};for(let t of e){let[e,i]=t.split("=");n[e]=i}!function(t,e){t.codeURL&&function(t,e){l(this,void 0,void 0,function*(){let n=yield fetch(t);if(!n.ok)return;let i=yield n.text();location.hash="#live-coding";let s=e.getModel().getValue()||"";s.trim().length>0&&!s.trim().startsWith("/*")&&(s="\n/*\n"+s+"\n*/\n"),e.getModel().setValue(i+s)})}(t.codeURL,e)}(n,t)}Object.defineProperty(e,"__esModule",{value:!0});var o=n(22),a=n(25),r=n(30),c=n(16),u=n(47),l=this&&this.__awaiter||function(t,e,n,i){return new(n||(n=Promise))(function(s,o){function a(t){try{c(i.next(t))}catch(t){o(t)}}function r(t){try{c(i.throw(t))}catch(t){o(t)}}function c(t){t.done?s(t.value):new n(function(e){e(t.value)}).then(a,r)}c((i=i.apply(t,e||[])).next())})};let h,d,f;Object(u.a)("#synth").then(t=>{h=$("#graph-canvas")[0],d=new(window.AudioContext||window.webkitAudioContext),f=new o.a(d,h,$("#node-params"),$("#audio-graph-fft"),$("#audio-graph-osc")),i().then(t=>s(t))})},function(t,e,n){"use strict";function i(t,e){const n=$("<div>").addClass(t);$("body").append(n);const i=n.css(e);return n.remove(),i}var s=n(23),o=n(5),a=n(1),r=n(6),c=n(24),u=n(15);e.a=class{constructor(t,e,n,l,h){this.gr=new s.a(e),this.gr.handler=new class{constructor(t,e,n,s){this.synthUI=t,this.jqParams=e,this.arrowColor=i("arrow","color"),this.ctrlArrowColor=i("arrow-ctrl","color"),this.registerNodeDelete(e.parent()[0]),this.analyzer=new u.a(n,s)}registerNodeDelete(t){$(Object(a.a)(t)).keydown(t=>{if(!(46==t.keyCode||8==t.keyCode&&t.metaKey))return;if(r.d)return;const e=this.getSelectedNode();e&&(e.data.isOut||r.c("Delete node?","Please confirm node deletion",t=>{t&&(this.synthUI.removeNode(e),this.jqParams.empty())}))})}getSelectedNode(){for(const t of this.synthUI.gr.nodes)if(t.element.hasClass("selected"))return t;return null}hasAudioParams(t){const e=Object.keys(t.nodeDef.params).filter(e=>t.anode[e]instanceof AudioParam);return e.length>0}canBeSource(t){const e=t.data;return e.anode!=this.synthUI.outNode}canConnect(t,e){const n=t.data,i=e.data;return n.nodeDef.control?this.hasAudioParams(i):i.anode.numberOfInputs>0}connected(t,e){this.synthUI.synth.connectNodes(t.data,e.data)}disconnected(t,e){this.synthUI.synth.disconnectNodes(t.data,e.data)}nodeSelected(t){const e=t.data;Object(c.a)(e,this.jqParams)}nodeRemoved(t){this.synthUI.removeNodeData(t.data)}getArrowColor(t,e){const n=t.data;return n.nodeDef.control?this.ctrlArrowColor:this.arrowColor}data2json(t){return this.synthUI.synth.nodeData2json(t.data)}json2data(t,e){this.synthUI.createNodeData(t,e.type),this.synthUI.synth.json2NodeData(e,t.data)}graphLoaded(){this.analyzer.analyze(this.synthUI.outNode)}graphSaved(){}}(this,n,l,h),this.synth=new o.b(t),this.registerPaletteHandler(),this.addOutputNode()}addOutputNode(){const t=new s.b(500,210,"Out");t.data=new l(t),this.synth.initOutputNodeData(t.data,this.synth.ac.destination),this.outNode=t.data.anode,this.gr.addNode(t,"node-out"),this.initNodeDimensions(t)}registerPaletteHandler(){let t=this;$(".palette .node").click(function(e){let n=$(this),i=(n.attr("class")||"").split(/\s+/).filter(t=>"node"!=t),s=n.attr("data-type");s&&t.addNode(s,n.find(".node-text").html(),i.join(" "))})}addNode(t,e,n){let{x:i,y:o}=this.findFreeSpot();const a=new s.b(i,o,e);this.createNodeData(a,t),this.gr.addNode(a,n),this.gr.selectNode(a)}removeNode(t){this.gr.removeNode(t)}removeNodeData(t){this.synth.removeNodeData(t)}createNodeData(t,e){t.data=new l(t),"out"==e?(this.synth.initOutputNodeData(t.data,this.synth.ac.destination),this.outNode=t.data.anode):this.synth.initNodeData(t.data,e)}findFreeSpot(){let t=0;const e=this.gr.canvas.width,n=this.gr.canvas.height;let i=e/2,s=n/2;for(let o=10;o<e-this.nw;o+=10)for(let e=10;e<n-this.nh;e+=10){const n=this.dist2nearestNode(o,e);n>t&&n<3*this.nw&&(i=o,s=e,t=n)}return{x:i,y:s}}dist2nearestNode(t,e){let n=Number.MAX_VALUE;for(const i of this.gr.nodes){const s=t-i.x,o=e-i.y,a=Math.sqrt(s*s+o*o);a<n&&(n=a)}return n}initNodeDimensions(t){this.nw=t.element.outerWidth()||0,this.nh=t.element.outerHeight()||0}};class l extends o.a{constructor(t){super(),this.node=t}getInputs(){const t=[];for(const e of this.node.inputs)t.push(e.data);return t}}},function(t,e,n){"use strict";const i=16,s=20;e.a=class{constructor(t){if(this.nodes=[],this.lastId=0,!t.parentElement)return;this.nodeCanvas=$(t.parentElement),this.canvas=t;const e=t.getContext("2d");e&&(this.graphDraw=new class{constructor(t,e,n){this.arrowHeadLen=10,this.graph=t,this.gc=e,this.canvas=n,this.nodes=t.nodes}draw(){this.clearCanvas(),this.gc.lineWidth=2;for(const t of this.nodes)for(const e of t.inputs)this.drawArrow(e,t)}clearCanvas(){this.gc.clearRect(0,0,this.canvas.width,this.canvas.height)}drawArrow(t,e){const n=this.getNodeCenter(t),i=this.getNodeCenter(e);this.gc.strokeStyle=this.graph.handler.getArrowColor(t,e),this.gc.beginPath(),this.gc.moveTo(n.x,n.y),this.gc.lineTo(i.x,i.y),this.drawArrowTip(n,i),this.gc.closePath(),this.gc.stroke()}drawArrowTip(t,e){const n=t.x+.6*(e.x-t.x),i=t.y+.6*(e.y-t.y);let s=Math.atan2(e.y-t.y,e.x-t.x);this.gc.moveTo(n,i),this.gc.lineTo(n-this.arrowHeadLen*Math.cos(s-Math.PI/6),i-this.arrowHeadLen*Math.sin(s-Math.PI/6)),this.gc.moveTo(n,i),this.gc.lineTo(n-this.arrowHeadLen*Math.cos(s+Math.PI/6),i-this.arrowHeadLen*Math.sin(s+Math.PI/6))}getNodeCenter(t){return t.w=void 0!==t.w?t.w:t.element.outerWidth()||0,t.h=void 0!==t.h?t.h:t.element.outerHeight()||0,{x:t.x+t.w/2,y:t.y+t.h/2}}}(this,e,t),this.graphInteract=new class{constructor(t,e){this.dragging=!1,this.graph=t,this.gc=e,this.setupConnectHandler(e.canvas)}registerNode(t){t.element.draggable({containment:"parent",distance:5,stack:".node",drag:(e,n)=>{t.x=n.position.left,t.y=n.position.top,this.graph.draw()},start:(t,e)=>{this.dragging=!0,e.helper.css("cursor","move")},stop:(t,e)=>{e.helper.css("cursor","default"),this.dragging=!1}}),t.element.click(e=>{this.dragging||this.selectedNode!=t&&this.selectNode(t)})}selectNode(t){this.selectedNode&&this.selectedNode.element.removeClass("selected"),t.element.addClass("selected"),this.selectedNode=t,this.graph.handler.nodeSelected(t)}setupConnectHandler(t){if(!t)return;let e,n=!1;for(;null!=t&&t.tabIndex<0&&"body"!=t.nodeName.toLowerCase();)t=t.parentElement;t&&$(t).keydown(t=>{if(t.keyCode==s)return this.setGrid([20,20]);t.keyCode!=i||n||(e=this.getNodeFromDOM(this.getElementUnderMouse()))&&(this.graph.handler.canBeSource(e)?(n=!0,this.registerRubberBanding(e)):e.element.css("cursor","not-allowed"))}).keyup(t=>{if(t.keyCode==s)return this.setGrid(null);if(t.keyCode!=i)return;n=!1,this.deregisterRubberBanding();const o=this.getNodeFromDOM(this.getElementUnderMouse());o&&e!=o&&(e&&this.connectOrDisconnect(e,o),this.graph.draw())})}setGrid(t){$(this.graph.nodeCanvas).find(".node").draggable("option","grid",t)}connectOrDisconnect(t,e){this.graph.disconnect(t,e)||this.graph.connect(t,e)}getElementUnderMouse(){const t=$(":hover");if(t.length<=0)return null;const e=$(t.get(t.length-1));return e.hasClass("node")?e:e.parent().hasClass("node")?e.parent():null}registerRubberBanding(t){const e=this.graph.nodeCanvas.offset();if(!e)return;const n=new o(0,0,"");n.w=0,n.h=0,$(this.graph.nodeCanvas).on("mousemove",i=>{if(!i)return;let s=i.clientX||0,o=i.clientY||0;n.x=s-e.left;let a=document.scrollingElement.scrollTop;n.y=o-e.top+a,this.graph.draw(),this.gc.save(),this.gc.setLineDash([10]),this.graph.graphDraw.drawArrow(t,n),this.gc.restore()}),this.graph.nodeCanvas.css("cursor","crosshair"),this.graph.nodeCanvas.find(".node").css("cursor","crosshair");for(const e of this.graph.nodes)e==t||this.graph.handler.canConnect(t,e)||e.element.css("cursor","not-allowed")}deregisterRubberBanding(){this.graph.nodeCanvas.css("cursor",""),this.graph.nodeCanvas.find(".node").css("cursor","default"),this.graph.nodeCanvas.off("mousemove"),this.graph.graphDraw.draw()}getNodeFromDOM(t){if(!t)return null;for(const e of this.graph.nodes)if(e.element[0]==t[0])return e;return null}}(this,e),this.handler=new a)}addNode(t,e){t.id=this.lastId++,t.element=$("<div>").addClass("node").html(`<div class="node-text">${t.name}</div>`).css({left:t.x,top:t.y,cursor:"default"}),e&&t.element.addClass(e),this.nodeCanvas.append(t.element),this.nodes.push(t),this.graphInteract.registerNode(t),this.draw()}removeNode(t){const e=this.nodes.indexOf(t);if(e<0)return console.warn(`Node '${t.name}' is not a member of graph`);for(const e of this.nodes)t!=e&&(this.disconnect(t,e),this.disconnect(e,t));this.nodes.splice(e,1),t.element.remove(),this.handler.nodeRemoved(t),this.draw()}selectNode(t){this.graphInteract.selectNode(t)}connect(t,e){return!(!this.handler.canBeSource(t)||!this.handler.canConnect(t,e)||(e.addInput(t),this.handler.connected(t,e),0))}disconnect(t,e){return!!e.removeInput(t)&&(this.handler.disconnected(t,e),!0)}draw(){this.graphDraw.draw()}toJSON(){const t=[],e=[];for(const n of this.nodes){const i=[];for(const t of n.inputs)i.push(t.id);t.push({id:n.id,x:n.x,y:n.y,name:n.name,inputs:i,classes:this.getAppClasses(n)}),e.push(this.handler.data2json(n))}const n={nodes:t,nodeData:e};return this.handler.graphSaved(),n}fromJSON(t){for(;this.nodes.length>0;)this.removeNode(this.nodes[0]);this.lastId=0;for(const e of t.nodes){const t=new o(e.x,e.y,e.name);this.addNode(t),t.id=e.id,t.element.attr("class",e.classes)}const e=this.handler;this.handler=new a;for(let e=0;e<t.nodes.length;e++)for(const n of t.nodes[e].inputs){const t=this.nodeById(n);t&&this.connect(t,this.nodes[e])}this.handler=e;for(let e=0;e<t.nodes.length;e++)this.handler.json2data(this.nodes[e],t.nodeData[e]);for(const t of this.nodes)for(const e of t.inputs)this.handler.connected(e,t);this.draw(),this.handler.graphLoaded()}nodeById(t){for(const e of this.nodes)if(e.id===t)return e;return null}getAppClasses(t){const e=t.element[0].className.split(/\s+/),n=[];for(const t of e)"selected"!=t&&"ui-"!=t.substr(0,3)&&n.push(t);return n.join(" ")}};class o{constructor(t,e,n){this.inputs=[],this.x=t,this.y=e,this.name=n.replace(/<[^<]*>/g,t=>"<br>"==t?t:"")}addInput(t){this.inputs.push(t)}removeInput(t){const e=this.inputs.indexOf(t);return!(e<0)&&(this.inputs.splice(e,1),!0)}}e.b=o;class a{canBeSource(t){return!0}canConnect(t,e){return!0}connected(t,e){}disconnected(t,e){}nodeSelected(t){}nodeRemoved(t){}getArrowColor(t,e){return"black"}data2json(t){return{}}json2data(t,e){}graphLoaded(){}graphSaved(){}}},function(t,e,n){"use strict";function i(t,e,n,i,s){const a=$('<div class="slider-box">'),l=$('<input type="range" orient="vertical">').attr("min",0).attr("max",1).attr("step",.001).attr("value",o(i,e)),h=$('<input type="number">').attr("min",e.min||0).attr("max",e.max||1).attr("value",c(i,5));return a.append(h),a.append(l),a.append($("<span><br/>"+r(n)+"</span>")),t.append(a),l.on("input",t=>{const n=function(t,e){let n=e.min||0,i=e.max||1;return e.linear?n+t*(i-n):Object(u.c)(t,n,i)}(parseFloat(""+l.val()),e);h.val(c(n,5)),s(n)}),h.on("input",t=>{const n=parseFloat(""+h.val());isNaN(n)||(l.val(o(n,e)),s(n))}),a}function s(t,e,n,i){const s=$('<div class="choice-box">'),o=$("<select>").attr("size",e.length||2);for(const t of e){const e=$("<option>").text(t);t==n&&e.attr("selected","selected"),o.append(e)}return s.append(o),o.after("<br/><br/>"+i),t.append(s),o}function o(t,e){let n=e.min||0,i=e.max||1;return e.linear?(t-n)/(i-n):Object(u.b)(t,n,i)}function a(t,e){t.empty();for(const n of e)t.append("<option>"+n+"</option>")}function r(t){return t[0].toUpperCase()+t.substring(1)}function c(t,e){let n=""+t;return"."==(n=n.substr(0,e))[n.length-1]?n.substr(0,e-1):n}e.a=function(t,e){e.empty();const n=[];if(t.nodeDef.control&&t.controlParams){let i=function(t,e){if(!t.controlParams)return null;const n=s(e,t.controlParams,t.controlParam,"Controlling");return n.change(e=>{t.controlParam&&t.anode.disconnect(t.controlTarget[t.controlParam]),t.controlParam=""+n.val(),t.anode.connect(t.controlTarget[t.controlParam])}),n.parent()}(t,e);i&&n.push(i)}const o=Object.keys(t.nodeDef.params||{});if(!(o.length<=0)){for(const a of o)if(t.anode[a]instanceof AudioParam)n.push(function(t,e,n,s){const o=e.params[n],a=t[n];return a._value&&(a.value=a._value),i(s,o,n,a.value,t=>{a.value=t,a._value=t})}(t.anode,t.nodeDef,a,e));else{let o=function(t,e,n,o){const a=e.params[n];if(a.choices){const e=s(o,a.choices,t[n],r(n));return e.change(i=>{t[n]=e.val()}),e.parent()}return void 0!=a.min?i(o,a,n,t[n],e=>t[n]=e):"boolean"==typeof a.initial?function(t,e,n,i,s){const o=$('<div class="choice-box">'),a=$('<button class="btn btn-info" data-toggle="button" aria-pressed="false">');return o.append(a),a.after("<br/><br/>"+s),t.append(o),i[n]?(a.text("Enabled"),a.addClass("active"),a.attr("aria-pressed","true")):(a.text("Disabled"),a.removeClass("active"),a.attr("aria-pressed","false")),a.click(t=>{i[n]=!i[n],a.text(i[n]?"Enabled":"Disabled")}),o}(o,0,n,t,r(n)):a.phandler?d[a.phandler.uiRender](o,a,t,n,r(n)):null}(t.anode,t.nodeDef,a,e);o&&n.push(o)}!function(t,e){if(e.length<1)return;const n=t.width()||0,i=e[0].width()||0,s=(n-e.length*i)/(e.length+1);let o=s;for(const t of e)t.css({position:"relative",left:o}),o+=s}(e,n)}};var u=n(1),l=n(4),h=n(6);const d={renderBufferData:function(t,e,n,i,s){const o=$('<div class="choice-box">'),a=$('\n\t\t<span class="btn btn-primary upload">\n\t\t\t<input type="file">\n\t\t\tLoad&nbsp;\n\t\t\t<span class="glyphicon glyphicon-open" aria-hidden="true"></span>\n\t\t</span>');o.append(a),a.after("<br/><br/>"+s),t.append(o);let r=!0;return a.find("input").change(t=>{l.e(t,t=>{n._encoded=t,n.context.decodeAudioData(t,t=>{n._buffer=t,r=!1,h.b()})}),setTimeout(t=>{r&&h.e("Loading and decoding audio data...")},300)}),o},renderSoundBank:function(t,e,n,i,o){const r=s(t,[],"","Buffers");r.css({marginBottom:"10px",marginLeft:"-20px",width:"140px",height:"100px",overflowX:"auto"});const c=$('<div style="margin-bottom: -24px">\n\t\t<span class="btn btn-primary upload">\n\t\t\t<input type="file">\n\t\t\t<span class="glyphicon glyphicon-open" aria-hidden="true"></span>\n\t\t</span>\n\t\t&nbsp;&nbsp;&nbsp;\n\t\t<span class="btn btn-danger">\n\t\t\t<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>\n\t\t</span></div>');r.after(c);const u=n._buffers,h=n._encodedBuffers,d=n._names;return a(r,d),c.find("input").change(t=>{l.e(t,(t,e)=>{h.push(t),n.context.decodeAudioData(t,t=>u.push(t)),d.push(e.name),a(r,d)})}),c.find(".btn-danger").click(t=>{const e=d.indexOf(r.val());e<0||([h,u,d].forEach(t=>t.splice(e,1)),a(r,d))}),r.parent()}}},function(t,e,n){"use strict";var i=n(26),s=n(27),o=n(28),a=n(29),r=n(8);const c=8;e.a=class{constructor(t){this.synthUI=t,this.poly=!1;let e=new o.a($("#piano"));this.piano=e,e.noteOn=(t=>this.arpeggiator.sendNoteOn(t,1)),e.noteOff=(t=>this.arpeggiator.sendNoteOff(t,1)),e.polyOn=(()=>this.polyOn()),e.polyOff=(()=>this.polyOff());let n=this.setupPCKeyboard(e);n.baseNote=e.baseNote,e.octaveChanged=(t=>n.baseNote=t),this.setupEnvelopeAnimation(e),this.setupArpeggiator(e,t.synth.ac),this.setupMidiKeyboard(e)}setupPCKeyboard(t){let e=new i.a("#synth");return e.noteOn=(e=>{"INPUT"==document.activeElement.nodeName&&"range"!=document.activeElement.getAttribute("type")||(this.arpeggiator.sendNoteOn(e,1),t.displayKeyDown(e))}),e.noteOff=(e=>{this.arpeggiator.sendNoteOff(e,1),t.displayKeyUp(e)}),e}setupMidiKeyboard(t){let e=new s.a;e.noteOn=((e,n,i)=>{this.arpeggiator.sendNoteOn(e,1),t.displayKeyDown(e)}),e.noteOff=((e,n,i)=>{this.arpeggiator.sendNoteOff(e,1),t.displayKeyUp(e)})}setupEnvelopeAnimation(t){const e=this.synthUI.gr.handler.graphLoaded;this.synthUI.gr.handler.graphLoaded=function(){e.bind(this.synthUI.gr.handler)();let n=null;for(const t of this.synthUI.gr.nodes){const e=t.data;if("ADSR"==e.type){n=e.anode;break}}t.setEnvelope(n||{attack:0,release:0})}}setupArpeggiator(t,e){this.arpeggiator=new a.a(e),t.arpeggioChanged=((t,e,n)=>{this.arpeggiator.mode=e,this.arpeggiator.octaves=n,this.arpeggiator.bpm=t}),this.arpeggiator.noteOn=((t,e,n)=>this.noteOn(t,e,n)),this.arpeggiator.noteOff=((t,e,n)=>this.noteOff(t,e,n))}noteOn(t,e,n){this.lastNote=t;const i=this.piano.getPortamento();this.poly?(this.instrument.portamento.time=i,this.instrument.noteOn(t,e,n)):(this.synthUI.synth.portamento.time=i,this.synthUI.synth.noteOn(t,e,n))}noteOff(t,e,n){this.lastNote=0,this.poly?this.instrument.noteOff(t,e,n):this.synthUI.synth.noteOff(t,e,n)}polyOn(){this.lastNote&&this.noteOff(this.lastNote,1),this.poly=!0;const t=this.synthUI.gr.toJSON();this.instrument=new r.a(this.synthUI.synth.ac,t,c,this.synthUI.outNode)}polyOff(){this.poly=!1,this.instrument.close()}}},function(t,e,n){"use strict";const i="ZSXDCVGBHNJMQ2W3ER5T6Y7UI9O0P",s=36;e.a=class{constructor(t="body"){this.setupHandler(t),this.baseNote=s}setupHandler(t){const e={};$(t).on("keydown",t=>{let n=t.keyCode||0;if(e[n])return;if(t.metaKey||t.altKey||t.ctrlKey)return;e[n]=!0;const i=this.key2midi(n);i<0||this.noteOn(i)}).on("keyup",t=>{let n=t.keyCode||0;e[n]=!1;const i=this.key2midi(n);i<0||this.noteOff(i)})}key2midi(t){const e=i.indexOf(String.fromCharCode(t));return e<0?-1:this.baseNote+e}noteOn(t){}noteOff(t){}}},function(t,e,n){"use strict";e.a=class{constructor(){this.connected=!1,navigator.requestMIDIAccess&&navigator.requestMIDIAccess({sysex:!1}).then(t=>{if(t.inputs.size<=0)return;const e=t.inputs.values().next().value;e&&(e.onmidimessage=(t=>this.midiMessage(t)),this.connected=!0)})}midiMessage(t){const e=t.data,n=e[0]>>4,i=15&e[0],s=e[1],o=e[2];switch(n){case 9:this.noteOn(s,o,i);break;case 8:this.noteOff(s,o,i)}}noteOn(t,e,n){}noteOff(t,e,n){}}},function(t,e,n){"use strict";var i=n(6),s=n(1);const o=17,a=36,r=["","u","d","ud"],c=["-","&uarr;","&darr;","&uarr;&darr;"],u=3,l=15,h=480,d=0,f=1;class p{constructor(t=o){this.numWhites=t}createKeys(t){const e=[],n=t.width()||0,i=t.height()||0,s=parseFloat(t.css("padding-left")),o=parseFloat(t.css("padding-top")),a=n/this.numWhites+1,r=Math.round(2*a/3),c=Math.round(2*i/3);let u=0;for(let n=0;n<this.numWhites;n++){const s=$('<div class="piano-key">').css({width:a+"px",height:i+"px"});t.append(s),e[u++]=s,this.hasBlack(n)&&u++}u=0;let l=s-r/2;for(let n=0;n<this.numWhites-1;n++){if(l+=a-1,u++,!this.hasBlack(n))continue;const i=$('<div class="piano-key piano-black">').css({width:r+"px",height:c+"px",left:l+"px",top:o+"px"});t.append(i),e[u++]=i}return e}hasBlack(t){const e=t%7;return 2!=e&&6!=e}}e.a=class{constructor(t){this.arpeggio={mode:0,octave:1,bpm:60},this.baseNote=a,this.octave=3,this.poly=!1,this.envelope={attack:0,release:0};const e=new p;this.keys=e.createKeys(t);for(let t=0;t<this.keys.length;t++)this.registerKey(this.keys[t],t);this.controls=t.parent(),this.registerButtons(this.controls),this.portaSlider=this.controls.find(".portamento-box input")}registerKey(t,e){t.mousedown(n=>{const i=e+this.baseNote;this.displayKeyDown(t),this.noteOn(i),this.pressedKey=t}),t.mouseup(n=>{const i=e+this.baseNote;this.displayKeyUp(t),this.noteOff(i),this.pressedKey=null}),t.mouseout(n=>{if(t!=this.pressedKey)return;const i=e+this.baseNote;this.displayKeyUp(t),this.noteOff(i),this.pressedKey=null})}registerButtons(t){$("#prev-octave-but").click(t=>{this.octave--,this.updateOctave()}),$("#next-octave-but").click(t=>{this.octave++,this.updateOctave()});const e=t.find(".arpeggio-box input");e.on("input",t=>{this.arpeggio.bpm=Object(s.c)(parseFloat(""+e.val()),l,h),this.triggerArpeggioChange()});const n=t.find(".btn-arpeggio-ud");n.click(t=>this.changeArpeggioMode(n));const i=t.find(".btn-arpeggio-oct");i.click(t=>this.changeArpeggioOctave(i)),$("#poly-but").click(t=>this.togglePoly())}updateOctave(){$("#prev-octave-but").prop("disabled",this.octave<=1),$("#next-octave-but").prop("disabled",this.octave>=8),$("#octave-label").text("C"+this.octave),this.baseNote=a+12*(this.octave-3),this.octaveChanged(this.baseNote)}displayKeyDown(t){"number"==typeof t&&(t=this.midi2key(t)),t&&(!this.poly&&0==this.arpeggio.mode&&this.lastKey&&this.displayKeyUp(this.lastKey,!0),t.css("transition",`background-color ${this.envelope.attack}s linear`),t.addClass("piano-key-pressed"),this.lastKey=t)}displayKeyUp(t,e){if("number"==typeof t&&(t=this.midi2key(t)),!t)return;const n=e?0:this.envelope.release;t.css("transition",`background-color ${n}s linear`),t.removeClass("piano-key-pressed")}midi2key(t){return this.keys[t-this.baseNote]}setEnvelope(t){this.envelope=t}togglePoly(){if(this.poly=!this.poly,this.poly){const t=$("<div>").addClass("editor-cover");t.append("<p>You can use the PC keyboard to play notes<br><br>Synth editing is disabled in polyphonic mode</p>"),$("body").append(t),$("#poly-but").text("Poly"),i.g(!0),this.polyOn()}else $(".editor-cover").remove(),$("#poly-but").text("Mono"),i.g(!1),this.polyOff()}getPortamento(){const t=parseFloat(""+this.portaSlider.val());return Object(s.c)(t,d,f)}changeArpeggioMode(t){this.arpeggio.mode++,this.arpeggio.mode>=r.length&&(this.arpeggio.mode=0),t.html(c[this.arpeggio.mode]),this.triggerArpeggioChange()}changeArpeggioOctave(t){this.arpeggio.octave++,this.arpeggio.octave>u&&(this.arpeggio.octave=1),t.text(this.arpeggio.octave),this.triggerArpeggioChange()}triggerArpeggioChange(){this.arpeggioChanged(this.arpeggio.bpm,r[this.arpeggio.mode],this.arpeggio.octave)}toJSON(){return{portamento:this.getPortamento(),octave:this.octave,arpeggio:{bpm:this.arpeggio.bpm,mode:this.arpeggio.mode,octave:this.arpeggio.octave}}}fromJSON(t){t&&(t.portamento&&this.portaSlider.val(Object(s.b)(t.portamento,d,f)),t.octave&&(this.octave=t.octave,this.updateOctave()),t.arpeggio&&(this.arpeggio.bpm=t.arpeggio.bpm,this.arpeggio.mode=t.arpeggio.mode,this.arpeggio.octave=t.arpeggio.octave,this.controls.find(".arpeggio-box input").val(Object(s.b)(this.arpeggio.bpm,l,h)),this.controls.find(".btn-arpeggio-ud").html(c[this.arpeggio.mode]),this.controls.find(".btn-arpeggio-oct").text(this.arpeggio.octave),this.triggerArpeggioChange()))}noteOn(t){}noteOff(t){}polyOn(){}polyOff(){}octaveChanged(t){}arpeggioChanged(t,e,n){}}},function(t,e,n){"use strict";var i=n(7);e.a=class{constructor(t){this.backward=!1,this.noteOnTime=.75,this.mode="",this.octaves=1,this.bpm=60,this.notect=0,this.notes=new class{constructor(){this.notes=[]}length(){return this.notes.length}get(t){return this.notes[t]}add(t,e,n){const i=new s(t,e,n);for(let t=0;t<this.notes.length;t++)if(e<this.notes[t].noteToPlay)return void this.notes.splice(t,0,i);this.notes.push(i)}remove(t){this.notes=this.notes.filter(e=>e.note!=t)}},this.timer=new i.a(t,this.bpm)}get bpm(){return this._bpm}set bpm(t){this._bpm=t,this.timer&&(this.timer.bpm=t)}timerCB(t){if(0==this.mode.length)return;const e=this.notes.length();if(0==e)return;this.wrapCounter(e);const n=this.notes.get(this.notect);this.noteOn(n.noteToPlay,n.velocity,t),this.noteOff(n.noteToPlay,n.velocity,t+this.timer.noteDuration*this.noteOnTime),"u"==this.mode?this.notect++:"d"==this.mode?this.notect--:"ud"==this.mode&&(this.backward?this.notect--:this.notect++)}wrapCounter(t){this.notect>=t?"ud"!=this.mode?this.notect=0:(this.backward=!0,this.notect=t<2?0:t-2):this.notect<0&&("ud"!=this.mode?this.notect=t-1:(this.backward=!1,this.notect=t<2?0:1))}sendNoteOn(t,e){if(0==this.mode.length)return this.noteOn(t,e);const n=0==this.notes.length();this.notes.add(t,t,e),this.octaves>1&&this.notes.add(t,t+12,e),this.octaves>2&&this.notes.add(t,t+24,e),n&&this.timer.start(t=>this.timerCB(t))}sendNoteOff(t,e){0==this.mode.length&&this.noteOff(t,e),this.notes.remove(t),0==this.notes.length()&&(this.timerCB(0),this.timer.stop(),this.backward=!1,this.notect=0)}noteOn(t,e,n){}noteOff(t,e,n){}};class s{constructor(t,e,n){this.note=t,this.noteToPlay=e,this.velocity=n}}},function(t,e,n){"use strict";var i=n(6),s=n(4),o=n(1);const a=20;e.a=class{constructor(t){this.presetNum=0,this.synthUI=t,this.registerListeners(t.gr.canvas),this.loadPresets()}loadPresets(){this.presets=new Array(a);for(let t=0;t<a;t++)this.presets[t]=this.getEmptyPreset();$.get("js/presets.json",t=>{if(t instanceof Array){for(let e=0;e<a;e++)t[e]&&(this.presets[e]=t[e]);this.preset2synth()}})}getEmptyPreset(){return{name:"",nodes:[{id:0,x:500,y:180,name:"Out",inputs:[],classes:"node node-out"}],nodeData:[{type:"out",params:{}}]}}registerListeners(t){$("#save-but").click(t=>this.savePreset()),$("#load-file").on("change",t=>this.loadPreset(t)),$("#prev-preset-but").click(t=>this.changePreset(this.presetNum-1)),$("#next-preset-but").click(t=>this.changePreset(this.presetNum+1)),$(Object(o.a)(t)).keydown(t=>{"INPUT"==t.target.nodeName||i.d||(37==t.keyCode&&this.changePreset(this.presetNum-1),39==t.keyCode&&this.changePreset(this.presetNum+1))}),$("#preset-num").click(t=>this.togglePresetSelector());const e=$(".preset-selector select");e.change(t=>{let n=e.val();if(!n)return;const i=n.toString().split(":")[0];this.changePreset(parseInt(i,10)-1)})}togglePresetSelector(){const t=$(".preset-selector");if(t.toggle(),!t.is(":visible"))return;this.synth2preset();const e=t.find("select");e.empty(),e.focus();let n=0;for(const t of this.presets){const i=n==this.presetNum?" selected":"";n++,t.nodes.length>1&&e.append(`<option${i}>${n}: ${t.name}</option>`)}}changePreset(t){t<0?t=a-1:t>=a&&(t=0),this.synth2preset(),this.presetNum=t,this.preset2synth()}synth2preset(){const t=this.synthUI.gr.toJSON();let e=""+$("#preset-name").val();return t.name=e.trim(),t.modulatorType="synth",this.beforeSave(t),this.presets[this.presetNum]=t,t}preset2synth(){const t=this.presets[this.presetNum];this.afterLoad(t),$("#preset-num").text(this.presetNum+1),$("#preset-name").val(t.name),$("#node-params").empty(),this.synthUI.gr.fromJSON(t),this.selectBestNode()}selectBestNode(){const t=t=>this.synthUI.gr.nodes.filter(t)[0];let e=t(t=>"Filter"==t.data.type);e||(e=t(t=>"ADSR"==t.data.type)),e||(e=t(t=>0==t.data.anode.numberOfInputs)),e&&this.synthUI.gr.selectNode(e)}loadPreset(t){t&&s.f(t,t=>{try{const e=JSON.parse(t);if("synth"!=e.modulatorType)throw"Invalid file format";this.presets[this.presetNum]=e,this.preset2synth()}catch(t){console.error(t),i.a("Could not load synth: invalid file format","Load error")}})}savePreset(){const t=this.synth2preset(),e=JSON.stringify(t);s.c()?(0==t.name.length&&(t.name=""+this.presetNum),s.d(t.name+".json",e)):i.f("Copy the text below to the clipboard and save it to a local text file","Save preset",e,null)}beforeSave(t){}afterLoad(t){}}},function(t,e,n){"use strict";function i(){f++}function s(){if(--f<=0){for(let t of p)t();p=[]}}var o=n(7),a=n(32),r=n(13),c=n(33),u=n(14),l=n(9),h=n(17),d=this&&this.__awaiter||function(t,e,n,i){return new(n||(n=Promise))(function(s,o){function a(t){try{c(i.next(t))}catch(t){o(t)}}function r(t){try{c(i.throw(t))}catch(t){o(t)}}function c(t){t.done?s(t.value):new n(function(e){e(t.value)}).then(a,r)}c((i=i.apply(t,e||[])).next())})};e.a=class{constructor(t,e,n){this.context=t,this.presets=e,this.synthUI=n,this.timer=new o.a(t,60,.2),this.timer.start(t=>Object(r.f)(this.timer,t))}instrument(t,e,n=4){if("string"==typeof t){let n=r.c[e||t];n&&n.shutdown()}let o=Object(h.a)(this,t,e,n);return e&&(o.name=e),r.c[o.name]=o,function(t){d(this,void 0,void 0,function*(){i(),yield t.initialize(),s()})}(o),o}effect(t,e){let n=Object(c.a)(this.context,t);return r.b[e||t]=n,n}track(t,e,n=!1){let i=new a.a(this.context,this.synthUI.outNode,this.timer);return i.loop=n,i.name=t,r.h[t]=i,i.callback=e,function(t){f<=0?t():p.push(t)}(()=>Object(r.e)(i)),this}loop_track(t,e){return this.track(t,e,!0)}scale(t,e,n){return Object(u.b)(t,e,n)}log(...t){return Object(l.e)(!0,!1,...t),this}log_enable(t=!0){return Object(l.b)(t),this}log_clear(){return Object(l.a)(),this}bpm(t){return void 0===t?this.timer.bpm:(this.timer.bpm=t,this)}stop(){return Object(r.a)(t=>t.stop()),this}pause(){return Object(r.a)(t=>t.pause()),this}continue(){return Object(r.a)(t=>t.continue()),this}reset(){return Object(r.a)(t=>{t._effect&&t._effect.input.disconnect(),t.delete()}),this}listen(t){return Object(r.d)(t),this}init(t){return d(this,void 0,void 0,function*(){return i(),yield t(),s(),this})}};let f=0,p=[]},function(t,e,n){"use strict";var i=n(13);class s{constructor(t,e,n){this.ac=t,this.out=e,this.timer=n,this.shouldStop=!1,this.stopped=!1,this._gain=t.createGain(),this._gain.connect(e),this.lastGain=this._gain.gain.value}mute(){return this.lastGain=this._gain.gain.value,this._gain.gain.value=1e-5,this}unmute(){return this._gain.gain.value=this.lastGain,this}gain(t,e){return t<1e-5&&(t=1e-5),void 0===e?this._gain.gain.value=t:this._gain.gain.exponentialRampToValueAtTime(t,this.ac.currentTime+e),this}stop(){return this.shouldStop=!0,this}pause(){return this.stopped=!0,this}continue(){return this.shouldStop=!1,this.stopped=!1,this}delete(){this.mute(),delete i.g[this.name],delete i.h[this.name]}}e.a=class extends s{constructor(){super(...arguments),this.notect=0,this.notes=[],this.time=0,this.latency=.2,this.loop=!1,this.loopCount=0,this.velocity=1,this._transpose=0,this.playing=!1}instrument(t){return this.playing||t.connect(this._gain),this.inst=t,this}effect(t){if(this.playing)return this;let e=this._effect?this._effect.output:this._gain;return e.disconnect(),e.connect(t.input),t.output.connect(this.out),this._effect=t,this}volume(t){return this.velocity=t,this}play(t=64,e,n){if(!this.inst)throw new Error("Must call instrument before playing a note or setting parameters");return this.notes.push({track:this,instrument:this.inst,number:t+this._transpose,time:this.time+this.latency,velocity:this.velocity,duration:e,options:n}),this}play_notes(t,e,n){void 0===e?e=[0]:"number"==typeof e&&(e=[e]);let i=e.ring();"number"==typeof n&&(n=[n]);let s=n?n.ring():void 0,o=t.ring();return this.repeat(t.length,t=>this.play(o.tick(),s?s.tick():void 0).sleep(i.tick())),this}transpose(t){return this._transpose=t,this}params(t){return this.play(0,void 0,t)}param(t,e){return this.params({instrument:this.inst,[t]:e})}sleep(t){return this.time+=60*t/this.timer.bpm,this}repeat(t,e){for(let n=0;n<t;n++)e(n);return this}}},function(t,e,n){"use strict";e.a=function(t,e){e.indexOf("/")<0&&(e="WebAudio/"+e);let[n,i]=e.split("/"),s=r[n];if(!s)throw new Error(`Effect "${e}" not found: unknown prefix "${s}"`);return s(t,i)};var i=n(34);class s{constructor(t,e){this.ac=t,this.name=e}param(t,e,n,i=!0){let s=this.getAudioParam(t);return void 0===e?s.value:(void 0===n?s.value=e:i?s.exponentialRampToValueAtTime(e,this.ac.currentTime+n):s.linearRampToValueAtTime(e,this.ac.currentTime+n),this)}paramNames(){let t=[];for(let e in this.input)this.input[e]instanceof AudioParam&&t.push(e);return t}getAudioParam(t){let e=this.input[t];if(!(e&&e instanceof AudioParam))throw new Error(`Parameter "${t}" not found in effect "${this.name}"`);return e}}class o extends s{constructor(t,e){super(t,e);let n=a[e];if(!n)throw new Error(`Effect "tuna/${e}" does not exist`);this.input=new n,this.output=this.input}paramNames(){let t=this.input,e=["bypass"];for(let n of Object.getOwnPropertyNames(t.defaults))e.push(n);return e}param(t,e,n,i=!0){let s=this.input;if(void 0===s[t])throw new Error(`Parameter "${t}" not found in effect "${this.name}"`);return void 0===e?s[t]:(void 0===n?s[t]=e:s.automate(t,e,n),this)}}let a,r={WebAudio:(t,e)=>new class extends s{constructor(t,e){super(t,e);let n="create"+e;if(!t[n])throw new Error(`Effect "${e}" does not exist`);this.input=t[n](),this.output=this.input}}(t,e),tuna:function(t,e){return a||(a=Object(i.a)(t)),new o(t,e)}}},function(t,e,n){"use strict";function i(t){if(!(this instanceof i))return new i(t);let e="undefined"==typeof window?{}:window;if(e.AudioContext||(e.AudioContext=e.webkitAudioContext),t||(console.log("tuna.js: Missing audio context! Creating a new context for you."),t=e.AudioContext&&new e.AudioContext),!t)throw new Error("Tuna cannot initialize because this environment does not support web audio.");!function(t){if(!0===t.__connectified__)return;let e=t.createGain(),n=Object.getPrototypeOf(Object.getPrototypeOf(e)),i=n.connect;n.connect=function(){let t=arguments[0];return arguments[0]=d.isPrototypeOf?d.isPrototypeOf(t)?t.input:t:t.input||t,i.apply(this,arguments),t},t.__connectified__=!0}(t),u=t,l=this}function s(t){return Math.max(0,Math.round(100*Math.pow(2,t/6))/100)}function o(t,e){let n,i,s=0,o=0,a=0,r=0;if(n=t.toExponential().match(/^.\.?(.*)e(.+)$/)||"",s=parseInt(n[2],10)-(n[1]+"").length,n=e.toExponential().match(/^.\.?(.*)e(.+)$/)||"",(o=parseInt(n[2],10)-(n[1]+"").length)>s&&(s=o),i=t%e,s<-100||s>20){a=Math.round(Math.log(i)/Math.log(10));return(i/(r=Math.pow(10,a))).toFixed(a-s)*r}return parseFloat(i.toFixed(-s))}function a(t){return 0===t?1:Math.abs(t)/t}function r(t){return(Math.exp(t)-Math.exp(-t))/(Math.exp(t)+Math.exp(-t))}function c(t,e){return void 0===t?e:t}e.a=i;let u,l,h=function(t,e){t.value=e},d=Object.create(null,{activate:{writable:!0,value:function(t){t?(this.input.disconnect(),this.input.connect(this.activateNode),this.activateCallback&&this.activateCallback(t)):(this.input.disconnect(),this.input.connect(this.output))}},bypass:{get:function(){return this._bypass},set:function(t){this._lastBypassValue!==t&&(this._bypass=t,this.activate(!t),this._lastBypassValue=t)}},connect:{value:function(t){this.output.connect(t)}},disconnect:{value:function(t){this.output.disconnect(t)}},connectInOrder:{value:function(t){let e=t.length-1;for(;e--;){if(!t[e].connect)return console.error("AudioNode.connectInOrder: TypeError: Not an AudioNode.",t[e]);t[e+1].input?t[e].connect(t[e+1].input):t[e].connect(t[e+1])}}},getDefaults:{value:function(){let t={};for(let e in this.defaults)t[e]=this.defaults[e].value;return t}},automate:{value:function(t,e,n,i){let s,o=i?~~(i/1e3):u.currentTime,a=n?~~(n/1e3):0,r=this.defaults[t],c=this[t];c?r.automatable?(n?(s="linearRampToValueAtTime",c.cancelScheduledValues(o),c.setValueAtTime(c.value,o)):s="setValueAtTime",c[s](e,a+o)):c=e:console.error("Invalid Property for "+this.name)}}}),f="float",p="boolean";i.prototype.Bitcrusher=function(t){t||(t=this.getDefaults()),this.bufferSize=t.bufferSize||this.defaults.bufferSize.value,this.input=u.createGain(),this.activateNode=u.createGain(),this.processor=u.createScriptProcessor(this.bufferSize,1,1),this.output=u.createGain(),this.activateNode.connect(this.processor),this.processor.connect(this.output);let e,n,i,s,o,a=0,r=0;this.processor.onaudioprocess=function(t){for(e=t.inputBuffer.getChannelData(0),n=t.outputBuffer.getChannelData(0),i=Math.pow(.5,this.bits),o=e.length,s=0;s<o;s++)(a+=this.normfreq)>=1&&(a-=1,r=i*Math.floor(e[s]/i+.5)),n[s]=r},this.bits=t.bits||this.defaults.bits.value,this.normfreq=c(t.normfreq,this.defaults.normfreq.value),this.bypass=t.bypass||!1},i.prototype.Bitcrusher.prototype=Object.create(d,{name:{value:"Bitcrusher"},defaults:{writable:!0,value:{bits:{value:4,min:1,max:16,automatable:!1,type:"int"},bufferSize:{value:4096,min:256,max:16384,automatable:!1,type:"int"},bypass:{value:!1,automatable:!1,type:p},normfreq:{value:.1,min:1e-4,max:1,automatable:!1,type:f}}},bits:{enumerable:!0,get:function(){return this.processor.bits},set:function(t){this.processor.bits=t}},normfreq:{enumerable:!0,get:function(){return this.processor.normfreq},set:function(t){this.processor.normfreq=t}}}),i.prototype.Cabinet=function(t){t||(t=this.getDefaults()),this.input=u.createGain(),this.activateNode=u.createGain(),this.convolver=this.newConvolver(t.impulsePath||"../impulses/impulse_guitar.wav"),this.makeupNode=u.createGain(),this.output=u.createGain(),this.activateNode.connect(this.convolver.input),this.convolver.output.connect(this.makeupNode),this.makeupNode.connect(this.output),this.makeupGain=c(t.makeupGain,this.defaults.makeupGain),this.bypass=t.bypass||!1},i.prototype.Cabinet.prototype=Object.create(d,{name:{value:"Cabinet"},defaults:{writable:!0,value:{makeupGain:{value:1,min:0,max:20,automatable:!0,type:f},bypass:{value:!1,automatable:!1,type:p}}},makeupGain:{enumerable:!0,get:function(){return this.makeupNode.gain},set:function(t){this.makeupNode.gain.value=t}},newConvolver:{value:function(t){return new l.Convolver({impulse:t,dryLevel:0,wetLevel:1})}}}),i.prototype.Chorus=function(t){t||(t=this.getDefaults()),this.input=u.createGain(),this.attenuator=this.activateNode=u.createGain(),this.splitter=u.createChannelSplitter(2),this.delayL=u.createDelay(),this.delayR=u.createDelay(),this.feedbackGainNodeLR=u.createGain(),this.feedbackGainNodeRL=u.createGain(),this.merger=u.createChannelMerger(2),this.output=u.createGain(),this.lfoL=new l.LFO({target:this.delayL.delayTime,callback:h}),this.lfoR=new l.LFO({target:this.delayR.delayTime,callback:h}),this.input.connect(this.attenuator),this.attenuator.connect(this.output),this.attenuator.connect(this.splitter),this.splitter.connect(this.delayL,0),this.splitter.connect(this.delayR,1),this.delayL.connect(this.feedbackGainNodeLR),this.delayR.connect(this.feedbackGainNodeRL),this.feedbackGainNodeLR.connect(this.delayR),this.feedbackGainNodeRL.connect(this.delayL),this.delayL.connect(this.merger,0,0),this.delayR.connect(this.merger,0,1),this.merger.connect(this.output),this.feedback=c(t.feedback,this.defaults.feedback.value),this.rate=c(t.rate,this.defaults.rate.value),this.delay=c(t.delay,this.defaults.delay.value),this.depth=c(t.depth,this.defaults.depth.value),this.lfoR.phase=Math.PI/2,this.attenuator.gain.value=.6934,this.lfoL.activate(!0),this.lfoR.activate(!0),this.bypass=t.bypass||!1},i.prototype.Chorus.prototype=Object.create(d,{name:{value:"Chorus"},defaults:{writable:!0,value:{feedback:{value:.4,min:0,max:.95,automatable:!1,type:f},delay:{value:.0045,min:0,max:1,automatable:!1,type:f},depth:{value:.7,min:0,max:1,automatable:!1,type:f},rate:{value:1.5,min:0,max:8,automatable:!1,type:f},bypass:{value:!1,automatable:!1,type:p}}},delay:{enumerable:!0,get:function(){return this._delay},set:function(t){this._delay=2*Math.pow(10,t)*2e-4,this.lfoL.offset=this._delay,this.lfoR.offset=this._delay,this._depth=this._depth}},depth:{enumerable:!0,get:function(){return this._depth},set:function(t){this._depth=t,this.lfoL.oscillation=this._depth*this._delay,this.lfoR.oscillation=this._depth*this._delay}},feedback:{enumerable:!0,get:function(){return this._feedback},set:function(t){this._feedback=t,this.feedbackGainNodeLR.gain.value=this._feedback,this.feedbackGainNodeRL.gain.value=this._feedback}},rate:{enumerable:!0,get:function(){return this._rate},set:function(t){this._rate=t,this.lfoL.frequency=this._rate,this.lfoR.frequency=this._rate}}}),i.prototype.Compressor=function(t){t||(t=this.getDefaults()),this.input=u.createGain(),this.compNode=this.activateNode=u.createDynamicsCompressor(),this.makeupNode=u.createGain(),this.output=u.createGain(),this.compNode.connect(this.makeupNode),this.makeupNode.connect(this.output),this.automakeup=c(t.automakeup,this.defaults.automakeup.value),this.makeupGain=c(t.makeupGain,this.defaults.makeupGain.value),this.threshold=c(t.threshold,this.defaults.threshold.value),this.release=c(t.release,this.defaults.release.value),this.attack=c(t.attack,this.defaults.attack.value),this.ratio=t.ratio||this.defaults.ratio.value,this.knee=c(t.knee,this.defaults.knee.value),this.bypass=t.bypass||!1},i.prototype.Compressor.prototype=Object.create(d,{name:{value:"Compressor"},defaults:{writable:!0,value:{threshold:{value:-20,min:-60,max:0,automatable:!0,type:f},release:{value:250,min:10,max:2e3,automatable:!0,type:f},makeupGain:{value:1,min:1,max:100,automatable:!0,type:f},attack:{value:1,min:0,max:1e3,automatable:!0,type:f},ratio:{value:4,min:1,max:50,automatable:!0,type:f},knee:{value:5,min:0,max:40,automatable:!0,type:f},automakeup:{value:!1,automatable:!1,type:p},bypass:{value:!1,automatable:!1,type:p}}},computeMakeup:{value:function(){let t=this.compNode;return-(t.threshold.value-t.threshold.value/t.ratio.value)/4}},automakeup:{enumerable:!0,get:function(){return this._automakeup},set:function(t){this._automakeup=t,this._automakeup&&(this.makeupGain=this.computeMakeup())}},threshold:{enumerable:!0,get:function(){return this.compNode.threshold},set:function(t){this.compNode.threshold.value=t,this._automakeup&&(this.makeupGain=this.computeMakeup())}},ratio:{enumerable:!0,get:function(){return this.compNode.ratio},set:function(t){this.compNode.ratio.value=t,this._automakeup&&(this.makeupGain=this.computeMakeup())}},knee:{enumerable:!0,get:function(){return this.compNode.knee},set:function(t){this.compNode.knee.value=t,this._automakeup&&(this.makeupGain=this.computeMakeup())}},attack:{enumerable:!0,get:function(){return this.compNode.attack},set:function(t){this.compNode.attack.value=t/1e3}},release:{enumerable:!0,get:function(){return this.compNode.release},set:function(t){this.compNode.release.value=t/1e3}},makeupGain:{enumerable:!0,get:function(){return this.makeupNode.gain},set:function(t){this.makeupNode.gain.value=s(t)}}}),i.prototype.Convolver=function(t){t||(t=this.getDefaults()),this.input=u.createGain(),this.activateNode=u.createGain(),this.convolver=u.createConvolver(),this.dry=u.createGain(),this.filterLow=u.createBiquadFilter(),this.filterHigh=u.createBiquadFilter(),this.wet=u.createGain(),this.output=u.createGain(),this.activateNode.connect(this.filterLow),this.activateNode.connect(this.dry),this.filterLow.connect(this.filterHigh),this.filterHigh.connect(this.convolver),this.convolver.connect(this.wet),this.wet.connect(this.output),this.dry.connect(this.output),this.dryLevel=c(t.dryLevel,this.defaults.dryLevel.value),this.wetLevel=c(t.wetLevel,this.defaults.wetLevel.value),this.highCut=t.highCut||this.defaults.highCut.value,this.buffer=t.impulse||"../impulses/ir_rev_short.wav",this.lowCut=t.lowCut||this.defaults.lowCut.value,this.level=c(t.level,this.defaults.level.value),this.filterHigh.type="lowpass",this.filterLow.type="highpass",this.bypass=t.bypass||!1},i.prototype.Convolver.prototype=Object.create(d,{name:{value:"Convolver"},defaults:{writable:!0,value:{highCut:{value:22050,min:20,max:22050,automatable:!0,type:f},lowCut:{value:20,min:20,max:22050,automatable:!0,type:f},dryLevel:{value:1,min:0,max:1,automatable:!0,type:f},wetLevel:{value:1,min:0,max:1,automatable:!0,type:f},level:{value:1,min:0,max:1,automatable:!0,type:f}}},lowCut:{get:function(){return this.filterLow.frequency},set:function(t){this.filterLow.frequency.value=t}},highCut:{get:function(){return this.filterHigh.frequency},set:function(t){this.filterHigh.frequency.value=t}},level:{get:function(){return this.output.gain},set:function(t){this.output.gain.value=t}},dryLevel:{get:function(){return this.dry.gain},set:function(t){this.dry.gain.value=t}},wetLevel:{get:function(){return this.wet.gain},set:function(t){this.wet.gain.value=t}},buffer:{enumerable:!1,get:function(){return this.convolver.buffer},set:function(t){let e=this.convolver,n=new XMLHttpRequest;t?(n.open("GET",t,!0),n.responseType="arraybuffer",n.onreadystatechange=function(){4===n.readyState&&(n.status<300&&n.status>199||302===n.status)&&u.decodeAudioData(n.response,function(t){e.buffer=t},function(t){t&&console.log("Tuna.Convolver.setBuffer: Error decoding data"+t)})},n.send(null)):console.log("Tuna.Convolver.setBuffer: Missing impulse path!")}}}),i.prototype.Delay=function(t){t||(t=this.getDefaults()),this.input=u.createGain(),this.activateNode=u.createGain(),this.dry=u.createGain(),this.wet=u.createGain(),this.filter=u.createBiquadFilter(),this.delay=u.createDelay(10),this.feedbackNode=u.createGain(),this.output=u.createGain(),this.activateNode.connect(this.delay),this.activateNode.connect(this.dry),this.delay.connect(this.filter),this.filter.connect(this.feedbackNode),this.feedbackNode.connect(this.delay),this.feedbackNode.connect(this.wet),this.wet.connect(this.output),this.dry.connect(this.output),this.delayTime=t.delayTime||this.defaults.delayTime.value,this.feedback=c(t.feedback,this.defaults.feedback.value),this.wetLevel=c(t.wetLevel,this.defaults.wetLevel.value),this.dryLevel=c(t.dryLevel,this.defaults.dryLevel.value),this.cutoff=t.cutoff||this.defaults.cutoff.value,this.filter.type="lowpass",this.bypass=t.bypass||!1},i.prototype.Delay.prototype=Object.create(d,{name:{value:"Delay"},defaults:{writable:!0,value:{delayTime:{value:100,min:20,max:1e3,automatable:!1,type:f},feedback:{value:.45,min:0,max:.9,automatable:!0,type:f},cutoff:{value:2e4,min:20,max:2e4,automatable:!0,type:f},wetLevel:{value:.5,min:0,max:1,automatable:!0,type:f},dryLevel:{value:1,min:0,max:1,automatable:!0,type:f}}},delayTime:{enumerable:!0,get:function(){return this.delay.delayTime},set:function(t){this.delay.delayTime.value=t/1e3}},wetLevel:{enumerable:!0,get:function(){return this.wet.gain},set:function(t){this.wet.gain.value=t}},dryLevel:{enumerable:!0,get:function(){return this.dry.gain},set:function(t){this.dry.gain.value=t}},feedback:{enumerable:!0,get:function(){return this.feedbackNode.gain},set:function(t){this.feedbackNode.gain.value=t}},cutoff:{enumerable:!0,get:function(){return this.filter.frequency},set:function(t){this.filter.frequency.value=t}}}),i.prototype.Filter=function(t){t||(t=this.getDefaults()),this.input=u.createGain(),this.activateNode=u.createGain(),this.filter=u.createBiquadFilter(),this.output=u.createGain(),this.activateNode.connect(this.filter),this.filter.connect(this.output),this.frequency=t.frequency||this.defaults.frequency.value,this.Q=t.resonance||this.defaults.Q.value,this.filterType=c(t.filterType,this.defaults.filterType.value),this.gain=c(t.gain,this.defaults.gain.value),this.bypass=t.bypass||!1},i.prototype.Filter.prototype=Object.create(d,{name:{value:"Filter"},defaults:{writable:!0,value:{frequency:{value:800,min:20,max:22050,automatable:!0,type:f},Q:{value:1,min:.001,max:100,automatable:!0,type:f},gain:{value:0,min:-40,max:40,automatable:!0,type:f},bypass:{value:!1,automatable:!1,type:p},filterType:{value:"lowpass",automatable:!1,type:"string"}}},filterType:{enumerable:!0,get:function(){return this.filter.type},set:function(t){this.filter.type=t}},Q:{enumerable:!0,get:function(){return this.filter.Q},set:function(t){this.filter.Q.value=t}},gain:{enumerable:!0,get:function(){return this.filter.gain},set:function(t){this.filter.gain.value=t}},frequency:{enumerable:!0,get:function(){return this.filter.frequency},set:function(t){this.filter.frequency.value=t}}}),i.prototype.Gain=function(t){t||(t=this.getDefaults()),this.input=u.createGain(),this.activateNode=u.createGain(),this.gainNode=u.createGain(),this.output=u.createGain(),this.activateNode.connect(this.gainNode),this.gainNode.connect(this.output),this.gain=c(t.gain,this.defaults.gain.value),this.bypass=t.bypass||!1},i.prototype.Gain.prototype=Object.create(d,{name:{value:"Gain"},defaults:{writable:!0,value:{bypass:{value:!1,automatable:!1,type:p},gain:{value:1,automatable:!0,type:f}}},gain:{enumerable:!0,get:function(){return this.gainNode.gain},set:function(t){this.gainNode.gain.value=t}}}),i.prototype.MoogFilter=function(t){t||(t=this.getDefaults()),this.bufferSize=t.bufferSize||this.defaults.bufferSize.value,this.input=u.createGain(),this.activateNode=u.createGain(),this.processor=u.createScriptProcessor(this.bufferSize,1,1),this.output=u.createGain(),this.activateNode.connect(this.processor),this.processor.connect(this.output);let e,n,i,s,o,a,r,l;e=n=i=s=o=a=r=l=0;let h,d,f,p,m,g,v;this.processor.onaudioprocess=function(t){for(h=t.inputBuffer.getChannelData(0),d=t.outputBuffer.getChannelData(0),f=1.16*this.cutoff,v=f*f*.35013*(f*f),p=this.resonance*(1-.15*f*f),g=h.length,m=0;m<g;m++)h[m]-=l*p,h[m]*=v,o=h[m]+.3*e+(1-f)*o,e=h[m],a=o+.3*n+(1-f)*a,n=o,r=a+.3*i+(1-f)*r,i=a,l=r+.3*s+(1-f)*l,s=r,d[m]=l},this.cutoff=c(t.cutoff,this.defaults.cutoff.value),this.resonance=c(t.resonance,this.defaults.resonance.value),this.bypass=t.bypass||!1},i.prototype.MoogFilter.prototype=Object.create(d,{name:{value:"MoogFilter"},defaults:{writable:!0,value:{bufferSize:{value:4096,min:256,max:16384,automatable:!1,type:"int"},bypass:{value:!1,automatable:!1,type:p},cutoff:{value:.065,min:1e-4,max:1,automatable:!1,type:f},resonance:{value:3.5,min:0,max:4,automatable:!1,type:f}}},cutoff:{enumerable:!0,get:function(){return this.processor.cutoff},set:function(t){this.processor.cutoff=t}},resonance:{enumerable:!0,get:function(){return this.processor.resonance},set:function(t){this.processor.resonance=t}}}),i.prototype.Overdrive=function(t){t||(t=this.getDefaults()),this.input=u.createGain(),this.activateNode=u.createGain(),this.inputDrive=u.createGain(),this.waveshaper=u.createWaveShaper(),this.outputDrive=u.createGain(),this.output=u.createGain(),this.activateNode.connect(this.inputDrive),this.inputDrive.connect(this.waveshaper),this.waveshaper.connect(this.outputDrive),this.outputDrive.connect(this.output),this.ws_table=new Float32Array(this.k_nSamples),this.drive=c(t.drive,this.defaults.drive.value),this.outputGain=c(t.outputGain,this.defaults.outputGain.value),this.curveAmount=c(t.curveAmount,this.defaults.curveAmount.value),this.algorithmIndex=c(t.algorithmIndex,this.defaults.algorithmIndex.value),this.bypass=t.bypass||!1},i.prototype.Overdrive.prototype=Object.create(d,{name:{value:"Overdrive"},defaults:{writable:!0,value:{drive:{value:1,min:0,max:1,automatable:!0,type:f,scaled:!0},outputGain:{value:1,min:0,max:1,automatable:!0,type:f,scaled:!0},curveAmount:{value:.725,min:0,max:1,automatable:!1,type:f},algorithmIndex:{value:0,min:0,max:5,automatable:!1,type:"int"}}},k_nSamples:{value:8192},drive:{get:function(){return this.inputDrive.gain},set:function(t){this._drive=t}},curveAmount:{get:function(){return this._curveAmount},set:function(t){this._curveAmount=t,void 0===this._algorithmIndex&&(this._algorithmIndex=0),this.waveshaperAlgorithms[this._algorithmIndex](this._curveAmount,this.k_nSamples,this.ws_table),this.waveshaper.curve=this.ws_table}},outputGain:{get:function(){return this.outputDrive.gain},set:function(t){this._outputGain=s(t)}},algorithmIndex:{get:function(){return this._algorithmIndex},set:function(t){this._algorithmIndex=t,this.curveAmount=this._curveAmount}},waveshaperAlgorithms:{value:[function(t,e,n){let i,s,o=2*(t=Math.min(t,.9999))/(1-t);for(i=0;i<e;i++)s=2*i/e-1,n[i]=(1+o)*s/(1+o*Math.abs(s))},function(t,e,n){let i,s,o=0;for(i=0;i<e;i++)s=2*i/e-1,o=(.5*Math.pow(s+1.4,2)-1)*o>=0?5.8:1.2,n[i]=r(o)},function(t,e,n){let i,s,o,a=1-t;for(i=0;i<e;i++)o=(s=2*i/e-1)<0?-Math.pow(Math.abs(s),a+.04):Math.pow(s,a),n[i]=r(2*o)},function(t,e,n){let i,s,o,r=0,c=1-t>.99?.99:1-t;for(i=0;i<e;i++)s=2*i/e-1,(o=Math.abs(s))<c?r=o:o>c?r=c+(o-c)/(1+Math.pow((o-c)/(1-c),2)):o>1&&(r=o),n[i]=a(s)*r*(1/((c+1)/2))},function(t,e,n){let i,s;for(i=0;i<e;i++)s=2*i/e-1,n[i]=s<-.08905?-.75*(1-Math.pow(1-(Math.abs(s)-.032857),12)+1/3*(Math.abs(s)-.032847))+.01:s>=-.08905&&s<.320018?s*s*-6.153+3.9375*s:.630035},function(t,e,n){let i,s,o=2+Math.round(14*t),a=Math.round(Math.pow(2,o-1));for(i=0;i<e;i++)s=2*i/e-1,n[i]=Math.round(s*a)/a}]}}),i.prototype.Panner=function(t){t||(t=this.getDefaults()),this.input=u.createGain(),this.activateNode=u.createGain(),this.panner=u.createStereoPanner(),this.output=u.createGain(),this.activateNode.connect(this.panner),this.panner.connect(this.output),this.pan=c(t.pan,this.defaults.pan.value),this.bypass=t.bypass||!1},i.prototype.Panner.prototype=Object.create(d,{name:{value:"Panner"},defaults:{writable:!0,value:{bypass:{value:!1,automatable:!1,type:p},pan:{value:0,min:-1,max:1,automatable:!0,type:f}}},pan:{enumerable:!0,get:function(){return this.panner.pan},set:function(t){this.panner.pan.value=t}}}),i.prototype.Phaser=function(t){t||(t=this.getDefaults()),this.input=u.createGain(),this.splitter=this.activateNode=u.createChannelSplitter(2),this.filtersL=[],this.filtersR=[],this.feedbackGainNodeL=u.createGain(),this.feedbackGainNodeR=u.createGain(),this.merger=u.createChannelMerger(2),this.filteredSignal=u.createGain(),this.output=u.createGain(),this.lfoL=new l.LFO({target:this.filtersL,callback:this.callback}),this.lfoR=new l.LFO({target:this.filtersR,callback:this.callback});let e=this.stage;for(;e--;)this.filtersL[e]=u.createBiquadFilter(),this.filtersR[e]=u.createBiquadFilter(),this.filtersL[e].type="allpass",this.filtersR[e].type="allpass";this.input.connect(this.splitter),this.input.connect(this.output),this.splitter.connect(this.filtersL[0],0,0),this.splitter.connect(this.filtersR[0],1,0),this.connectInOrder(this.filtersL),this.connectInOrder(this.filtersR),this.filtersL[this.stage-1].connect(this.feedbackGainNodeL),this.filtersL[this.stage-1].connect(this.merger,0,0),this.filtersR[this.stage-1].connect(this.feedbackGainNodeR),this.filtersR[this.stage-1].connect(this.merger,0,1),this.feedbackGainNodeL.connect(this.filtersL[0]),this.feedbackGainNodeR.connect(this.filtersR[0]),this.merger.connect(this.output),this.rate=c(t.rate,this.defaults.rate.value),this.baseModulationFrequency=t.baseModulationFrequency||this.defaults.baseModulationFrequency.value,this.depth=c(t.depth,this.defaults.depth.value),this.feedback=c(t.feedback,this.defaults.feedback.value),this.stereoPhase=c(t.stereoPhase,this.defaults.stereoPhase.value),this.lfoL.activate(!0),this.lfoR.activate(!0),this.bypass=t.bypass||!1},i.prototype.Phaser.prototype=Object.create(d,{name:{value:"Phaser"},stage:{value:4},defaults:{writable:!0,value:{rate:{value:.1,min:0,max:8,automatable:!1,type:f},depth:{value:.6,min:0,max:1,automatable:!1,type:f},feedback:{value:.7,min:0,max:1,automatable:!1,type:f},stereoPhase:{value:40,min:0,max:180,automatable:!1,type:f},baseModulationFrequency:{value:700,min:500,max:1500,automatable:!1,type:f}}},callback:{value:function(t,e){for(let n=0;n<4;n++)t[n].frequency.value=e}},depth:{get:function(){return this._depth},set:function(t){this._depth=t,this.lfoL.oscillation=this._baseModulationFrequency*this._depth,this.lfoR.oscillation=this._baseModulationFrequency*this._depth}},rate:{get:function(){return this._rate},set:function(t){this._rate=t,this.lfoL.frequency=this._rate,this.lfoR.frequency=this._rate}},baseModulationFrequency:{enumerable:!0,get:function(){return this._baseModulationFrequency},set:function(t){this._baseModulationFrequency=t,this.lfoL.offset=this._baseModulationFrequency,this.lfoR.offset=this._baseModulationFrequency,this._depth=this._depth}},feedback:{get:function(){return this._feedback},set:function(t){this._feedback=t,this.feedbackGainNodeL.gain.value=this._feedback,this.feedbackGainNodeR.gain.value=this._feedback}},stereoPhase:{get:function(){return this._stereoPhase},set:function(t){this._stereoPhase=t;let e=this.lfoL._phase+this._stereoPhase*Math.PI/180;e=o(e,2*Math.PI),this.lfoR._phase=e}}}),i.prototype.PingPongDelay=function(t){t||(t=this.getDefaults()),this.input=u.createGain(),this.wetLevel=u.createGain(),this.stereoToMonoMix=u.createGain(),this.feedbackLevel=u.createGain(),this.output=u.createGain(),this.delayLeft=u.createDelay(10),this.delayRight=u.createDelay(10),this.activateNode=u.createGain(),this.splitter=u.createChannelSplitter(2),this.merger=u.createChannelMerger(2),this.activateNode.connect(this.splitter),this.splitter.connect(this.stereoToMonoMix,0,0),this.splitter.connect(this.stereoToMonoMix,1,0),this.stereoToMonoMix.gain.value=.5,this.stereoToMonoMix.connect(this.wetLevel),this.wetLevel.connect(this.delayLeft),this.feedbackLevel.connect(this.delayLeft),this.delayLeft.connect(this.delayRight),this.delayRight.connect(this.feedbackLevel),this.delayLeft.connect(this.merger,0,0),this.delayRight.connect(this.merger,0,1),this.merger.connect(this.output),this.activateNode.connect(this.output),this.delayTimeLeft=void 0!==t.delayTimeLeft?t.delayTimeLeft:this.defaults.delayTimeLeft.value,this.delayTimeRight=void 0!==t.delayTimeRight?t.delayTimeRight:this.defaults.delayTimeRight.value,this.feedbackLevel.gain.value=void 0!==t.feedback?t.feedback:this.defaults.feedback.value,this.wetLevel.gain.value=void 0!==t.wetLevel?t.wetLevel:this.defaults.wetLevel.value,this.bypass=t.bypass||!1},i.prototype.PingPongDelay.prototype=Object.create(d,{name:{value:"PingPongDelay"},delayTimeLeft:{enumerable:!0,get:function(){return this._delayTimeLeft},set:function(t){this._delayTimeLeft=t,this.delayLeft.delayTime.value=t/1e3}},delayTimeRight:{enumerable:!0,get:function(){return this._delayTimeRight},set:function(t){this._delayTimeRight=t,this.delayRight.delayTime.value=t/1e3}},defaults:{writable:!0,value:{delayTimeLeft:{value:200,min:1,max:1e4,automatable:!1,type:"int"},delayTimeRight:{value:400,min:1,max:1e4,automatable:!1,type:"int"},feedback:{value:.3,min:0,max:1,automatable:!1,type:f},wetLevel:{value:.5,min:0,max:1,automatable:!1,type:f}}}}),i.prototype.Tremolo=function(t){t||(t=this.getDefaults()),this.input=u.createGain(),this.splitter=this.activateNode=u.createChannelSplitter(2),this.amplitudeL=u.createGain(),this.amplitudeR=u.createGain(),this.merger=u.createChannelMerger(2),this.output=u.createGain(),this.lfoL=new l.LFO({target:this.amplitudeL.gain,callback:h}),this.lfoR=new l.LFO({target:this.amplitudeR.gain,callback:h}),this.input.connect(this.splitter),this.splitter.connect(this.amplitudeL,0),this.splitter.connect(this.amplitudeR,1),this.amplitudeL.connect(this.merger,0,0),this.amplitudeR.connect(this.merger,0,1),this.merger.connect(this.output),this.rate=t.rate||this.defaults.rate.value,this.intensity=c(t.intensity,this.defaults.intensity.value),this.stereoPhase=c(t.stereoPhase,this.defaults.stereoPhase.value),this.lfoL.offset=1-this.intensity/2,this.lfoR.offset=1-this.intensity/2,this.lfoL.phase=this.stereoPhase*Math.PI/180,this.lfoL.activate(!0),this.lfoR.activate(!0),this.bypass=t.bypass||!1},i.prototype.Tremolo.prototype=Object.create(d,{name:{value:"Tremolo"},defaults:{writable:!0,value:{intensity:{value:.3,min:0,max:1,automatable:!1,type:f},stereoPhase:{value:0,min:0,max:180,automatable:!1,type:f},rate:{value:5,min:.1,max:11,automatable:!1,type:f}}},intensity:{enumerable:!0,get:function(){return this._intensity},set:function(t){this._intensity=t,this.lfoL.offset=1-this._intensity/2,this.lfoR.offset=1-this._intensity/2,this.lfoL.oscillation=this._intensity,this.lfoR.oscillation=this._intensity}},rate:{enumerable:!0,get:function(){return this._rate},set:function(t){this._rate=t,this.lfoL.frequency=this._rate,this.lfoR.frequency=this._rate}},stereoPhase:{enumerable:!0,get:function(){return this._stereoPhase},set:function(t){this._stereoPhase=t;let e=this.lfoL._phase+this._stereoPhase*Math.PI/180;e=o(e,2*Math.PI),this.lfoR.phase=e}}}),i.prototype.WahWah=function(t){t||(t=this.getDefaults()),this.input=u.createGain(),this.activateNode=u.createGain(),this.envelopeFollower=new l.EnvelopeFollower({target:this,callback:function(t,e){t.sweep=e}}),this.filterBp=u.createBiquadFilter(),this.filterPeaking=u.createBiquadFilter(),this.output=u.createGain(),this.activateNode.connect(this.filterBp),this.filterBp.connect(this.filterPeaking),this.filterPeaking.connect(this.output),this.init(),this.automode=c(t.automode,this.defaults.automode.value),this.resonance=t.resonance||this.defaults.resonance.value,this.sensitivity=c(t.sensitivity,this.defaults.sensitivity.value),this.baseFrequency=c(t.baseFrequency,this.defaults.baseFrequency.value),this.excursionOctaves=t.excursionOctaves||this.defaults.excursionOctaves.value,this.sweep=c(t.sweep,this.defaults.sweep.value),this.activateNode.gain.value=2,this.envelopeFollower.activate(!0),this.bypass=t.bypass||!1},i.prototype.WahWah.prototype=Object.create(d,{name:{value:"WahWah"},defaults:{writable:!0,value:{automode:{value:!0,automatable:!1,type:p},baseFrequency:{value:.5,min:0,max:1,automatable:!1,type:f},excursionOctaves:{value:2,min:1,max:6,automatable:!1,type:f},sweep:{value:.2,min:0,max:1,automatable:!1,type:f},resonance:{value:10,min:1,max:100,automatable:!1,type:f},sensitivity:{value:.5,min:-1,max:1,automatable:!1,type:f}}},automode:{get:function(){return this._automode},set:function(t){this._automode=t,t?(this.activateNode.connect(this.envelopeFollower.input),this.envelopeFollower.activate(!0)):(this.envelopeFollower.activate(!1),this.activateNode.disconnect(),this.activateNode.connect(this.filterBp))}},filterFreqTimeout:{writable:!0,value:0},setFilterFreq:{value:function(){try{this.filterBp.frequency.value=Math.min(22050,this._baseFrequency+this._excursionFrequency*this._sweep),this.filterPeaking.frequency.value=Math.min(22050,this._baseFrequency+this._excursionFrequency*this._sweep)}catch(t){clearTimeout(this.filterFreqTimeout),this.filterFreqTimeout=setTimeout(function(){this.setFilterFreq()}.bind(this),0)}}},sweep:{enumerable:!0,get:function(){return this._sweep},set:function(t){this._sweep=Math.pow(t>1?1:t<0?0:t,this._sensitivity),this.setFilterFreq()}},baseFrequency:{enumerable:!0,get:function(){return this._baseFrequency},set:function(t){this._baseFrequency=50*Math.pow(10,2*t),this._excursionFrequency=Math.min(u.sampleRate/2,this.baseFrequency*Math.pow(2,this._excursionOctaves)),this.setFilterFreq()}},excursionOctaves:{enumerable:!0,get:function(){return this._excursionOctaves},set:function(t){this._excursionOctaves=t,this._excursionFrequency=Math.min(u.sampleRate/2,this.baseFrequency*Math.pow(2,this._excursionOctaves)),this.setFilterFreq()}},sensitivity:{enumerable:!0,get:function(){return this._sensitivity},set:function(t){this._sensitivity=Math.pow(10,t)}},resonance:{enumerable:!0,get:function(){return this._resonance},set:function(t){this._resonance=t,this.filterPeaking.Q.value=this._resonance}},init:{value:function(){this.output.gain.value=1,this.filterPeaking.type="peaking",this.filterBp.type="bandpass",this.filterPeaking.frequency.value=100,this.filterPeaking.gain.value=20,this.filterPeaking.Q.value=5,this.filterBp.frequency.value=100,this.filterBp.Q.value=1}}}),i.prototype.EnvelopeFollower=function(t){t||(t=this.getDefaults()),this.input=u.createGain(),this.jsNode=this.output=u.createScriptProcessor(this.buffersize,1,1),this.input.connect(this.output),this.attackTime=c(t.attackTime,this.defaults.attackTime.value),this.releaseTime=c(t.releaseTime,this.defaults.releaseTime.value),this._envelope=0,this.target=t.target||{},this.callback=t.callback||function(){},this.bypass=t.bypass||!1},i.prototype.EnvelopeFollower.prototype=Object.create(d,{name:{value:"EnvelopeFollower"},defaults:{value:{attackTime:{value:.003,min:0,max:.5,automatable:!1,type:f},releaseTime:{value:.5,min:0,max:.5,automatable:!1,type:f}}},buffersize:{value:256},envelope:{value:0},sampleRate:{value:44100},attackTime:{enumerable:!0,get:function(){return this._attackTime},set:function(t){this._attackTime=t,this._attackC=Math.exp(-1/this._attackTime*this.sampleRate/this.buffersize)}},releaseTime:{enumerable:!0,get:function(){return this._releaseTime},set:function(t){this._releaseTime=t,this._releaseC=Math.exp(-1/this._releaseTime*this.sampleRate/this.buffersize)}},callback:{get:function(){return this._callback},set:function(t){"function"==typeof t?this._callback=t:console.error("tuna.js: "+this.name+": Callback must be a function!")}},target:{get:function(){return this._target},set:function(t){this._target=t}},activate:{value:function(t){this.activated=t,t?(this.jsNode.connect(u.destination),this.jsNode.onaudioprocess=this.returnCompute(this)):(this.jsNode.disconnect(),this.jsNode.onaudioprocess=null),this.activateCallback&&this.activateCallback(t)}},returnCompute:{value:function(t){return function(e){t.compute(e)}}},compute:{value:function(t){let e,n,i,s,o=t.inputBuffer.getChannelData(0).length,a=t.inputBuffer.numberOfChannels;if(n=i=s=0,a>1)for(s=0;s<o;++s)for(;n<a;++n)i+=(e=t.inputBuffer.getChannelData(n)[s])*e/a;else for(s=0;s<o;++s)i+=(e=t.inputBuffer.getChannelData(0)[s])*e;i=Math.sqrt(i),this._envelope<i?(this._envelope*=this._attackC,this._envelope+=(1-this._attackC)*i):(this._envelope*=this._releaseC,this._envelope+=(1-this._releaseC)*i),this._callback(this._target,this._envelope)}}}),i.prototype.LFO=function(t){t||(t=this.getDefaults()),this.input=u.createGain(),this.output=u.createScriptProcessor(256,1,1),this.activateNode=u.destination,this.frequency=c(t.frequency,this.defaults.frequency.value),this.offset=c(t.offset,this.defaults.offset.value),this.oscillation=c(t.oscillation,this.defaults.oscillation.value),this.phase=c(t.phase,this.defaults.phase.value),this.target=t.target||{},this.output.onaudioprocess=this.callback(t.callback||function(){}),this.bypass=t.bypass||!1},i.prototype.LFO.prototype=Object.create(d,{name:{value:"LFO"},bufferSize:{value:256},sampleRate:{value:44100},defaults:{value:{frequency:{value:1,min:0,max:20,automatable:!1,type:f},offset:{value:.85,min:0,max:22049,automatable:!1,type:f},oscillation:{value:.3,min:-22050,max:22050,automatable:!1,type:f},phase:{value:0,min:0,max:2*Math.PI,automatable:!1,type:f}}},frequency:{get:function(){return this._frequency},set:function(t){this._frequency=t,this._phaseInc=2*Math.PI*this._frequency*this.bufferSize/this.sampleRate}},offset:{get:function(){return this._offset},set:function(t){this._offset=t}},oscillation:{get:function(){return this._oscillation},set:function(t){this._oscillation=t}},phase:{get:function(){return this._phase},set:function(t){this._phase=t}},target:{get:function(){return this._target},set:function(t){this._target=t}},activate:{value:function(t){t?(this.output.connect(u.destination),this.activateCallback&&this.activateCallback(t)):this.output.disconnect()}},callback:{value:function(t){let e=this;return function(){e._phase+=e._phaseInc,e._phase>2*Math.PI&&(e._phase=0),t(e._target,e._offset+e._oscillation*Math.sin(e._phase))}}}}),i.toString=i.prototype.toString=function(){return"Please visit https://github.com/Theodeus/tuna/wiki for instructions on how to use Tuna.js"}},function(t,e,n){"use strict";n.d(e,"a",function(){return i});let i=function(){return this.envelopes=[],this.onCacheFinish=null,this.onCacheProgress=null,this.afterTime=.05,this.nearZero=1e-6,this.queueWaveTable=function(t,e,n,i,s,o,a,r){a?a*=1:a=1;let c=this.findZone(t,n,s);if(!c.buffer)throw new Error("Preset is not ready: empty buffer");let u=c.originalPitch-100*c.coarseTune-c.fineTune,l=1*Math.pow(2,(100*s-u)/1200),h=(c.sampleRate,t.sampleRate,i);h<t.currentTime&&(h=t.currentTime);let d=o+this.afterTime,f=!0;(c.loopStart<1||c.loopStart>=c.loopEnd)&&(f=!1),f||d>c.buffer.duration/l&&(d=c.buffer.duration/l);let p=this.findEnvelope(t,e,h,d);if(this.setupEnvelope(t,p,c,a,h,d,o),p.audioBufferSourceNode=t.createBufferSource(),p.audioBufferSourceNode.playbackRate.value=l,r&&r.length>0){p.audioBufferSourceNode.playbackRate.setValueAtTime(l,i);for(let t=0;t<r.length;t++){let e=1*Math.pow(2,(100*r[t].pitch-u)/1200),n=i+r[t].when;p.audioBufferSourceNode.playbackRate.linearRampToValueAtTime(e,n)}}return p.audioBufferSourceNode.buffer=c.buffer,f?(p.audioBufferSourceNode.loop=!0,p.audioBufferSourceNode.loopStart=c.loopStart/c.sampleRate+c.delay,p.audioBufferSourceNode.loopEnd=c.loopEnd/c.sampleRate+c.delay):p.audioBufferSourceNode.loop=!1,p.audioBufferSourceNode.connect(p),p.audioBufferSourceNode.start(h,c.delay),p.audioBufferSourceNode.stop(h+d),p.when=h,p.duration=d,p.pitch=s,p.preset=n,p},this.noZeroVolume=function(t){return t>this.nearZero?t:this.nearZero},this.setupEnvelope=function(t,e,n,i,s,o,a){e.gain.setValueAtTime(this.noZeroVolume(0),t.currentTime);let r=0,c=0,u=a,l=n.ahdsr;o<u+this.afterTime&&(u=o-this.afterTime),l?l.length>0||(l=[{duration:0,volume:1},{duration:.5,volume:1},{duration:1.5,volume:.5},{duration:3,volume:0}]):l=[{duration:0,volume:1},{duration:u,volume:1}],e.gain.cancelScheduledValues(s),e.gain.setValueAtTime(this.noZeroVolume(l[0].volume*i),s);for(let t=0;t<l.length;t++)if(l[t].duration>0){if(l[t].duration+r>u){let n=c-(1-(l[t].duration+r-u)/l[t].duration)*(c-l[t].volume);e.gain.linearRampToValueAtTime(this.noZeroVolume(i*n),s+u);break}r+=l[t].duration,c=l[t].volume,e.gain.linearRampToValueAtTime(this.noZeroVolume(i*c),s+r)}e.gain.linearRampToValueAtTime(this.noZeroVolume(0),s+u+this.afterTime)},this.numValue=function(t,e){return"number"==typeof t?t:e},this.findEnvelope=function(t,e,n,i){let s=null;for(let e=0;e<this.envelopes.length;e++){let n=this.envelopes[e];if(this.expireEnvelope(n,t)){s=n;break}}return s||((s=t.createGain()).target=e,s.connect(e),s.cancel=function(e){void 0===e&&(e=t.currentTime),s.when+s.duration>t.currentTime&&(s.gain.cancelScheduledValues(e),s.gain.setTargetAtTime(1e-5,e,.1),s.when=e+1e-5,s.duration=0)},this.envelopes.push(s)),s},this.expireEnvelope=function(t,e){if(e.currentTime>t.when+t.duration+.1){try{t.audioBufferSourceNode.disconnect(),t.audioBufferSourceNode.stop(0),t.audioBufferSourceNode=null}catch(t){}return!0}return!1},this.expireEnvelopes=function(t){this.envelopes=this.envelopes.filter(e=>!this.expireEnvelope(e,t))},this.adjustPreset=function(t,e,n){e.bufferct=0;for(let i=0;i<e.zones.length;i++)this.adjustZone(t,e.zones[i],e,n)},this.adjustZone=function(t,e,n,i){if(e.buffer);else{if(e.delay=0,e.sample){let s=atob(e.sample);e.buffer=t.createBuffer(1,s.length/2,e.sampleRate);let o,a,r,c=e.buffer.getChannelData(0);for(let t=0;t<s.length/2;t++)o=s.charCodeAt(2*t),a=s.charCodeAt(2*t+1),o<0&&(o=256+o),a<0&&(a=256+a),(r=256*a+o)>=32768&&(r-=65536),c[t]=r/65536;n.bufferct++,n.bufferct>=n.zones.length&&i&&i()}else if(e.file){let s,o=e.file.length,a=new ArrayBuffer(o),r=new Uint8Array(a),c=atob(e.file);for(let t=0;t<c.length;t++)s=c.charCodeAt(t),r[t]=s;t.decodeAudioData(a,function(t){e.buffer=t,n.bufferct++,n.bufferct>=n.zones.length&&i&&i()})}e.loopStart=this.numValue(e.loopStart,0),e.loopEnd=this.numValue(e.loopEnd,0),e.coarseTune=this.numValue(e.coarseTune,0),e.fineTune=this.numValue(e.fineTune,0),e.originalPitch=this.numValue(e.originalPitch,6e3),e.sampleRate=this.numValue(e.sampleRate,44100),e.sustain=this.numValue(e.originalPitch,0)}},this.findZone=function(t,e,n){let i=null;for(let t=e.zones.length-1;t>=0&&!((i=e.zones[t]).keyRangeLow<=n&&i.keyRangeHigh+1>=n);t--);try{this.adjustZone(t,i)}catch(t){console.log("adjustZone",t)}return i},this.cancelQueue=function(t){for(let e=0;e<this.envelopes.length;e++){let n=this.envelopes[e];n.gain.cancelScheduledValues(0),n.gain.setValueAtTime(this.nearZero,t.currentTime),n.when=-1;try{n.audioBufferSourceNode.disconnect()}catch(t){console.log(t)}}},this}},function(t,e,n){"use strict";e.a=function(t){const e=monaco.KeyMod.Alt|monaco.KeyMod.CtrlCmd,n=monaco.KeyMod.CtrlCmd|monaco.KeyMod.Shift;let a=new class{constructor(t){this.editor=t,this.lightTheme=!0}runAllCode(){let t=this.editor.getModel();Object(i.b)(t.getValue()),Object(i.c)(t.getFullModelRange())}runSomeCode(){let t=this.editor.getSelection(),e=this.getRange(t);Object(i.b)(e),Object(i.c)(t)}stopAllTracks(){lc.reset()}toggleTheme(){this.lightTheme=!this.lightTheme,this.lightTheme?($("body").removeClass("dark"),monaco.editor.setTheme("vs"),$(".logo > img").attr("src","img/logo.svg")):($("body").addClass("dark"),monaco.editor.setTheme("vs-dark"),$(".logo > img").attr("src","img/logo-white.svg")),localStorage.walc_prefs_theme=this.lightTheme?"light":"dark"}reduceFont(){let t=this.getFontSize();t<=1||this.editor.updateOptions({fontSize:t-1})}enlargeFont(){this.editor.updateOptions({fontSize:this.getFontSize()+1})}showPrevBuffer(){Object(s.c)(this.editor)}showNextBuffer(){Object(s.b)(this.editor)}getRange(t){let e;return t.startLineNumber!=t.endLineNumber||t.startColumn!=t.endColumn?e=this.editor.getModel().getValueInRange(t):(e=this.editor.getModel().getLineContent(t.startLineNumber),t.startColumn=1,t.endColumn=e.length+1),"\n".repeat(t.startLineNumber-1)+e}getFontSize(){return this.editor.getConfiguration().fontInfo.fontSize}}(t);!function(t){let e=e=>t.editor.focus();$("#walc-run-all").click(n=>e(t.runAllCode())),$("#walc-run-sel").click(n=>e(t.runSomeCode())),$("#walc-stop").click(n=>e(t.stopAllTracks())),$("#walc-toggle-theme").click(n=>e(t.toggleTheme())),$("#walc-font-sm").click(n=>e(t.reduceFont())),$("#walc-font-lg").click(n=>e(t.enlargeFont()))}(a),function(t){"dark"==localStorage.walc_prefs_theme&&t.toggleTheme()}(a),$("#live-coding").on("drag dragstart dragend dragover dragenter dragleave drop",t=>{t.preventDefault(),t.stopPropagation()}).on("drop",t=>{let e=t.originalEvent.dataTransfer.files;Object(o.b)(e)}),t.addAction({id:"walc-run-all",label:"Run all code",keybindings:[e|monaco.KeyCode.Enter],contextMenuGroupId:"modulator",contextMenuOrder:1,run:()=>a.runAllCode()}),t.addAction({id:"walc-run-part",label:"Run current line or selection",keybindings:[monaco.KeyMod.CtrlCmd|monaco.KeyCode.Enter],contextMenuGroupId:"modulator",contextMenuOrder:2,run:()=>a.runSomeCode()}),t.addAction({id:"walc-stop-all",label:"Stop all tracks",keybindings:[monaco.KeyMod.CtrlCmd|monaco.KeyCode.US_DOT],contextMenuGroupId:"modulator",contextMenuOrder:3,run:()=>a.stopAllTracks()}),t.addAction({id:"walc-font-sm",label:"Reduce code font",keybindings:[e|monaco.KeyCode.US_COMMA],contextMenuGroupId:"modulator",contextMenuOrder:4,run:()=>a.reduceFont()}),t.addAction({id:"walc-font-lg",label:"Enlarge code font",keybindings:[e|monaco.KeyCode.US_DOT],contextMenuGroupId:"modulator",contextMenuOrder:5,run:()=>a.enlargeFont()}),t.addAction({id:"walc-buffer-prev",label:"Previous code buffer",keybindings:[n|monaco.KeyCode.US_COMMA],run:()=>a.showPrevBuffer()}),t.addAction({id:"walc-buffer-next",label:"Next code buffer",keybindings:[n|monaco.KeyCode.US_DOT],run:()=>a.showNextBuffer()})};var i=n(16),s=n(18),o=n(17)},function(t,e,n){"use strict";function i(t,e){return e.tick_ct=t.tick_ct,e.tick_ct>=e.length&&(e.tick_ct=e.length-1),e}e.a=function(){Array.prototype.ring||(Array.prototype.ring=function(){return(new o).fromArray(this)})};var s=n(19);class o extends Array{constructor(){super(...arguments),this.tick_ct=0}tick(){let t=this[this.tick_ct];return this.tick_ct++,this.tick_ct>=this.length&&(this.tick_ct=0),t}choose(){return this[s.a.integer(0,this.length-1)]}fromArray(t){for(let e of t)this.push(e);return this}toArray(){return new Array(...this)}clone(){return i(this,this.toArray().ring())}reverse(){return i(this,this.toArray().reverse().ring())}sort(t){return i(this,this.toArray().sort(t).ring())}shuffle(){let t=this.clone();for(let e=t.length-1;e>0;e--){let n=s.a.integer(0,e),i=t[e];t[e]=t[n],t[n]=i}return i(this,t)}take(t){return i(this,this.slice(0,t))}drop(t){return i(this,this.slice(t))}butlast(){return this.take(this.length-1)}drop_last(t){return this.take(this.length-t)}take_last(t){return this.drop(this.length-t)}stretch(t){let e=new o;for(let n of this)for(let i=0;i<t;i++)e.push(n);return i(this,e)}repeat(t){let e=new o;for(let n=0;n<t;n++)for(let t of this)e.push(t);return i(this,e)}mirror(){return i(this,this.concat(this.reverse()))}reflect(){return i(this,this.concat(this.reverse().drop(1)))}scale(t){let e=this.clone();for(let n=0;n<e.length;n++)e[n]*=t;return i(this,e)}transpose(t){let e=this.clone();for(let n=0;n<e.length;n++)e[n]+=t;return i(this,e)}toString(){let t=[];for(let e of this)t.push(e.toString());return t[this.tick_ct]=">"+t[this.tick_ct]+"<","("+t.join(", ")+")"}}},function(t,e,n){var i=n(39),s=n(40),o=n(41),a=n(42),r=n(43),c=n(44),u=n(45);u.alea=i,u.xor128=s,u.xorwow=o,u.xorshift7=a,u.xor4096=r,u.tychei=c,t.exports=u},function(t,e,n){(function(t){var i;!function(t,s,o){function a(t,e){return e.c=t.c,e.s0=t.s0,e.s1=t.s1,e.s2=t.s2,e}function r(t,e){var n=new function(t){var e=this,n=function(){var t=4022871197;return function(e){e=e.toString();for(var n=0;n<e.length;n++){var i=.02519603282416938*(t+=e.charCodeAt(n));i-=t=i>>>0,t=(i*=t)>>>0,t+=4294967296*(i-=t)}return 2.3283064365386963e-10*(t>>>0)}}();e.next=function(){var t=2091639*e.s0+2.3283064365386963e-10*e.c;return e.s0=e.s1,e.s1=e.s2,e.s2=t-(e.c=0|t)},e.c=1,e.s0=n(" "),e.s1=n(" "),e.s2=n(" "),e.s0-=n(t),e.s0<0&&(e.s0+=1),e.s1-=n(t),e.s1<0&&(e.s1+=1),e.s2-=n(t),e.s2<0&&(e.s2+=1),n=null}(t),i=e&&e.state,s=n.next;return s.int32=function(){return 4294967296*n.next()|0},s.double=function(){return s()+1.1102230246251565e-16*(2097152*s()|0)},s.quick=s,i&&("object"==typeof i&&a(i,n),s.state=function(){return a(n,{})}),s}s&&s.exports?s.exports=r:n(0)&&n(3)?void 0===(i=function(){return r}.call(e,n,e,s))||(s.exports=i):this.alea=r}(0,"object"==typeof t&&t,n(0))}).call(e,n(2)(t))},function(t,e,n){(function(t){var i;!function(t,s,o){function a(t,e){return e.x=t.x,e.y=t.y,e.z=t.z,e.w=t.w,e}function r(t,e){var n=new function(t){var e=this,n="";e.x=0,e.y=0,e.z=0,e.w=0,e.next=function(){var t=e.x^e.x<<11;return e.x=e.y,e.y=e.z,e.z=e.w,e.w^=e.w>>>19^t^t>>>8},t===(0|t)?e.x=t:n+=t;for(var i=0;i<n.length+64;i++)e.x^=0|n.charCodeAt(i),e.next()}(t),i=e&&e.state,s=function(){return(n.next()>>>0)/4294967296};return s.double=function(){do{var t=((n.next()>>>11)+(n.next()>>>0)/4294967296)/(1<<21)}while(0===t);return t},s.int32=n.next,s.quick=s,i&&("object"==typeof i&&a(i,n),s.state=function(){return a(n,{})}),s}s&&s.exports?s.exports=r:n(0)&&n(3)?void 0===(i=function(){return r}.call(e,n,e,s))||(s.exports=i):this.xor128=r}(0,"object"==typeof t&&t,n(0))}).call(e,n(2)(t))},function(t,e,n){(function(t){var i;!function(t,s,o){function a(t,e){return e.x=t.x,e.y=t.y,e.z=t.z,e.w=t.w,e.v=t.v,e.d=t.d,e}function r(t,e){var n=new function(t){var e=this,n="";e.next=function(){var t=e.x^e.x>>>2;return e.x=e.y,e.y=e.z,e.z=e.w,e.w=e.v,(e.d=e.d+362437|0)+(e.v=e.v^e.v<<4^t^t<<1)|0},e.x=0,e.y=0,e.z=0,e.w=0,e.v=0,t===(0|t)?e.x=t:n+=t;for(var i=0;i<n.length+64;i++)e.x^=0|n.charCodeAt(i),i==n.length&&(e.d=e.x<<10^e.x>>>4),e.next()}(t),i=e&&e.state,s=function(){return(n.next()>>>0)/4294967296};return s.double=function(){do{var t=((n.next()>>>11)+(n.next()>>>0)/4294967296)/(1<<21)}while(0===t);return t},s.int32=n.next,s.quick=s,i&&("object"==typeof i&&a(i,n),s.state=function(){return a(n,{})}),s}s&&s.exports?s.exports=r:n(0)&&n(3)?void 0===(i=function(){return r}.call(e,n,e,s))||(s.exports=i):this.xorwow=r}(0,"object"==typeof t&&t,n(0))}).call(e,n(2)(t))},function(t,e,n){(function(t){var i;!function(t,s,o){function a(t,e){return e.x=t.x.slice(),e.i=t.i,e}function r(t,e){null==t&&(t=+new Date);var n=new function(t){var e=this;e.next=function(){var t,n,i=e.x,s=e.i;return t=i[s],t^=t>>>7,n=t^t<<24,t=i[s+1&7],n^=t^t>>>10,t=i[s+3&7],n^=t^t>>>3,t=i[s+4&7],n^=t^t<<7,t=i[s+7&7],t^=t<<13,n^=t^t<<9,i[s]=n,e.i=s+1&7,n},function(t,e){var n,i=[];if(e===(0|e))i[0]=e;else for(e=""+e,n=0;n<e.length;++n)i[7&n]=i[7&n]<<15^e.charCodeAt(n)+i[n+1&7]<<13;for(;i.length<8;)i.push(0);for(n=0;n<8&&0===i[n];++n);for(8==n?i[7]=-1:i[n],t.x=i,t.i=0,n=256;n>0;--n)t.next()}(e,t)}(t),i=e&&e.state,s=function(){return(n.next()>>>0)/4294967296};return s.double=function(){do{var t=((n.next()>>>11)+(n.next()>>>0)/4294967296)/(1<<21)}while(0===t);return t},s.int32=n.next,s.quick=s,i&&(i.x&&a(i,n),s.state=function(){return a(n,{})}),s}s&&s.exports?s.exports=r:n(0)&&n(3)?void 0===(i=function(){return r}.call(e,n,e,s))||(s.exports=i):this.xorshift7=r}(0,"object"==typeof t&&t,n(0))}).call(e,n(2)(t))},function(t,e,n){(function(t){var i;!function(t,s,o){function a(t,e){return e.i=t.i,e.w=t.w,e.X=t.X.slice(),e}function r(t,e){null==t&&(t=+new Date);var n=new function(t){var e=this;e.next=function(){var t,n,i=e.w,s=e.X,o=e.i;return e.w=i=i+1640531527|0,n=s[o+34&127],t=s[o=o+1&127],n^=n<<13,t^=t<<17,n^=n>>>15,t^=t>>>12,n=s[o]=n^t,e.i=o,n+(i^i>>>16)|0},function(t,e){var n,i,s,o,a,r=[],c=128;for(e===(0|e)?(i=e,e=null):(e+="\0",i=0,c=Math.max(c,e.length)),s=0,o=-32;o<c;++o)e&&(i^=e.charCodeAt((o+32)%e.length)),0===o&&(a=i),i^=i<<10,i^=i>>>15,i^=i<<4,i^=i>>>13,o>=0&&(a=a+1640531527|0,s=0==(n=r[127&o]^=i+a)?s+1:0);for(s>=128&&(r[127&(e&&e.length||0)]=-1),s=127,o=512;o>0;--o)i=r[s+34&127],n=r[s=s+1&127],i^=i<<13,n^=n<<17,i^=i>>>15,n^=n>>>12,r[s]=i^n;t.w=a,t.X=r,t.i=s}(e,t)}(t),i=e&&e.state,s=function(){return(n.next()>>>0)/4294967296};return s.double=function(){do{var t=((n.next()>>>11)+(n.next()>>>0)/4294967296)/(1<<21)}while(0===t);return t},s.int32=n.next,s.quick=s,i&&(i.X&&a(i,n),s.state=function(){return a(n,{})}),s}s&&s.exports?s.exports=r:n(0)&&n(3)?void 0===(i=function(){return r}.call(e,n,e,s))||(s.exports=i):this.xor4096=r}(0,"object"==typeof t&&t,n(0))}).call(e,n(2)(t))},function(t,e,n){(function(t){var i;!function(t,s,o){function a(t,e){return e.a=t.a,e.b=t.b,e.c=t.c,e.d=t.d,e}function r(t,e){var n=new function(t){var e=this,n="";e.next=function(){var t=e.b,n=e.c,i=e.d,s=e.a;return t=t<<25^t>>>7^n,n=n-i|0,i=i<<24^i>>>8^s,s=s-t|0,e.b=t=t<<20^t>>>12^n,e.c=n=n-i|0,e.d=i<<16^n>>>16^s,e.a=s-t|0},e.a=0,e.b=0,e.c=-1640531527,e.d=1367130551,t===Math.floor(t)?(e.a=t/4294967296|0,e.b=0|t):n+=t;for(var i=0;i<n.length+20;i++)e.b^=0|n.charCodeAt(i),e.next()}(t),i=e&&e.state,s=function(){return(n.next()>>>0)/4294967296};return s.double=function(){do{var t=((n.next()>>>11)+(n.next()>>>0)/4294967296)/(1<<21)}while(0===t);return t},s.int32=n.next,s.quick=s,i&&("object"==typeof i&&a(i,n),s.state=function(){return a(n,{})}),s}s&&s.exports?s.exports=r:n(0)&&n(3)?void 0===(i=function(){return r}.call(e,n,e,s))||(s.exports=i):this.tychei=r}(0,"object"==typeof t&&t,n(0))}).call(e,n(2)(t))},function(t,e,n){var i;!function(s,o){function a(t,e,n){var i=[],a=u(c((e=1==e?{entropy:!0}:e||{}).entropy?[t,l(s)]:null==t?function(){try{var t;return h&&(t=h.randomBytes)?t=t(f):(t=new Uint8Array(f),(d.crypto||d.msCrypto).getRandomValues(t)),l(t)}catch(t){var e=d.navigator,n=e&&e.plugins;return[+new Date,d,n,d.screen,l(s)]}}():t,3),i),_=new function(t){var e,n=t.length,i=this,s=0,o=i.i=i.j=0,a=i.S=[];n||(t=[n++]);for(;s<f;)a[s]=s++;for(s=0;s<f;s++)a[s]=a[o=y&o+t[s%n]+(e=a[s])],a[o]=e;(i.g=function(t){for(var e,n=0,s=i.i,o=i.j,a=i.S;t--;)e=a[s=y&s+1],n=n*f+a[y&(a[s]=a[o=y&o+e])+(a[o]=e)];return i.i=s,i.j=o,n})(f)}(i),w=function(){for(var t=_.g(p),e=g,n=0;t<v;)t=(t+n)*f,e*=f,n=_.g(1);for(;t>=b;)t/=2,e/=2,n>>>=1;return(t+n)/e};return w.int32=function(){return 0|_.g(4)},w.quick=function(){return _.g(4)/4294967296},w.double=w,u(l(_.S),s),(e.pass||n||function(t,e,n,i){return i&&(i.S&&r(i,_),t.state=function(){return r(_,{})}),n?(o[m]=t,e):t})(w,a,"global"in e?e.global:this==o,e.state)}function r(t,e){return e.i=t.i,e.j=t.j,e.S=t.S.slice(),e}function c(t,e){var n,i=[],s=typeof t;if(e&&"object"==s)for(n in t)try{i.push(c(t[n],e-1))}catch(t){}return i.length?i:"string"==s?t:t+"\0"}function u(t,e){for(var n,i=t+"",s=0;s<i.length;)e[y&s]=y&(n^=19*e[y&s])+i.charCodeAt(s++);return l(e)}function l(t){return String.fromCharCode.apply(0,t)}var h,d=this,f=256,p=6,m="random",g=o.pow(f,p),v=o.pow(2,52),b=2*v,y=f-1;if(o["seed"+m]=a,u(o.random(),s),"object"==typeof t&&t.exports){t.exports=a;try{h=n(46)}catch(t){}}else void 0===(i=function(){return a}.call(e,n,e,t))||(t.exports=i)}([],Math)},function(t,e){},function(t,e,n){"use strict";function i(){const t=location.hash||a;$("#page > div").hide(),$(t).show().css("outline","none").focus(),o&&$(document).trigger("route:hide",o),$(document).trigger("route:show",t),o=t,window.scrollTo(0,0)}function s(t){return new Promise(e=>{$.get(t+".html",n=>{$("#"+t).empty().append(n),e()})})}e.a=function(t){return window.onhashchange=i,a=t,i(),Promise.all([s("live-coding"),s("synth")])};let o,a}]);
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, {
+/******/ 				configurable: false,
+/******/ 				enumerable: true,
+/******/ 				get: getter
+/******/ 			});
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = 20);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ (function(module, exports) {
+
+module.exports = function() {
+	throw new Error("define cannot be used indirect");
+};
+
+
+/***/ }),
+/* 1 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["d"] = removeArrayElement;
+/* harmony export (immutable) */ __webpack_exports__["b"] = linear2log;
+/* harmony export (immutable) */ __webpack_exports__["c"] = log2linear;
+/* harmony export (immutable) */ __webpack_exports__["a"] = focusable;
+/**
+ * Modernize browser interfaces so that TypeScript does not complain
+ * when using new features.
+ *
+ * Also provides some basic utility funcitons
+ */
+function removeArrayElement(a, e) {
+    const pos = a.indexOf(e);
+    if (pos < 0)
+        return false; // not found
+    a.splice(pos, 1);
+    return true;
+}
+const LOG_BASE = 2;
+function logarithm(base, x) {
+    return Math.log(x) / Math.log(base);
+}
+function linear2log(value, min, max) {
+    const logRange = logarithm(LOG_BASE, max + 1 - min);
+    return logarithm(LOG_BASE, value + 1 - min) / logRange;
+}
+function log2linear(value, min, max) {
+    const logRange = logarithm(LOG_BASE, max + 1 - min);
+    return min + Math.pow(LOG_BASE, value * logRange) - 1;
+}
+function focusable(elem) {
+    while (elem != null && elem.tabIndex < 0 &&
+        elem.nodeName.toLowerCase() != 'body')
+        elem = elem.parentElement;
+    return elem || document.body;
+}
+
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports) {
+
+module.exports = function(module) {
+	if(!module.webpackPolyfill) {
+		module.deprecate = function() {};
+		module.paths = [];
+		// module.parent = undefined by default
+		if(!module.children) module.children = [];
+		Object.defineProperty(module, "loaded", {
+			enumerable: true,
+			get: function() {
+				return module.l;
+			}
+		});
+		Object.defineProperty(module, "id", {
+			enumerable: true,
+			get: function() {
+				return module.i;
+			}
+		});
+		module.webpackPolyfill = 1;
+	}
+	return module;
+};
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports) {
+
+/* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {/* globals __webpack_amd_options__ */
+module.exports = __webpack_amd_options__;
+
+/* WEBPACK VAR INJECTION */}.call(exports, {}))
+
+/***/ }),
+/* 4 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = arrayBufferToBase64;
+/* harmony export (immutable) */ __webpack_exports__["b"] = base64ToArrayBuffer;
+/* harmony export (immutable) */ __webpack_exports__["c"] = browserSupportsDownload;
+/* harmony export (immutable) */ __webpack_exports__["d"] = download;
+/* harmony export (immutable) */ __webpack_exports__["f"] = uploadText;
+/* harmony export (immutable) */ __webpack_exports__["e"] = uploadArrayBuffer;
+// -------------------- Encoding / decoding --------------------
+function arrayBufferToBase64(buffer) {
+    let binary = '';
+    let bytes = new Uint8Array(buffer);
+    let len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+}
+function base64ToArrayBuffer(base64) {
+    let binary_string = window.atob(base64);
+    let len = binary_string.length;
+    let bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+        bytes[i] = binary_string.charCodeAt(i);
+    }
+    return bytes.buffer;
+}
+// -------------------- Downloading --------------------
+function browserSupportsDownload() {
+    return !window.externalHost && 'download' in $('<a>')[0];
+}
+function download(fileName, fileData) {
+    const a = $('<a>');
+    a.attr('download', fileName);
+    a.attr('href', 'data:application/octet-stream;base64,' + btoa(fileData));
+    const clickEvent = new MouseEvent('click', { view: window, bubbles: true, cancelable: false });
+    a[0].dispatchEvent(clickEvent);
+}
+function uploadText(event, cb) {
+    upload(event, cb, 'readAsText');
+}
+function uploadArrayBuffer(event, cb) {
+    upload(event, cb, 'readAsArrayBuffer');
+}
+function upload(event, cb, readFunc) {
+    let files = event.target.files;
+    if (!files || files.length <= 0)
+        return cb('', '');
+    const file = files[0];
+    const reader = new FileReader();
+    reader.onload = (loadEvt) => cb(loadEvt.target.result, file);
+    // let func = (<any>reader)[readFunc]
+    // func.bind(reader)(file)
+    reader[readFunc](file);
+}
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__notes__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__palette__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_modern__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__customNodes__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_file__ = __webpack_require__(4);
+
+
+
+
+
+const SEMITONE = Math.pow(2, 1 / 12);
+const A4 = 57;
+/**
+ * Holds all data associated with an AudioNode
+ */
+class NodeData {
+    constructor() {
+        // Flag to avoid deleting output node
+        this.isOut = false;
+    }
+    // To be implemented by user code
+    getInputs() {
+        throw 'Error: getInputs() function should be implemented by user';
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = NodeData;
+
+/**
+ * Global paramters that apply to the whole monophonic synthesizer.
+ */
+class Portamento {
+    constructor() {
+        this.time = 0;
+        this.ratio = 0;
+    }
+}
+/* unused harmony export Portamento */
+
+/**
+ * Performs global operations on all AudioNodes:
+ * - Manages AudioNode creation, initialization and connection
+ * - Distributes MIDI keyboard events to NoteHandlers
+ */
+class Synth {
+    constructor(ac) {
+        this.customNodes = {};
+        this.paramHandlers = {};
+        this.noteHandlers = [];
+        this.portamento = new Portamento();
+        this.ac = ac;
+        this.palette = __WEBPACK_IMPORTED_MODULE_1__palette__["a" /* palette */];
+        this.registerCustomNode('createADSR', __WEBPACK_IMPORTED_MODULE_3__customNodes__["a" /* ADSR */]);
+        this.registerCustomNode('createNoise', __WEBPACK_IMPORTED_MODULE_3__customNodes__["e" /* NoiseGenerator */]);
+        this.registerCustomNode('createNoiseCtrl', __WEBPACK_IMPORTED_MODULE_3__customNodes__["d" /* NoiseCtrlGenerator */]);
+        this.registerCustomNode('createLineIn', __WEBPACK_IMPORTED_MODULE_3__customNodes__["c" /* LineInNode */]);
+        this.registerCustomNode('createDetuner', __WEBPACK_IMPORTED_MODULE_3__customNodes__["b" /* Detuner */]);
+        this.registerParamHandler('BufferDataHandler', new BufferDataHandler());
+        this.registerParamHandler('SoundBankHandler', new SoundBankHandler());
+    }
+    createAudioNode(type) {
+        const def = __WEBPACK_IMPORTED_MODULE_1__palette__["a" /* palette */][type];
+        if (!def)
+            return null;
+        const factory = def.custom ? this.customNodes : this.ac;
+        if (!def.constructor || !factory[def.constructor])
+            return null;
+        const anode = factory[def.constructor]();
+        if (!anode.context)
+            anode.context = this.ac;
+        this.initNodeParams(anode, def, type);
+        return anode;
+    }
+    initNodeData(ndata, type) {
+        ndata.synth = this;
+        ndata.type = type;
+        let anode = this.createAudioNode(type);
+        if (!anode)
+            throw new Error(`No AudioNode found for "${type}"`);
+        ndata.anode = anode;
+        ndata.nodeDef = this.palette[type];
+        const nh = ndata.nodeDef.noteHandler;
+        if (nh) {
+            ndata.noteHandler = new __WEBPACK_IMPORTED_MODULE_0__notes__["a" /* NoteHandlers */][nh](ndata);
+            this.addNoteHandler(ndata.noteHandler);
+        }
+        return anode;
+    }
+    initOutputNodeData(ndata, dst) {
+        ndata.synth = this;
+        ndata.type = 'out';
+        this.outGainNode = this.ac.createGain();
+        ndata.anode = this.outGainNode;
+        ndata.anode.connect(dst);
+        ndata.nodeDef = this.palette['Speaker'];
+        ndata.isOut = true;
+        return ndata.anode;
+    }
+    removeNodeData(data) {
+        if (data.noteHandler)
+            this.removeNoteHandler(data.noteHandler);
+    }
+    connectNodes(srcData, dstData) {
+        if (srcData.nodeDef.control && !dstData.nodeDef.control) {
+            let anode = dstData.anode;
+            srcData.controlParams = Object.keys(dstData.nodeDef.params)
+                .filter(pname => anode[pname] instanceof AudioParam);
+            srcData.controlParam = srcData.controlParams[0];
+            srcData.controlTarget = dstData.anode;
+            srcData.anode.connect(anode[srcData.controlParam]);
+        }
+        else
+            srcData.anode.connect(dstData.anode);
+    }
+    disconnectNodes(srcData, dstData) {
+        if (srcData.nodeDef.control && !dstData.nodeDef.control) {
+            srcData.controlParams = null;
+            srcData.anode.disconnect(dstData.anode[srcData.controlParam]);
+        }
+        else
+            srcData.anode.disconnect(dstData.anode);
+    }
+    json2NodeData(json, data) {
+        let anydata = data;
+        for (const pname of Object.keys(json.params)) {
+            const pvalue = anydata.anode[pname];
+            const jv = json.params[pname];
+            if (anydata.nodeDef.params[pname].handler)
+                this.paramHandlers[anydata.nodeDef.params[pname].handler]
+                    .json2param(anydata.anode, jv);
+            else if (pvalue instanceof AudioParam) {
+                pvalue.value = jv;
+                pvalue['_value'] = jv;
+            }
+            else
+                anydata.anode[pname] = jv;
+        }
+    }
+    nodeData2json(data) {
+        const params = {};
+        for (const pname of Object.keys(data.nodeDef.params)) {
+            const pvalue = data.anode[pname];
+            if (data.nodeDef.params[pname].handler)
+                params[pname] = this.paramHandlers[data.nodeDef.params[pname].handler]
+                    .param2json(data.anode);
+            else if (pvalue instanceof AudioParam)
+                if (pvalue['_value'] === undefined)
+                    params[pname] = pvalue.value;
+                else
+                    params[pname] = pvalue['_value'];
+            else
+                params[pname] = pvalue;
+        }
+        return {
+            type: data.type,
+            params,
+            controlParam: data.controlParam,
+            controlParams: data.controlParams
+        };
+    }
+    midi2freqRatio(midi) {
+        return Math.pow(SEMITONE, midi - A4);
+    }
+    noteOn(midi, gain, when) {
+        if (!when)
+            when = this.ac.currentTime;
+        this.outGainNode.gain.value = gain;
+        const ratio = this.midi2freqRatio(midi);
+        this.setupNoteHandlers();
+        for (const nh of this.noteHandlers)
+            nh.noteOn(midi, gain, ratio, when);
+        this.portamento.ratio = ratio;
+    }
+    noteOff(midi, gain, when) {
+        if (!when)
+            when = this.ac.currentTime;
+        for (const nh of this.noteHandlers)
+            nh.noteOff(midi, gain, when);
+    }
+    addNoteHandler(nh) {
+        this.noteHandlers.push(nh);
+    }
+    removeNoteHandler(nh) {
+        Object(__WEBPACK_IMPORTED_MODULE_2__utils_modern__["d" /* removeArrayElement */])(this.noteHandlers, nh);
+    }
+    setupNoteHandlers() {
+        let maxRelease = 0;
+        for (const nh of this.noteHandlers) {
+            if (nh.kbTrigger && nh.releaseTime > maxRelease)
+                maxRelease = nh.releaseTime;
+        }
+        for (const nh of this.noteHandlers) {
+            if (!nh.kbTrigger)
+                nh.releaseTime = maxRelease;
+        }
+    }
+    initNodeParams(anode, def, type) {
+        let anynode = anode;
+        for (const param of Object.keys(def.params || {}))
+            if (anynode[param] === undefined)
+                console.warn(`Parameter '${param}' not found for node '${type}'`);
+            else if (anynode[param] instanceof AudioParam)
+                anynode[param].value = def.params[param].initial;
+            else if (def.params[param].handler) {
+                def.params[param].phandler = this.paramHandlers[def.params[param].handler || ''];
+                def.params[param].phandler.initialize(anynode, def);
+            }
+            else
+                anynode[param] = def.params[param].initial;
+    }
+    registerCustomNode(constructorName, nodeClass) {
+        this.customNodes[constructorName] = () => new nodeClass(this.ac);
+    }
+    registerParamHandler(hname, handler) {
+        this.paramHandlers[hname] = handler;
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["b"] = Synth;
+
+class BufferDataHandler {
+    constructor() {
+        this.uiRender = 'renderBufferData';
+    }
+    initialize(anode, def) { }
+    param2json(anode) {
+        return __WEBPACK_IMPORTED_MODULE_4__utils_file__["a" /* arrayBufferToBase64 */](anode._encoded);
+    }
+    json2param(anode, json) {
+        const encoded = __WEBPACK_IMPORTED_MODULE_4__utils_file__["b" /* base64ToArrayBuffer */](json);
+        anode._encoded = encoded;
+        anode.context.decodeAudioData(encoded, buffer => anode._buffer = buffer);
+    }
+}
+class SoundBankHandler {
+    constructor() {
+        this.uiRender = 'renderSoundBank';
+    }
+    initialize(anode, def) {
+        anode._buffers = [];
+        anode._encodedBuffers = [];
+        anode._names = [];
+    }
+    param2json(anode) {
+        const files = [];
+        const encs = anode._encodedBuffers;
+        const names = anode._names;
+        for (let i = 0; i < names.length; i++)
+            files.push({
+                name: names[i],
+                data: __WEBPACK_IMPORTED_MODULE_4__utils_file__["a" /* arrayBufferToBase64 */](encs[i])
+            });
+        return files;
+    }
+    json2param(anode, json) {
+        const bufs = anode._buffers;
+        bufs.length = 0;
+        const encs = anode._encodedBuffers;
+        encs.length = 0;
+        const names = anode._names;
+        names.length = 0;
+        for (let i = 0; i < json.length; i++) {
+            const item = json[i];
+            names.push(item.name);
+            const encoded = __WEBPACK_IMPORTED_MODULE_4__utils_file__["b" /* base64ToArrayBuffer */](item.data);
+            encs.push(encoded);
+            this.decodeBuffer(anode, encoded, bufs, i);
+        }
+    }
+    decodeBuffer(anode, data, bufs, i) {
+        anode.context.decodeAudioData(data, buffer => bufs[i] = buffer);
+    }
+}
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return isOpen; });
+/* harmony export (immutable) */ __webpack_exports__["g"] = setOpen;
+/* harmony export (immutable) */ __webpack_exports__["a"] = alert;
+/* harmony export (immutable) */ __webpack_exports__["e"] = progress;
+/* harmony export (immutable) */ __webpack_exports__["b"] = close;
+/* harmony export (immutable) */ __webpack_exports__["c"] = confirm;
+/* harmony export (immutable) */ __webpack_exports__["f"] = prompt;
+/** Informs whether a popup is open or not */
+let isOpen = false;
+function setOpen(open) {
+    isOpen = open;
+}
+/** Bootstrap-based equivalent of standard alert function */
+function alert(msg, title, hideClose, options) {
+    popup.find('.popup-message').html(msg);
+    popup.find('.modal-title').text(title || 'Alert');
+    popup.find('.popup-ok').hide();
+    if (hideClose)
+        popup.find('.popup-close').hide();
+    else
+        popup.find('.popup-close').html('Close');
+    popup.find('.popup-prompt > input').hide();
+    isOpen = true;
+    popup.one('hidden.bs.modal', _ => isOpen = false);
+    popup.modal(options);
+}
+/** Like an alert, but without a close button */
+function progress(msg, title) {
+    alert(msg, title, true, { keyboard: false });
+}
+/** Closes a popup in case it is open */
+function close() {
+    if (!isOpen)
+        return;
+    popup.find('.popup-ok').click();
+}
+/** Bootstrap-based equivalent of standard confirm function */
+function confirm(msg, title, cbClose, cbOpen) {
+    let result = false;
+    popup.find('.popup-message').html(msg);
+    popup.find('.modal-title').text(title || 'Please confirm');
+    const okButton = popup.find('.popup-ok');
+    okButton.show().click(_ => result = true);
+    popup.find('.popup-prompt > input').hide();
+    popup.find('.popup-close').text('Cancel');
+    popup.one('shown.bs.modal', _ => {
+        okButton.focus();
+        if (cbOpen)
+            cbOpen();
+    });
+    popup.find('form').one('submit', _ => {
+        result = true;
+        okButton.click();
+        return false;
+    });
+    popup.one('hide.bs.modal', _ => {
+        okButton.off('click');
+        isOpen = false;
+        cbClose(result);
+    });
+    isOpen = true;
+    popup.modal();
+}
+/** Bootstrap-based equivalent of standard prompt function */
+function prompt(msg, title, initialValue, cb) {
+    const input = popup.find('.popup-prompt > input');
+    confirm(msg, title, confirmed => {
+        if (!cb)
+            return;
+        if (!confirmed)
+            cb(null);
+        else
+            cb(input.val());
+    }, () => {
+        input.show();
+        input.focus();
+        if (initialValue) {
+            input.val(initialValue);
+            const hinput = input[0];
+            hinput.select();
+        }
+        else
+            input.val('');
+    });
+}
+const popup = $(`
+	<div class="normal-font modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			<h4 class="modal-title" id="myModalLabel"></h4>
+		</div>
+		<div class="modal-body">
+			<div class="popup-message"></div>
+			<form class="popup-prompt">
+				<input type="text" style="width: 100%">
+			</form>
+		</div>
+		<div class="modal-footer">
+			<button type="button" class="btn btn-default popup-close" data-dismiss="modal"></button>
+			<button type="button" class="btn btn-primary popup-ok" data-dismiss="modal">OK</button>
+		</div>
+		</div>
+	</div>
+	</div>
+`);
+$('body').append(popup);
+
+
+/***/ }),
+/* 7 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+class Timer {
+    constructor(ac, bpm = 60, ahead = 0.1) {
+        this.running = false;
+        this.ac = ac;
+        this.noteDuration = 0;
+        this.nextNoteTime = 0;
+        this.bpm = bpm;
+        this.ahead = ahead;
+    }
+    get bpm() { return this._bpm; }
+    set bpm(v) {
+        this._bpm = v;
+        this.nextNoteTime -= this.noteDuration;
+        this.noteDuration = (1 / 4) * 60 / this._bpm;
+        this.nextNoteTime += this.noteDuration;
+    }
+    start(cb) {
+        if (this.running)
+            return;
+        this.running = true;
+        if (cb)
+            this.cb = cb;
+        this.nextNoteTime = this.ac.currentTime;
+        this.tick();
+    }
+    stop() {
+        this.running = false;
+    }
+    tick() {
+        if (!this.running)
+            return;
+        requestAnimationFrame(this.tick.bind(this));
+        while (this.nextNoteTime < this.ac.currentTime + this.ahead) {
+            if (this.cb)
+                this.cb(this.nextNoteTime);
+            this.nextNoteTime += this.noteDuration;
+        }
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Timer;
+
+
+
+/***/ }),
+/* 8 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth__ = __webpack_require__(5);
+
+/**
+ * A polyphonic synth controlling an array of voices
+ */
+class Instrument {
+    constructor(ac, json, numVoices, dest) {
+        // Setup voices
+        this.pressed = [];
+        this.released = [];
+        this.voices = [];
+        for (let i = 0; i < numVoices; i++) {
+            this.voices.push(new Voice(ac, json, dest));
+            this.released.push(i);
+        }
+        // Setup synth params by having a common instance for all voices
+        this.portamento = this.voices[0].synth.portamento;
+        if (json.keyboard && json.keyboard.portamento)
+            this.portamento.time = json.keyboard.portamento;
+        for (let i = 1; i < numVoices; i++)
+            this.voices[i].synth.portamento = this.portamento;
+    }
+    noteOn(midi, velocity = 1, when) {
+        const vnum = this.findVoice();
+        const voice = this.voices[vnum];
+        this.pressed.push(vnum);
+        voice.noteOn(midi, velocity, when);
+    }
+    noteOff(midi, velocity = 1, when) {
+        for (let i = 0; i < this.voices.length; i++) {
+            const voice = this.voices[i];
+            if (voice.lastNote == midi) {
+                voice.noteOff(midi, velocity, when);
+                this.released.push(i);
+                break;
+            }
+        }
+    }
+    allNotesOff() {
+        for (const voice of this.voices) {
+            if (voice.lastNote)
+                voice.noteOff(voice.lastNote);
+        }
+    }
+    findVoice() {
+        let voices;
+        if (this.released.length > 0)
+            voices = this.released;
+        else if (this.pressed.length > 0)
+            voices = this.pressed;
+        else
+            throw 'This should never happen';
+        return voices.splice(0, 1)[0];
+    }
+    close() {
+        for (const voice of this.voices)
+            voice.close();
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Instrument;
+
+/**
+ * An independent monophonic synth
+ */
+class Voice {
+    constructor(ac, json, dest) {
+        this.nodes = {};
+        this.loader = new SynthLoader();
+        this.synth = this.loader.load(ac, json, dest || ac.destination, this.nodes);
+        this.lastNote = 0;
+    }
+    noteOn(midi, velocity = 1, when) {
+        this.synth.noteOn(midi, velocity, when);
+        this.lastNote = midi;
+    }
+    noteOff(midi, velocity = 1, when) {
+        this.synth.noteOff(midi, velocity, when);
+        this.lastNote = 0;
+    }
+    getParameterNode(nname, pname) {
+        let n = this.nodes[nname];
+        if (!n)
+            throw new Error(`Node "${nname}" not found`);
+        let prm = n[pname];
+        if (!prm)
+            throw new Error(`Parameter "${pname}" not found in node "${nname}"`);
+        return prm;
+    }
+    close() {
+        // This method must be called to avoid memory leaks at the Web Audio level
+        if (this.lastNote)
+            this.noteOff(this.lastNote, 1);
+        this.loader.close();
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["b"] = Voice;
+
+// -------------------- Private --------------------
+class VoiceNodeData extends __WEBPACK_IMPORTED_MODULE_0__synth__["a" /* NodeData */] {
+    constructor(id) {
+        super();
+        this.id = id;
+        this.inputs = [];
+    }
+    getInputs() {
+        return this.inputs;
+    }
+}
+class SynthLoader {
+    constructor() {
+        this.nodes = [];
+    }
+    load(ac, json, dest, nodes) {
+        const synth = new __WEBPACK_IMPORTED_MODULE_0__synth__["b" /* Synth */](ac);
+        // Add nodes into id-based table
+        let j = 0;
+        for (const jn of json.nodes)
+            this.nodes[j++] = new VoiceNodeData(jn.id);
+        // Then set their list of inputs
+        for (let i = 0; i < json.nodes.length; i++)
+            for (const inum of json.nodes[i].inputs) {
+                let input = this.nodeById(inum);
+                if (input)
+                    this.nodes[i].inputs.push(input);
+            }
+        // Then set their data
+        for (let i = 0; i < json.nodes.length; i++) {
+            const type = json.nodeData[i].type;
+            let anode;
+            if (type == 'out')
+                anode = synth.initOutputNodeData(this.nodes[i], dest);
+            else
+                anode = synth.initNodeData(this.nodes[i], type);
+            synth.json2NodeData(json.nodeData[i], this.nodes[i]);
+            this.registerNode(anode, nodes, json.nodes[i].name);
+        }
+        // Then notify connections to handler
+        for (const dst of this.nodes)
+            for (const src of dst.inputs)
+                synth.connectNodes(src, dst);
+        // Finally, return the newly created synth
+        this.synth = synth;
+        return synth;
+    }
+    nodeById(id) {
+        for (const node of this.nodes)
+            if (node.id === id)
+                return node;
+        return null;
+    }
+    registerNode(anode, nodes, name) {
+        nodes[name] = anode;
+    }
+    close() {
+        for (const node of this.nodes)
+            for (const input of node.inputs)
+                this.synth.disconnectNodes(input, node);
+    }
+}
+
+
+/***/ }),
+/* 9 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["e"] = logToPanel;
+/* harmony export (immutable) */ __webpack_exports__["b"] = enableLog;
+/* unused harmony export isLogEnabled */
+/* harmony export (immutable) */ __webpack_exports__["f"] = txt2html;
+/* harmony export (immutable) */ __webpack_exports__["a"] = clearLog;
+/* harmony export (immutable) */ __webpack_exports__["d"] = logNote;
+/* harmony export (immutable) */ __webpack_exports__["c"] = logEvent;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__scales__ = __webpack_require__(14);
+
+let logEnabled = true;
+let logCount = 0;
+const MAX_LOG_LINES = 1000;
+function logToPanel(always, asHTML, ...args) {
+    if (!always && !logEnabled)
+        return;
+    ffTweak();
+    if (logCount++ > MAX_LOG_LINES)
+        $('#walc-log-content > *:first-child').remove();
+    let txt = args.join(', ');
+    let div = $('<div>');
+    if (asHTML)
+        div.html(txt);
+    else
+        div.text(txt);
+    $('#walc-log-content').append(div);
+    let logContainer = $('#walc-log-container');
+    logContainer.scrollTop(MAX_LOG_LINES * 100);
+}
+function enableLog(flag) {
+    logEnabled = flag;
+}
+function isLogEnabled() {
+    return logEnabled;
+}
+function txt2html(s) {
+    return s.replace(/\[([^\]\|]+)\|([^\]\|]+)\]/g, (x, y, z) => `<span class="${y}">${z}</span>`);
+}
+function clearLog() {
+    logCount = 0;
+    $('#walc-log-content').empty();
+}
+function logNote(note, track) {
+    let time = formatTime(track, note);
+    let noteName = __WEBPACK_IMPORTED_MODULE_0__scales__["a" /* Note */][note.number];
+    if (noteName && noteName.length < 3)
+        noteName += ' ';
+    let snote = noteName
+        ? `[log-bold|${noteName}] (${note.number})`
+        : `[log-bold|${note.number}]`;
+    let sinstr = `[log-instr|${note.instrument.name}]`;
+    let strack = `[log-track|${track.name}]`;
+    logToPanel(false, true, txt2html(`${time} - Note: ${snote} ${sinstr} ${strack}`));
+}
+function logEvent(track, txt) {
+    let time = formatTime(track);
+    logToPanel(false, true, txt2html(`${time} - ${txt}`));
+}
+function formatTime(track, note) {
+    let ntime = note ? note.time : 0;
+    let t = ntime + track.time * track.loopCount - track.latency;
+    let millis = (t % 1);
+    let smillis = millis.toLocaleString(undefined, {
+        minimumFractionDigits: 3, maximumFractionDigits: 3
+    }).substr(2);
+    t = Math.floor(t);
+    let secs = (t % 60);
+    let ssecs = secs.toLocaleString(undefined, { minimumIntegerDigits: 2 });
+    let mins = Math.floor(t / 60);
+    return `[log-time|${mins}:${ssecs}.${smillis}]`;
+}
+function ffTweak() {
+    if (tweaked)
+        return;
+    tweaked = true;
+    if (navigator.userAgent.indexOf('Firefox') < 0)
+        return;
+    let logContainer = $('#walc-log-container');
+    let h = logContainer.height();
+    logContainer.css('height', h + 'px');
+}
+let tweaked = false;
+
+
+/***/ }),
+/* 10 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_modern__ = __webpack_require__(1);
+
+/**
+ * Handles common AudioNode cloning, used by oscillator and buffered data nodes.
+ */
+class BaseNoteHandler {
+    constructor(ndata) {
+        this.kbTrigger = false;
+        this.releaseTime = 0;
+        this.ndata = ndata;
+        this.outTracker = new OutputTracker(ndata.anode);
+    }
+    noteOn(midi, gain, ratio, when) { }
+    noteOff(midi, gain, when) { }
+    clone() {
+        // Create clone
+        let ctor = this.ndata.nodeDef.constructor;
+        if (!ctor)
+            return null;
+        const anode = this.ndata.anode.context[ctor]();
+        // Copy parameters
+        for (const pname of Object.keys(this.ndata.nodeDef.params)) {
+            const param = this.ndata.anode[pname];
+            if (param instanceof AudioParam)
+                anode[pname].value = param.value;
+            else if (param !== null && param !== undefined)
+                anode[pname] = param;
+        }
+        // Copy output connections
+        for (const out of this.outTracker.outputs) {
+            let o2 = out;
+            if (o2.custom && o2.anode)
+                o2 = o2.anode;
+            anode.connect(o2);
+        }
+        // Copy control input connections
+        for (const inData of this.ndata.getInputs()) {
+            inData.anode.connect(anode[inData.controlParam]);
+        }
+        // TODO should copy snapshot of list of inputs and outputs
+        // ...in case user connects or disconnects during playback
+        return anode;
+    }
+    disconnect(anode) {
+        // Disconnect outputs
+        for (const out of this.outTracker.outputs)
+            anode.disconnect(out);
+        // Disconnect control inputs
+        for (const inData of this.ndata.getInputs()) {
+            inData.anode.disconnect(anode[inData.controlParam]);
+        }
+    }
+    rampParam(param, ratio, when) {
+        const portamento = this.ndata.synth.portamento;
+        const newv = param.value * ratio;
+        param._value = newv; // Required for ADSR to capture the correct value
+        if (portamento.time > 0 && portamento.ratio > 0) {
+            const oldv = param.value * portamento.ratio;
+            param.cancelScheduledValues(when);
+            param.linearRampToValueAtTime(oldv, when);
+            param.exponentialRampToValueAtTime(newv, when + portamento.time);
+        }
+        else
+            param.setValueAtTime(newv, when);
+    }
+}
+/* unused harmony export BaseNoteHandler */
+
+/**
+ * Handles note events for an OscillatorNode
+ */
+class OscNoteHandler extends BaseNoteHandler {
+    noteOn(midi, gain, ratio, when) {
+        if (this.oscClone)
+            this.oscClone.stop(when);
+        this.oscClone = this.clone();
+        this.rampParam(this.oscClone.frequency, ratio, when);
+        this.oscClone.start(when);
+        this.lastNote = midi;
+    }
+    noteOff(midi, gain, when) {
+        if (midi != this.lastNote)
+            return; // Avoid multple keys artifacts in mono mode
+        this.oscClone.stop(when + this.releaseTime);
+    }
+}
+/* unused harmony export OscNoteHandler */
+
+/**
+ * Handles note events for an LFO node. This is identical to a regular
+ * oscillator node, but the note does not affect the oscillator frequency
+ */
+class LFONoteHandler extends OscNoteHandler {
+    rampParam(param, ratio, when) {
+        // Disable portamento for LFO
+        param.setValueAtTime(param.value, when);
+    }
+}
+/* unused harmony export LFONoteHandler */
+
+/**
+ * Handles note events for an AudioBufferSourceNode
+ */
+class BufferNoteHandler extends BaseNoteHandler {
+    noteOn(midi, gain, ratio, when) {
+        if (this.absn)
+            this.absn.stop(when);
+        const buf = this.ndata.anode._buffer;
+        if (!buf)
+            return; // Buffer still loading or failed
+        this.absn = this.clone();
+        this.absn.buffer = buf;
+        const pbr = this.absn.playbackRate;
+        const newRate = pbr.value * ratio;
+        this.rampParam(pbr, pbr.value * ratio, when);
+        this.absn.start(when);
+        this.lastNote = midi;
+    }
+    noteOff(midi, gain, when) {
+        if (midi != this.lastNote)
+            return;
+        this.absn.stop(when + this.releaseTime);
+    }
+}
+/* unused harmony export BufferNoteHandler */
+
+/**
+ * Performs computations about ramps so they can be easily rescheduled
+ */
+class Ramp {
+    constructor(v1, v2, t1, t2) {
+        this.v1 = v1;
+        this.v2 = v2;
+        this.t1 = t1;
+        this.t2 = t2;
+    }
+    inside(t) {
+        return this.t1 < this.t2 && this.t1 <= t && t <= this.t2;
+    }
+    cut(t) {
+        const newv = this.v1 + (this.v2 - this.v1) * (t - this.t1) / (this.t2 - this.t1);
+        return new Ramp(this.v1, newv, this.t1, t);
+    }
+    run(p, follow = false) {
+        if (this.t2 - this.t1 <= 0) {
+            p.setValueAtTime(this.v2, this.t2);
+        }
+        else {
+            if (!follow)
+                p.setValueAtTime(this.v1, this.t1);
+            p.linearRampToValueAtTime(this.v2, this.t2);
+        }
+    }
+}
+/* unused harmony export Ramp */
+
+/**
+ * Handles note events for a custom ADSR node
+ */
+class ADSRNoteHandler extends BaseNoteHandler {
+    constructor(ndata) {
+        super(ndata);
+        this.kbTrigger = true;
+        const adsr = this.getADSR();
+        const oldMethod = adsr.disconnect;
+        adsr.disconnect = (dest) => {
+            this.loopParams(param => {
+                if (param == dest)
+                    param.setValueAtTime(param._value, adsr.context.currentTime);
+            });
+            oldMethod(dest);
+        };
+    }
+    getADSR() {
+        let anode = this.ndata.anode;
+        return anode;
+    }
+    get releaseTime() {
+        const adsr = this.getADSR();
+        return adsr.release;
+    }
+    set releaseTime(relTime) { }
+    noteOn(midi, gain, ratio, when) {
+        this.lastNote = midi;
+        const adsr = this.getADSR();
+        this.loopParams(param => {
+            const v = this.getParamValue(param);
+            const initial = (1 - adsr.depth) * v;
+            const sustain = v * adsr.sustain + initial * (1 - adsr.sustain);
+            const now = adsr.context.currentTime;
+            param.cancelScheduledValues(now);
+            if (when > now)
+                this.rescheduleRamp(param, param._release, now);
+            param._attack = new Ramp(initial, v, when, when + adsr.attack);
+            param._decay = new Ramp(v, sustain, when + adsr.attack, when + adsr.attack + adsr.decay);
+            param._attack.run(param);
+            param._decay.run(param, true);
+        });
+    }
+    noteOff(midi, gain, when) {
+        if (midi != this.lastNote)
+            return; // Avoid multple keys artifacts in mono mode
+        const adsr = this.getADSR();
+        this.loopParams(param => {
+            let v = this.getRampValueAtTime(param, when);
+            if (v === null)
+                v = this.getParamValue(param) * adsr.sustain;
+            const finalv = (1 - adsr.depth) * v;
+            param.cancelScheduledValues(when);
+            const now = adsr.context.currentTime;
+            if (when > now)
+                // tslint:disable-next-line:no-unused-expression
+                this.rescheduleRamp(param, param._attack, now) ||
+                    this.rescheduleRamp(param, param._decay, now);
+            param._release = new Ramp(v, finalv, when, when + adsr.release);
+            param._release.run(param);
+        });
+    }
+    rescheduleRamp(param, ramp, now) {
+        if (ramp && ramp.inside(now)) {
+            ramp.cut(now).run(param);
+            return true;
+        }
+        return false;
+    }
+    getRampValueAtTime(param, t) {
+        let ramp;
+        if (param._attack && param._attack.inside(t))
+            return param._attack.cut(t).v2;
+        if (param._decay && param._decay.inside(t))
+            return param._decay.cut(t).v2;
+        return null;
+    }
+    loopParams(cb) {
+        for (const out of this.outTracker.outputs)
+            if (out instanceof AudioParam)
+                cb(out);
+    }
+    getParamValue(p) {
+        if (p._value === undefined)
+            p._value = p.value;
+        return p._value;
+    }
+}
+/* unused harmony export ADSRNoteHandler */
+
+/**
+ * Handles note events for any node that allows calling start() after stop(),
+ * such as custom nodes.
+ */
+class RestartableNoteHandler extends BaseNoteHandler {
+    constructor() {
+        super(...arguments);
+        this.playing = false;
+    }
+    noteOn(midi, gain, ratio, when) {
+        const anode = this.ndata.anode;
+        if (this.playing)
+            anode.stop(when);
+        this.playing = true;
+        anode.start(when);
+        this.lastNote = midi;
+    }
+    noteOff(midi, gain, when) {
+        if (midi != this.lastNote)
+            return;
+        this.playing = false;
+        const anode = this.ndata.anode;
+        anode.stop(when + this.releaseTime);
+    }
+}
+/* unused harmony export RestartableNoteHandler */
+
+/**
+ * Handles note events for the SoundBank source node
+ */
+class SoundBankNoteHandler extends BaseNoteHandler {
+    noteOn(midi, gain, ratio, when) {
+        const bufs = this.ndata.anode['_buffers'];
+        const absn = this.clone();
+        absn.buffer = bufs[midi % bufs.length];
+        absn.start(when);
+    }
+    noteOff(midi, gain, when) { }
+}
+/* unused harmony export SoundBankNoteHandler */
+
+// -------------------- Exported note handlers --------------------
+/**
+ * Exports available note handlers so they are used by their respective
+ * nodes from the palette.
+ */
+const NoteHandlers = {
+    'osc': OscNoteHandler,
+    'buffer': BufferNoteHandler,
+    'ADSR': ADSRNoteHandler,
+    'LFO': LFONoteHandler,
+    'restartable': RestartableNoteHandler,
+    'soundBank': SoundBankNoteHandler
+};
+/* harmony export (immutable) */ __webpack_exports__["a"] = NoteHandlers;
+
+// -------------------- Private classes --------------------
+/**
+ * Tracks a node output connections and disconnections, to be used
+ * when cloning, removing or controlling nodes.
+ */
+class OutputTracker {
+    constructor(anode) {
+        this.outputs = [];
+        this.onBefore(anode, 'connect', this.connect, (oldf, obj, args) => {
+            if (args[0].custom && args[0].anode)
+                args[0] = args[0].anode;
+            oldf.apply(obj, args);
+        });
+        this.onBefore(anode, 'disconnect', this.disconnect);
+    }
+    connect(np) {
+        this.outputs.push(np);
+    }
+    disconnect(np) {
+        Object(__WEBPACK_IMPORTED_MODULE_0__utils_modern__["d" /* removeArrayElement */])(this.outputs, np);
+    }
+    onBefore(obj, fname, funcToCall, cb) {
+        const oldf = obj[fname];
+        const self = this;
+        obj[fname] = function () {
+            funcToCall.apply(self, arguments);
+            if (cb)
+                cb(oldf, obj, arguments);
+            else
+                oldf.apply(obj, arguments);
+        };
+    }
+}
+/* unused harmony export OutputTracker */
+
+
+
+/***/ }),
+/* 11 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return palette; });
+// -------------------- Node palette definition --------------------
+const OCTAVE_DETUNE = {
+    initial: 0,
+    min: -1200,
+    max: 1200,
+    linear: true
+};
+/**
+ * The set of AudioNodes available to the application, along with
+ * their configuration.
+ */
+let palette = {
+    // Sources
+    Oscillator: {
+        constructor: 'createOscillator',
+        noteHandler: 'osc',
+        params: {
+            frequency: { initial: 220, min: 20, max: 20000 },
+            detune: OCTAVE_DETUNE,
+            type: {
+                initial: 'sawtooth',
+                choices: ['sine', 'square', 'sawtooth', 'triangle']
+            }
+        }
+    },
+    Buffer: {
+        constructor: 'createBufferSource',
+        noteHandler: 'buffer',
+        params: {
+            playbackRate: { initial: 1, min: 0, max: 8 },
+            detune: OCTAVE_DETUNE,
+            buffer: {
+                initial: null,
+                handler: 'BufferDataHandler'
+            },
+            loop: { initial: false },
+            loopStart: { initial: 0, min: 0, max: 10 },
+            loopEnd: { initial: 3, min: 0, max: 10 }
+        }
+    },
+    Noise: {
+        constructor: 'createNoise',
+        noteHandler: 'restartable',
+        custom: true,
+        params: {
+            gain: { initial: 1, min: 0, max: 10 }
+        }
+    },
+    LineIn: {
+        constructor: 'createLineIn',
+        custom: true,
+        params: {}
+    },
+    SoundBank: {
+        constructor: 'createBufferSource',
+        noteHandler: 'soundBank',
+        params: {
+            buffer: {
+                initial: null,
+                handler: 'SoundBankHandler'
+            }
+        }
+    },
+    // Effects
+    Gain: {
+        constructor: 'createGain',
+        params: {
+            gain: { initial: 1, min: 0, max: 10, linear: true }
+        }
+    },
+    Filter: {
+        constructor: 'createBiquadFilter',
+        params: {
+            frequency: { initial: 440, min: 20, max: 20000 },
+            Q: { initial: 0, min: 0, max: 100 },
+            detune: OCTAVE_DETUNE,
+            gain: { initial: 0, min: -40, max: 40, linear: true },
+            type: {
+                initial: 'lowpass',
+                choices: ['lowpass', 'highpass', 'bandpass',
+                    'lowshelf', 'highshelf', 'peaking', 'notch', 'allpass']
+            }
+        },
+    },
+    Delay: {
+        constructor: 'createDelay',
+        params: {
+            delayTime: { initial: 1, min: 0, max: 5 }
+        }
+    },
+    StereoPan: {
+        constructor: 'createStereoPanner',
+        params: {
+            pan: { initial: 0, min: -1, max: 1, linear: true }
+        }
+    },
+    Compressor: {
+        constructor: 'createDynamicsCompressor',
+        params: {
+            threshold: { initial: -24, min: -100, max: 0, linear: true },
+            knee: { initial: 30, min: 0, max: 40, linear: true },
+            ratio: { initial: 12, min: 1, max: 20, linear: true },
+            attack: { initial: 0.003, min: 0, max: 1 },
+            release: { initial: 0.25, min: 0, max: 1 }
+        }
+    },
+    Detuner: {
+        constructor: 'createDetuner',
+        custom: true,
+        params: {
+            octave: { initial: 0, min: -2, max: 2, linear: true }
+        }
+    },
+    // Controllers
+    LFO: {
+        constructor: 'createOscillator',
+        noteHandler: 'LFO',
+        control: true,
+        params: {
+            frequency: { initial: 5, min: 0.01, max: 200 },
+            detune: OCTAVE_DETUNE,
+            type: {
+                initial: 'sine',
+                choices: ['sine', 'square', 'sawtooth', 'triangle']
+            }
+        }
+    },
+    GainCtrl: {
+        constructor: 'createGain',
+        control: true,
+        params: {
+            gain: { initial: 10, min: 0, max: 100, linear: true }
+        }
+    },
+    ADSR: {
+        constructor: 'createADSR',
+        noteHandler: 'ADSR',
+        control: true,
+        custom: true,
+        params: {
+            attack: { initial: 0.2, min: 0, max: 10 },
+            decay: { initial: 0.5, min: 0, max: 10 },
+            sustain: { initial: 0.5, min: 0, max: 1, linear: true },
+            release: { initial: 1.0, min: 0, max: 10 },
+            depth: { initial: 1.0, min: 0, max: 1 }
+        }
+    },
+    NoiseCtrl: {
+        constructor: 'createNoiseCtrl',
+        control: true,
+        custom: true,
+        params: {
+            frequency: { initial: 4, min: 0, max: 200 },
+            depth: { initial: 20, min: 0, max: 200 }
+        }
+    },
+    // Output
+    Speaker: {
+        constructor: null,
+        params: {}
+    }
+};
+
+
+/***/ }),
+/* 12 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/**
+ * Base class to derive all custom nodes from it
+ */
+class CustomNodeBase {
+    constructor() {
+        this.custom = true;
+        this.channelCount = 2;
+        this.channelCountMode = 'max';
+        this.channelInterpretation = 'speakers';
+        this.numberOfInputs = 0;
+        this.numberOfOutputs = 1;
+    }
+    // Connect - disconnect
+    connect(destination, output, input) {
+        return destination;
+    }
+    disconnect(destination, output, input) { }
+    // Required for extending EventTarget
+    addEventListener() { }
+    dispatchEvent(evt) { return false; }
+    removeEventListener() { }
+}
+/* unused harmony export CustomNodeBase */
+
+/**
+ * Envelope generator that controls the evolution over time of a destination
+ * node's parameter. All parameter control is performed in the corresponding
+ * ADSR note handler.
+ */
+class ADSR extends CustomNodeBase {
+    constructor() {
+        super(...arguments);
+        this.attack = 0.2;
+        this.decay = 0.5;
+        this.sustain = 0.5;
+        this.release = 1;
+        this.depth = 1;
+        // TODO linear / exponential
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = ADSR;
+
+/**
+ * Base ScriptProcessor, to derive all custom audio processing nodes from it.
+ */
+class ScriptProcessor extends CustomNodeBase {
+    constructor(ac) {
+        super();
+        this.gain = 1;
+        this.playing = false;
+        this.anode = ac.createScriptProcessor(1024);
+        this.anode.onaudioprocess = evt => this.processAudio(evt);
+    }
+    connect(node) {
+        return this.anode.connect(node);
+    }
+    disconnect() {
+        this.anode.disconnect();
+    }
+    start() {
+        this.playing = true;
+    }
+    stop() {
+        this.playing = false;
+    }
+    processAudio(evt) { }
+}
+/* unused harmony export ScriptProcessor */
+
+/**
+ * Simple noise generator
+ */
+class NoiseGenerator extends ScriptProcessor {
+    processAudio(evt) {
+        for (let channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
+            const out = evt.outputBuffer.getChannelData(channel);
+            for (let sample = 0; sample < out.length; sample++)
+                out[sample] = this.playing ? this.gain * (Math.random() * 2 - 1) : 0;
+        }
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["e"] = NoiseGenerator;
+
+/**
+ * Noise generator to be used as control node.
+ * It uses sample & hold in order to implement the 'frequency' parameter.
+ */
+class NoiseCtrlGenerator extends ScriptProcessor {
+    constructor(ac) {
+        super(ac);
+        this.ac = ac;
+        this.frequency = 4;
+        this.depth = 20;
+        this.sct = 0;
+        this.v = 0;
+    }
+    connect(param) {
+        return this.anode.connect(param);
+    }
+    processAudio(evt) {
+        const samplesPerCycle = this.ac.sampleRate / this.frequency;
+        for (let channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
+            let out = evt.outputBuffer.getChannelData(channel);
+            for (let sample = 0; sample < out.length; sample++) {
+                this.sct++;
+                if (this.sct > samplesPerCycle) {
+                    this.v = this.depth * (Math.random() * 2 - 1);
+                    this.sct = 0; // this.sct - Math.floor(this.sct);
+                }
+                out[sample] = this.v;
+            }
+        }
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["d"] = NoiseCtrlGenerator;
+
+/**
+ * Simple Pitch Shifter implemented in a quick & dirty way
+ */
+class Detuner extends ScriptProcessor {
+    constructor() {
+        super(...arguments);
+        this.octave = 0;
+        this.numberOfInputs = 1;
+    }
+    processAudio(evt) {
+        const dx = Math.pow(2, this.octave);
+        for (let channel = 0; channel < evt.outputBuffer.numberOfChannels; channel++) {
+            let out = evt.outputBuffer.getChannelData(channel);
+            let inbuf = evt.inputBuffer.getChannelData(channel);
+            let sct = 0;
+            for (let sample = 0; sample < out.length; sample++) {
+                out[sample] = inbuf[Math.floor(sct)];
+                sct += dx;
+                if (sct >= inbuf.length)
+                    sct = 0;
+            }
+        }
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["b"] = Detuner;
+
+/**
+ * Captures audio from the PC audio input.
+ * Requires user's authorization to grab audio input.
+ */
+class LineInNode extends CustomNodeBase {
+    connect(anode) {
+        if (this.srcNode) {
+            this.srcNode.connect(anode);
+            this.dstNode = anode;
+            return anode;
+        }
+        const navigator = window.navigator;
+        navigator.getUserMedia = (navigator.getUserMedia ||
+            navigator.webkitGetUserMedia ||
+            navigator.mozGetUserMedia ||
+            navigator.msGetUserMedia);
+        navigator.getUserMedia({ audio: true }, (stream) => {
+            const ac = anode.context;
+            this.srcNode = ac.createMediaStreamSource(stream);
+            let a2 = anode;
+            if (a2.custom && a2.anode)
+                a2 = a2.anode;
+            this.srcNode.connect(a2);
+            this.dstNode = anode;
+            this.stream = stream;
+        }, (error) => console.error(error));
+    }
+    disconnect() {
+        this.srcNode.disconnect(this.dstNode);
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["c"] = LineInNode;
+
+
+
+/***/ }),
+/* 13 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return instruments; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return effects; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return userTracks; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() { return tracks; });
+/* harmony export (immutable) */ __webpack_exports__["e"] = scheduleTrack;
+/* harmony export (immutable) */ __webpack_exports__["f"] = timerTickHandler;
+/* harmony export (immutable) */ __webpack_exports__["a"] = eachTrack;
+/* harmony export (immutable) */ __webpack_exports__["d"] = listenNotes;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__log__ = __webpack_require__(9);
+
+let instruments = {};
+let effects = {};
+let userTracks = {};
+let tracks = {};
+let nextTracks = {};
+let noteInfoListener = function (n) { };
+function scheduleTrack(t) {
+    t.startTime = t.ac.currentTime;
+    if (tracks[t.name])
+        nextTracks[t.name] = t;
+    else
+        tracks[t.name] = t;
+    t.callback(t);
+    t.playing = true;
+}
+function timerTickHandler(timer, time) {
+    eachTrack(t => playTrack(timer, t, time));
+}
+function eachTrack(cb) {
+    let tnames = Object.getOwnPropertyNames(tracks);
+    for (let tname of tnames)
+        cb(tracks[tname]);
+}
+function listenNotes(listener) {
+    noteInfoListener = listener;
+}
+function playTrack(timer, track, time) {
+    let played;
+    do {
+        played = false;
+        if (shouldTrackEnd(track))
+            break;
+        track = tracks[track.name];
+        let note = track.notes[track.notect];
+        if (track.startTime + note.time <= time) {
+            playNote(track, note, timer, track.startTime);
+            played = true;
+            track.notect++;
+        }
+    } while (played);
+}
+function playNote(track, note, timer, startTime) {
+    if (note.options)
+        setOptions(note.options);
+    if (note.number < 1)
+        return;
+    Object(__WEBPACK_IMPORTED_MODULE_0__log__["d" /* logNote */])(note, track);
+    noteInfoListener(note); // TODO time accuracy could be improved
+    note.instrument.noteOn(note.number, note.velocity, startTime + note.time);
+    let duration = note.duration
+        || note.instrument.duration || timer.noteDuration;
+    note.instrument.noteOff(note.number, note.velocity, startTime + note.time + duration);
+}
+function setOptions(opts) {
+    if (opts.effect) {
+        let e = opts.effect;
+        for (let pname of Object.getOwnPropertyNames(opts))
+            if (pname != 'effect')
+                e.param(pname, opts[pname]);
+    }
+    else if (opts.instrument) {
+        let i = opts.instrument;
+        for (let pname of Object.getOwnPropertyNames(opts))
+            if (pname != 'instrument')
+                i.param(pname, opts[pname]);
+    }
+}
+function shouldTrackEnd(track) {
+    if (track.stopped)
+        return true;
+    if (track.notect < track.notes.length)
+        return false;
+    track.notect = 0;
+    if (track.shouldStop) {
+        track.stopped = true;
+        track.shouldStop = false;
+        return true;
+    }
+    if (nextTracks[track.name]) {
+        let nextTrack = nextTracks[track.name];
+        nextTrack.startTime = track.startTime + track.time;
+        tracks[track.name] = nextTrack;
+        userTracks[track.name] = nextTrack;
+        delete nextTracks[track.name];
+        return false;
+    }
+    if (track.loop) {
+        track.startTime += track.time;
+        track.loopCount++;
+        Object(__WEBPACK_IMPORTED_MODULE_0__log__["c" /* logEvent */])(track, `Track [log-track|${track.name}] has looped`);
+        track.notes = [];
+        track.time = 0;
+        try {
+            track.callback(track);
+        }
+        catch (e) {
+            track.loop = false;
+            Object(__WEBPACK_IMPORTED_MODULE_0__log__["e" /* logToPanel */])(true, true, Object(__WEBPACK_IMPORTED_MODULE_0__log__["f" /* txt2html */])(`[log-bold|Runtime error]: "${e.message}" in track "${track.name}" - looping stopped`));
+            console.error(e);
+        }
+        return false;
+    }
+    else {
+        // Update latency and loopCount just for the sake of logEvent
+        track.latency = 0;
+        track.loopCount++;
+        Object(__WEBPACK_IMPORTED_MODULE_0__log__["c" /* logEvent */])(track, `Track [log-track|${track.name}] has ended`);
+        delete tracks[track.name];
+        delete userTracks[track.name];
+        return true;
+    }
+}
+
+
+/***/ }),
+/* 14 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Note; });
+/* harmony export (immutable) */ __webpack_exports__["b"] = makeScale;
+let Note = {
+    C0: 12, Cs0: 13, Db0: 13, D0: 14, Ds0: 15, Eb0: 15,
+    E0: 16, F0: 17, Fs0: 18, Gb0: 18, G0: 19, Gs0: 20,
+    Ab0: 20, A0: 21, As0: 22, Bb0: 22, B0: 23,
+    C1: 24, Cs1: 25, Db1: 25, D1: 26, Ds1: 27, Eb1: 27,
+    E1: 28, F1: 29, Fs1: 30, Gb1: 30, G1: 31, Gs1: 32,
+    Ab1: 32, A1: 33, As1: 34, Bb1: 34, B1: 35,
+    C2: 36, Cs2: 37, Db2: 37, D2: 38, Ds2: 39, Eb2: 39,
+    E2: 40, F2: 41, Fs2: 42, Gb2: 42, G2: 43, Gs2: 44,
+    Ab2: 44, A2: 45, As2: 46, Bb2: 46, B2: 47,
+    C3: 48, Cs3: 49, Db3: 49, D3: 50, Ds3: 51, Eb3: 51,
+    E3: 52, F3: 53, Fs3: 54, Gb3: 54, G3: 55, Gs3: 56,
+    Ab3: 56, A3: 57, As3: 58, Bb3: 58, B3: 59,
+    C4: 60, Cs4: 61, Db4: 61, D4: 62, Ds4: 63, Eb4: 63,
+    E4: 64, F4: 65, Fs4: 66, Gb4: 66, G4: 67, Gs4: 68,
+    Ab4: 68, A4: 69, As4: 70, Bb4: 70, B4: 71,
+    C5: 72, Cs5: 73, Db5: 73, D5: 74, Ds5: 75, Eb5: 75,
+    E5: 76, F5: 77, Fs5: 78, Gb5: 78, G5: 79, Gs5: 80,
+    Ab5: 80, A5: 81, As5: 82, Bb5: 82, B5: 83,
+    C6: 84, Cs6: 85, Db6: 85, D6: 86, Ds6: 87, Eb6: 87,
+    E6: 88, F6: 89, Fs6: 90, Gb6: 90, G6: 91, Gs6: 92,
+    Ab6: 92, A6: 93, As6: 94, Bb6: 94, B6: 95,
+    C7: 96, Cs7: 97, Db7: 97, D7: 98, Ds7: 99, Eb7: 99,
+    E7: 100, F7: 101, Fs7: 102, Gb7: 102, G7: 103, Gs7: 104,
+    Ab7: 104, A7: 105, As7: 106, Bb7: 106, B7: 107,
+    C8: 108, Cs8: 109, Db8: 109, D8: 110, Ds8: 111, Eb8: 111,
+    E8: 112, F8: 113, Fs8: 114, Gb8: 114, G8: 115, Gs8: 116,
+    Ab8: 116, A8: 117, As8: 118, Bb8: 118, B8: 119
+};
+const NoteDeltas = {
+    major: [0, 2, 4, 5, 7, 9, 11, 12],
+    major_pentatonic: [0, 2, 4, 7, 9, 12],
+    minor: [0, 2, 3, 5, 7, 8, 10, 12],
+    minor_pentatonic: [0, 3, 5, 7, 10, 12],
+    chromatic: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+};
+function invertEnum(enm) {
+    for (let k of Object.getOwnPropertyNames(enm))
+        enm[enm[k]] = k;
+}
+invertEnum(Note);
+function makeSingleScale(note, type) {
+    let deltas = NoteDeltas[type];
+    if (!deltas)
+        throw new Error(`Scale type "${type}" does not exist`);
+    let r = [];
+    for (let delta of deltas)
+        r.push(note + delta);
+    return r.ring();
+}
+function makeScale(note, type = 'major', octaves = 1) {
+    if (octaves <= 1)
+        return makeSingleScale(note, type);
+    let r = [].ring();
+    for (let oct = 0; oct < octaves; oct++) {
+        r = r.concat(makeSingleScale(note + oct * 12, type));
+        if (oct < octaves - 1)
+            r = r.butlast();
+    }
+    return r;
+}
+
+
+/***/ }),
+/* 15 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/**
+ * Displays FFT and Oscilloscope graphs from the output of a given AudioNode
+ */
+class AudioAnalyzer {
+    constructor(jqfft, jqosc) {
+        this.canvasFFT = this.createCanvas(jqfft);
+        this.gcFFT = this.canvasFFT.getContext('2d');
+        this.canvasOsc = this.createCanvas(jqosc);
+        this.gcOsc = this.canvasOsc.getContext('2d');
+    }
+    createCanvas(panel) {
+        const jqCanvas = $(`<canvas width="${panel.width()}" height="${panel.height()}">`);
+        panel.append(jqCanvas);
+        const canvas = jqCanvas[0];
+        return canvas;
+    }
+    createAnalyzerNode(ac) {
+        if (this.anode)
+            return;
+        this.anode = ac.createAnalyser();
+        this.fftData = new Uint8Array(this.anode.fftSize);
+        this.oscData = new Uint8Array(this.anode.fftSize);
+    }
+    analyze(input) {
+        this.disconnect();
+        this.createAnalyzerNode(input.context);
+        this.input = input;
+        this.input.connect(this.anode);
+        this.requestAnimationFrame();
+    }
+    disconnect() {
+        if (!this.input)
+            return;
+        this.input.disconnect(this.anode);
+        this.input = null;
+    }
+    requestAnimationFrame() {
+        window.requestAnimationFrame(_ => this.updateCanvas());
+    }
+    updateCanvas() {
+        if (!this.input)
+            return;
+        if (this.gcFFT)
+            this.drawFFT(this.gcFFT, this.canvasFFT, this.fftData, '#00FF00');
+        if (this.gcOsc)
+            this.drawOsc(this.gcOsc, this.canvasOsc, this.oscData, '#FFFF00');
+        this.requestAnimationFrame();
+    }
+    drawFFT(gc, canvas, data, color) {
+        const [w, h] = this.setupDraw(gc, canvas, data, color);
+        this.anode.getByteFrequencyData(data);
+        const dx = (data.length / 2) / canvas.width;
+        let x = 0;
+        // TODO calculate average of all samples from x to x + dx - 1
+        for (let i = 0; i < w; i++) {
+            let y = data[Math.floor(x)];
+            x += dx;
+            gc.moveTo(i, h - 1);
+            gc.lineTo(i, h - 1 - h * y / 256);
+        }
+        gc.stroke();
+        gc.closePath();
+    }
+    drawOsc(gc, canvas, data, color) {
+        const [w, h] = this.setupDraw(gc, canvas, data, color);
+        this.anode.getByteTimeDomainData(data);
+        gc.moveTo(0, h / 2);
+        let x = 0;
+        while (data[x] > 128 && x < data.length / 4)
+            x++;
+        while (data[x] < 128 && x < data.length / 4)
+            x++;
+        const dx = (data.length * 0.75) / canvas.width;
+        for (let i = 0; i < w; i++) {
+            let y = data[Math.floor(x)];
+            x += dx;
+            gc.lineTo(i, h * y / 256);
+        }
+        gc.stroke();
+        gc.closePath();
+    }
+    setupDraw(gc, canvas, data, color) {
+        const w = canvas.width;
+        const h = canvas.height;
+        gc.clearRect(0, 0, w, h);
+        gc.beginPath();
+        gc.strokeStyle = color;
+        return [w, h];
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = AudioAnalyzer;
+
+
+
+/***/ }),
+/* 16 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = createEditor;
+/* harmony export (immutable) */ __webpack_exports__["c"] = flashRange;
+/* harmony export (immutable) */ __webpack_exports__["b"] = doRunCode;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__live_coding__ = __webpack_require__(31);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__editor_actions__ = __webpack_require__(37);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__rings__ = __webpack_require__(38);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__scales__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__random__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__editor_buffers__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__synthUI_analyzer__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__log__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__scheduler__ = __webpack_require__(13);
+
+
+
+
+
+
+
+
+
+let sinkDiv = document.createElement('div');
+function byId(id) {
+    return document.getElementById(id) || sinkDiv;
+}
+// -------------------- Editor setup --------------------
+let global = window;
+let monacoRequire = global.require;
+let editor;
+let _synthUI;
+let analyzer;
+let decorations = [];
+function loadMonaco(cb) {
+    monacoRequire.config({ paths: { 'vs': 'js/vendor/monaco/min/vs' } });
+    monacoRequire(['vs/editor/editor.main'], cb);
+}
+function createEditor(ac, presets, synthUI) {
+    setupGlobals(new __WEBPACK_IMPORTED_MODULE_0__live_coding__["a" /* LiveCoding */](ac, presets, synthUI));
+    _synthUI = synthUI;
+    return new Promise(resolve => loadMonaco(() => resolve(setupEditor())));
+}
+function setupEditor() {
+    let editorElem = byId('walc-code-editor');
+    setupDefinitions();
+    editor = monaco.editor.create(editorElem, {
+        value: '',
+        language: 'typescript',
+        lineNumbers: false,
+        renderLineHighlight: 'none',
+        minimap: { enabled: false }
+        // fontSize: 15
+    });
+    handleEditorResize(editorElem);
+    Object(__WEBPACK_IMPORTED_MODULE_1__editor_actions__["a" /* registerActions */])(editor);
+    editor.focus();
+    Object(__WEBPACK_IMPORTED_MODULE_5__editor_buffers__["a" /* handleBuffers */])(editor);
+    setupCompletion();
+    $(document).on('route:show', (e, h) => {
+        if (h != '#live-coding')
+            return;
+        editor.focus();
+        window.scrollTo(0, 0);
+    });
+    analyzer = new __WEBPACK_IMPORTED_MODULE_6__synthUI_analyzer__["a" /* AudioAnalyzer */]($('#walc-graph-fft'), $('#walc-graph-osc'));
+    return editor;
+}
+function setupGlobals(lc) {
+    global.lc = lc;
+    global.instruments = __WEBPACK_IMPORTED_MODULE_8__scheduler__["c" /* instruments */];
+    global.effects = __WEBPACK_IMPORTED_MODULE_8__scheduler__["b" /* effects */];
+    global.tracks = __WEBPACK_IMPORTED_MODULE_8__scheduler__["h" /* userTracks */];
+    global.Note = __WEBPACK_IMPORTED_MODULE_3__scales__["a" /* Note */];
+    global.random = __WEBPACK_IMPORTED_MODULE_4__random__["a" /* random */];
+    global.p5 = global;
+    Object(__WEBPACK_IMPORTED_MODULE_2__rings__["a" /* setupRing */])();
+}
+function addTypeScriptDefinitions(defs) {
+    monaco.languages.typescript.typescriptDefaults.addExtraLib(defs);
+}
+function setupDefinitions() {
+    fetch('js/lc-definitions.ts')
+        .then(response => response.text())
+        .then(addTypeScriptDefinitions);
+    if (document.location.pathname.endsWith('p5j.html'))
+        fetch('js/p5.d.ts')
+            .then(response => response.text())
+            .then(addTypeScriptDefinitions);
+}
+function createProposals(name, obj) {
+    let members = [];
+    if (name.endsWith('s'))
+        name = name.substr(0, name.length - 1);
+    for (let pname in obj)
+        members.push({
+            label: pname,
+            kind: monaco.languages.CompletionItemKind.Field,
+            documentation: `The ${pname} ${name}`,
+            insertText: pname
+        });
+    return members;
+}
+function setupCompletion() {
+    monaco.languages.registerCompletionItemProvider('typescript', {
+        provideCompletionItems: function (model, pos) {
+            let lnum = pos.lineNumber;
+            let txt = model.getValueInRange({
+                startLineNumber: lnum, startColumn: 1,
+                endLineNumber: lnum, endColumn: pos.column
+            });
+            let globals = { instruments: __WEBPACK_IMPORTED_MODULE_8__scheduler__["c" /* instruments */], effects: __WEBPACK_IMPORTED_MODULE_8__scheduler__["b" /* effects */], tracks: __WEBPACK_IMPORTED_MODULE_8__scheduler__["h" /* userTracks */], global };
+            for (let name in globals)
+                if (txt.endsWith(name + '.'))
+                    return createProposals(name, globals[name]);
+            return [];
+        }
+    });
+}
+function handleEditorResize(elem) {
+    let edw = elem.clientWidth;
+    setInterval(_ => {
+        let newW = elem.clientWidth;
+        if (edw != newW) {
+            edw = newW;
+            editor.layout();
+        }
+    }, 1000);
+}
+function setupAnalyzers() {
+    analyzer.analyze(_synthUI.outNode);
+}
+// -------------------- Error handling --------------------
+function getRuntimeErrorDecoration(lineNum) {
+    let decs = editor.getLineDecorations(lineNum);
+    if (!decs || decs.length <= 0)
+        return null;
+    for (let dec of decs)
+        if (dec.options.className == 'walc-error')
+            return dec;
+    return null;
+}
+function getErrorLocation(e) {
+    // Safari
+    if (e.line)
+        return { line: e.line, column: e.column };
+    // Chrome: <anonymous>
+    // Firefox: > eval
+    if (!e.stack)
+        return null;
+    let match = e.stack.match(/(<anonymous>|> eval):(\d+):(\d+)/);
+    if (match && match.length == 4) {
+        return {
+            line: parseInt(match[2], 10),
+            column: parseInt(match[3], 10)
+        };
+    }
+    return null;
+}
+function showError(msg, line, col) {
+    Object(__WEBPACK_IMPORTED_MODULE_7__log__["e" /* logToPanel */])(true, true, Object(__WEBPACK_IMPORTED_MODULE_7__log__["f" /* txt2html */])(`[log-bold|Runtime error]: "${msg}" at line ${line}, column ${col}`));
+    editor.revealLineInCenter(line);
+    let errorRange = getErrorRange(editor.getModel().getLineContent(line), col);
+    decorations = editor.deltaDecorations(decorations, [{
+            range: new monaco.Range(line, errorRange.from, line, errorRange.to),
+            options: {
+                isWholeLine: false,
+                className: 'walc-error',
+                hoverMessage: ['**Runtime Error**', msg]
+            }
+        }]);
+    return errorRange;
+}
+function getErrorRange(s, col) {
+    s = s.substring(col - 1);
+    let m = s.match(/\s*[\w_$]+/);
+    if (m && m.index !== undefined && m[0]) {
+        return { from: col + m.index, to: col + m.index + m[0].length };
+    }
+    return { from: 0, to: s.length + 1 };
+}
+// -------------------- Code execution --------------------
+function flashRange(range) {
+    let decs = [];
+    decs = editor.deltaDecorations(decs, [{
+            range,
+            options: {
+                isWholeLine: false,
+                className: 'walc-running'
+            }
+        }]);
+    setTimeout(_ => {
+        $('.walc-running').css('background-color', 'inherit');
+        setTimeout(() => {
+            decs = editor.deltaDecorations(decs, []);
+        }, 1000);
+    }, 100);
+}
+function doRunCode(code) {
+    __WEBPACK_IMPORTED_MODULE_4__random__["a" /* random */].seed(__WEBPACK_IMPORTED_MODULE_4__random__["a" /* random */].seed());
+    setupAnalyzers();
+    try {
+        decorations = editor.deltaDecorations(decorations, []);
+        // tslint:disable-next-line:no-eval
+        eval(code);
+    }
+    catch (e) {
+        let location = getErrorLocation(e);
+        if (location)
+            showError(e.message, location.line, location.column);
+    }
+}
+
+
+/***/ }),
+/* 17 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* unused harmony export registerProvider */
+/* harmony export (immutable) */ __webpack_exports__["a"] = createInstrument;
+/* harmony export (immutable) */ __webpack_exports__["b"] = loadSamples;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_instrument__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__third_party_wavetable__ = __webpack_require__(36);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__log__ = __webpack_require__(9);
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+
+
+
+let providers = {
+    Modulator: modulatorInstrProvider,
+    wavetable: wavetableInstrProvider,
+    sample: sampleInstrProvider
+};
+function registerProvider(prefix, provider) {
+    providers[prefix] = provider;
+}
+function createInstrument(lc, // This is ugly and should be refactored
+    preset, name, numVoices = 4) {
+    if (typeof preset != 'string')
+        return modulatorInstrProvider(lc, preset, name, numVoices);
+    if (preset.indexOf('/') < 0)
+        preset = 'Modulator/' + preset;
+    let [prefix, iname] = preset.split('/');
+    let provider = providers[prefix];
+    if (!provider)
+        throw new Error(`Instrument '${preset}' not found: unknown prefix '${provider}'`);
+    return provider(lc, iname, name, numVoices);
+}
+function modulatorInstrProvider(lc, // This is ugly and should be refactored
+    preset, name, numVoices = 4) {
+    let prst = getPreset(lc.presets, preset);
+    let instr = new ModulatorInstrument(lc.context, prst, numVoices, lc.synthUI.outNode);
+    instr.name = name || prst.name;
+    instr.duration = findNoteDuration(prst);
+    return instr;
+}
+function wavetableInstrProvider(lc, preset, name, numVoices = 4) {
+    let instr = new WavetableInstrument(lc.context, preset, name);
+    return instr;
+}
+function sampleInstrProvider(lc, preset, name, numVoices = 4) {
+    let instr = new SampleInstrument(lc.context, preset, name);
+    return instr;
+}
+// ------------------------- Modulator instrument -------------------------
+class ModulatorInstrument extends __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /* Instrument */] {
+    initialize() {
+        return __awaiter(this, void 0, void 0, function* () {
+            logInstrReady(this.name);
+        });
+    }
+    shutdown() { }
+    param(pname, value, rampTime, exponential = true) {
+        let names = pname.split('/');
+        if (names.length < 2)
+            throw new Error(`Instrument parameters require "node/param" format`);
+        let node = names[0];
+        let name = names[1];
+        if (value === undefined) {
+            let prm = this.voices[0].getParameterNode(node, name);
+            return prm.value;
+        }
+        for (let v of this.voices) {
+            let prm = v.getParameterNode(node, name);
+            this.updateValue(prm, value, rampTime, exponential);
+        }
+        return this;
+    }
+    paramNames() {
+        let pnames = [];
+        let v = this.voices[0];
+        for (let nname of Object.getOwnPropertyNames(v.nodes))
+            for (let pname in v.nodes[nname])
+                if (v.nodes[nname][pname] instanceof AudioParam)
+                    pnames.push(nname + '/' + pname);
+        return pnames;
+    }
+    connect(node) {
+        for (let v of this.voices) {
+            v.synth.outGainNode.disconnect();
+            v.synth.outGainNode.connect(node);
+        }
+    }
+    updateValue(prm, value, rampTime, exponential = true) {
+        if (rampTime === undefined) {
+            prm._value = value;
+            prm.value = value;
+        }
+        else {
+            let ctx = this.voices[0].synth.ac;
+            if (exponential) {
+                prm.exponentialRampToValueAtTime(value, ctx.currentTime + rampTime);
+            }
+            else {
+                prm.linearRampToValueAtTime(value, ctx.currentTime + rampTime);
+            }
+        }
+    }
+}
+function getPreset(presets, preset) {
+    if (typeof preset == 'number') {
+        let maxPrst = presets.presets.length;
+        if (preset < 1 || preset > maxPrst)
+            throw new Error(`The preset number should be between 1 and ${maxPrst}`);
+        return presets.presets[preset - 1];
+    }
+    else if (typeof preset == 'string') {
+        for (let prs of presets.presets)
+            if (prs.name == preset)
+                return prs;
+        throw new Error(`Preset "${preset}" does not exist`);
+    }
+    return preset;
+}
+function findNoteDuration(preset) {
+    let duration = 0;
+    for (let node of preset.nodeData) {
+        if (node.type == 'ADSR') {
+            let d = node.params.attack + node.params.decay;
+            if (d > duration)
+                duration = d;
+        }
+    }
+    if (duration)
+        duration += 0.01;
+    return duration;
+}
+// ------------------------- Wavetable instrument -------------------------
+class WavetableInstrument {
+    constructor(ctx, presetName, name) {
+        this.ctx = ctx;
+        this.presetName = presetName;
+        this.envelopes = [];
+        this.duration = 0;
+        if (name === undefined)
+            name = presetName;
+        this.name = name;
+    }
+    initialize() {
+        return __awaiter(this, void 0, void 0, function* () {
+            log(`Loading instrument [log-instr|${this.name}]...`);
+            this.preset = yield this.loadInstrument(this.presetName);
+            logInstrReady(this.name);
+        });
+    }
+    shutdown() {
+        wtPlayer.expireEnvelopes(this.ctx);
+    }
+    param(pname, value, rampTime, exponential = true) {
+        // TODO maybe provide ADSR
+        return this;
+    }
+    paramNames() {
+        // TODO implement
+        let pnames = [];
+        return pnames;
+    }
+    connect(node) {
+        this.destination = node;
+    }
+    noteOn(midi, velocity, when) {
+        if (when === undefined)
+            when = this.ctx.currentTime;
+        let envelope = wtPlayer.queueWaveTable(this.ctx, this.destination, this.preset, when, midi, 9999, velocity);
+        this.envelopes[midi] = envelope;
+    }
+    noteOff(midi, velocity, when) {
+        let envelope = this.envelopes[midi];
+        if (envelope)
+            envelope.cancel(when);
+    }
+    adjustPreset(preset) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise(resolve => wtPlayer.adjustPreset(this.ctx, preset, resolve));
+        });
+    }
+    fetchPreset(name) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let response = yield fetch(this.getURL(name, '_sf2_file'));
+            if (!response.ok)
+                response = yield fetch(this.getURL(name, '_sf2'));
+            if (!response.ok) {
+                let msg = `wavetable preset '${name}' not found`;
+                log('[log-bold|Error]: ' + msg);
+                throw new Error(msg);
+            }
+            let data = yield response.json();
+            return data;
+        });
+    }
+    loadInstrument(name) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let preset = yield this.fetchPreset(name);
+            yield this.adjustPreset(preset);
+            return preset;
+        });
+    }
+    getURL(name, suffix) {
+        // The following files have both _sf2 and _sf2_file ending:
+        // 		0280_LesPaul, 0290_LesPaul, 0291_LesPaul, 0292_LesPaul
+        // 		0300_LesPaul, 0301_LesPaul, 0310_LesPaul
+        // Therefore it is better to load them using their full name
+        if (!name.endsWith('_sf2_file') && !name.endsWith('_sf2'))
+            name += suffix;
+        return `wavetables/${name}.json`;
+    }
+}
+let wtPlayer = new __WEBPACK_IMPORTED_MODULE_1__third_party_wavetable__["a" /* WebAudioFontPlayer */]();
+let samples = {};
+let context = new AudioContext();
+function loadSamples(files) {
+    for (let i = 0; i < files.length; i++)
+        loadSample(files[i]);
+}
+function loadSample(file) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!file.type.startsWith('audio/'))
+            return log(`[log-bold|Error]: file ${file.name} is not an audio file`);
+        let fname = removeExtension(file.name);
+        log(`Loading sample [log-instr|${fname}]...`);
+        let data = yield readSampleFile(file);
+        let buffer = yield decodeSample(data);
+        samples[fname] = buffer;
+        log(`Sample [log-instr|${fname}] ready`);
+    });
+}
+function readSampleFile(file) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise(resolve => {
+            let reader = new FileReader();
+            reader.onload = (loadEvt) => resolve(loadEvt.target.result);
+            reader.readAsArrayBuffer(file);
+        });
+    });
+}
+function decodeSample(data) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise(resolve => {
+            context.decodeAudioData(data, resolve);
+        });
+    });
+}
+function removeExtension(fname) {
+    let pos = fname.lastIndexOf('.');
+    if (pos <= 0)
+        return fname;
+    return fname.substr(0, pos);
+}
+class SampleInstrument {
+    constructor(ctx, preset, name) {
+        this.ctx = ctx;
+        this.baseNote = 69;
+        this.ignoreNote = true;
+        this.loops = 1;
+        this.loopStart = 0;
+        this.loopEnd = 1000;
+        this.buffer = samples[preset];
+        if (!this.buffer)
+            throw new Error(`Sample '${preset}' not found`);
+        this.name = name || preset;
+        this.duration = this.buffer.duration;
+        this.loopEnd = this.duration;
+    }
+    initialize() {
+        return __awaiter(this, void 0, void 0, function* () {
+            logInstrReady(this.name);
+        });
+    }
+    shutdown() { }
+    param(pname, value, rampTime, exponential) {
+        if (this.paramNames().indexOf(pname) < 0)
+            throw new Error(`Parameter '${pname}' not found in instrument '${this.name}'`);
+        let that = this;
+        if (value === undefined)
+            return that[pname];
+        that[pname] = value;
+        return this;
+    }
+    paramNames() {
+        // TODO 'attack' and 'release'
+        return ['baseNote', 'ignoreNote', 'loops', 'loopStart', 'loopEnd'];
+    }
+    noteOn(midi, velocity, when) {
+        let bufferNode = this.ctx.createBufferSource();
+        this.src = bufferNode;
+        bufferNode.buffer = this.buffer;
+        let dst = this.connectGain(velocity);
+        bufferNode.connect(dst);
+        let ratio = this.ignoreNote ? 1 : this.midi2Ratio(midi);
+        bufferNode.playbackRate.value = ratio;
+        this.duration = this.buffer.duration / ratio;
+        this.setupLooping(ratio);
+        bufferNode.start(when);
+    }
+    noteOff(midi, velocity, when) {
+        this.src.stop(when);
+    }
+    connect(node) {
+        this.destination = node;
+    }
+    midi2Ratio(midi) {
+        const semitone = Math.pow(2, 1 / 12);
+        return Math.pow(semitone, midi - this.baseNote);
+    }
+    connectGain(velocity) {
+        let dst = this.destination;
+        if (velocity == 1)
+            return dst;
+        let gain = this.ctx.createGain();
+        gain.gain.value = velocity;
+        gain.connect(dst);
+        return gain;
+    }
+    setupLooping(ratio) {
+        if (this.loops == 1)
+            return;
+        this.src.loop = true;
+        this.src.loopStart = this.loopStart;
+        this.src.loopEnd = this.loopEnd;
+        this.duration = this.loopEnd + (this.loopEnd - this.loopStart) * (this.loops - 1);
+        this.duration = this.duration / ratio;
+    }
+}
+// ------------------------- Log helper -------------------------
+function log(txt) {
+    return Object(__WEBPACK_IMPORTED_MODULE_2__log__["e" /* logToPanel */])(true, true, Object(__WEBPACK_IMPORTED_MODULE_2__log__["f" /* txt2html */])(txt));
+}
+function logInstrReady(name) {
+    log(`Instrument [log-instr|${name}] ready`);
+}
+
+
+/***/ }),
+/* 18 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = handleBuffers;
+/* harmony export (immutable) */ __webpack_exports__["c"] = prevBuffer;
+/* harmony export (immutable) */ __webpack_exports__["b"] = nextBuffer;
+const NUM_BUFFERS = 8;
+let currentBuffer = 1;
+// -------------------- Buffer navigation --------------------
+function handleBuffers(editor) {
+    handleEditorStorage(editor);
+    for (let i = 1; i <= NUM_BUFFERS; i++)
+        registerButton(i, editor);
+    selectSavedBuffer(editor);
+}
+function prevBuffer(editor) {
+    let num = currentBuffer - 1;
+    if (num < 1)
+        num = NUM_BUFFERS;
+    bufferChanged(num, editor);
+}
+function nextBuffer(editor) {
+    let num = currentBuffer + 1;
+    if (num > NUM_BUFFERS)
+        num = 1;
+    bufferChanged(num, editor);
+}
+function registerButton(id, editor) {
+    getButton$(id).click(_ => bufferChanged(id, editor));
+}
+function getButton$(id) {
+    return $('#walc-buffer-' + id);
+}
+function updateButtons(disableId, enableId) {
+    getButton$(disableId)
+        .removeClass('btn-info')
+        .addClass('btn-primary');
+    getButton$(enableId)
+        .removeClass('btn-primary')
+        .addClass('btn-info');
+}
+function bufferChanged(num, editor) {
+    updateButtons(currentBuffer, num);
+    storeBuffer(currentBuffer, editor);
+    loadBuffer(num, editor);
+    currentBuffer = num;
+    localStorage.setItem('code_buffer_selected', '' + currentBuffer);
+    editor.focus();
+}
+function selectSavedBuffer(editor) {
+    let snum = localStorage.getItem('code_buffer_selected') || '1';
+    let num = parseInt(snum, 10);
+    if (!isNaN(num))
+        bufferChanged(num, editor);
+}
+// -------------------- Buffer storage management --------------------
+function handleEditorStorage(editor) {
+    loadBuffer(currentBuffer, editor);
+    watchCodeAndStoreIt(editor);
+}
+function watchCodeAndStoreIt(editor) {
+    let storedCode = getEditorText(editor);
+    let storedPos = editor.getPosition();
+    setInterval(() => {
+        let code = getEditorText(editor);
+        let pos = editor.getPosition();
+        if (storedCode == code
+            && storedPos.lineNumber == pos.lineNumber
+            && storedPos.column == pos.column)
+            return;
+        storeBuffer(currentBuffer, editor);
+        storedCode = code;
+        storedPos = pos;
+    }, 1000);
+}
+// -------------------- Helpers --------------------
+function storeBuffer(num, editor) {
+    let txt = getEditorText(editor);
+    localStorage.setItem('code_buffer_' + num, txt);
+    let prefs = {
+        fontSize: editor.getConfiguration().fontInfo.fontSize,
+        position: editor.getPosition()
+    };
+    localStorage.setItem('code_buffer_prefs_' + num, JSON.stringify(prefs));
+}
+function loadBuffer(num, editor) {
+    let code = localStorage.getItem('code_buffer_' + num) || '';
+    setEditorText(editor, code);
+    let sprefs = localStorage.getItem('code_buffer_prefs_' + num);
+    if (sprefs) {
+        let prefs = JSON.parse(sprefs);
+        editor.setPosition(prefs.position);
+        editor.revealPositionInCenterIfOutsideViewport(prefs.position);
+        editor.updateOptions({ fontSize: prefs.fontSize });
+    }
+}
+function setEditorText(editor, text) {
+    editor.getModel().setValue(text);
+}
+function getEditorText(editor) {
+    return editor.getModel().getValue();
+}
+
+
+/***/ }),
+/* 19 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return random; });
+const seedrandom = __webpack_require__(39);
+let random = {
+    seed(newSeed) {
+        if (newSeed !== undefined)
+            setSeedNumber(newSeed);
+        return seedNumber;
+    },
+    float(from, to) {
+        if (to === undefined)
+            return rng() * from;
+        return from + rng() * (to - from);
+    },
+    integer(from, to) {
+        return from + Math.floor(rng() * (to - from + 1));
+    },
+    dice(sides) {
+        return this.integer(1, sides);
+    },
+    one_in(times) {
+        return this.dice(times) === 1;
+    },
+    choose(...args) {
+        let arr = [];
+        for (let a of args)
+            arr = arr.concat(a);
+        return arr[this.dice(arr.length) - 1];
+    }
+};
+let seedNumber = 0;
+let rng;
+function setSeedNumber(newSeed) {
+    let seed = (newSeed + 123456789).toString();
+    rng = seedrandom(seed);
+    seedNumber = newSeed;
+}
+setSeedNumber(0);
+
+
+/***/ }),
+/* 20 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(21);
+
+
+/***/ }),
+/* 21 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synthUI_synthUI__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__piano_noteInputs__ = __webpack_require__(25);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__synthUI_presets__ = __webpack_require__(30);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__live_coding_editor__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_routes__ = __webpack_require__(48);
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+/**
+ * Main entry point: setup synth editor and keyboard listener.
+ */
+
+
+
+
+
+let graphCanvas;
+let ac;
+let synthUI;
+Object(__WEBPACK_IMPORTED_MODULE_4__utils_routes__["a" /* setupRoutes */])('#synth').then(_ => {
+    graphCanvas = $('#graph-canvas')[0];
+    ac = createAudioContext();
+    synthUI = new __WEBPACK_IMPORTED_MODULE_0__synthUI_synthUI__["a" /* SynthUI */](ac, graphCanvas, $('#node-params'), $('#audio-graph-fft'), $('#audio-graph-osc'));
+    setupPanels()
+        .then(editor => checkSearch(editor));
+});
+function createAudioContext() {
+    const CtxClass = window.AudioContext || window.webkitAudioContext;
+    return new CtxClass();
+}
+function setupPanels() {
+    setupPalette();
+    const inputs = new __WEBPACK_IMPORTED_MODULE_1__piano_noteInputs__["a" /* NoteInputs */](synthUI);
+    const prsts = new __WEBPACK_IMPORTED_MODULE_2__synthUI_presets__["a" /* Presets */](synthUI);
+    prsts.beforeSave = (json) => $.extend(json, { keyboard: inputs.piano.toJSON() });
+    prsts.afterLoad = (json) => inputs.piano.fromJSON(json.keyboard);
+    $(function () {
+        $('#synth').focus();
+    });
+    $(document).on('route:show', (e, h) => {
+        if (h == '#synth')
+            prsts.selectBestNode();
+    });
+    return Object(__WEBPACK_IMPORTED_MODULE_3__live_coding_editor__["a" /* createEditor */])(ac, prsts, synthUI);
+}
+function setupPalette() {
+    $(function () {
+        let nano = $('.nano');
+        nano.nanoScroller({ preventPageScrolling: true });
+    });
+}
+function checkSearch(editor) {
+    if (!location.search || location.search.length <= 0
+        || !location.search.startsWith('?'))
+        return;
+    let sdata = location.search.substr(1).split('&');
+    let result = {};
+    for (let param of sdata) {
+        let [k, v] = param.split('=');
+        result[k] = v;
+    }
+    applySearch(result, editor);
+}
+function applySearch(search, editor) {
+    if (search.codeURL)
+        fetchCode(search.codeURL, editor);
+}
+function fetchCode(url, editor) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let r = yield fetch(url);
+        if (!r.ok)
+            return;
+        let code = yield r.text();
+        location.hash = '#live-coding';
+        let edtxt = editor.getModel().getValue() || '';
+        if (edtxt.trim().length > 0 && !edtxt.trim().startsWith('/*'))
+            edtxt = '\n/*\n' + edtxt + '\n*/\n';
+        editor.getModel().setValue(code + edtxt);
+    });
+}
+
+
+/***/ }),
+/* 22 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__graph__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__synth_synth__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_modern__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_popups__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__paramsUI__ = __webpack_require__(24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__analyzer__ = __webpack_require__(15);
+
+
+
+
+/**
+ * Customizes the generic graph editor in order to manipulate and control
+ * a graph of AudioNodes
+ */
+class SynthUI {
+    constructor(ac, graphCanvas, jqParams, jqFFT, jqOsc) {
+        this.gr = new __WEBPACK_IMPORTED_MODULE_0__graph__["a" /* Graph */](graphCanvas);
+        this.gr.handler = new SynthGraphHandler(this, jqParams, jqFFT, jqOsc);
+        this.synth = new __WEBPACK_IMPORTED_MODULE_1__synth_synth__["b" /* Synth */](ac);
+        this.registerPaletteHandler();
+        this.addOutputNode();
+    }
+    addOutputNode() {
+        // TODO avoid using hardcoded position
+        const out = new __WEBPACK_IMPORTED_MODULE_0__graph__["b" /* Node */](500, 210, 'Out');
+        out.data = new GraphNodeData(out);
+        this.synth.initOutputNodeData(out.data, this.synth.ac.destination);
+        this.outNode = out.data.anode;
+        this.gr.addNode(out, 'node-out');
+        this.initNodeDimensions(out);
+    }
+    registerPaletteHandler() {
+        let self = this; // JQuery sets 'this' in event handlers
+        $('.palette .node').click(function (evt) {
+            let elem = $(this);
+            let classAttr = elem.attr('class') || '';
+            let classes = classAttr.split(/\s+/).filter(c => c != 'node');
+            let type = elem.attr('data-type');
+            if (!type)
+                return;
+            self.addNode(type, elem.find('.node-text').html(), classes.join(' '));
+        });
+    }
+    addNode(type, text, classes) {
+        let { x, y } = this.findFreeSpot();
+        const n = new __WEBPACK_IMPORTED_MODULE_0__graph__["b" /* Node */](x, y, text);
+        this.createNodeData(n, type);
+        this.gr.addNode(n, classes);
+        this.gr.selectNode(n);
+    }
+    removeNode(n) {
+        this.gr.removeNode(n);
+    }
+    removeNodeData(data) {
+        this.synth.removeNodeData(data);
+    }
+    createNodeData(n, type) {
+        n.data = new GraphNodeData(n);
+        if (type == 'out') {
+            this.synth.initOutputNodeData(n.data, this.synth.ac.destination);
+            this.outNode = n.data.anode;
+        }
+        else
+            this.synth.initNodeData(n.data, type);
+    }
+    // ----- Rest of methods are used to find a free spot in the canvas -----
+    findFreeSpot() {
+        let maxDist = 0;
+        const canvasW = this.gr.canvas.width;
+        const canvasH = this.gr.canvas.height;
+        let x = canvasW / 2;
+        let y = canvasH / 2;
+        for (let xx = 10; xx < canvasW - this.nw; xx += 10) {
+            for (let yy = 10; yy < canvasH - this.nh; yy += 10) {
+                const dist = this.dist2nearestNode(xx, yy);
+                if (dist > maxDist && dist < this.nw * 3) {
+                    x = xx;
+                    y = yy;
+                    maxDist = dist;
+                }
+            }
+        }
+        return { x, y };
+    }
+    dist2nearestNode(x, y) {
+        let minDist = Number.MAX_VALUE;
+        for (const n of this.gr.nodes) {
+            const dx = x - n.x;
+            const dy = y - n.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < minDist)
+                minDist = dist;
+        }
+        return minDist;
+    }
+    initNodeDimensions(n) {
+        this.nw = n.element.outerWidth() || 0;
+        this.nh = n.element.outerHeight() || 0;
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = SynthUI;
+
+
+
+class GraphNodeData extends __WEBPACK_IMPORTED_MODULE_1__synth_synth__["a" /* NodeData */] {
+    constructor(node) {
+        super();
+        this.node = node;
+    }
+    getInputs() {
+        const result = [];
+        for (const nin of this.node.inputs)
+            result.push(nin.data);
+        return result;
+    }
+}
+class SynthGraphHandler {
+    constructor(synthUI, jqParams, jqFFT, jqOsc) {
+        this.synthUI = synthUI;
+        this.jqParams = jqParams;
+        this.arrowColor = getCssFromClass('arrow', 'color');
+        this.ctrlArrowColor = getCssFromClass('arrow-ctrl', 'color');
+        this.registerNodeDelete(jqParams.parent()[0]);
+        this.analyzer = new __WEBPACK_IMPORTED_MODULE_5__analyzer__["a" /* AudioAnalyzer */](jqFFT, jqOsc);
+    }
+    registerNodeDelete(elem) {
+        $(Object(__WEBPACK_IMPORTED_MODULE_2__utils_modern__["a" /* focusable */])(elem)).keydown((evt) => {
+            if (!(evt.keyCode == 46 || (evt.keyCode == 8 && evt.metaKey)))
+                return;
+            if (__WEBPACK_IMPORTED_MODULE_3__utils_popups__["d" /* isOpen */])
+                return;
+            const selectedNode = this.getSelectedNode();
+            if (!selectedNode)
+                return;
+            if (selectedNode.data.isOut)
+                return;
+            __WEBPACK_IMPORTED_MODULE_3__utils_popups__["c" /* confirm */]('Delete node?', 'Please confirm node deletion', confirmed => {
+                if (!confirmed)
+                    return;
+                this.synthUI.removeNode(selectedNode);
+                this.jqParams.empty();
+            });
+        });
+    }
+    getSelectedNode() {
+        for (const node of this.synthUI.gr.nodes)
+            if (node.element.hasClass('selected'))
+                return node;
+        return null;
+    }
+    hasAudioParams(ndata) {
+        const aparams = Object.keys(ndata.nodeDef.params)
+            .filter(pname => ndata.anode[pname] instanceof AudioParam);
+        return aparams.length > 0;
+    }
+    // --------------- Implementation of the GraphHandler interface ---------------
+    canBeSource(n) {
+        const data = n.data;
+        return data.anode != this.synthUI.outNode;
+    }
+    canConnect(src, dst) {
+        const srcData = src.data;
+        const dstData = dst.data;
+        if (srcData.nodeDef.control)
+            return this.hasAudioParams(dstData);
+        return dstData.anode.numberOfInputs > 0;
+    }
+    connected(src, dst) {
+        this.synthUI.synth.connectNodes(src.data, dst.data);
+        // TODO update paramsUI in case selected node is src
+    }
+    disconnected(src, dst) {
+        this.synthUI.synth.disconnectNodes(src.data, dst.data);
+    }
+    nodeSelected(n) {
+        const data = n.data;
+        Object(__WEBPACK_IMPORTED_MODULE_4__paramsUI__["a" /* renderParams */])(data, this.jqParams);
+    }
+    nodeRemoved(n) {
+        this.synthUI.removeNodeData(n.data);
+    }
+    getArrowColor(src, dst) {
+        const srcData = src.data;
+        return srcData.nodeDef.control ? this.ctrlArrowColor : this.arrowColor;
+    }
+    data2json(n) {
+        return this.synthUI.synth.nodeData2json(n.data);
+    }
+    json2data(n, json) {
+        this.synthUI.createNodeData(n, json.type);
+        this.synthUI.synth.json2NodeData(json, n.data);
+    }
+    graphLoaded() {
+        this.analyzer.analyze(this.synthUI.outNode);
+    }
+    graphSaved() { }
+}
+function getCssFromClass(className, propName) {
+    const tmp = $('<div>').addClass(className);
+    $('body').append(tmp);
+    const propValue = tmp.css(propName);
+    tmp.remove();
+    return propValue;
+}
+
+
+/***/ }),
+/* 23 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+const SHIFT_KEY = 16;
+const CAPS_LOCK = 20;
+/**
+ * A generic directed graph editor.
+ */
+class Graph {
+    constructor(canvas) {
+        this.nodes = [];
+        this.lastId = 0;
+        if (!canvas.parentElement)
+            return;
+        this.nodeCanvas = $(canvas.parentElement);
+        this.canvas = canvas;
+        const gc = canvas.getContext('2d');
+        if (!gc)
+            return;
+        this.graphDraw = new GraphDraw(this, gc, canvas);
+        this.graphInteract = new GraphInteraction(this, gc);
+        this.handler = new DefaultGraphHandler();
+    }
+    addNode(n, classes) {
+        n.id = this.lastId++;
+        n.element = $('<div>')
+            .addClass('node')
+            .html(`<div class="node-text">${n.name}</div>`)
+            .css({ left: n.x, top: n.y, cursor: 'default' });
+        if (classes)
+            n.element.addClass(classes);
+        this.nodeCanvas.append(n.element);
+        this.nodes.push(n);
+        this.graphInteract.registerNode(n);
+        this.draw();
+    }
+    removeNode(n) {
+        const pos = this.nodes.indexOf(n);
+        if (pos < 0)
+            return console.warn(`Node '${n.name}' is not a member of graph`);
+        for (const nn of this.nodes) {
+            if (n == nn)
+                continue;
+            this.disconnect(n, nn);
+            this.disconnect(nn, n);
+        }
+        this.nodes.splice(pos, 1);
+        n.element.remove();
+        this.handler.nodeRemoved(n);
+        this.draw();
+    }
+    selectNode(n) {
+        this.graphInteract.selectNode(n);
+    }
+    connect(srcn, dstn) {
+        if (!this.handler.canBeSource(srcn) || !this.handler.canConnect(srcn, dstn))
+            return false;
+        dstn.addInput(srcn);
+        this.handler.connected(srcn, dstn);
+        return true;
+    }
+    disconnect(srcn, dstn) {
+        if (!dstn.removeInput(srcn))
+            return false;
+        this.handler.disconnected(srcn, dstn);
+        return true;
+    }
+    draw() {
+        this.graphDraw.draw();
+    }
+    toJSON() {
+        const jsonNodes = [];
+        const jsonNodeData = [];
+        for (const node of this.nodes) {
+            const nodeInputs = [];
+            for (const nin of node.inputs)
+                nodeInputs.push(nin.id);
+            jsonNodes.push({
+                id: node.id,
+                x: node.x,
+                y: node.y,
+                name: node.name,
+                inputs: nodeInputs,
+                classes: this.getAppClasses(node)
+            });
+            jsonNodeData.push(this.handler.data2json(node));
+        }
+        const jsonGraph = {
+            nodes: jsonNodes,
+            nodeData: jsonNodeData
+        };
+        this.handler.graphSaved();
+        return jsonGraph;
+    }
+    fromJSON(json) {
+        // First, remove existing nodes
+        while (this.nodes.length > 0)
+            this.removeNode(this.nodes[0]);
+        this.lastId = 0;
+        // Then add nodes
+        for (const jn of json.nodes) {
+            const node = new Node(jn.x, jn.y, jn.name);
+            this.addNode(node);
+            node.id = jn.id; // Override id after being initialized inside addNode
+            node.element.attr('class', jn.classes);
+        }
+        // Then connect them
+        const gh = this.handler;
+        this.handler = new DefaultGraphHandler(); // Disable graph handler
+        for (let i = 0; i < json.nodes.length; i++) {
+            for (const inum of json.nodes[i].inputs) {
+                const src = this.nodeById(inum);
+                if (src)
+                    this.connect(src, this.nodes[i]);
+            }
+        }
+        this.handler = gh; // Restore graph handler
+        // Then set their data
+        for (let i = 0; i < json.nodes.length; i++) {
+            this.handler.json2data(this.nodes[i], json.nodeData[i]);
+        }
+        // Then notify connections to handler
+        for (const dst of this.nodes)
+            for (const src of dst.inputs)
+                this.handler.connected(src, dst);
+        // And finally, draw the new graph
+        this.draw();
+        this.handler.graphLoaded();
+    }
+    nodeById(id) {
+        for (const node of this.nodes)
+            if (node.id === id)
+                return node;
+        return null;
+    }
+    getAppClasses(n) {
+        const classes = n.element[0].className.split(/\s+/);
+        const result = [];
+        for (const cname of classes) {
+            if (cname == 'selected')
+                continue;
+            if (cname.substr(0, 3) == 'ui-')
+                continue;
+            result.push(cname);
+        }
+        return result.join(' ');
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Graph;
+
+/**
+ * A node in the graph. Application-specific data can be attached
+ * to its data property.
+ */
+class Node {
+    constructor(x, y, name) {
+        this.inputs = [];
+        this.x = x;
+        this.y = y;
+        this.name = name.replace(/<[^<]*>/g, t => t == '<br>' ? t : '');
+    }
+    addInput(n) {
+        this.inputs.push(n);
+    }
+    removeInput(n) {
+        const pos = this.inputs.indexOf(n);
+        if (pos < 0)
+            return false;
+        this.inputs.splice(pos, 1);
+        return true;
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["b"] = Node;
+
+// ------------------------- Privates -------------------------
+/** Default, do-nothing GraphHandler implementation */
+class DefaultGraphHandler {
+    canBeSource(n) { return true; }
+    canConnect(src, dst) { return true; }
+    connected(src, dst) { }
+    disconnected(src, dst) { }
+    nodeSelected(n) { }
+    nodeRemoved(n) { }
+    getArrowColor(src, dst) { return 'black'; }
+    data2json(n) { return {}; }
+    json2data(n, json) { }
+    graphLoaded() { }
+    graphSaved() { }
+}
+/**
+ * Handles all UI interaction with graph in order to move, select, connect
+ * and disconnect nodes.
+ */
+class GraphInteraction {
+    constructor(graph, gc) {
+        this.dragging = false;
+        this.graph = graph;
+        this.gc = gc;
+        this.setupConnectHandler(gc.canvas);
+    }
+    registerNode(n) {
+        n.element.draggable({
+            containment: 'parent',
+            distance: 5,
+            stack: '.node',
+            drag: (event, ui) => {
+                n.x = ui.position.left;
+                n.y = ui.position.top;
+                this.graph.draw();
+            },
+            start: (event, ui) => {
+                this.dragging = true;
+                ui.helper.css('cursor', 'move');
+            },
+            stop: (event, ui) => {
+                ui.helper.css('cursor', 'default');
+                this.dragging = false;
+            }
+        });
+        n.element.click(_ => {
+            if (this.dragging)
+                return;
+            if (this.selectedNode == n)
+                return;
+            this.selectNode(n);
+        });
+    }
+    selectNode(n) {
+        if (this.selectedNode)
+            this.selectedNode.element.removeClass('selected');
+        n.element.addClass('selected');
+        this.selectedNode = n;
+        this.graph.handler.nodeSelected(n);
+    }
+    setupConnectHandler(elem) {
+        if (!elem)
+            return;
+        let srcn;
+        let connecting = false;
+        while (elem != null && elem.tabIndex < 0
+            && elem.nodeName.toLowerCase() != 'body')
+            elem = elem.parentElement;
+        if (!elem)
+            return;
+        $(elem).keydown(evt => {
+            if (evt.keyCode == CAPS_LOCK)
+                return this.setGrid([20, 20]);
+            if (evt.keyCode != SHIFT_KEY || connecting)
+                return;
+            srcn = this.getNodeFromDOM(this.getElementUnderMouse());
+            if (!srcn)
+                return;
+            if (!this.graph.handler.canBeSource(srcn)) {
+                srcn.element.css('cursor', 'not-allowed');
+                return;
+            }
+            connecting = true;
+            this.registerRubberBanding(srcn);
+        })
+            .keyup(evt => {
+            if (evt.keyCode == CAPS_LOCK)
+                return this.setGrid(null);
+            if (evt.keyCode != SHIFT_KEY)
+                return;
+            connecting = false;
+            this.deregisterRubberBanding();
+            const dstn = this.getNodeFromDOM(this.getElementUnderMouse());
+            if (!dstn || srcn == dstn)
+                return;
+            if (srcn)
+                this.connectOrDisconnect(srcn, dstn);
+            this.graph.draw();
+        });
+    }
+    setGrid(grid) {
+        $(this.graph.nodeCanvas).find('.node').draggable('option', 'grid', grid);
+    }
+    connectOrDisconnect(srcn, dstn) {
+        if (this.graph.disconnect(srcn, dstn))
+            return;
+        else
+            this.graph.connect(srcn, dstn);
+    }
+    getElementUnderMouse() {
+        const hovered = $(':hover');
+        if (hovered.length <= 0)
+            return null;
+        const jqNode = $(hovered.get(hovered.length - 1));
+        if (jqNode.hasClass('node'))
+            return jqNode;
+        if (jqNode.parent().hasClass('node'))
+            return jqNode.parent();
+        return null;
+    }
+    registerRubberBanding(srcn) {
+        const ofs = this.graph.nodeCanvas.offset();
+        if (!ofs)
+            return;
+        const dstn = new Node(0, 0, '');
+        dstn.w = 0;
+        dstn.h = 0;
+        $(this.graph.nodeCanvas).on('mousemove', evt => {
+            if (!evt)
+                return;
+            let cltx = evt.clientX || 0;
+            let clty = evt.clientY || 0;
+            dstn.x = cltx - ofs.left;
+            let scrollTop = document.scrollingElement.scrollTop;
+            dstn.y = clty - ofs.top + scrollTop;
+            this.graph.draw();
+            this.gc.save();
+            this.gc.setLineDash([10]);
+            this.graph.graphDraw.drawArrow(srcn, dstn);
+            this.gc.restore();
+        });
+        // Setup cursors
+        this.graph.nodeCanvas.css('cursor', 'crosshair');
+        this.graph.nodeCanvas.find('.node').css('cursor', 'crosshair');
+        for (const n of this.graph.nodes)
+            if (n != srcn && !this.graph.handler.canConnect(srcn, n))
+                n.element.css('cursor', 'not-allowed');
+    }
+    deregisterRubberBanding() {
+        this.graph.nodeCanvas.css('cursor', '');
+        this.graph.nodeCanvas.find('.node').css('cursor', 'default');
+        this.graph.nodeCanvas.off('mousemove');
+        this.graph.graphDraw.draw();
+    }
+    getNodeFromDOM(jqNode) {
+        if (!jqNode)
+            return null;
+        for (const n of this.graph.nodes)
+            if (n.element[0] == jqNode[0])
+                return n;
+        return null;
+    }
+}
+/* unused harmony export GraphInteraction */
+
+/**
+ * Handles graph drawing by rendering arrows in a canvas.
+ */
+class GraphDraw {
+    constructor(graph, gc, canvas) {
+        this.arrowHeadLen = 10;
+        this.graph = graph;
+        this.gc = gc;
+        this.canvas = canvas;
+        this.nodes = graph.nodes;
+    }
+    draw() {
+        this.clearCanvas();
+        this.gc.lineWidth = 2;
+        for (const ndst of this.nodes)
+            for (const nsrc of ndst.inputs)
+                this.drawArrow(nsrc, ndst);
+    }
+    clearCanvas() {
+        this.gc.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+    drawArrow(srcNode, dstNode) {
+        const srcPoint = this.getNodeCenter(srcNode);
+        const dstPoint = this.getNodeCenter(dstNode);
+        this.gc.strokeStyle = this.graph.handler.getArrowColor(srcNode, dstNode);
+        this.gc.beginPath();
+        this.gc.moveTo(srcPoint.x, srcPoint.y);
+        this.gc.lineTo(dstPoint.x, dstPoint.y);
+        this.drawArrowTip(srcPoint, dstPoint);
+        this.gc.closePath();
+        this.gc.stroke();
+    }
+    drawArrowTip(src, dst) {
+        const posCoef = 0.6;
+        const mx = src.x + (dst.x - src.x) * posCoef;
+        const my = src.y + (dst.y - src.y) * posCoef;
+        let angle = Math.atan2(dst.y - src.y, dst.x - src.x);
+        this.gc.moveTo(mx, my);
+        this.gc.lineTo(mx - this.arrowHeadLen * Math.cos(angle - Math.PI / 6), my - this.arrowHeadLen * Math.sin(angle - Math.PI / 6));
+        this.gc.moveTo(mx, my);
+        this.gc.lineTo(mx - this.arrowHeadLen * Math.cos(angle + Math.PI / 6), my - this.arrowHeadLen * Math.sin(angle + Math.PI / 6));
+    }
+    getNodeCenter(n) {
+        n.w = n.w !== undefined ? n.w : n.element.outerWidth() || 0;
+        n.h = n.h !== undefined ? n.h : n.element.outerHeight() || 0;
+        return { x: n.x + n.w / 2, y: n.y + n.h / 2 };
+    }
+}
+/* unused harmony export GraphDraw */
+
+
+
+/***/ }),
+/* 24 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = renderParams;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_modern__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_file__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_popups__ = __webpack_require__(6);
+
+
+
+/**
+ * Renders the UI controls associated with the parameters of a given node
+ */
+function renderParams(ndata, panel) {
+    panel.empty();
+    const boxes = [];
+    if (ndata.nodeDef.control && ndata.controlParams) {
+        let box = renderParamControl(ndata, panel);
+        if (box)
+            boxes.push(box);
+    }
+    const params = Object.keys(ndata.nodeDef.params || {});
+    if (params.length <= 0)
+        return;
+    for (const param of params)
+        if (ndata.anode[param] instanceof AudioParam) {
+            boxes.push(renderAudioParam(ndata.anode, ndata.nodeDef, param, panel));
+        }
+        else {
+            let box = renderOtherParam(ndata.anode, ndata.nodeDef, param, panel);
+            if (box)
+                boxes.push(box);
+        }
+    positionBoxes(panel, boxes);
+}
+function positionBoxes(panel, boxes) {
+    if (boxes.length < 1)
+        return;
+    const pw = panel.width() || 0;
+    const bw = boxes[0].width() || 0;
+    const sep = (pw - boxes.length * bw) / (boxes.length + 1);
+    let x = sep;
+    for (const box of boxes) {
+        box.css({
+            position: 'relative',
+            left: x
+        });
+        x += sep;
+    }
+}
+function renderAudioParam(anode, ndef, param, panel) {
+    const pdef = ndef.params[param];
+    const aparam = anode[param];
+    if (aparam['_value'])
+        aparam.value = aparam['_value'];
+    return renderSlider(panel, pdef, param, aparam.value, value => {
+        aparam.value = value;
+        aparam['_value'] = value;
+    });
+}
+function renderParamControl(ndata, panel) {
+    if (!ndata.controlParams)
+        return null;
+    const combo = renderCombo(panel, ndata.controlParams, ndata.controlParam, 'Controlling');
+    combo.change(_ => {
+        if (ndata.controlParam)
+            ndata.anode.disconnect(ndata.controlTarget[ndata.controlParam]);
+        ndata.controlParam = '' + combo.val();
+        ndata.anode.connect(ndata.controlTarget[ndata.controlParam]);
+    });
+    return combo.parent();
+}
+const customRenderMethods = {
+    renderBufferData,
+    renderSoundBank
+};
+function renderOtherParam(anode, ndef, param, panel) {
+    const pdef = ndef.params[param];
+    if (pdef.choices) {
+        const combo = renderCombo(panel, pdef.choices, anode[param], ucfirst(param));
+        combo.change(_ => {
+            anode[param] = combo.val();
+        });
+        return combo.parent();
+    }
+    else if (pdef.min != undefined)
+        return renderSlider(panel, pdef, param, anode[param], value => anode[param] = value);
+    else if (typeof pdef.initial == 'boolean')
+        return renderBoolean(panel, pdef, param, anode, ucfirst(param));
+    else if (pdef.phandler)
+        return customRenderMethods[pdef.phandler.uiRender](panel, pdef, anode, param, ucfirst(param));
+    return null;
+}
+function renderSlider(panel, pdef, param, value, setValue) {
+    const sliderBox = $('<div class="slider-box">');
+    const slider = $('<input type="range" orient="vertical">')
+        .attr('min', 0)
+        .attr('max', 1)
+        .attr('step', 0.001)
+        .attr('value', param2slider(value, pdef));
+    const numInput = $('<input type="number">')
+        .attr('min', pdef.min || 0)
+        .attr('max', pdef.max || 1)
+        .attr('value', truncateFloat(value, 5));
+    sliderBox.append(numInput);
+    sliderBox.append(slider);
+    sliderBox.append($('<span><br/>' + ucfirst(param) + '</span>'));
+    panel.append(sliderBox);
+    slider.on('input', _ => {
+        const v = slider2param(parseFloat('' + slider.val()), pdef);
+        numInput.val(truncateFloat(v, 5));
+        setValue(v);
+    });
+    numInput.on('input', _ => {
+        const v = parseFloat('' + numInput.val());
+        if (isNaN(v))
+            return;
+        slider.val(param2slider(v, pdef));
+        setValue(v);
+    });
+    return sliderBox;
+}
+function renderCombo(panel, choices, selected, label) {
+    const choiceBox = $('<div class="choice-box">');
+    const combo = $('<select>').attr('size', choices.length || 2);
+    for (const choice of choices) {
+        const option = $('<option>').text(choice);
+        if (choice == selected)
+            option.attr('selected', 'selected');
+        combo.append(option);
+    }
+    choiceBox.append(combo);
+    combo.after('<br/><br/>' + label);
+    panel.append(choiceBox);
+    return combo;
+}
+function renderBoolean(panel, pdef, param, anode, label) {
+    const box = $('<div class="choice-box">');
+    const button = $('<button class="btn btn-info" data-toggle="button" aria-pressed="false">');
+    box.append(button);
+    button.after('<br/><br/>' + label);
+    panel.append(box);
+    if (anode[param]) {
+        button.text('Enabled');
+        button.addClass('active');
+        button.attr('aria-pressed', 'true');
+    }
+    else {
+        button.text('Disabled');
+        button.removeClass('active');
+        button.attr('aria-pressed', 'false');
+    }
+    button.click(_ => {
+        anode[param] = !anode[param];
+        button.text(anode[param] ? 'Enabled' : 'Disabled');
+    });
+    return box;
+}
+function param2slider(paramValue, pdef) {
+    let min = pdef.min || 0;
+    let max = pdef.max || 1;
+    if (pdef.linear)
+        return (paramValue - min) / (max - min);
+    else
+        return Object(__WEBPACK_IMPORTED_MODULE_0__utils_modern__["b" /* linear2log */])(paramValue, min, max);
+}
+function slider2param(sliderValue, pdef) {
+    let min = pdef.min || 0;
+    let max = pdef.max || 1;
+    if (pdef.linear)
+        return min + sliderValue * (max - min);
+    else
+        return Object(__WEBPACK_IMPORTED_MODULE_0__utils_modern__["c" /* log2linear */])(sliderValue, min, max);
+}
+// -------------------- Custom parameter rendering --------------------
+function renderBufferData(panel, pdef, anode, param, label) {
+    const box = $('<div class="choice-box">');
+    const button = $(`
+		<span class="btn btn-primary upload">
+			<input type="file">
+			Load&nbsp;
+			<span class="glyphicon glyphicon-open" aria-hidden="true"></span>
+		</span>`);
+    box.append(button);
+    button.after('<br/><br/>' + label);
+    panel.append(box);
+    let loading = true;
+    button.find('input').change(evt => {
+        // Trigger asynchronous upload & decode
+        __WEBPACK_IMPORTED_MODULE_1__utils_file__["e" /* uploadArrayBuffer */](evt, soundFile => {
+            anode['_encoded'] = soundFile;
+            anode.context.decodeAudioData(soundFile, (buffer) => {
+                anode['_buffer'] = buffer;
+                loading = false;
+                // TODO capture errors and report them with popups.alert
+                __WEBPACK_IMPORTED_MODULE_2__utils_popups__["b" /* close */]();
+            });
+        });
+        // Open progress popup
+        setTimeout(_ => {
+            if (loading)
+                __WEBPACK_IMPORTED_MODULE_2__utils_popups__["e" /* progress */]('Loading and decoding audio data...');
+        }, 300);
+    });
+    return box;
+}
+function setComboOptions(combo, names) {
+    combo.empty();
+    for (const name of names)
+        combo.append('<option>' + name + '</option>');
+}
+function renderSoundBank(panel, pdef, anode, param, label) {
+    const combo = renderCombo(panel, [], '', 'Buffers');
+    combo.css({
+        marginBottom: '10px', marginLeft: '-20px',
+        width: '140px', height: '100px',
+        overflowX: 'auto'
+    });
+    const buttons = $(`<div style="margin-bottom: -24px">
+		<span class="btn btn-primary upload">
+			<input type="file">
+			<span class="glyphicon glyphicon-open" aria-hidden="true"></span>
+		</span>
+		&nbsp;&nbsp;&nbsp;
+		<span class="btn btn-danger">
+			<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+		</span></div>`);
+    combo.after(buttons);
+    const bufs = anode['_buffers'];
+    const encs = anode['_encodedBuffers'];
+    const names = anode['_names'];
+    setComboOptions(combo, names);
+    buttons.find('input').change(evt => {
+        // Trigger asynchronous upload & decode
+        __WEBPACK_IMPORTED_MODULE_1__utils_file__["e" /* uploadArrayBuffer */](evt, (fileData, f) => {
+            encs.push(fileData);
+            anode.context.decodeAudioData(fileData, (buffer) => bufs.push(buffer));
+            names.push(f.name);
+            setComboOptions(combo, names);
+        });
+    });
+    buttons.find('.btn-danger').click(_ => {
+        const idx = names.indexOf(combo.val());
+        if (idx < 0)
+            return;
+        [encs, bufs, names].forEach(a => a.splice(idx, 1));
+        setComboOptions(combo, names);
+    });
+    return combo.parent();
+}
+// -------------------- Misc utilities --------------------
+function ucfirst(str) {
+    return str[0].toUpperCase() + str.substring(1);
+}
+function truncateFloat(f, len) {
+    let s = '' + f;
+    s = s.substr(0, len);
+    if (s[s.length - 1] == '.')
+        return s.substr(0, len - 1);
+    else
+        return s;
+}
+
+
+/***/ }),
+/* 25 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__keyboard__ = __webpack_require__(26);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__midi__ = __webpack_require__(27);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__piano__ = __webpack_require__(28);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__arpeggiator__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__synth_instrument__ = __webpack_require__(8);
+
+
+
+
+
+const NUM_VOICES = 8;
+/**
+ * Manages all note-generation inputs:
+ * 	- PC Keyboard
+ * 	- Virtual piano keyboard
+ *	- An external MIDI keyboard
+ * Handles switching to polyphonic mode and back to mono
+ */
+class NoteInputs {
+    constructor(synthUI) {
+        this.synthUI = synthUI;
+        this.poly = false;
+        // Setup piano panel
+        let piano = new __WEBPACK_IMPORTED_MODULE_2__piano__["a" /* PianoKeyboard */]($('#piano'));
+        this.piano = piano;
+        piano.noteOn = (midi) => this.arpeggiator.sendNoteOn(midi, 1);
+        piano.noteOff = (midi) => this.arpeggiator.sendNoteOff(midi, 1);
+        // Register poly on/off handlers
+        piano.polyOn = () => this.polyOn();
+        piano.polyOff = () => this.polyOff();
+        // Setup PC keyboard
+        let kb = this.setupPCKeyboard(piano);
+        // Bind piano octave with PC keyboard
+        kb.baseNote = piano.baseNote;
+        piano.octaveChanged = baseNote => kb.baseNote = baseNote;
+        this.setupEnvelopeAnimation(piano);
+        // Setup arpeggiator
+        this.setupArpeggiator(piano, synthUI.synth.ac);
+        // Setup MIDI keyboard
+        this.setupMidiKeyboard(piano);
+    }
+    setupPCKeyboard(piano) {
+        let kb = new __WEBPACK_IMPORTED_MODULE_0__keyboard__["a" /* Keyboard */]('#synth');
+        kb.noteOn = (midi) => {
+            if (document.activeElement.nodeName == 'INPUT' &&
+                document.activeElement.getAttribute('type') != 'range')
+                return;
+            this.arpeggiator.sendNoteOn(midi, 1);
+            piano.displayKeyDown(midi);
+        };
+        kb.noteOff = (midi) => {
+            this.arpeggiator.sendNoteOff(midi, 1);
+            piano.displayKeyUp(midi);
+        };
+        return kb;
+    }
+    setupMidiKeyboard(piano) {
+        let midi = new __WEBPACK_IMPORTED_MODULE_1__midi__["a" /* MidiKeyboard */]();
+        midi.noteOn = (note, velocity, channel) => {
+            this.arpeggiator.sendNoteOn(note, 1);
+            piano.displayKeyDown(note);
+        };
+        midi.noteOff = (note, velocity, channel) => {
+            this.arpeggiator.sendNoteOff(note, 1);
+            piano.displayKeyUp(note);
+        };
+    }
+    setupEnvelopeAnimation(piano) {
+        const loaded = this.synthUI.gr.handler.graphLoaded;
+        this.synthUI.gr.handler.graphLoaded = function () {
+            loaded.bind(this.synthUI.gr.handler)();
+            let adsr = null;
+            for (const node of this.synthUI.gr.nodes) {
+                const data = node.data;
+                if (data.type == 'ADSR') {
+                    adsr = data.anode;
+                    break;
+                }
+            }
+            piano.setEnvelope(adsr || { attack: 0, release: 0 });
+        };
+    }
+    setupArpeggiator(piano, ac) {
+        this.arpeggiator = new __WEBPACK_IMPORTED_MODULE_3__arpeggiator__["a" /* Arpeggiator */](ac);
+        piano.arpeggioChanged = (bpm, mode, octaves) => {
+            this.arpeggiator.mode = mode;
+            this.arpeggiator.octaves = octaves;
+            this.arpeggiator.bpm = bpm;
+        };
+        this.arpeggiator.noteOn =
+            (midi, velocity, time) => this.noteOn(midi, velocity, time);
+        this.arpeggiator.noteOff =
+            (midi, velocity, time) => this.noteOff(midi, velocity, time);
+    }
+    noteOn(midi, velocity, time) {
+        this.lastNote = midi;
+        const portamento = this.piano.getPortamento();
+        if (this.poly) {
+            this.instrument.portamento.time = portamento;
+            this.instrument.noteOn(midi, velocity, time);
+        }
+        else {
+            this.synthUI.synth.portamento.time = portamento;
+            this.synthUI.synth.noteOn(midi, velocity, time);
+        }
+    }
+    noteOff(midi, velocity, time) {
+        this.lastNote = 0;
+        if (this.poly)
+            this.instrument.noteOff(midi, velocity, time);
+        else
+            this.synthUI.synth.noteOff(midi, velocity, time);
+    }
+    polyOn() {
+        if (this.lastNote)
+            this.noteOff(this.lastNote, 1);
+        this.poly = true;
+        const json = this.synthUI.gr.toJSON();
+        this.instrument = new __WEBPACK_IMPORTED_MODULE_4__synth_instrument__["a" /* Instrument */](this.synthUI.synth.ac, json, NUM_VOICES, this.synthUI.outNode);
+    }
+    polyOff() {
+        this.poly = false;
+        this.instrument.close();
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = NoteInputs;
+
+
+
+/***/ }),
+/* 26 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+const KB_NOTES = 'ZSXDCVGBHNJMQ2W3ER5T6Y7UI9O0P';
+const BASE_NOTE = 36;
+/**
+ * Provides a piano keyboard using the PC keyboard.
+ * Listens to keyboard events and generates MIDI-style noteOn/noteOff events.
+ */
+class Keyboard {
+    constructor(kbTarget = 'body') {
+        this.setupHandler(kbTarget);
+        this.baseNote = BASE_NOTE;
+    }
+    setupHandler(kbTarget) {
+        const pressedKeys = {};
+        $(kbTarget)
+            .on('keydown', evt => {
+            let kcode = evt.keyCode || 0;
+            if (pressedKeys[kcode])
+                return; // Skip repetitions
+            if (evt.metaKey || evt.altKey || evt.ctrlKey)
+                return; // Skip browser shortcuts
+            pressedKeys[kcode] = true;
+            const midi = this.key2midi(kcode);
+            if (midi < 0)
+                return;
+            this.noteOn(midi);
+        })
+            .on('keyup', evt => {
+            let kcode = evt.keyCode || 0;
+            pressedKeys[kcode] = false;
+            const midi = this.key2midi(kcode);
+            if (midi < 0)
+                return;
+            this.noteOff(midi);
+        });
+    }
+    key2midi(keyCode) {
+        const pos = KB_NOTES.indexOf(String.fromCharCode(keyCode));
+        if (pos < 0)
+            return -1;
+        return this.baseNote + pos;
+    }
+    noteOn(midi) { }
+    noteOff(midi) { }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Keyboard;
+
+
+
+/***/ }),
+/* 27 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+class MidiKeyboard {
+    constructor() {
+        this.connected = false;
+        if (!navigator.requestMIDIAccess)
+            return;
+        navigator.requestMIDIAccess({ sysex: false })
+            .then((midiAccess) => {
+            if (midiAccess.inputs.size <= 0)
+                return;
+            const input = midiAccess.inputs.values().next().value;
+            if (!input)
+                return;
+            input.onmidimessage = (msg) => this.midiMessage(msg);
+            this.connected = true;
+        });
+    }
+    midiMessage(msg) {
+        const data = msg.data;
+        const cmd = data[0] >> 4;
+        const channel = data[0] & 0xf;
+        const note = data[1];
+        const velocity = data[2];
+        switch (cmd) {
+            case 9:
+                this.noteOn(note, velocity, channel);
+                break;
+            case 8:
+                this.noteOff(note, velocity, channel);
+                break;
+        }
+    }
+    noteOn(midi, velocity, channel) { }
+    noteOff(midi, velocity, channel) { }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = MidiKeyboard;
+
+
+
+/***/ }),
+/* 28 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_popups__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_modern__ = __webpack_require__(1);
+
+
+const NUM_WHITES = 17;
+const BASE_NOTE = 36;
+const ARPEGGIO_MODES = ['', 'u', 'd', 'ud'];
+const ARPEGGIO_LABELS = ['-', '&uarr;', '&darr;', '&uarr;&darr;'];
+const MAX_ARPEGGIO_OCT = 3;
+const ARPEGGIO_MIN = 15;
+const ARPEGGIO_MAX = 480;
+const PORTAMENTO_MIN = 0;
+const PORTAMENTO_MAX = 1;
+/** Builds a piano keyboard out of DIVs */
+class PianoKeys {
+    constructor(numWhites = NUM_WHITES) {
+        this.numWhites = numWhites;
+    }
+    createKeys(panel) {
+        const keys = [];
+        const pw = panel.width() || 0;
+        const ph = panel.height() || 0;
+        const fromX = parseFloat(panel.css('padding-left'));
+        const fromY = parseFloat(panel.css('padding-top'));
+        const kw = pw / this.numWhites + 1;
+        const bw = Math.round(kw * 2 / 3);
+        const bh = Math.round(ph * 2 / 3);
+        // Create white keys
+        let knum = 0;
+        for (let i = 0; i < this.numWhites; i++) {
+            const key = $('<div class="piano-key">').css({
+                width: '' + kw + 'px',
+                height: '' + ph + 'px'
+            });
+            panel.append(key);
+            keys[knum++] = key;
+            if (this.hasBlack(i))
+                knum++;
+        }
+        // Create black keys
+        knum = 0;
+        let x = fromX - bw / 2;
+        for (let i = 0; i < this.numWhites - 1; i++) {
+            x += kw - 1;
+            knum++;
+            if (!this.hasBlack(i))
+                continue;
+            const key = $('<div class="piano-key piano-black">').css({
+                width: '' + bw + 'px',
+                height: '' + bh + 'px',
+                left: '' + x + 'px',
+                top: '' + fromY + 'px'
+            });
+            panel.append(key);
+            keys[knum++] = key;
+        }
+        return keys;
+    }
+    hasBlack(num) {
+        const mod7 = num % 7;
+        return mod7 != 2 && mod7 != 6;
+    }
+}
+/* unused harmony export PianoKeys */
+
+/**
+ * A virtual piano keyboard that:
+ * 	- Captures mouse input and generates corresponding note events
+ * 	- Displays note events as CSS-animated colors in the pressed keys
+ * 	- Supports octave switching
+ * 	- Provides a poly/mono button
+ */
+class PianoKeyboard {
+    constructor(panel) {
+        this.arpeggio = {
+            mode: 0,
+            octave: 1,
+            bpm: 60
+        };
+        this.baseNote = BASE_NOTE;
+        this.octave = 3;
+        this.poly = false;
+        this.envelope = { attack: 0, release: 0 };
+        const pianoKeys = new PianoKeys();
+        this.keys = pianoKeys.createKeys(panel);
+        for (let i = 0; i < this.keys.length; i++)
+            this.registerKey(this.keys[i], i);
+        this.controls = panel.parent();
+        this.registerButtons(this.controls);
+        this.portaSlider = this.controls.find('.portamento-box input');
+    }
+    registerKey(key, knum) {
+        key.mousedown(_ => {
+            const midi = knum + this.baseNote;
+            this.displayKeyDown(key);
+            this.noteOn(midi);
+            this.pressedKey = key;
+        });
+        key.mouseup(_ => {
+            const midi = knum + this.baseNote;
+            this.displayKeyUp(key);
+            this.noteOff(midi);
+            this.pressedKey = null;
+        });
+        key.mouseout(_ => {
+            if (key != this.pressedKey)
+                return;
+            const midi = knum + this.baseNote;
+            this.displayKeyUp(key);
+            this.noteOff(midi);
+            this.pressedKey = null;
+        });
+    }
+    registerButtons(panel) {
+        // Octave navigation
+        $('#prev-octave-but').click(_ => {
+            this.octave--;
+            this.updateOctave();
+        });
+        $('#next-octave-but').click(_ => {
+            this.octave++;
+            this.updateOctave();
+        });
+        // Arpeggio
+        const arpeggioSlider = panel.find('.arpeggio-box input');
+        arpeggioSlider.on('input', _ => {
+            this.arpeggio.bpm =
+                Object(__WEBPACK_IMPORTED_MODULE_1__utils_modern__["c" /* log2linear */])(parseFloat('' + arpeggioSlider.val()), ARPEGGIO_MIN, ARPEGGIO_MAX);
+            // ARPEGGIO_MIN + parseFloat(arpeggioSlider.val()) * (ARPEGGIO_MAX - ARPEGGIO_MIN);
+            this.triggerArpeggioChange();
+        });
+        const butArpMode = panel.find('.btn-arpeggio-ud');
+        butArpMode.click(_ => this.changeArpeggioMode(butArpMode));
+        const butArpOct = panel.find('.btn-arpeggio-oct');
+        butArpOct.click(_ => this.changeArpeggioOctave(butArpOct));
+        // Monophonic / polyphonic mode
+        $('#poly-but').click(_ => this.togglePoly());
+    }
+    updateOctave() {
+        $('#prev-octave-but').prop('disabled', this.octave <= 1);
+        $('#next-octave-but').prop('disabled', this.octave >= 8);
+        $('#octave-label').text('C' + this.octave);
+        this.baseNote = BASE_NOTE + 12 * (this.octave - 3);
+        this.octaveChanged(this.baseNote);
+    }
+    displayKeyDown(key) {
+        if (typeof key == 'number')
+            key = this.midi2key(key);
+        if (!key)
+            return;
+        if (!this.poly && this.arpeggio.mode == 0 && this.lastKey)
+            this.displayKeyUp(this.lastKey, true);
+        key.css('transition', `background-color ${this.envelope.attack}s linear`);
+        key.addClass('piano-key-pressed');
+        this.lastKey = key;
+    }
+    displayKeyUp(key, immediate) {
+        if (typeof key == 'number')
+            key = this.midi2key(key);
+        if (!key)
+            return;
+        const release = immediate ? 0 : this.envelope.release;
+        key.css('transition', `background-color ${release}s linear`);
+        key.removeClass('piano-key-pressed');
+    }
+    midi2key(midi) {
+        return this.keys[midi - this.baseNote];
+    }
+    setEnvelope(adsr) {
+        this.envelope = adsr;
+    }
+    togglePoly() {
+        this.poly = !this.poly;
+        if (this.poly) {
+            const cover = $('<div>').addClass('editor-cover');
+            cover.append('<p>You can use the PC keyboard to play notes<br><br>' +
+                'Synth editing is disabled in polyphonic mode</p>');
+            $('body').append(cover);
+            $('#poly-but').text('Poly');
+            __WEBPACK_IMPORTED_MODULE_0__utils_popups__["g" /* setOpen */](true);
+            this.polyOn();
+        }
+        else {
+            $('.editor-cover').remove();
+            $('#poly-but').text('Mono');
+            __WEBPACK_IMPORTED_MODULE_0__utils_popups__["g" /* setOpen */](false);
+            this.polyOff();
+        }
+    }
+    getPortamento() {
+        const sv = parseFloat('' + this.portaSlider.val());
+        return Object(__WEBPACK_IMPORTED_MODULE_1__utils_modern__["c" /* log2linear */])(sv, PORTAMENTO_MIN, PORTAMENTO_MAX);
+    }
+    changeArpeggioMode(button) {
+        this.arpeggio.mode++;
+        if (this.arpeggio.mode >= ARPEGGIO_MODES.length)
+            this.arpeggio.mode = 0;
+        button.html(ARPEGGIO_LABELS[this.arpeggio.mode]);
+        this.triggerArpeggioChange();
+    }
+    changeArpeggioOctave(button) {
+        this.arpeggio.octave++;
+        if (this.arpeggio.octave > MAX_ARPEGGIO_OCT)
+            this.arpeggio.octave = 1;
+        button.text(this.arpeggio.octave);
+        this.triggerArpeggioChange();
+    }
+    triggerArpeggioChange() {
+        this.arpeggioChanged(this.arpeggio.bpm, ARPEGGIO_MODES[this.arpeggio.mode], this.arpeggio.octave);
+    }
+    toJSON() {
+        return {
+            portamento: this.getPortamento(),
+            octave: this.octave,
+            arpeggio: {
+                bpm: this.arpeggio.bpm,
+                mode: this.arpeggio.mode,
+                octave: this.arpeggio.octave
+            }
+        };
+    }
+    fromJSON(json) {
+        if (!json)
+            return;
+        if (json.portamento) {
+            this.portaSlider.val(Object(__WEBPACK_IMPORTED_MODULE_1__utils_modern__["b" /* linear2log */])(json.portamento, PORTAMENTO_MIN, PORTAMENTO_MAX));
+        }
+        if (json.octave) {
+            this.octave = json.octave;
+            this.updateOctave();
+        }
+        if (json.arpeggio) {
+            this.arpeggio.bpm = json.arpeggio.bpm;
+            this.arpeggio.mode = json.arpeggio.mode;
+            this.arpeggio.octave = json.arpeggio.octave;
+            this.controls.find('.arpeggio-box input').val(Object(__WEBPACK_IMPORTED_MODULE_1__utils_modern__["b" /* linear2log */])(this.arpeggio.bpm, ARPEGGIO_MIN, ARPEGGIO_MAX));
+            this.controls.find('.btn-arpeggio-ud').html(ARPEGGIO_LABELS[this.arpeggio.mode]);
+            this.controls.find('.btn-arpeggio-oct').text(this.arpeggio.octave);
+            this.triggerArpeggioChange();
+        }
+    }
+    // Simple event handlers
+    noteOn(midi) { }
+    noteOff(midi) { }
+    polyOn() { }
+    polyOff() { }
+    octaveChanged(baseNote) { }
+    arpeggioChanged(bpm, mode, octaves) { }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = PianoKeyboard;
+
+
+
+/***/ }),
+/* 29 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_timer__ = __webpack_require__(7);
+
+class Arpeggiator {
+    constructor(ac) {
+        this.backward = false;
+        this.noteOnTime = 0.75;
+        this.mode = '';
+        this.octaves = 1;
+        this.bpm = 60;
+        this.notect = 0;
+        this.notes = new NoteTable();
+        this.timer = new __WEBPACK_IMPORTED_MODULE_0__synth_timer__["a" /* Timer */](ac, this.bpm);
+    }
+    get bpm() { return this._bpm; }
+    set bpm(v) {
+        this._bpm = v;
+        if (this.timer)
+            this.timer.bpm = v;
+    }
+    timerCB(time) {
+        // Return if disabled or no notes
+        if (this.mode.length == 0)
+            return;
+        const len = this.notes.length();
+        if (len == 0)
+            return;
+        // Check note counter
+        this.wrapCounter(len);
+        // Get current note and play it
+        const ndata = this.notes.get(this.notect);
+        this.noteOn(ndata.noteToPlay, ndata.velocity, time);
+        this.noteOff(ndata.noteToPlay, ndata.velocity, time + this.timer.noteDuration * this.noteOnTime);
+        // Update note counter
+        if (this.mode == 'u')
+            this.notect++;
+        else if (this.mode == 'd')
+            this.notect--;
+        else if (this.mode == 'ud') {
+            if (this.backward)
+                this.notect--;
+            else
+                this.notect++;
+        }
+    }
+    wrapCounter(len) {
+        if (this.notect >= len) {
+            if (this.mode != 'ud')
+                this.notect = 0;
+            else {
+                this.backward = true;
+                this.notect = len < 2 ? 0 : len - 2;
+            }
+        }
+        else if (this.notect < 0) {
+            if (this.mode != 'ud')
+                this.notect = len - 1;
+            else {
+                this.backward = false;
+                this.notect = len < 2 ? 0 : 1;
+            }
+        }
+    }
+    sendNoteOn(midi, velocity) {
+        if (this.mode.length == 0)
+            return this.noteOn(midi, velocity);
+        const shouldStart = this.notes.length() == 0;
+        this.notes.add(midi, midi, velocity);
+        if (this.octaves > 1)
+            this.notes.add(midi, midi + 12, velocity);
+        if (this.octaves > 2)
+            this.notes.add(midi, midi + 24, velocity);
+        if (shouldStart)
+            this.timer.start(time => this.timerCB(time));
+    }
+    sendNoteOff(midi, velocity) {
+        if (this.mode.length == 0)
+            this.noteOff(midi, velocity);
+        this.notes.remove(midi);
+        if (this.notes.length() == 0) {
+            this.timerCB(0);
+            this.timer.stop();
+            this.backward = false;
+            this.notect = 0;
+        }
+    }
+    // Event handlers
+    noteOn(midi, velocity, time) { }
+    noteOff(midi, velocity, time) { }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Arpeggiator;
+
+class NoteData {
+    constructor(note, noteToPlay, velocity) {
+        this.note = note;
+        this.noteToPlay = noteToPlay;
+        this.velocity = velocity;
+    }
+}
+/* unused harmony export NoteData */
+
+class NoteTable {
+    constructor() {
+        this.notes = [];
+    }
+    length() { return this.notes.length; }
+    get(i) { return this.notes[i]; }
+    add(note, noteToPlay, velocity) {
+        const ndata = new NoteData(note, noteToPlay, velocity);
+        for (let i = 0; i < this.notes.length; i++) {
+            if (noteToPlay < this.notes[i].noteToPlay) {
+                this.notes.splice(i, 0, ndata);
+                return;
+            }
+        }
+        this.notes.push(ndata);
+    }
+    remove(note) {
+        this.notes = this.notes.filter(ndata => ndata.note != note);
+    }
+}
+/* unused harmony export NoteTable */
+
+
+
+/***/ }),
+/* 30 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_popups__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_file__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_modern__ = __webpack_require__(1);
+
+
+
+const MAX_PRESETS = 20;
+/**
+ * Manages the presets box:
+ * - Handles navigation through presets
+ * - Handles preset loading & saving
+ */
+class Presets {
+    constructor(synthUI) {
+        this.presetNum = 0;
+        this.synthUI = synthUI;
+        this.registerListeners(synthUI.gr.canvas);
+        this.loadPresets();
+    }
+    loadPresets() {
+        this.presets = new Array(MAX_PRESETS);
+        for (let i = 0; i < MAX_PRESETS; i++)
+            this.presets[i] = this.getEmptyPreset();
+        $.get('js/presets.json', data => {
+            if (!(data instanceof Array))
+                return;
+            for (let i = 0; i < MAX_PRESETS; i++)
+                if (data[i])
+                    this.presets[i] = data[i];
+            this.preset2synth();
+        });
+    }
+    getEmptyPreset() {
+        return {
+            name: '',
+            nodes: [
+                { id: 0, x: 500, y: 180, name: 'Out', inputs: [], classes: 'node node-out' }
+            ],
+            nodeData: [
+                { type: 'out', params: {} }
+            ]
+        };
+    }
+    registerListeners(elem) {
+        $('#save-but').click(_ => this.savePreset());
+        $('#load-file').on('change', evt => this.loadPreset(evt));
+        $('#prev-preset-but').click(_ => this.changePreset(this.presetNum - 1));
+        $('#next-preset-but').click(_ => this.changePreset(this.presetNum + 1));
+        $(Object(__WEBPACK_IMPORTED_MODULE_2__utils_modern__["a" /* focusable */])(elem)).keydown(evt => {
+            if (evt.target.nodeName == 'INPUT' || __WEBPACK_IMPORTED_MODULE_0__utils_popups__["d" /* isOpen */])
+                return;
+            if (evt.keyCode == 37)
+                this.changePreset(this.presetNum - 1);
+            if (evt.keyCode == 39)
+                this.changePreset(this.presetNum + 1);
+        });
+        $('#preset-num').click(_ => this.togglePresetSelector());
+        const preSel = $('.preset-selector select');
+        preSel.change(_ => {
+            let val = preSel.val();
+            if (!val)
+                return;
+            const sel = val.toString().split(':')[0];
+            this.changePreset(parseInt(sel, 10) - 1);
+        });
+    }
+    togglePresetSelector() {
+        const seldiv = $('.preset-selector');
+        seldiv.toggle();
+        if (!seldiv.is(':visible'))
+            return;
+        // Fill select contents
+        this.synth2preset();
+        const sel = seldiv.find('select');
+        sel.empty();
+        sel.focus();
+        let i = 0;
+        for (const preset of this.presets) {
+            const selected = i == this.presetNum ? ' selected' : '';
+            i++;
+            if (preset.nodes.length > 1)
+                sel.append(`<option${selected}>${i}: ${preset.name}</option>`);
+        }
+    }
+    changePreset(newNum) {
+        if (newNum < 0)
+            newNum = MAX_PRESETS - 1;
+        else if (newNum >= MAX_PRESETS)
+            newNum = 0;
+        this.synth2preset();
+        this.presetNum = newNum;
+        this.preset2synth();
+    }
+    synth2preset() {
+        const json = this.synthUI.gr.toJSON();
+        let val = '' + $('#preset-name').val();
+        json.name = val.trim();
+        json.modulatorType = 'synth';
+        this.beforeSave(json);
+        this.presets[this.presetNum] = json;
+        return json;
+    }
+    preset2synth() {
+        const preset = this.presets[this.presetNum];
+        this.afterLoad(preset);
+        $('#preset-num').text(this.presetNum + 1);
+        $('#preset-name').val(preset.name);
+        $('#node-params').empty();
+        this.synthUI.gr.fromJSON(preset);
+        this.selectBestNode();
+    }
+    selectBestNode() {
+        const getFirstNode = (isGood) => this.synthUI.gr.nodes.filter(isGood)[0];
+        let n = getFirstNode(nn => nn.data.type == 'Filter');
+        if (!n)
+            n = getFirstNode(nn => nn.data.type == 'ADSR');
+        if (!n)
+            n = getFirstNode(nn => nn.data.anode.numberOfInputs == 0);
+        if (n)
+            this.synthUI.gr.selectNode(n);
+    }
+    loadPreset(evt) {
+        if (!evt)
+            return;
+        __WEBPACK_IMPORTED_MODULE_1__utils_file__["f" /* uploadText */](evt, data => {
+            try {
+                const json = JSON.parse(data);
+                if (json.modulatorType != 'synth')
+                    throw 'Invalid file format';
+                this.presets[this.presetNum] = json;
+                this.preset2synth();
+            }
+            catch (e) {
+                console.error(e);
+                __WEBPACK_IMPORTED_MODULE_0__utils_popups__["a" /* alert */]('Could not load synth: invalid file format', 'Load error');
+            }
+        });
+    }
+    savePreset() {
+        const json = this.synth2preset();
+        const jsonData = JSON.stringify(json);
+        if (__WEBPACK_IMPORTED_MODULE_1__utils_file__["c" /* browserSupportsDownload */]()) {
+            if (json.name.length == 0)
+                json.name = '' + this.presetNum;
+            __WEBPACK_IMPORTED_MODULE_1__utils_file__["d" /* download */](json.name + '.json', jsonData);
+        }
+        else {
+            __WEBPACK_IMPORTED_MODULE_0__utils_popups__["f" /* prompt */]('Copy the text below to the clipboard and save it to a local text file', 'Save preset', jsonData, null);
+        }
+    }
+    // Extension point to specify additional data to save, e.g. keyboard settings
+    beforeSave(json) { }
+    // Extension point to handle previously saved additional data
+    afterLoad(json) { }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Presets;
+
+
+
+/***/ }),
+/* 31 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__synth_timer__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__track__ = __webpack_require__(32);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__scheduler__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__effects__ = __webpack_require__(34);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__scales__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__log__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__instruments__ = __webpack_require__(17);
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+
+
+
+
+
+
+
+class LiveCoding {
+    constructor(context, presets, synthUI) {
+        this.context = context;
+        this.presets = presets;
+        this.synthUI = synthUI;
+        this.timer = new __WEBPACK_IMPORTED_MODULE_0__synth_timer__["a" /* Timer */](context, 60, 0.2);
+        this.timer.start(time => Object(__WEBPACK_IMPORTED_MODULE_2__scheduler__["f" /* timerTickHandler */])(this.timer, time));
+    }
+    instrument(preset, name, numVoices = 4) {
+        if (typeof preset == 'string') {
+            let oldInstr = __WEBPACK_IMPORTED_MODULE_2__scheduler__["c" /* instruments */][name || preset];
+            if (oldInstr)
+                oldInstr.shutdown();
+        }
+        let instr = Object(__WEBPACK_IMPORTED_MODULE_6__instruments__["a" /* createInstrument */])(this, preset, name, numVoices);
+        if (name)
+            instr.name = name;
+        __WEBPACK_IMPORTED_MODULE_2__scheduler__["c" /* instruments */][instr.name] = instr;
+        initInstrument(instr);
+        return instr;
+    }
+    effect(name, newName) {
+        let eff = Object(__WEBPACK_IMPORTED_MODULE_3__effects__["a" /* createEffect */])(this.context, name);
+        __WEBPACK_IMPORTED_MODULE_2__scheduler__["b" /* effects */][newName || name] = eff;
+        return eff;
+    }
+    track(name, cb, loop = false) {
+        let t = new __WEBPACK_IMPORTED_MODULE_1__track__["a" /* Track */](this.context, this.synthUI.outNode, this.timer);
+        t.loop = loop;
+        t.name = name;
+        __WEBPACK_IMPORTED_MODULE_2__scheduler__["h" /* userTracks */][name] = t;
+        t.callback = cb;
+        onInitialized(() => Object(__WEBPACK_IMPORTED_MODULE_2__scheduler__["e" /* scheduleTrack */])(t));
+        return this;
+    }
+    loop_track(name, cb) {
+        return this.track(name, cb, true);
+    }
+    scale(note, type, octaves) {
+        return Object(__WEBPACK_IMPORTED_MODULE_4__scales__["b" /* makeScale */])(note, type, octaves);
+    }
+    log(...args) {
+        Object(__WEBPACK_IMPORTED_MODULE_5__log__["e" /* logToPanel */])(true, false, ...args);
+        return this;
+    }
+    log_enable(flag = true) {
+        Object(__WEBPACK_IMPORTED_MODULE_5__log__["b" /* enableLog */])(flag);
+        return this;
+    }
+    log_clear() {
+        Object(__WEBPACK_IMPORTED_MODULE_5__log__["a" /* clearLog */])();
+        return this;
+    }
+    bpm(value) {
+        if (value === undefined)
+            return this.timer.bpm;
+        this.timer.bpm = value;
+        return this;
+    }
+    stop() {
+        Object(__WEBPACK_IMPORTED_MODULE_2__scheduler__["a" /* eachTrack */])(t => t.stop());
+        return this;
+    }
+    pause() {
+        Object(__WEBPACK_IMPORTED_MODULE_2__scheduler__["a" /* eachTrack */])(t => t.pause());
+        return this;
+    }
+    continue() {
+        Object(__WEBPACK_IMPORTED_MODULE_2__scheduler__["a" /* eachTrack */])(t => t.continue());
+        return this;
+    }
+    reset() {
+        Object(__WEBPACK_IMPORTED_MODULE_2__scheduler__["a" /* eachTrack */])(t => {
+            if (t._effect)
+                t._effect.input.disconnect();
+            t.delete();
+        });
+        return this;
+    }
+    listen(listenFunc) {
+        Object(__WEBPACK_IMPORTED_MODULE_2__scheduler__["d" /* listenNotes */])(listenFunc);
+        return this;
+    }
+    init(initFunc) {
+        return __awaiter(this, void 0, void 0, function* () {
+            pushTask();
+            yield initFunc();
+            popTask();
+            return this;
+        });
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = LiveCoding;
+
+// ---------- Instrument init ----------
+function initInstrument(instr) {
+    return __awaiter(this, void 0, void 0, function* () {
+        pushTask();
+        yield instr.initialize();
+        popTask();
+    });
+}
+let taskCount = 0;
+let initListeners = [];
+function pushTask() {
+    taskCount++;
+}
+function popTask() {
+    taskCount--;
+    if (taskCount <= 0) {
+        for (let trackCB of initListeners)
+            trackCB();
+        initListeners = [];
+    }
+}
+function onInitialized(cb) {
+    if (taskCount <= 0)
+        cb();
+    else
+        initListeners.push(cb);
+}
+
+
+/***/ }),
+/* 32 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__scheduler__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__tidal_parser__ = __webpack_require__(33);
+
+
+class TrackControl {
+    constructor(ac, out, timer) {
+        this.ac = ac;
+        this.out = out;
+        this.timer = timer;
+        this.shouldStop = false;
+        this.stopped = false;
+        this._gain = ac.createGain();
+        this._gain.connect(out);
+        this.lastGain = this._gain.gain.value;
+    }
+    mute() {
+        this.lastGain = this._gain.gain.value;
+        this._gain.gain.value = 1e-5;
+        return this;
+    }
+    unmute() {
+        this._gain.gain.value = this.lastGain;
+        return this;
+    }
+    gain(value, rampTime) {
+        if (value < 1e-5)
+            value = 1e-5;
+        if (rampTime === undefined)
+            this._gain.gain.value = value;
+        else
+            this._gain.gain.exponentialRampToValueAtTime(value, this.ac.currentTime + rampTime);
+        return this;
+    }
+    stop() {
+        this.shouldStop = true;
+        return this;
+    }
+    pause() {
+        this.stopped = true;
+        return this;
+    }
+    continue() {
+        this.shouldStop = false;
+        this.stopped = false;
+        return this;
+    }
+    delete() {
+        this.mute();
+        delete __WEBPACK_IMPORTED_MODULE_0__scheduler__["g" /* tracks */][this.name];
+        delete __WEBPACK_IMPORTED_MODULE_0__scheduler__["h" /* userTracks */][this.name];
+    }
+}
+class Track extends TrackControl {
+    constructor() {
+        super(...arguments);
+        this.notect = 0;
+        this.notes = [];
+        this.time = 0;
+        this.latency = 0.2;
+        this.loop = false;
+        this.loopCount = 0;
+        this.velocity = 1;
+        this._transpose = 0;
+        this.playing = false;
+    }
+    instrument(inst) {
+        if (!this.playing)
+            inst.connect(this._gain);
+        this.inst = inst;
+        return this;
+    }
+    effect(e) {
+        if (this.playing)
+            return this;
+        let dst = this._effect ? this._effect.output : this._gain;
+        dst.disconnect();
+        dst.connect(e.input);
+        e.output.connect(this.out);
+        this._effect = e;
+        return this;
+    }
+    volume(v) {
+        this.velocity = v;
+        return this;
+    }
+    play(note = 64, duration, options) {
+        if (!this.inst)
+            throw new Error(`Must call instrument before playing a note or setting parameters`);
+        this.notes.push({
+            track: this,
+            instrument: this.inst,
+            number: note + this._transpose,
+            time: this.time + this.latency,
+            velocity: this.velocity,
+            duration,
+            options
+        });
+        return this;
+    }
+    play_notes(notes, times, durations) {
+        if (times === undefined)
+            times = [0];
+        else if (typeof times == 'number')
+            times = [times];
+        let rtimes = times.ring();
+        if (typeof durations == 'number')
+            durations = [durations];
+        let rdurs = durations ? durations.ring() : undefined;
+        let rnotes = notes.ring();
+        this.repeat(notes.length, _ => this
+            .play(rnotes.tick(), rdurs ? rdurs.tick() : undefined)
+            .sleep(rtimes.tick()));
+        return this;
+    }
+    play_tidal(code, time = 1, baseNote = 69) {
+        let parser = new __WEBPACK_IMPORTED_MODULE_1__tidal_parser__["a" /* TidalParser */]();
+        let ntevs = parser.parse(code, time);
+        if (!ntevs && parser.error)
+            throw new Error(`Tidal parsing error in position ${parser.error.tk.pos}: ${parser.error.msg}`);
+        if (!ntevs || ntevs.length == 0)
+            return;
+        let oldt = 0;
+        for (let ev of ntevs) {
+            this.sleep(ev.time - oldt);
+            this.instrument(__WEBPACK_IMPORTED_MODULE_0__scheduler__["c" /* instruments */][ev.instr])
+                .play(baseNote);
+            oldt = ev.time;
+        }
+        this.sleep(time - oldt);
+        return this;
+    }
+    transpose(notes) {
+        this._transpose = notes;
+        return this;
+    }
+    params(options) {
+        return this.play(0, undefined, options);
+    }
+    param(pname, value) {
+        return this.params({ instrument: this.inst, [pname]: value });
+    }
+    sleep(time) {
+        this.time += time * 60 / this.timer.bpm;
+        return this;
+    }
+    repeat(times, cb) {
+        for (let i = 0; i < times; i++)
+            cb(i);
+        return this;
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Track;
+
+
+
+/***/ }),
+/* 33 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+class TidalParser {
+    parse(s, time = 1) {
+        this.tokens = new Tokenizer().tokenize(s);
+        this.tokenPos = 0;
+        this.error = null;
+        try {
+            let node = this.parseNode();
+            let events = [];
+            this.expand(events, node, time, 0);
+            return events;
+        }
+        catch (err) {
+            if (!err.tk)
+                throw err;
+            this.error = err;
+            return null;
+        }
+    }
+    expand(events, node, time, start) {
+        let t = time / node.children.length;
+        let i = 0;
+        for (let ch of node.children) {
+            if (ch.children) {
+                this.expand(events, ch, t, start + t * i);
+            }
+            else {
+                let nev = ch;
+                events.push({ instr: nev.instr, time: start + t * i });
+            }
+            i++;
+        }
+    }
+    parseNode() {
+        let node = { children: [] };
+        let end = false;
+        while (!this.finished() && !end) {
+            let t = this.nextToken();
+            if (t.text == ']')
+                end = true;
+            else if (t.text == '[')
+                node.children.push(this.parseNode());
+            else if (t.type == TokenType.Identifier)
+                node.children.push(this.parseInstr(t.text));
+            else
+                throw new ParseError(t, `Expecting instrument or '['`);
+        }
+        return node;
+    }
+    parseInstr(name) {
+        let t = this.peekToken();
+        if (t.type == TokenType.Symbol && t.text == '*') {
+            t = this.nextToken(); // Move past "*"
+            t = this.nextToken(); // Get number
+            if (t.type != TokenType.Number)
+                throw new ParseError(t, 'Expecting a number');
+            let repeat = parseInt(t.text, 10);
+            let node = { children: [] };
+            for (let i = 0; i < repeat; i++)
+                node.children.push({ instr: name, time: 0 });
+            return node;
+        }
+        else
+            return { instr: name, time: 0 };
+    }
+    nextToken() {
+        let tk = this.tokens[this.tokenPos];
+        this.tokenPos++;
+        return tk;
+    }
+    peekToken() {
+        if (this.finished()) {
+            let lastToken = this.tokens[this.tokens.length - 1];
+            return {
+                type: TokenType.Error,
+                text: 'EOF',
+                pos: lastToken.pos + lastToken.text.length
+            };
+        }
+        return this.tokens[this.tokenPos];
+    }
+    finished() {
+        return this.tokenPos >= this.tokens.length;
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = TidalParser;
+
+/*
+Grammar:
+EXPR =
+      ident
+    | ident EXPR
+    | ident * num
+    | [ EXPR ]
+*/
+class ParseError {
+    constructor(tk, msg) {
+        this.tk = tk;
+        this.msg = msg;
+    }
+}
+class Tokenizer {
+    constructor() {
+        this.tokens = [];
+        this.token = { type: TokenType.Error, text: '', pos: 0 };
+    }
+    tokenize(s) {
+        for (let i = 0; i < s.length; i++) {
+            let c = s[i];
+            if ('[] +-*/,'.includes(c)) {
+                if (this.token.text.length > 0)
+                    this.pushToken();
+                if (c != ' ')
+                    this.pushToken({ type: TokenType.Symbol, text: c, pos: i });
+            }
+            else if (this.token.text.length == 0) {
+                this.token.text += c;
+                this.token.pos = i;
+                if (isNumber(c))
+                    this.token.type = TokenType.Number;
+                else if (isIdentifier(c))
+                    this.token.type = TokenType.Identifier;
+                else
+                    this.token.type = TokenType.Error;
+            }
+            else if (isIdentifier)
+                this.token.text += c;
+            else {
+                this.pushToken();
+                this.pushToken({ type: TokenType.Error, text: c, pos: i });
+            }
+        }
+        if (this.token.text.length > 0)
+            this.pushToken();
+        return this.tokens;
+    }
+    pushToken(tk) {
+        if (tk)
+            this.tokens.push(tk);
+        else
+            this.tokens.push(Object.assign({}, this.token));
+        this.token.text = '';
+    }
+}
+function isNumber(c) {
+    return c >= '0' && c <= '9';
+}
+function isIdentifier(c) {
+    return isNumber(c) ||
+        c >= 'A' && c <= 'Z' ||
+        c >= 'a' && c <= 'z' ||
+        c == '_';
+}
+var TokenType;
+(function (TokenType) {
+    TokenType[TokenType["Symbol"] = 0] = "Symbol";
+    TokenType[TokenType["Identifier"] = 1] = "Identifier";
+    TokenType[TokenType["Number"] = 2] = "Number";
+    TokenType[TokenType["Error"] = 3] = "Error";
+})(TokenType || (TokenType = {}));
+
+
+/***/ }),
+/* 34 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* unused harmony export registerProvider */
+/* harmony export (immutable) */ __webpack_exports__["a"] = createEffect;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__third_party_tuna__ = __webpack_require__(35);
+
+class BaseEffect {
+    constructor(ac, name) {
+        this.ac = ac;
+        this.name = name;
+    }
+    param(name, value, rampTime, exponential = true) {
+        let prm = this.getAudioParam(name);
+        if (value === undefined) {
+            return prm.value;
+        }
+        if (rampTime === undefined) {
+            prm.value = value;
+        }
+        else {
+            if (exponential) {
+                prm.exponentialRampToValueAtTime(value, this.ac.currentTime + rampTime);
+            }
+            else {
+                prm.linearRampToValueAtTime(value, this.ac.currentTime + rampTime);
+            }
+        }
+        return this;
+    }
+    paramNames() {
+        let pnames = [];
+        for (let pname in this.input)
+            if (this.input[pname] instanceof AudioParam)
+                pnames.push(pname);
+        return pnames;
+    }
+    getAudioParam(name) {
+        let prm = this.input[name];
+        if (!prm || !(prm instanceof AudioParam))
+            throw new Error(`Parameter "${name}" not found in effect "${this.name}"`);
+        return prm;
+    }
+}
+/* unused harmony export BaseEffect */
+
+class WebAudioEffect extends BaseEffect {
+    constructor(ac, name) {
+        super(ac, name);
+        let methodName = 'create' + name;
+        let anyac = ac;
+        if (!anyac[methodName])
+            throw new Error(`Effect "${name}" does not exist`);
+        this.input = ac[methodName]();
+        this.output = this.input;
+    }
+}
+class TunaEffect extends BaseEffect {
+    constructor(ac, name) {
+        super(ac, name);
+        let effClass = tuna[name];
+        if (!effClass)
+            throw new Error(`Effect "tuna/${name}" does not exist`);
+        this.input = new effClass();
+        this.output = this.input;
+    }
+    paramNames() {
+        let tunaEffect = this.input;
+        let names = ['bypass'];
+        for (let pname of Object.getOwnPropertyNames(tunaEffect.defaults))
+            names.push(pname);
+        return names;
+    }
+    param(name, value, rampTime, exponential = true) {
+        let tunaEffect = this.input;
+        if (tunaEffect[name] === undefined)
+            throw new Error(`Parameter "${name}" not found in effect "${this.name}"`);
+        if (value === undefined)
+            return tunaEffect[name];
+        if (rampTime === undefined)
+            tunaEffect[name] = value;
+        else
+            tunaEffect.automate(name, value, rampTime);
+        return this;
+    }
+}
+let providers = {
+    WebAudio: (ac, name) => new WebAudioEffect(ac, name),
+    tuna: tunaProvider
+};
+function tunaProvider(ac, name) {
+    if (!tuna)
+        tuna = Object(__WEBPACK_IMPORTED_MODULE_0__third_party_tuna__["a" /* Tuna */])(ac);
+    return new TunaEffect(ac, name);
+}
+let tuna;
+function registerProvider(prefix, provider) {
+    providers[prefix] = provider;
+}
+function createEffect(ac, name) {
+    if (name.indexOf('/') < 0)
+        name = 'WebAudio/' + name;
+    let [prefix, ename] = name.split('/');
+    let provider = providers[prefix];
+    if (!provider)
+        throw new Error(`Effect "${name}" not found: unknown prefix "${provider}"`);
+    return provider(ac, ename);
+}
+
+
+/***/ }),
+/* 35 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = Tuna;
+/* This is just the great Tuna library, but adapted to a TypeScript module
+    See https://github.com/Theodeus/tuna/wiki
+    Original license follows below
+*/
+/*
+    Copyright (c) 2012 DinahMoe AB & Oskar Eriksson
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation
+    files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy,
+    modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software
+    is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+    OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+let userContext, userInstance, pipe = function (param, val) {
+    param.value = val;
+};
+let Super = Object.create(null, {
+    activate: {
+        writable: true,
+        value: function (doActivate) {
+            if (doActivate) {
+                this.input.disconnect();
+                this.input.connect(this.activateNode);
+                if (this.activateCallback) {
+                    this.activateCallback(doActivate);
+                }
+            }
+            else {
+                this.input.disconnect();
+                this.input.connect(this.output);
+            }
+        }
+    },
+    bypass: {
+        get: function () {
+            return this._bypass;
+        },
+        set: function (value) {
+            if (this._lastBypassValue === value) {
+                return;
+            }
+            this._bypass = value;
+            this.activate(!value);
+            this._lastBypassValue = value;
+        }
+    },
+    connect: {
+        value: function (target) {
+            this.output.connect(target);
+        }
+    },
+    disconnect: {
+        value: function (target) {
+            this.output.disconnect(target);
+        }
+    },
+    connectInOrder: {
+        value: function (nodeArray) {
+            let i = nodeArray.length - 1;
+            while (i--) {
+                if (!nodeArray[i].connect) {
+                    return console.error('AudioNode.connectInOrder: TypeError: Not an AudioNode.', nodeArray[i]);
+                }
+                if (nodeArray[i + 1].input) {
+                    nodeArray[i].connect(nodeArray[i + 1].input);
+                }
+                else {
+                    nodeArray[i].connect(nodeArray[i + 1]);
+                }
+            }
+        }
+    },
+    getDefaults: {
+        value: function () {
+            let result = {};
+            // tslint:disable-next-line:forin
+            for (let key in this.defaults) {
+                result[key] = this.defaults[key].value;
+            }
+            return result;
+        }
+    },
+    automate: {
+        value: function (property, value, duration, startTime) {
+            let start = startTime ? ~~(startTime / 1000) : userContext.currentTime, dur = duration ? ~~(duration / 1000) : 0, _is = this.defaults[property], param = this[property], method;
+            if (param) {
+                if (_is.automatable) {
+                    if (!duration) {
+                        method = 'setValueAtTime';
+                    }
+                    else {
+                        method = 'linearRampToValueAtTime';
+                        param.cancelScheduledValues(start);
+                        param.setValueAtTime(param.value, start);
+                    }
+                    param[method](value, dur + start);
+                }
+                else {
+                    param = value;
+                }
+            }
+            else {
+                console.error('Invalid Property for ' + this.name);
+            }
+        }
+    }
+});
+let FLOAT = 'float', BOOLEAN = 'boolean', STRING = 'string', INT = 'int';
+function definition() {
+    return Tuna;
+}
+function Tuna(context) {
+    if (!(this instanceof Tuna)) {
+        return new Tuna(context);
+    }
+    let _window = typeof window === 'undefined' ? {} : window;
+    if (!_window.AudioContext) {
+        _window.AudioContext = _window.webkitAudioContext;
+    }
+    if (!context) {
+        console.log('tuna.js: Missing audio context! Creating a new context for you.');
+        context = _window.AudioContext && (new _window.AudioContext());
+    }
+    if (!context) {
+        throw new Error('Tuna cannot initialize because this environment does not support web audio.');
+    }
+    connectify(context);
+    userContext = context;
+    userInstance = this;
+}
+function connectify(context) {
+    if (context.__connectified__ === true)
+        return;
+    let gain = context.createGain(), proto = Object.getPrototypeOf(Object.getPrototypeOf(gain)), oconnect = proto.connect;
+    proto.connect = shimConnect;
+    context.__connectified__ = true; // Prevent overriding connect more than once
+    function shimConnect() {
+        let node = arguments[0];
+        arguments[0] = Super.isPrototypeOf ? (Super.isPrototypeOf(node) ? node.input : node) : (node.input || node);
+        oconnect.apply(this, arguments);
+        return node;
+    }
+}
+function dbToWAVolume(db) {
+    return Math.max(0, Math.round(100 * Math.pow(2, db / 6)) / 100);
+}
+function fmod(x, y) {
+    // http://kevin.vanzonneveld.net
+    // *     example 1: fmod(5.7, 1.3);
+    // *     returns 1: 0.5
+    let tmp, tmp2, p = 0, pY = 0, l = 0.0, l2 = 0.0;
+    tmp = x.toExponential().match(/^.\.?(.*)e(.+)$/) || '';
+    p = parseInt(tmp[2], 10) - (tmp[1] + '').length;
+    tmp = y.toExponential().match(/^.\.?(.*)e(.+)$/) || '';
+    pY = parseInt(tmp[2], 10) - (tmp[1] + '').length;
+    if (pY > p) {
+        p = pY;
+    }
+    tmp2 = (x % y);
+    if (p < -100 || p > 20) {
+        // toFixed will give an out of bound error so we fix it like this:
+        l = Math.round(Math.log(tmp2) / Math.log(10));
+        l2 = Math.pow(10, l);
+        let rr = (tmp2 / l2).toFixed(l - p);
+        return rr * l2;
+    }
+    else {
+        return parseFloat(tmp2.toFixed(-p));
+    }
+}
+function sign(x) {
+    if (x === 0) {
+        return 1;
+    }
+    else {
+        return Math.abs(x) / x;
+    }
+}
+function tanh(n) {
+    return (Math.exp(n) - Math.exp(-n)) / (Math.exp(n) + Math.exp(-n));
+}
+function initValue(userVal, defaultVal) {
+    return userVal === undefined ? defaultVal : userVal;
+}
+Tuna.prototype.Bitcrusher = function (properties) {
+    if (!properties) {
+        properties = this.getDefaults();
+    }
+    this.bufferSize = properties.bufferSize || this.defaults.bufferSize.value;
+    this.input = userContext.createGain();
+    this.activateNode = userContext.createGain();
+    this.processor = userContext.createScriptProcessor(this.bufferSize, 1, 1);
+    this.output = userContext.createGain();
+    this.activateNode.connect(this.processor);
+    this.processor.connect(this.output);
+    let phaser = 0, last = 0, input, output, step, i, length;
+    this.processor.onaudioprocess = function (e) {
+        input = e.inputBuffer.getChannelData(0),
+            output = e.outputBuffer.getChannelData(0),
+            step = Math.pow(1 / 2, this.bits);
+        length = input.length;
+        for (i = 0; i < length; i++) {
+            phaser += this.normfreq;
+            if (phaser >= 1.0) {
+                phaser -= 1.0;
+                last = step * Math.floor(input[i] / step + 0.5);
+            }
+            output[i] = last;
+        }
+    };
+    this.bits = properties.bits || this.defaults.bits.value;
+    this.normfreq = initValue(properties.normfreq, this.defaults.normfreq.value);
+    this.bypass = properties.bypass || false;
+};
+Tuna.prototype.Bitcrusher.prototype = Object.create(Super, {
+    name: {
+        value: 'Bitcrusher'
+    },
+    defaults: {
+        writable: true,
+        value: {
+            bits: {
+                value: 4,
+                min: 1,
+                max: 16,
+                automatable: false,
+                type: INT
+            },
+            bufferSize: {
+                value: 4096,
+                min: 256,
+                max: 16384,
+                automatable: false,
+                type: INT
+            },
+            bypass: {
+                value: false,
+                automatable: false,
+                type: BOOLEAN
+            },
+            normfreq: {
+                value: 0.1,
+                min: 0.0001,
+                max: 1.0,
+                automatable: false,
+                type: FLOAT
+            }
+        }
+    },
+    bits: {
+        enumerable: true,
+        get: function () {
+            return this.processor.bits;
+        },
+        set: function (value) {
+            this.processor.bits = value;
+        }
+    },
+    normfreq: {
+        enumerable: true,
+        get: function () {
+            return this.processor.normfreq;
+        },
+        set: function (value) {
+            this.processor.normfreq = value;
+        }
+    }
+});
+Tuna.prototype.Cabinet = function (properties) {
+    if (!properties) {
+        properties = this.getDefaults();
+    }
+    this.input = userContext.createGain();
+    this.activateNode = userContext.createGain();
+    this.convolver = this.newConvolver(properties.impulsePath || '../impulses/impulse_guitar.wav');
+    this.makeupNode = userContext.createGain();
+    this.output = userContext.createGain();
+    this.activateNode.connect(this.convolver.input);
+    this.convolver.output.connect(this.makeupNode);
+    this.makeupNode.connect(this.output);
+    this.makeupGain = initValue(properties.makeupGain, this.defaults.makeupGain);
+    this.bypass = properties.bypass || false;
+};
+Tuna.prototype.Cabinet.prototype = Object.create(Super, {
+    name: {
+        value: 'Cabinet'
+    },
+    defaults: {
+        writable: true,
+        value: {
+            makeupGain: {
+                value: 1,
+                min: 0,
+                max: 20,
+                automatable: true,
+                type: FLOAT
+            },
+            bypass: {
+                value: false,
+                automatable: false,
+                type: BOOLEAN
+            }
+        }
+    },
+    makeupGain: {
+        enumerable: true,
+        get: function () {
+            return this.makeupNode.gain;
+        },
+        set: function (value) {
+            this.makeupNode.gain.value = value;
+        }
+    },
+    newConvolver: {
+        value: function (impulsePath) {
+            return new userInstance.Convolver({
+                impulse: impulsePath,
+                dryLevel: 0,
+                wetLevel: 1
+            });
+        }
+    }
+});
+Tuna.prototype.Chorus = function (properties) {
+    if (!properties) {
+        properties = this.getDefaults();
+    }
+    this.input = userContext.createGain();
+    this.attenuator = this.activateNode = userContext.createGain();
+    this.splitter = userContext.createChannelSplitter(2);
+    this.delayL = userContext.createDelay();
+    this.delayR = userContext.createDelay();
+    this.feedbackGainNodeLR = userContext.createGain();
+    this.feedbackGainNodeRL = userContext.createGain();
+    this.merger = userContext.createChannelMerger(2);
+    this.output = userContext.createGain();
+    this.lfoL = new userInstance.LFO({
+        target: this.delayL.delayTime,
+        callback: pipe
+    });
+    this.lfoR = new userInstance.LFO({
+        target: this.delayR.delayTime,
+        callback: pipe
+    });
+    this.input.connect(this.attenuator);
+    this.attenuator.connect(this.output);
+    this.attenuator.connect(this.splitter);
+    this.splitter.connect(this.delayL, 0);
+    this.splitter.connect(this.delayR, 1);
+    this.delayL.connect(this.feedbackGainNodeLR);
+    this.delayR.connect(this.feedbackGainNodeRL);
+    this.feedbackGainNodeLR.connect(this.delayR);
+    this.feedbackGainNodeRL.connect(this.delayL);
+    this.delayL.connect(this.merger, 0, 0);
+    this.delayR.connect(this.merger, 0, 1);
+    this.merger.connect(this.output);
+    this.feedback = initValue(properties.feedback, this.defaults.feedback.value);
+    this.rate = initValue(properties.rate, this.defaults.rate.value);
+    this.delay = initValue(properties.delay, this.defaults.delay.value);
+    this.depth = initValue(properties.depth, this.defaults.depth.value);
+    this.lfoR.phase = Math.PI / 2;
+    this.attenuator.gain.value = 0.6934; // 1 / (10 ^ (((20 * log10(3)) / 3) / 20))
+    this.lfoL.activate(true);
+    this.lfoR.activate(true);
+    this.bypass = properties.bypass || false;
+};
+Tuna.prototype.Chorus.prototype = Object.create(Super, {
+    name: {
+        value: 'Chorus'
+    },
+    defaults: {
+        writable: true,
+        value: {
+            feedback: {
+                value: 0.4,
+                min: 0,
+                max: 0.95,
+                automatable: false,
+                type: FLOAT
+            },
+            delay: {
+                value: 0.0045,
+                min: 0,
+                max: 1,
+                automatable: false,
+                type: FLOAT
+            },
+            depth: {
+                value: 0.7,
+                min: 0,
+                max: 1,
+                automatable: false,
+                type: FLOAT
+            },
+            rate: {
+                value: 1.5,
+                min: 0,
+                max: 8,
+                automatable: false,
+                type: FLOAT
+            },
+            bypass: {
+                value: false,
+                automatable: false,
+                type: BOOLEAN
+            }
+        }
+    },
+    delay: {
+        enumerable: true,
+        get: function () {
+            return this._delay;
+        },
+        set: function (value) {
+            this._delay = 0.0002 * (Math.pow(10, value) * 2);
+            this.lfoL.offset = this._delay;
+            this.lfoR.offset = this._delay;
+            this._depth = this._depth;
+        }
+    },
+    depth: {
+        enumerable: true,
+        get: function () {
+            return this._depth;
+        },
+        set: function (value) {
+            this._depth = value;
+            this.lfoL.oscillation = this._depth * this._delay;
+            this.lfoR.oscillation = this._depth * this._delay;
+        }
+    },
+    feedback: {
+        enumerable: true,
+        get: function () {
+            return this._feedback;
+        },
+        set: function (value) {
+            this._feedback = value;
+            this.feedbackGainNodeLR.gain.value = this._feedback;
+            this.feedbackGainNodeRL.gain.value = this._feedback;
+        }
+    },
+    rate: {
+        enumerable: true,
+        get: function () {
+            return this._rate;
+        },
+        set: function (value) {
+            this._rate = value;
+            this.lfoL.frequency = this._rate;
+            this.lfoR.frequency = this._rate;
+        }
+    }
+});
+Tuna.prototype.Compressor = function (properties) {
+    if (!properties) {
+        properties = this.getDefaults();
+    }
+    this.input = userContext.createGain();
+    this.compNode = this.activateNode = userContext.createDynamicsCompressor();
+    this.makeupNode = userContext.createGain();
+    this.output = userContext.createGain();
+    this.compNode.connect(this.makeupNode);
+    this.makeupNode.connect(this.output);
+    this.automakeup = initValue(properties.automakeup, this.defaults.automakeup.value);
+    this.makeupGain = initValue(properties.makeupGain, this.defaults.makeupGain.value);
+    this.threshold = initValue(properties.threshold, this.defaults.threshold.value);
+    this.release = initValue(properties.release, this.defaults.release.value);
+    this.attack = initValue(properties.attack, this.defaults.attack.value);
+    this.ratio = properties.ratio || this.defaults.ratio.value;
+    this.knee = initValue(properties.knee, this.defaults.knee.value);
+    this.bypass = properties.bypass || false;
+};
+Tuna.prototype.Compressor.prototype = Object.create(Super, {
+    name: {
+        value: 'Compressor'
+    },
+    defaults: {
+        writable: true,
+        value: {
+            threshold: {
+                value: -20,
+                min: -60,
+                max: 0,
+                automatable: true,
+                type: FLOAT
+            },
+            release: {
+                value: 250,
+                min: 10,
+                max: 2000,
+                automatable: true,
+                type: FLOAT
+            },
+            makeupGain: {
+                value: 1,
+                min: 1,
+                max: 100,
+                automatable: true,
+                type: FLOAT
+            },
+            attack: {
+                value: 1,
+                min: 0,
+                max: 1000,
+                automatable: true,
+                type: FLOAT
+            },
+            ratio: {
+                value: 4,
+                min: 1,
+                max: 50,
+                automatable: true,
+                type: FLOAT
+            },
+            knee: {
+                value: 5,
+                min: 0,
+                max: 40,
+                automatable: true,
+                type: FLOAT
+            },
+            automakeup: {
+                value: false,
+                automatable: false,
+                type: BOOLEAN
+            },
+            bypass: {
+                value: false,
+                automatable: false,
+                type: BOOLEAN
+            }
+        }
+    },
+    computeMakeup: {
+        value: function () {
+            let magicCoefficient = 4, // raise me if the output is too hot
+            c = this.compNode;
+            return -(c.threshold.value - c.threshold.value / c.ratio.value) / magicCoefficient;
+        }
+    },
+    automakeup: {
+        enumerable: true,
+        get: function () {
+            return this._automakeup;
+        },
+        set: function (value) {
+            this._automakeup = value;
+            if (this._automakeup)
+                this.makeupGain = this.computeMakeup();
+        }
+    },
+    threshold: {
+        enumerable: true,
+        get: function () {
+            return this.compNode.threshold;
+        },
+        set: function (value) {
+            this.compNode.threshold.value = value;
+            if (this._automakeup)
+                this.makeupGain = this.computeMakeup();
+        }
+    },
+    ratio: {
+        enumerable: true,
+        get: function () {
+            return this.compNode.ratio;
+        },
+        set: function (value) {
+            this.compNode.ratio.value = value;
+            if (this._automakeup)
+                this.makeupGain = this.computeMakeup();
+        }
+    },
+    knee: {
+        enumerable: true,
+        get: function () {
+            return this.compNode.knee;
+        },
+        set: function (value) {
+            this.compNode.knee.value = value;
+            if (this._automakeup)
+                this.makeupGain = this.computeMakeup();
+        }
+    },
+    attack: {
+        enumerable: true,
+        get: function () {
+            return this.compNode.attack;
+        },
+        set: function (value) {
+            this.compNode.attack.value = value / 1000;
+        }
+    },
+    release: {
+        enumerable: true,
+        get: function () {
+            return this.compNode.release;
+        },
+        set: function (value) {
+            this.compNode.release.value = value / 1000;
+        }
+    },
+    makeupGain: {
+        enumerable: true,
+        get: function () {
+            return this.makeupNode.gain;
+        },
+        set: function (value) {
+            this.makeupNode.gain.value = dbToWAVolume(value);
+        }
+    }
+});
+Tuna.prototype.Convolver = function (properties) {
+    if (!properties) {
+        properties = this.getDefaults();
+    }
+    this.input = userContext.createGain();
+    this.activateNode = userContext.createGain();
+    this.convolver = userContext.createConvolver();
+    this.dry = userContext.createGain();
+    this.filterLow = userContext.createBiquadFilter();
+    this.filterHigh = userContext.createBiquadFilter();
+    this.wet = userContext.createGain();
+    this.output = userContext.createGain();
+    this.activateNode.connect(this.filterLow);
+    this.activateNode.connect(this.dry);
+    this.filterLow.connect(this.filterHigh);
+    this.filterHigh.connect(this.convolver);
+    this.convolver.connect(this.wet);
+    this.wet.connect(this.output);
+    this.dry.connect(this.output);
+    this.dryLevel = initValue(properties.dryLevel, this.defaults.dryLevel.value);
+    this.wetLevel = initValue(properties.wetLevel, this.defaults.wetLevel.value);
+    this.highCut = properties.highCut || this.defaults.highCut.value;
+    this.buffer = properties.impulse || '../impulses/ir_rev_short.wav';
+    this.lowCut = properties.lowCut || this.defaults.lowCut.value;
+    this.level = initValue(properties.level, this.defaults.level.value);
+    this.filterHigh.type = 'lowpass';
+    this.filterLow.type = 'highpass';
+    this.bypass = properties.bypass || false;
+};
+Tuna.prototype.Convolver.prototype = Object.create(Super, {
+    name: {
+        value: 'Convolver'
+    },
+    defaults: {
+        writable: true,
+        value: {
+            highCut: {
+                value: 22050,
+                min: 20,
+                max: 22050,
+                automatable: true,
+                type: FLOAT
+            },
+            lowCut: {
+                value: 20,
+                min: 20,
+                max: 22050,
+                automatable: true,
+                type: FLOAT
+            },
+            dryLevel: {
+                value: 1,
+                min: 0,
+                max: 1,
+                automatable: true,
+                type: FLOAT
+            },
+            wetLevel: {
+                value: 1,
+                min: 0,
+                max: 1,
+                automatable: true,
+                type: FLOAT
+            },
+            level: {
+                value: 1,
+                min: 0,
+                max: 1,
+                automatable: true,
+                type: FLOAT
+            }
+        }
+    },
+    lowCut: {
+        get: function () {
+            return this.filterLow.frequency;
+        },
+        set: function (value) {
+            this.filterLow.frequency.value = value;
+        }
+    },
+    highCut: {
+        get: function () {
+            return this.filterHigh.frequency;
+        },
+        set: function (value) {
+            this.filterHigh.frequency.value = value;
+        }
+    },
+    level: {
+        get: function () {
+            return this.output.gain;
+        },
+        set: function (value) {
+            this.output.gain.value = value;
+        }
+    },
+    dryLevel: {
+        get: function () {
+            return this.dry.gain;
+        },
+        set: function (value) {
+            this.dry.gain.value = value;
+        }
+    },
+    wetLevel: {
+        get: function () {
+            return this.wet.gain;
+        },
+        set: function (value) {
+            this.wet.gain.value = value;
+        }
+    },
+    buffer: {
+        enumerable: false,
+        get: function () {
+            return this.convolver.buffer;
+        },
+        set: function (impulse) {
+            let convolver = this.convolver, xhr = new XMLHttpRequest();
+            if (!impulse) {
+                console.log('Tuna.Convolver.setBuffer: Missing impulse path!');
+                return;
+            }
+            xhr.open('GET', impulse, true);
+            xhr.responseType = 'arraybuffer';
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status < 300 && xhr.status > 199 || xhr.status === 302) {
+                        userContext.decodeAudioData(xhr.response, function (buffer) {
+                            convolver.buffer = buffer;
+                        }, function (e) {
+                            if (e)
+                                console.log('Tuna.Convolver.setBuffer: Error decoding data' + e);
+                        });
+                    }
+                }
+            };
+            xhr.send(null);
+        }
+    }
+});
+Tuna.prototype.Delay = function (properties) {
+    if (!properties) {
+        properties = this.getDefaults();
+    }
+    this.input = userContext.createGain();
+    this.activateNode = userContext.createGain();
+    this.dry = userContext.createGain();
+    this.wet = userContext.createGain();
+    this.filter = userContext.createBiquadFilter();
+    this.delay = userContext.createDelay(10);
+    this.feedbackNode = userContext.createGain();
+    this.output = userContext.createGain();
+    this.activateNode.connect(this.delay);
+    this.activateNode.connect(this.dry);
+    this.delay.connect(this.filter);
+    this.filter.connect(this.feedbackNode);
+    this.feedbackNode.connect(this.delay);
+    this.feedbackNode.connect(this.wet);
+    this.wet.connect(this.output);
+    this.dry.connect(this.output);
+    this.delayTime = properties.delayTime || this.defaults.delayTime.value;
+    this.feedback = initValue(properties.feedback, this.defaults.feedback.value);
+    this.wetLevel = initValue(properties.wetLevel, this.defaults.wetLevel.value);
+    this.dryLevel = initValue(properties.dryLevel, this.defaults.dryLevel.value);
+    this.cutoff = properties.cutoff || this.defaults.cutoff.value;
+    this.filter.type = 'lowpass';
+    this.bypass = properties.bypass || false;
+};
+Tuna.prototype.Delay.prototype = Object.create(Super, {
+    name: {
+        value: 'Delay'
+    },
+    defaults: {
+        writable: true,
+        value: {
+            delayTime: {
+                value: 100,
+                min: 20,
+                max: 1000,
+                automatable: false,
+                type: FLOAT
+            },
+            feedback: {
+                value: 0.45,
+                min: 0,
+                max: 0.9,
+                automatable: true,
+                type: FLOAT
+            },
+            cutoff: {
+                value: 20000,
+                min: 20,
+                max: 20000,
+                automatable: true,
+                type: FLOAT
+            },
+            wetLevel: {
+                value: 0.5,
+                min: 0,
+                max: 1,
+                automatable: true,
+                type: FLOAT
+            },
+            dryLevel: {
+                value: 1,
+                min: 0,
+                max: 1,
+                automatable: true,
+                type: FLOAT
+            }
+        }
+    },
+    delayTime: {
+        enumerable: true,
+        get: function () {
+            return this.delay.delayTime;
+        },
+        set: function (value) {
+            this.delay.delayTime.value = value / 1000;
+        }
+    },
+    wetLevel: {
+        enumerable: true,
+        get: function () {
+            return this.wet.gain;
+        },
+        set: function (value) {
+            this.wet.gain.value = value;
+        }
+    },
+    dryLevel: {
+        enumerable: true,
+        get: function () {
+            return this.dry.gain;
+        },
+        set: function (value) {
+            this.dry.gain.value = value;
+        }
+    },
+    feedback: {
+        enumerable: true,
+        get: function () {
+            return this.feedbackNode.gain;
+        },
+        set: function (value) {
+            this.feedbackNode.gain.value = value;
+        }
+    },
+    cutoff: {
+        enumerable: true,
+        get: function () {
+            return this.filter.frequency;
+        },
+        set: function (value) {
+            this.filter.frequency.value = value;
+        }
+    }
+});
+Tuna.prototype.Filter = function (properties) {
+    if (!properties) {
+        properties = this.getDefaults();
+    }
+    this.input = userContext.createGain();
+    this.activateNode = userContext.createGain();
+    this.filter = userContext.createBiquadFilter();
+    this.output = userContext.createGain();
+    this.activateNode.connect(this.filter);
+    this.filter.connect(this.output);
+    this.frequency = properties.frequency || this.defaults.frequency.value;
+    this.Q = properties.resonance || this.defaults.Q.value;
+    this.filterType = initValue(properties.filterType, this.defaults.filterType.value);
+    this.gain = initValue(properties.gain, this.defaults.gain.value);
+    this.bypass = properties.bypass || false;
+};
+Tuna.prototype.Filter.prototype = Object.create(Super, {
+    name: {
+        value: 'Filter'
+    },
+    defaults: {
+        writable: true,
+        value: {
+            frequency: {
+                value: 800,
+                min: 20,
+                max: 22050,
+                automatable: true,
+                type: FLOAT
+            },
+            Q: {
+                value: 1,
+                min: 0.001,
+                max: 100,
+                automatable: true,
+                type: FLOAT
+            },
+            gain: {
+                value: 0,
+                min: -40,
+                max: 40,
+                automatable: true,
+                type: FLOAT
+            },
+            bypass: {
+                value: false,
+                automatable: false,
+                type: BOOLEAN
+            },
+            filterType: {
+                value: 'lowpass',
+                automatable: false,
+                type: STRING
+            }
+        }
+    },
+    filterType: {
+        enumerable: true,
+        get: function () {
+            return this.filter.type;
+        },
+        set: function (value) {
+            this.filter.type = value;
+        }
+    },
+    Q: {
+        enumerable: true,
+        get: function () {
+            return this.filter.Q;
+        },
+        set: function (value) {
+            this.filter.Q.value = value;
+        }
+    },
+    gain: {
+        enumerable: true,
+        get: function () {
+            return this.filter.gain;
+        },
+        set: function (value) {
+            this.filter.gain.value = value;
+        }
+    },
+    frequency: {
+        enumerable: true,
+        get: function () {
+            return this.filter.frequency;
+        },
+        set: function (value) {
+            this.filter.frequency.value = value;
+        }
+    }
+});
+Tuna.prototype.Gain = function (properties) {
+    if (!properties) {
+        properties = this.getDefaults();
+    }
+    this.input = userContext.createGain();
+    this.activateNode = userContext.createGain();
+    this.gainNode = userContext.createGain();
+    this.output = userContext.createGain();
+    this.activateNode.connect(this.gainNode);
+    this.gainNode.connect(this.output);
+    this.gain = initValue(properties.gain, this.defaults.gain.value);
+    this.bypass = properties.bypass || false;
+};
+Tuna.prototype.Gain.prototype = Object.create(Super, {
+    name: {
+        value: 'Gain'
+    },
+    defaults: {
+        writable: true,
+        value: {
+            bypass: {
+                value: false,
+                automatable: false,
+                type: BOOLEAN
+            },
+            gain: {
+                value: 1.0,
+                automatable: true,
+                type: FLOAT
+            }
+        }
+    },
+    gain: {
+        enumerable: true,
+        get: function () {
+            return this.gainNode.gain;
+        },
+        set: function (value) {
+            this.gainNode.gain.value = value;
+        }
+    }
+});
+Tuna.prototype.MoogFilter = function (properties) {
+    if (!properties) {
+        properties = this.getDefaults();
+    }
+    this.bufferSize = properties.bufferSize || this.defaults.bufferSize.value;
+    this.input = userContext.createGain();
+    this.activateNode = userContext.createGain();
+    this.processor = userContext.createScriptProcessor(this.bufferSize, 1, 1);
+    this.output = userContext.createGain();
+    this.activateNode.connect(this.processor);
+    this.processor.connect(this.output);
+    let in1, in2, in3, in4, out1, out2, out3, out4;
+    in1 = in2 = in3 = in4 = out1 = out2 = out3 = out4 = 0.0;
+    let input, output, f, fb, i, length, inputFactor;
+    this.processor.onaudioprocess = function (e) {
+        input = e.inputBuffer.getChannelData(0),
+            output = e.outputBuffer.getChannelData(0),
+            f = this.cutoff * 1.16,
+            inputFactor = 0.35013 * (f * f) * (f * f);
+        fb = this.resonance * (1.0 - 0.15 * f * f);
+        length = input.length;
+        for (i = 0; i < length; i++) {
+            input[i] -= out4 * fb;
+            input[i] *= inputFactor;
+            out1 = input[i] + 0.3 * in1 + (1 - f) * out1; // Pole 1
+            in1 = input[i];
+            out2 = out1 + 0.3 * in2 + (1 - f) * out2; // Pole 2
+            in2 = out1;
+            out3 = out2 + 0.3 * in3 + (1 - f) * out3; // Pole 3
+            in3 = out2;
+            out4 = out3 + 0.3 * in4 + (1 - f) * out4; // Pole 4
+            in4 = out3;
+            output[i] = out4;
+        }
+    };
+    this.cutoff = initValue(properties.cutoff, this.defaults.cutoff.value);
+    this.resonance = initValue(properties.resonance, this.defaults.resonance.value);
+    this.bypass = properties.bypass || false;
+};
+Tuna.prototype.MoogFilter.prototype = Object.create(Super, {
+    name: {
+        value: 'MoogFilter'
+    },
+    defaults: {
+        writable: true,
+        value: {
+            bufferSize: {
+                value: 4096,
+                min: 256,
+                max: 16384,
+                automatable: false,
+                type: INT
+            },
+            bypass: {
+                value: false,
+                automatable: false,
+                type: BOOLEAN
+            },
+            cutoff: {
+                value: 0.065,
+                min: 0.0001,
+                max: 1.0,
+                automatable: false,
+                type: FLOAT
+            },
+            resonance: {
+                value: 3.5,
+                min: 0.0,
+                max: 4.0,
+                automatable: false,
+                type: FLOAT
+            }
+        }
+    },
+    cutoff: {
+        enumerable: true,
+        get: function () {
+            return this.processor.cutoff;
+        },
+        set: function (value) {
+            this.processor.cutoff = value;
+        }
+    },
+    resonance: {
+        enumerable: true,
+        get: function () {
+            return this.processor.resonance;
+        },
+        set: function (value) {
+            this.processor.resonance = value;
+        }
+    }
+});
+Tuna.prototype.Overdrive = function (properties) {
+    if (!properties) {
+        properties = this.getDefaults();
+    }
+    this.input = userContext.createGain();
+    this.activateNode = userContext.createGain();
+    this.inputDrive = userContext.createGain();
+    this.waveshaper = userContext.createWaveShaper();
+    this.outputDrive = userContext.createGain();
+    this.output = userContext.createGain();
+    this.activateNode.connect(this.inputDrive);
+    this.inputDrive.connect(this.waveshaper);
+    this.waveshaper.connect(this.outputDrive);
+    this.outputDrive.connect(this.output);
+    this.ws_table = new Float32Array(this.k_nSamples);
+    this.drive = initValue(properties.drive, this.defaults.drive.value);
+    this.outputGain = initValue(properties.outputGain, this.defaults.outputGain.value);
+    this.curveAmount = initValue(properties.curveAmount, this.defaults.curveAmount.value);
+    this.algorithmIndex = initValue(properties.algorithmIndex, this.defaults.algorithmIndex.value);
+    this.bypass = properties.bypass || false;
+};
+Tuna.prototype.Overdrive.prototype = Object.create(Super, {
+    name: {
+        value: 'Overdrive'
+    },
+    defaults: {
+        writable: true,
+        value: {
+            drive: {
+                value: 1,
+                min: 0,
+                max: 1,
+                automatable: true,
+                type: FLOAT,
+                scaled: true
+            },
+            outputGain: {
+                value: 1,
+                min: 0,
+                max: 1,
+                automatable: true,
+                type: FLOAT,
+                scaled: true
+            },
+            curveAmount: {
+                value: 0.725,
+                min: 0,
+                max: 1,
+                automatable: false,
+                type: FLOAT
+            },
+            algorithmIndex: {
+                value: 0,
+                min: 0,
+                max: 5,
+                automatable: false,
+                type: INT
+            }
+        }
+    },
+    k_nSamples: {
+        value: 8192
+    },
+    drive: {
+        get: function () {
+            return this.inputDrive.gain;
+        },
+        set: function (value) {
+            this._drive = value;
+        }
+    },
+    curveAmount: {
+        get: function () {
+            return this._curveAmount;
+        },
+        set: function (value) {
+            this._curveAmount = value;
+            if (this._algorithmIndex === undefined) {
+                this._algorithmIndex = 0;
+            }
+            this.waveshaperAlgorithms[this._algorithmIndex](this._curveAmount, this.k_nSamples, this.ws_table);
+            this.waveshaper.curve = this.ws_table;
+        }
+    },
+    outputGain: {
+        get: function () {
+            return this.outputDrive.gain;
+        },
+        set: function (value) {
+            this._outputGain = dbToWAVolume(value);
+        }
+    },
+    algorithmIndex: {
+        get: function () {
+            return this._algorithmIndex;
+        },
+        set: function (value) {
+            this._algorithmIndex = value;
+            this.curveAmount = this._curveAmount;
+        }
+    },
+    waveshaperAlgorithms: {
+        value: [
+            function (amount, n_samples, ws_table) {
+                amount = Math.min(amount, 0.9999);
+                let k = 2 * amount / (1 - amount), i, x;
+                for (i = 0; i < n_samples; i++) {
+                    x = i * 2 / n_samples - 1;
+                    ws_table[i] = (1 + k) * x / (1 + k * Math.abs(x));
+                }
+            },
+            function (amount, n_samples, ws_table) {
+                let i, x, y = 0;
+                for (i = 0; i < n_samples; i++) {
+                    x = i * 2 / n_samples - 1;
+                    y = ((0.5 * Math.pow((x + 1.4), 2)) - 1) * y >= 0 ? 5.8 : 1.2;
+                    ws_table[i] = tanh(y);
+                }
+            },
+            function (amount, n_samples, ws_table) {
+                let i, x, y, a = 1 - amount;
+                for (i = 0; i < n_samples; i++) {
+                    x = i * 2 / n_samples - 1;
+                    y = x < 0 ? -Math.pow(Math.abs(x), a + 0.04) : Math.pow(x, a);
+                    ws_table[i] = tanh(y * 2);
+                }
+            },
+            function (amount, n_samples, ws_table) {
+                let i, x, y = 0, abx, a = 1 - amount > 0.99 ? 0.99 : 1 - amount;
+                for (i = 0; i < n_samples; i++) {
+                    x = i * 2 / n_samples - 1;
+                    abx = Math.abs(x);
+                    if (abx < a)
+                        y = abx;
+                    else if (abx > a)
+                        y = a + (abx - a) / (1 + Math.pow((abx - a) / (1 - a), 2));
+                    else if (abx > 1)
+                        y = abx;
+                    ws_table[i] = sign(x) * y * (1 / ((a + 1) / 2));
+                }
+            },
+            function (amount, n_samples, ws_table) {
+                // fixed curve, amount doesn't do anything, the distortion is just from the drive
+                let i, x;
+                for (i = 0; i < n_samples; i++) {
+                    x = i * 2 / n_samples - 1;
+                    if (x < -0.08905) {
+                        ws_table[i] = (-3 / 4) * (1 - (Math.pow((1 - (Math.abs(x) - 0.032857)), 12)) + (1 / 3) * (Math.abs(x) - 0.032847)) + 0.01;
+                    }
+                    else if (x >= -0.08905 && x < 0.320018) {
+                        ws_table[i] = (-6.153 * (x * x)) + 3.9375 * x;
+                    }
+                    else {
+                        ws_table[i] = 0.630035;
+                    }
+                }
+            },
+            function (amount, n_samples, ws_table) {
+                let a = 2 + Math.round(amount * 14), 
+                // we go from 2 to 16 bits, keep in mind for the UI
+                bits = Math.round(Math.pow(2, a - 1)), 
+                // real number of quantization steps divided by 2
+                i, x;
+                for (i = 0; i < n_samples; i++) {
+                    x = i * 2 / n_samples - 1;
+                    ws_table[i] = Math.round(x * bits) / bits;
+                }
+            }
+        ]
+    }
+});
+Tuna.prototype.Panner = function (properties) {
+    if (!properties) {
+        properties = this.getDefaults();
+    }
+    this.input = userContext.createGain();
+    this.activateNode = userContext.createGain();
+    this.panner = userContext.createStereoPanner();
+    this.output = userContext.createGain();
+    this.activateNode.connect(this.panner);
+    this.panner.connect(this.output);
+    this.pan = initValue(properties.pan, this.defaults.pan.value);
+    this.bypass = properties.bypass || false;
+};
+Tuna.prototype.Panner.prototype = Object.create(Super, {
+    name: {
+        value: 'Panner'
+    },
+    defaults: {
+        writable: true,
+        value: {
+            bypass: {
+                value: false,
+                automatable: false,
+                type: BOOLEAN
+            },
+            pan: {
+                value: 0.0,
+                min: -1.0,
+                max: 1.0,
+                automatable: true,
+                type: FLOAT
+            }
+        }
+    },
+    pan: {
+        enumerable: true,
+        get: function () {
+            return this.panner.pan;
+        },
+        set: function (value) {
+            this.panner.pan.value = value;
+        }
+    }
+});
+Tuna.prototype.Phaser = function (properties) {
+    if (!properties) {
+        properties = this.getDefaults();
+    }
+    this.input = userContext.createGain();
+    this.splitter = this.activateNode = userContext.createChannelSplitter(2);
+    this.filtersL = [];
+    this.filtersR = [];
+    this.feedbackGainNodeL = userContext.createGain();
+    this.feedbackGainNodeR = userContext.createGain();
+    this.merger = userContext.createChannelMerger(2);
+    this.filteredSignal = userContext.createGain();
+    this.output = userContext.createGain();
+    this.lfoL = new userInstance.LFO({
+        target: this.filtersL,
+        callback: this.callback
+    });
+    this.lfoR = new userInstance.LFO({
+        target: this.filtersR,
+        callback: this.callback
+    });
+    let i = this.stage;
+    while (i--) {
+        this.filtersL[i] = userContext.createBiquadFilter();
+        this.filtersR[i] = userContext.createBiquadFilter();
+        this.filtersL[i].type = 'allpass';
+        this.filtersR[i].type = 'allpass';
+    }
+    this.input.connect(this.splitter);
+    this.input.connect(this.output);
+    this.splitter.connect(this.filtersL[0], 0, 0);
+    this.splitter.connect(this.filtersR[0], 1, 0);
+    this.connectInOrder(this.filtersL);
+    this.connectInOrder(this.filtersR);
+    this.filtersL[this.stage - 1].connect(this.feedbackGainNodeL);
+    this.filtersL[this.stage - 1].connect(this.merger, 0, 0);
+    this.filtersR[this.stage - 1].connect(this.feedbackGainNodeR);
+    this.filtersR[this.stage - 1].connect(this.merger, 0, 1);
+    this.feedbackGainNodeL.connect(this.filtersL[0]);
+    this.feedbackGainNodeR.connect(this.filtersR[0]);
+    this.merger.connect(this.output);
+    this.rate = initValue(properties.rate, this.defaults.rate.value);
+    this.baseModulationFrequency = properties.baseModulationFrequency || this.defaults.baseModulationFrequency.value;
+    this.depth = initValue(properties.depth, this.defaults.depth.value);
+    this.feedback = initValue(properties.feedback, this.defaults.feedback.value);
+    this.stereoPhase = initValue(properties.stereoPhase, this.defaults.stereoPhase.value);
+    this.lfoL.activate(true);
+    this.lfoR.activate(true);
+    this.bypass = properties.bypass || false;
+};
+Tuna.prototype.Phaser.prototype = Object.create(Super, {
+    name: {
+        value: 'Phaser'
+    },
+    stage: {
+        value: 4
+    },
+    defaults: {
+        writable: true,
+        value: {
+            rate: {
+                value: 0.1,
+                min: 0,
+                max: 8,
+                automatable: false,
+                type: FLOAT
+            },
+            depth: {
+                value: 0.6,
+                min: 0,
+                max: 1,
+                automatable: false,
+                type: FLOAT
+            },
+            feedback: {
+                value: 0.7,
+                min: 0,
+                max: 1,
+                automatable: false,
+                type: FLOAT
+            },
+            stereoPhase: {
+                value: 40,
+                min: 0,
+                max: 180,
+                automatable: false,
+                type: FLOAT
+            },
+            baseModulationFrequency: {
+                value: 700,
+                min: 500,
+                max: 1500,
+                automatable: false,
+                type: FLOAT
+            }
+        }
+    },
+    callback: {
+        value: function (filters, value) {
+            for (let stage = 0; stage < 4; stage++) {
+                filters[stage].frequency.value = value;
+            }
+        }
+    },
+    depth: {
+        get: function () {
+            return this._depth;
+        },
+        set: function (value) {
+            this._depth = value;
+            this.lfoL.oscillation = this._baseModulationFrequency * this._depth;
+            this.lfoR.oscillation = this._baseModulationFrequency * this._depth;
+        }
+    },
+    rate: {
+        get: function () {
+            return this._rate;
+        },
+        set: function (value) {
+            this._rate = value;
+            this.lfoL.frequency = this._rate;
+            this.lfoR.frequency = this._rate;
+        }
+    },
+    baseModulationFrequency: {
+        enumerable: true,
+        get: function () {
+            return this._baseModulationFrequency;
+        },
+        set: function (value) {
+            this._baseModulationFrequency = value;
+            this.lfoL.offset = this._baseModulationFrequency;
+            this.lfoR.offset = this._baseModulationFrequency;
+            this._depth = this._depth;
+        }
+    },
+    feedback: {
+        get: function () {
+            return this._feedback;
+        },
+        set: function (value) {
+            this._feedback = value;
+            this.feedbackGainNodeL.gain.value = this._feedback;
+            this.feedbackGainNodeR.gain.value = this._feedback;
+        }
+    },
+    stereoPhase: {
+        get: function () {
+            return this._stereoPhase;
+        },
+        set: function (value) {
+            this._stereoPhase = value;
+            let newPhase = this.lfoL._phase + this._stereoPhase * Math.PI / 180;
+            newPhase = fmod(newPhase, 2 * Math.PI);
+            this.lfoR._phase = newPhase;
+        }
+    }
+});
+Tuna.prototype.PingPongDelay = function (properties) {
+    if (!properties) {
+        properties = this.getDefaults();
+    }
+    this.input = userContext.createGain();
+    this.wetLevel = userContext.createGain();
+    this.stereoToMonoMix = userContext.createGain();
+    this.feedbackLevel = userContext.createGain();
+    this.output = userContext.createGain();
+    this.delayLeft = userContext.createDelay(10);
+    this.delayRight = userContext.createDelay(10);
+    this.activateNode = userContext.createGain();
+    this.splitter = userContext.createChannelSplitter(2);
+    this.merger = userContext.createChannelMerger(2);
+    this.activateNode.connect(this.splitter);
+    this.splitter.connect(this.stereoToMonoMix, 0, 0);
+    this.splitter.connect(this.stereoToMonoMix, 1, 0);
+    this.stereoToMonoMix.gain.value = .5;
+    this.stereoToMonoMix.connect(this.wetLevel);
+    this.wetLevel.connect(this.delayLeft);
+    this.feedbackLevel.connect(this.delayLeft);
+    this.delayLeft.connect(this.delayRight);
+    this.delayRight.connect(this.feedbackLevel);
+    this.delayLeft.connect(this.merger, 0, 0);
+    this.delayRight.connect(this.merger, 0, 1);
+    this.merger.connect(this.output);
+    this.activateNode.connect(this.output);
+    this.delayTimeLeft = properties.delayTimeLeft !== undefined ? properties.delayTimeLeft : this.defaults.delayTimeLeft.value;
+    this.delayTimeRight = properties.delayTimeRight !== undefined ? properties.delayTimeRight : this.defaults.delayTimeRight.value;
+    this.feedbackLevel.gain.value = properties.feedback !== undefined ? properties.feedback : this.defaults.feedback.value;
+    this.wetLevel.gain.value = properties.wetLevel !== undefined ? properties.wetLevel : this.defaults.wetLevel.value;
+    this.bypass = properties.bypass || false;
+};
+Tuna.prototype.PingPongDelay.prototype = Object.create(Super, {
+    name: {
+        value: 'PingPongDelay'
+    },
+    delayTimeLeft: {
+        enumerable: true,
+        get: function () {
+            return this._delayTimeLeft;
+        },
+        set: function (value) {
+            this._delayTimeLeft = value;
+            this.delayLeft.delayTime.value = value / 1000;
+        }
+    },
+    delayTimeRight: {
+        enumerable: true,
+        get: function () {
+            return this._delayTimeRight;
+        },
+        set: function (value) {
+            this._delayTimeRight = value;
+            this.delayRight.delayTime.value = value / 1000;
+        }
+    },
+    defaults: {
+        writable: true,
+        value: {
+            delayTimeLeft: {
+                value: 200,
+                min: 1,
+                max: 10000,
+                automatable: false,
+                type: INT
+            },
+            delayTimeRight: {
+                value: 400,
+                min: 1,
+                max: 10000,
+                automatable: false,
+                type: INT
+            },
+            feedback: {
+                value: 0.3,
+                min: 0,
+                max: 1,
+                automatable: false,
+                type: FLOAT
+            },
+            wetLevel: {
+                value: 0.5,
+                min: 0,
+                max: 1,
+                automatable: false,
+                type: FLOAT
+            }
+        }
+    }
+});
+Tuna.prototype.Tremolo = function (properties) {
+    if (!properties) {
+        properties = this.getDefaults();
+    }
+    this.input = userContext.createGain();
+    this.splitter = this.activateNode = userContext.createChannelSplitter(2),
+        this.amplitudeL = userContext.createGain(),
+        this.amplitudeR = userContext.createGain(),
+        this.merger = userContext.createChannelMerger(2),
+        this.output = userContext.createGain();
+    this.lfoL = new userInstance.LFO({
+        target: this.amplitudeL.gain,
+        callback: pipe
+    });
+    this.lfoR = new userInstance.LFO({
+        target: this.amplitudeR.gain,
+        callback: pipe
+    });
+    this.input.connect(this.splitter);
+    this.splitter.connect(this.amplitudeL, 0);
+    this.splitter.connect(this.amplitudeR, 1);
+    this.amplitudeL.connect(this.merger, 0, 0);
+    this.amplitudeR.connect(this.merger, 0, 1);
+    this.merger.connect(this.output);
+    this.rate = properties.rate || this.defaults.rate.value;
+    this.intensity = initValue(properties.intensity, this.defaults.intensity.value);
+    this.stereoPhase = initValue(properties.stereoPhase, this.defaults.stereoPhase.value);
+    this.lfoL.offset = 1 - (this.intensity / 2);
+    this.lfoR.offset = 1 - (this.intensity / 2);
+    this.lfoL.phase = this.stereoPhase * Math.PI / 180;
+    this.lfoL.activate(true);
+    this.lfoR.activate(true);
+    this.bypass = properties.bypass || false;
+};
+Tuna.prototype.Tremolo.prototype = Object.create(Super, {
+    name: {
+        value: 'Tremolo'
+    },
+    defaults: {
+        writable: true,
+        value: {
+            intensity: {
+                value: 0.3,
+                min: 0,
+                max: 1,
+                automatable: false,
+                type: FLOAT
+            },
+            stereoPhase: {
+                value: 0,
+                min: 0,
+                max: 180,
+                automatable: false,
+                type: FLOAT
+            },
+            rate: {
+                value: 5,
+                min: 0.1,
+                max: 11,
+                automatable: false,
+                type: FLOAT
+            }
+        }
+    },
+    intensity: {
+        enumerable: true,
+        get: function () {
+            return this._intensity;
+        },
+        set: function (value) {
+            this._intensity = value;
+            this.lfoL.offset = 1 - this._intensity / 2;
+            this.lfoR.offset = 1 - this._intensity / 2;
+            this.lfoL.oscillation = this._intensity;
+            this.lfoR.oscillation = this._intensity;
+        }
+    },
+    rate: {
+        enumerable: true,
+        get: function () {
+            return this._rate;
+        },
+        set: function (value) {
+            this._rate = value;
+            this.lfoL.frequency = this._rate;
+            this.lfoR.frequency = this._rate;
+        }
+    },
+    stereoPhase: {
+        enumerable: true,
+        get: function () {
+            return this._stereoPhase;
+        },
+        set: function (value) {
+            this._stereoPhase = value;
+            let newPhase = this.lfoL._phase + this._stereoPhase * Math.PI / 180;
+            newPhase = fmod(newPhase, 2 * Math.PI);
+            this.lfoR.phase = newPhase;
+        }
+    }
+});
+Tuna.prototype.WahWah = function (properties) {
+    if (!properties) {
+        properties = this.getDefaults();
+    }
+    this.input = userContext.createGain();
+    this.activateNode = userContext.createGain();
+    this.envelopeFollower = new userInstance.EnvelopeFollower({
+        target: this,
+        callback: function (context, value) {
+            context.sweep = value;
+        }
+    });
+    this.filterBp = userContext.createBiquadFilter();
+    this.filterPeaking = userContext.createBiquadFilter();
+    this.output = userContext.createGain();
+    // Connect AudioNodes
+    this.activateNode.connect(this.filterBp);
+    this.filterBp.connect(this.filterPeaking);
+    this.filterPeaking.connect(this.output);
+    // Set Properties
+    this.init();
+    this.automode = initValue(properties.automode, this.defaults.automode.value);
+    this.resonance = properties.resonance || this.defaults.resonance.value;
+    this.sensitivity = initValue(properties.sensitivity, this.defaults.sensitivity.value);
+    this.baseFrequency = initValue(properties.baseFrequency, this.defaults.baseFrequency.value);
+    this.excursionOctaves = properties.excursionOctaves || this.defaults.excursionOctaves.value;
+    this.sweep = initValue(properties.sweep, this.defaults.sweep.value);
+    this.activateNode.gain.value = 2;
+    this.envelopeFollower.activate(true);
+    this.bypass = properties.bypass || false;
+};
+Tuna.prototype.WahWah.prototype = Object.create(Super, {
+    name: {
+        value: 'WahWah'
+    },
+    defaults: {
+        writable: true,
+        value: {
+            automode: {
+                value: true,
+                automatable: false,
+                type: BOOLEAN
+            },
+            baseFrequency: {
+                value: 0.5,
+                min: 0,
+                max: 1,
+                automatable: false,
+                type: FLOAT
+            },
+            excursionOctaves: {
+                value: 2,
+                min: 1,
+                max: 6,
+                automatable: false,
+                type: FLOAT
+            },
+            sweep: {
+                value: 0.2,
+                min: 0,
+                max: 1,
+                automatable: false,
+                type: FLOAT
+            },
+            resonance: {
+                value: 10,
+                min: 1,
+                max: 100,
+                automatable: false,
+                type: FLOAT
+            },
+            sensitivity: {
+                value: 0.5,
+                min: -1,
+                max: 1,
+                automatable: false,
+                type: FLOAT
+            }
+        }
+    },
+    automode: {
+        get: function () {
+            return this._automode;
+        },
+        set: function (value) {
+            this._automode = value;
+            if (value) {
+                this.activateNode.connect(this.envelopeFollower.input);
+                this.envelopeFollower.activate(true);
+            }
+            else {
+                this.envelopeFollower.activate(false);
+                this.activateNode.disconnect();
+                this.activateNode.connect(this.filterBp);
+            }
+        }
+    },
+    filterFreqTimeout: {
+        writable: true,
+        value: 0
+    },
+    setFilterFreq: {
+        value: function () {
+            try {
+                this.filterBp.frequency.value = Math.min(22050, this._baseFrequency + this._excursionFrequency * this._sweep);
+                this.filterPeaking.frequency.value = Math.min(22050, this._baseFrequency + this._excursionFrequency * this._sweep);
+            }
+            catch (e) {
+                clearTimeout(this.filterFreqTimeout);
+                // put on the next cycle to let all init properties be set
+                this.filterFreqTimeout = setTimeout(function () {
+                    this.setFilterFreq();
+                }.bind(this), 0);
+            }
+        }
+    },
+    sweep: {
+        enumerable: true,
+        get: function () {
+            return this._sweep;
+        },
+        set: function (value) {
+            this._sweep = Math.pow(value > 1 ? 1 : value < 0 ? 0 : value, this._sensitivity);
+            this.setFilterFreq();
+        }
+    },
+    baseFrequency: {
+        enumerable: true,
+        get: function () {
+            return this._baseFrequency;
+        },
+        set: function (value) {
+            this._baseFrequency = 50 * Math.pow(10, value * 2);
+            this._excursionFrequency = Math.min(userContext.sampleRate / 2, this.baseFrequency * Math.pow(2, this._excursionOctaves));
+            this.setFilterFreq();
+        }
+    },
+    excursionOctaves: {
+        enumerable: true,
+        get: function () {
+            return this._excursionOctaves;
+        },
+        set: function (value) {
+            this._excursionOctaves = value;
+            this._excursionFrequency = Math.min(userContext.sampleRate / 2, this.baseFrequency * Math.pow(2, this._excursionOctaves));
+            this.setFilterFreq();
+        }
+    },
+    sensitivity: {
+        enumerable: true,
+        get: function () {
+            return this._sensitivity;
+        },
+        set: function (value) {
+            this._sensitivity = Math.pow(10, value);
+        }
+    },
+    resonance: {
+        enumerable: true,
+        get: function () {
+            return this._resonance;
+        },
+        set: function (value) {
+            this._resonance = value;
+            this.filterPeaking.Q.value = this._resonance;
+        }
+    },
+    init: {
+        value: function () {
+            this.output.gain.value = 1;
+            this.filterPeaking.type = 'peaking';
+            this.filterBp.type = 'bandpass';
+            this.filterPeaking.frequency.value = 100;
+            this.filterPeaking.gain.value = 20;
+            this.filterPeaking.Q.value = 5;
+            this.filterBp.frequency.value = 100;
+            this.filterBp.Q.value = 1;
+        }
+    }
+});
+Tuna.prototype.EnvelopeFollower = function (properties) {
+    if (!properties) {
+        properties = this.getDefaults();
+    }
+    this.input = userContext.createGain();
+    this.jsNode = this.output = userContext.createScriptProcessor(this.buffersize, 1, 1);
+    this.input.connect(this.output);
+    this.attackTime = initValue(properties.attackTime, this.defaults.attackTime.value);
+    this.releaseTime = initValue(properties.releaseTime, this.defaults.releaseTime.value);
+    this._envelope = 0;
+    this.target = properties.target || {};
+    this.callback = properties.callback || function () { };
+    this.bypass = properties.bypass || false;
+};
+Tuna.prototype.EnvelopeFollower.prototype = Object.create(Super, {
+    name: {
+        value: 'EnvelopeFollower'
+    },
+    defaults: {
+        value: {
+            attackTime: {
+                value: 0.003,
+                min: 0,
+                max: 0.5,
+                automatable: false,
+                type: FLOAT
+            },
+            releaseTime: {
+                value: 0.5,
+                min: 0,
+                max: 0.5,
+                automatable: false,
+                type: FLOAT
+            }
+        }
+    },
+    buffersize: {
+        value: 256
+    },
+    envelope: {
+        value: 0
+    },
+    sampleRate: {
+        value: 44100
+    },
+    attackTime: {
+        enumerable: true,
+        get: function () {
+            return this._attackTime;
+        },
+        set: function (value) {
+            this._attackTime = value;
+            this._attackC = Math.exp(-1 / this._attackTime * this.sampleRate / this.buffersize);
+        }
+    },
+    releaseTime: {
+        enumerable: true,
+        get: function () {
+            return this._releaseTime;
+        },
+        set: function (value) {
+            this._releaseTime = value;
+            this._releaseC = Math.exp(-1 / this._releaseTime * this.sampleRate / this.buffersize);
+        }
+    },
+    callback: {
+        get: function () {
+            return this._callback;
+        },
+        set: function (value) {
+            if (typeof value === 'function') {
+                this._callback = value;
+            }
+            else {
+                console.error('tuna.js: ' + this.name + ': Callback must be a function!');
+            }
+        }
+    },
+    target: {
+        get: function () {
+            return this._target;
+        },
+        set: function (value) {
+            this._target = value;
+        }
+    },
+    activate: {
+        value: function (doActivate) {
+            this.activated = doActivate;
+            if (doActivate) {
+                this.jsNode.connect(userContext.destination);
+                this.jsNode.onaudioprocess = this.returnCompute(this);
+            }
+            else {
+                this.jsNode.disconnect();
+                this.jsNode.onaudioprocess = null;
+            }
+            if (this.activateCallback) {
+                this.activateCallback(doActivate);
+            }
+        }
+    },
+    returnCompute: {
+        value: function (instance) {
+            return function (event) {
+                instance.compute(event);
+            };
+        }
+    },
+    compute: {
+        value: function (event) {
+            let count = event.inputBuffer.getChannelData(0).length, channels = event.inputBuffer.numberOfChannels, current, chan, rms, i;
+            chan = rms = i = 0;
+            if (channels > 1) {
+                for (i = 0; i < count; ++i) {
+                    for (; chan < channels; ++chan) {
+                        current = event.inputBuffer.getChannelData(chan)[i];
+                        rms += (current * current) / channels;
+                    }
+                }
+            }
+            else {
+                for (i = 0; i < count; ++i) {
+                    current = event.inputBuffer.getChannelData(0)[i];
+                    rms += (current * current);
+                }
+            }
+            rms = Math.sqrt(rms);
+            if (this._envelope < rms) {
+                this._envelope *= this._attackC;
+                this._envelope += (1 - this._attackC) * rms;
+            }
+            else {
+                this._envelope *= this._releaseC;
+                this._envelope += (1 - this._releaseC) * rms;
+            }
+            this._callback(this._target, this._envelope);
+        }
+    }
+});
+Tuna.prototype.LFO = function (properties) {
+    if (!properties) {
+        properties = this.getDefaults();
+    }
+    // Instantiate AudioNode
+    this.input = userContext.createGain();
+    this.output = userContext.createScriptProcessor(256, 1, 1);
+    this.activateNode = userContext.destination;
+    // Set Properties
+    this.frequency = initValue(properties.frequency, this.defaults.frequency.value);
+    this.offset = initValue(properties.offset, this.defaults.offset.value);
+    this.oscillation = initValue(properties.oscillation, this.defaults.oscillation.value);
+    this.phase = initValue(properties.phase, this.defaults.phase.value);
+    this.target = properties.target || {};
+    this.output.onaudioprocess = this.callback(properties.callback || function () { });
+    this.bypass = properties.bypass || false;
+};
+Tuna.prototype.LFO.prototype = Object.create(Super, {
+    name: {
+        value: 'LFO'
+    },
+    bufferSize: {
+        value: 256
+    },
+    sampleRate: {
+        value: 44100
+    },
+    defaults: {
+        value: {
+            frequency: {
+                value: 1,
+                min: 0,
+                max: 20,
+                automatable: false,
+                type: FLOAT
+            },
+            offset: {
+                value: 0.85,
+                min: 0,
+                max: 22049,
+                automatable: false,
+                type: FLOAT
+            },
+            oscillation: {
+                value: 0.3,
+                min: -22050,
+                max: 22050,
+                automatable: false,
+                type: FLOAT
+            },
+            phase: {
+                value: 0,
+                min: 0,
+                max: 2 * Math.PI,
+                automatable: false,
+                type: FLOAT
+            }
+        }
+    },
+    frequency: {
+        get: function () {
+            return this._frequency;
+        },
+        set: function (value) {
+            this._frequency = value;
+            this._phaseInc = 2 * Math.PI * this._frequency * this.bufferSize / this.sampleRate;
+        }
+    },
+    offset: {
+        get: function () {
+            return this._offset;
+        },
+        set: function (value) {
+            this._offset = value;
+        }
+    },
+    oscillation: {
+        get: function () {
+            return this._oscillation;
+        },
+        set: function (value) {
+            this._oscillation = value;
+        }
+    },
+    phase: {
+        get: function () {
+            return this._phase;
+        },
+        set: function (value) {
+            this._phase = value;
+        }
+    },
+    target: {
+        get: function () {
+            return this._target;
+        },
+        set: function (value) {
+            this._target = value;
+        }
+    },
+    activate: {
+        value: function (doActivate) {
+            if (doActivate) {
+                this.output.connect(userContext.destination);
+                if (this.activateCallback) {
+                    this.activateCallback(doActivate);
+                }
+            }
+            else {
+                this.output.disconnect();
+            }
+        }
+    },
+    callback: {
+        value: function (callback) {
+            let that = this;
+            return function () {
+                that._phase += that._phaseInc;
+                if (that._phase > 2 * Math.PI) {
+                    that._phase = 0;
+                }
+                callback(that._target, that._offset + that._oscillation * Math.sin(that._phase));
+            };
+        }
+    }
+});
+Tuna.toString = Tuna.prototype.toString = function () {
+    return 'Please visit https://github.com/Theodeus/tuna/wiki for instructions on how to use Tuna.js';
+};
+
+
+/***/ }),
+/* 36 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return WebAudioFontPlayer; });
+let WebAudioFontPlayer = WebAudioFontPlayerConstructor;
+function WebAudioFontPlayerConstructor() {
+    this.envelopes = [];
+    this.onCacheFinish = null;
+    this.onCacheProgress = null;
+    this.afterTime = 0.05;
+    this.nearZero = 0.000001;
+    this.queueWaveTable = function (audioContext, target, preset, when, pitch, duration, volume, slides) {
+        if (volume) {
+            volume = 1.0 * volume;
+        }
+        else {
+            volume = 1.0;
+        }
+        let zone = this.findZone(audioContext, preset, pitch);
+        if (!(zone.buffer))
+            throw new Error('Preset is not ready: empty buffer');
+        let baseDetune = zone.originalPitch - 100.0 * zone.coarseTune - zone.fineTune;
+        let playbackRate = 1.0 * Math.pow(2, (100.0 * pitch - baseDetune) / 1200.0);
+        let sampleRatio = zone.sampleRate / audioContext.sampleRate;
+        let startWhen = when;
+        if (startWhen < audioContext.currentTime) {
+            startWhen = audioContext.currentTime;
+        }
+        let waveDuration = duration + this.afterTime;
+        let loop = true;
+        if (zone.loopStart < 1 || zone.loopStart >= zone.loopEnd) {
+            loop = false;
+        }
+        if (!loop) {
+            if (waveDuration > zone.buffer.duration / playbackRate) {
+                waveDuration = zone.buffer.duration / playbackRate;
+            }
+        }
+        let envelope = this.findEnvelope(audioContext, target, startWhen, waveDuration);
+        this.setupEnvelope(audioContext, envelope, zone, volume, startWhen, waveDuration, duration);
+        envelope.audioBufferSourceNode = audioContext.createBufferSource();
+        envelope.audioBufferSourceNode.playbackRate.value = playbackRate;
+        if (slides) {
+            if (slides.length > 0) {
+                envelope.audioBufferSourceNode.playbackRate.setValueAtTime(playbackRate, when);
+                for (let i = 0; i < slides.length; i++) {
+                    let newPlaybackRate = 1.0 * Math.pow(2, (100.0 * slides[i].pitch - baseDetune) / 1200.0);
+                    let newWhen = when + slides[i].when;
+                    envelope.audioBufferSourceNode.playbackRate.linearRampToValueAtTime(newPlaybackRate, newWhen);
+                }
+            }
+        }
+        envelope.audioBufferSourceNode.buffer = zone.buffer;
+        if (loop) {
+            envelope.audioBufferSourceNode.loop = true;
+            envelope.audioBufferSourceNode.loopStart = zone.loopStart / zone.sampleRate + zone.delay;
+            envelope.audioBufferSourceNode.loopEnd = zone.loopEnd / zone.sampleRate + zone.delay;
+        }
+        else {
+            envelope.audioBufferSourceNode.loop = false;
+        }
+        envelope.audioBufferSourceNode.connect(envelope);
+        envelope.audioBufferSourceNode.start(startWhen, zone.delay);
+        envelope.audioBufferSourceNode.stop(startWhen + waveDuration);
+        envelope.when = startWhen;
+        envelope.duration = waveDuration;
+        envelope.pitch = pitch;
+        envelope.preset = preset;
+        return envelope;
+    };
+    this.noZeroVolume = function (n) {
+        if (n > this.nearZero) {
+            return n;
+        }
+        else {
+            return this.nearZero;
+        }
+    };
+    this.setupEnvelope = function (audioContext, envelope, zone, volume, when, sampleDuration, noteDuration) {
+        envelope.gain.setValueAtTime(this.noZeroVolume(0), audioContext.currentTime);
+        let lastTime = 0;
+        let lastVolume = 0;
+        let duration = noteDuration;
+        let ahdsr = zone.ahdsr;
+        if (sampleDuration < duration + this.afterTime) {
+            duration = sampleDuration - this.afterTime;
+        }
+        if (ahdsr) {
+            if (!(ahdsr.length > 0)) {
+                ahdsr = [{
+                        duration: 0,
+                        volume: 1
+                    }, {
+                        duration: 0.5,
+                        volume: 1
+                    }, {
+                        duration: 1.5,
+                        volume: 0.5
+                    }, {
+                        duration: 3,
+                        volume: 0
+                    }
+                ];
+            }
+        }
+        else {
+            ahdsr = [{
+                    duration: 0,
+                    volume: 1
+                }, {
+                    duration: duration,
+                    volume: 1
+                }
+            ];
+        }
+        envelope.gain.cancelScheduledValues(when);
+        envelope.gain.setValueAtTime(this.noZeroVolume(ahdsr[0].volume * volume), when);
+        for (let i = 0; i < ahdsr.length; i++) {
+            if (ahdsr[i].duration > 0) {
+                if (ahdsr[i].duration + lastTime > duration) {
+                    let r = 1 - (ahdsr[i].duration + lastTime - duration) / ahdsr[i].duration;
+                    let n = lastVolume - r * (lastVolume - ahdsr[i].volume);
+                    envelope.gain.linearRampToValueAtTime(this.noZeroVolume(volume * n), when + duration);
+                    break;
+                }
+                lastTime = lastTime + ahdsr[i].duration;
+                lastVolume = ahdsr[i].volume;
+                envelope.gain.linearRampToValueAtTime(this.noZeroVolume(volume * lastVolume), when + lastTime);
+            }
+        }
+        envelope.gain.linearRampToValueAtTime(this.noZeroVolume(0), when + duration + this.afterTime);
+    };
+    this.numValue = function (aValue, defValue) {
+        if (typeof aValue === 'number') {
+            return aValue;
+        }
+        else {
+            return defValue;
+        }
+    };
+    this.findEnvelope = function (audioContext, target, when, duration) {
+        let envelope = null;
+        for (let i = 0; i < this.envelopes.length; i++) {
+            let e = this.envelopes[i];
+            if (this.expireEnvelope(e, audioContext)) {
+                envelope = e;
+                break;
+            }
+        }
+        if (!(envelope)) {
+            envelope = audioContext.createGain();
+            envelope.target = target;
+            envelope.connect(target);
+            envelope.cancel = function (time) {
+                if (time === undefined)
+                    time = audioContext.currentTime;
+                if (envelope.when + envelope.duration > audioContext.currentTime) {
+                    envelope.gain.cancelScheduledValues(time);
+                    envelope.gain.setTargetAtTime(0.00001, time, 0.1);
+                    envelope.when = time + 0.00001;
+                    envelope.duration = 0;
+                }
+            };
+            this.envelopes.push(envelope);
+        }
+        return envelope;
+    };
+    this.expireEnvelope = function (e, ctx) {
+        if (ctx.currentTime > e.when + e.duration + 0.1) {
+            try {
+                e.audioBufferSourceNode.disconnect();
+                e.audioBufferSourceNode.stop(0);
+                e.audioBufferSourceNode = null;
+            }
+            catch (x) {
+                // audioBufferSourceNode is dead already
+            }
+            return true;
+        }
+        return false;
+    };
+    this.expireEnvelopes = function (ctx) {
+        this.envelopes = this.envelopes.filter((e) => !this.expireEnvelope(e, ctx));
+    };
+    this.adjustPreset = function (audioContext, preset, cb) {
+        preset.bufferct = 0;
+        for (let i = 0; i < preset.zones.length; i++) {
+            this.adjustZone(audioContext, preset.zones[i], preset, cb);
+        }
+    };
+    this.adjustZone = function (audioContext, zone, preset, cb) {
+        if (zone.buffer) {
+            //
+        }
+        else {
+            zone.delay = 0;
+            if (zone.sample) {
+                let decoded = atob(zone.sample);
+                zone.buffer = audioContext.createBuffer(1, decoded.length / 2, zone.sampleRate);
+                let float32Array = zone.buffer.getChannelData(0);
+                let b1, b2, n;
+                for (let i = 0; i < decoded.length / 2; i++) {
+                    b1 = decoded.charCodeAt(i * 2);
+                    b2 = decoded.charCodeAt(i * 2 + 1);
+                    if (b1 < 0) {
+                        b1 = 256 + b1;
+                    }
+                    if (b2 < 0) {
+                        b2 = 256 + b2;
+                    }
+                    n = b2 * 256 + b1;
+                    if (n >= 65536 / 2) {
+                        n = n - 65536;
+                    }
+                    float32Array[i] = n / 65536.0;
+                }
+                preset.bufferct++;
+                if (preset.bufferct >= preset.zones.length && cb)
+                    cb();
+            }
+            else {
+                if (zone.file) {
+                    let datalen = zone.file.length;
+                    let arraybuffer = new ArrayBuffer(datalen);
+                    let view = new Uint8Array(arraybuffer);
+                    let decoded = atob(zone.file);
+                    let b;
+                    for (let i = 0; i < decoded.length; i++) {
+                        b = decoded.charCodeAt(i);
+                        view[i] = b;
+                    }
+                    audioContext.decodeAudioData(arraybuffer, function (audioBuffer) {
+                        zone.buffer = audioBuffer;
+                        preset.bufferct++;
+                        if (preset.bufferct >= preset.zones.length && cb)
+                            cb();
+                    });
+                }
+            }
+            zone.loopStart = this.numValue(zone.loopStart, 0);
+            zone.loopEnd = this.numValue(zone.loopEnd, 0);
+            zone.coarseTune = this.numValue(zone.coarseTune, 0);
+            zone.fineTune = this.numValue(zone.fineTune, 0);
+            zone.originalPitch = this.numValue(zone.originalPitch, 6000);
+            zone.sampleRate = this.numValue(zone.sampleRate, 44100);
+            zone.sustain = this.numValue(zone.originalPitch, 0);
+        }
+    };
+    this.findZone = function (audioContext, preset, pitch) {
+        let zone = null;
+        for (let i = preset.zones.length - 1; i >= 0; i--) {
+            zone = preset.zones[i];
+            if (zone.keyRangeLow <= pitch && zone.keyRangeHigh + 1 >= pitch) {
+                break;
+            }
+        }
+        try {
+            this.adjustZone(audioContext, zone);
+        }
+        catch (ex) {
+            console.log('adjustZone', ex);
+        }
+        return zone;
+    };
+    this.cancelQueue = function (audioContext) {
+        for (let i = 0; i < this.envelopes.length; i++) {
+            let e = this.envelopes[i];
+            e.gain.cancelScheduledValues(0);
+            e.gain.setValueAtTime(this.nearZero, audioContext.currentTime);
+            e.when = -1;
+            try {
+                e.audioBufferSourceNode.disconnect();
+            }
+            catch (ex) {
+                console.log(ex);
+            }
+        }
+    };
+    return this;
+}
+/*
+Wavetable instrument list:
+
+0: Piano - Acoustic Grand Piano
+1: Piano - Bright Acoustic Piano
+2: Piano - Electric Grand Piano
+3: Piano - Honky-tonk Piano
+4: Piano - Electric Piano 1
+5: Piano - Electric Piano 2
+6: Piano - Harpsichord
+7: Piano - Clavinet
+8: Chromatic Percussion - Celesta
+9: Chromatic Percussion - Glockenspiel
+10: Chromatic Percussion - Music Box
+11: Chromatic Percussion - Vibraphone
+12: Chromatic Percussion - Marimba
+13: Chromatic Percussion - Xylophone
+14: Chromatic Percussion - Tubular Bells
+15: Chromatic Percussion - Dulcimer
+16: Organ - Drawbar Organ
+17: Organ - Percussive Organ
+18: Organ - Rock Organ
+19: Organ - Church Organ
+20: Organ - Reed Organ
+21: Organ - Accordion
+22: Organ - Harmonica
+23: Organ - Tango Accordion
+24: Guitar - Acoustic Guitar (nylon)
+25: Guitar - Acoustic Guitar (steel)
+26: Guitar - Electric Guitar (jazz)
+27: Guitar - Electric Guitar (clean)
+28: Guitar - Electric Guitar (muted)
+29: Guitar - Overdriven Guitar
+30: Guitar - Distortion Guitar
+31: Guitar - Guitar Harmonics
+32: Bass - Acoustic Bass
+33: Bass - Electric Bass (finger)
+34: Bass - Electric Bass (pick)
+35: Bass - Fretless Bass
+36: Bass - Slap Bass 1
+37: Bass - Slap Bass 2
+38: Bass - Synth Bass 1
+39: Bass - Synth Bass 2
+40: Strings - Violin
+41: Strings - Viola
+42: Strings - Cello
+43: Strings - Contrabass
+44: Strings - Tremolo Strings
+45: Strings - Pizzicato Strings
+46: Strings - Orchestral Harp
+47: Strings - Timpani
+48: Ensemble - String Ensemble 1
+49: Ensemble - String Ensemble 2
+50: Ensemble - Synth Strings 1
+51: Ensemble - Synth Strings 2
+52: Ensemble - Choir Aahs
+53: Ensemble - Voice Oohs
+54: Ensemble - Synth Choir
+55: Ensemble - Orchestra Hit
+56: Brass - Trumpet
+57: Brass - Trombone
+58: Brass - Tuba
+59: Brass - Muted Trumpet
+60: Brass - French Horn
+61: Brass - Brass Section
+62: Brass - Synth Brass 1
+63: Brass - Synth Brass 2
+64: Reed - Soprano Sax
+65: Reed - Alto Sax
+66: Reed - Tenor Sax
+67: Reed - Baritone Sax
+68: Reed - Oboe
+69: Reed - English Horn
+70: Reed - Bassoon
+71: Reed - Clarinet
+72: Pipe - Piccolo
+73: Pipe - Flute
+74: Pipe - Recorder
+75: Pipe - Pan Flute
+76: Pipe - Blown bottle
+77: Pipe - Shakuhachi
+78: Pipe - Whistle
+79: Pipe - Ocarina
+80: Synth Lead - Lead 1 (square)
+81: Synth Lead - Lead 2 (sawtooth)
+82: Synth Lead - Lead 3 (calliope)
+83: Synth Lead - Lead 4 (chiff)
+84: Synth Lead - Lead 5 (charang)
+85: Synth Lead - Lead 6 (voice)
+86: Synth Lead - Lead 7 (fifths)
+87: Synth Lead - Lead 8 (bass + lead)
+88: Synth Pad - Pad 1 (new age)
+89: Synth Pad - Pad 2 (warm)
+90: Synth Pad - Pad 3 (polysynth)
+91: Synth Pad - Pad 4 (choir)
+92: Synth Pad - Pad 5 (bowed)
+93: Synth Pad - Pad 6 (metallic)
+94: Synth Pad - Pad 7 (halo)
+95: Synth Pad - Pad 8 (sweep)
+96: Synth Effects - FX 1 (rain)
+97: Synth Effects - FX 2 (soundtrack)
+98: Synth Effects - FX 3 (crystal)
+99: Synth Effects - FX 4 (atmosphere)
+100: Synth Effects - FX 5 (brightness)
+101: Synth Effects - FX 6 (goblins)
+102: Synth Effects - FX 7 (echoes)
+103: Synth Effects - FX 8 (sci-fi)
+104: Ethnic - Sitar
+105: Ethnic - Banjo
+106: Ethnic - Shamisen
+107: Ethnic - Koto
+108: Ethnic - Kalimba
+109: Ethnic - Bagpipe
+110: Ethnic - Fiddle
+111: Ethnic - Shanai
+112: Percussive - Tinkle Bell
+113: Percussive - Agogo
+114: Percussive - Steel Drums
+115: Percussive - Woodblock
+116: Percussive - Taiko Drum
+117: Percussive - Melodic Tom
+118: Percussive - Synth Drum
+119: Percussive - Reverse Cymbal
+120: Sound effects - Guitar Fret Noise
+121: Sound effects - Breath Noise
+122: Sound effects - Seashore
+123: Sound effects - Bird Tweet
+124: Sound effects - Telephone Ring
+125: Sound effects - Helicopter
+126: Sound effects - Applause
+127: Sound effects - Gunshot
+
+Drums:
+Drum_Stan1_SC88P
+Standard
+Standard_part2
+Standard
+DRUM_SFX
+Room_2
+Standard_2_PART3
+CM_64_32_MT_32
+Room_3
+Roomm_PART3
+Room_4
+Power_PART3
+Room_5
+Electronic_PART3
+Room_6
+zTR_808_PART3
+Room_7
+Dance_PART3
+Power
+Jazz_PART3
+Power_1
+Brush_PART3
+Power_2
+Orchestra_PART3
+Power_3
+SFX_PART3
+Drum_Room
+Standard_1
+Roomm_PART2
+Room
+Electronic
+Standard
+TR_808
+Roomm
+Jazz
+Power_SC_55
+Jazz_1
+Electronic_SC_55
+Jazz_2
+zTR_808
+Jazz_3
+Dance_SC_88
+Jazz_4
+Jazz
+Brush
+Brush_SC_55
+Brush_1
+Orchestra
+Brush_2
+SFX
+Drum_Room_SC88P
+Standard_2
+Power_PART2
+Power
+Orchestra_Kit
+Drum_Power
+Standard_3
+Electronic_PART2
+Electronic
+Drum_Elec_SC88P
+Standard_4
+zTR_808_PART2
+TR_808
+Drum_TR808_SC88P
+Standard_5
+Dance_PART2
+Jazz
+Drum_TR909_SC88P
+Standard_6
+Jazz_PART2
+Brush
+Drum_Jazz
+Standard_7
+Brush_PART2
+Orchestra
+Drum_Brush_SC88P
+Room
+Orchestra_PART2
+SFX
+Drum_Orch_SC88P
+Room_1
+SFX_PART2
+*/
+
+
+/***/ }),
+/* 37 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = registerActions;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__editor__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__editor_buffers__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__instruments__ = __webpack_require__(17);
+
+
+
+function registerActions(editor) {
+    const CTRL_ALT = monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd;
+    const CTRL_SHIFT = monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift;
+    let editorActions = new EditorActions(editor);
+    registerButtons(editorActions);
+    setColorTheme(editorActions);
+    registerDnD();
+    // -------------------- Run code actions --------------------
+    editor.addAction({
+        id: 'walc-run-all',
+        label: 'Run all code',
+        keybindings: [CTRL_ALT | monaco.KeyCode.Enter],
+        contextMenuGroupId: 'modulator',
+        contextMenuOrder: 1,
+        run: () => editorActions.runAllCode()
+    });
+    editor.addAction({
+        id: 'walc-run-part',
+        label: 'Run current line or selection',
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+        contextMenuGroupId: 'modulator',
+        contextMenuOrder: 2,
+        run: () => editorActions.runSomeCode()
+    });
+    editor.addAction({
+        id: 'walc-stop-all',
+        label: 'Stop all tracks',
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.US_DOT],
+        contextMenuGroupId: 'modulator',
+        contextMenuOrder: 3,
+        run: () => editorActions.stopAllTracks()
+    });
+    // -------------------- Font size actions --------------------
+    editor.addAction({
+        id: 'walc-font-sm',
+        label: 'Reduce code font',
+        keybindings: [CTRL_ALT | monaco.KeyCode.US_COMMA],
+        contextMenuGroupId: 'modulator',
+        contextMenuOrder: 4,
+        run: () => editorActions.reduceFont()
+    });
+    editor.addAction({
+        id: 'walc-font-lg',
+        label: 'Enlarge code font',
+        keybindings: [CTRL_ALT | monaco.KeyCode.US_DOT],
+        contextMenuGroupId: 'modulator',
+        contextMenuOrder: 5,
+        run: () => editorActions.enlargeFont()
+    });
+    // -------------------- Buffer actions --------------------
+    editor.addAction({
+        id: 'walc-buffer-prev',
+        label: 'Previous code buffer',
+        keybindings: [CTRL_SHIFT | monaco.KeyCode.US_COMMA],
+        run: () => editorActions.showPrevBuffer()
+    });
+    editor.addAction({
+        id: 'walc-buffer-next',
+        label: 'Next code buffer',
+        keybindings: [CTRL_SHIFT | monaco.KeyCode.US_DOT],
+        run: () => editorActions.showNextBuffer()
+    });
+}
+function registerButtons(editorActions) {
+    let refocus = (x) => editorActions.editor.focus();
+    // ----- Left buttons ----
+    $('#walc-run-all').click(_ => refocus(editorActions.runAllCode()));
+    $('#walc-run-sel').click(_ => refocus(editorActions.runSomeCode()));
+    $('#walc-stop').click(_ => refocus(editorActions.stopAllTracks()));
+    // ----- Right buttons -----
+    $('#walc-toggle-theme').click(_ => refocus(editorActions.toggleTheme()));
+    $('#walc-font-sm').click(_ => refocus(editorActions.reduceFont()));
+    $('#walc-font-lg').click(_ => refocus(editorActions.enlargeFont()));
+}
+function setColorTheme(editorActions) {
+    let theme = localStorage.walc_prefs_theme;
+    if (theme == 'dark')
+        editorActions.toggleTheme();
+}
+function registerDnD() {
+    $('#live-coding').on('drag dragstart dragend dragover dragenter dragleave drop', e => {
+        e.preventDefault();
+        e.stopPropagation();
+    })
+        .on('drop', e => {
+        let files = e.originalEvent.dataTransfer.files;
+        Object(__WEBPACK_IMPORTED_MODULE_2__instruments__["b" /* loadSamples */])(files);
+    });
+}
+class EditorActions {
+    constructor(editor) {
+        this.editor = editor;
+        this.lightTheme = true;
+    }
+    runAllCode() {
+        let model = this.editor.getModel();
+        Object(__WEBPACK_IMPORTED_MODULE_0__editor__["b" /* doRunCode */])(model.getValue());
+        Object(__WEBPACK_IMPORTED_MODULE_0__editor__["c" /* flashRange */])(model.getFullModelRange());
+    }
+    runSomeCode() {
+        let range = this.editor.getSelection();
+        let sel = this.getRange(range);
+        Object(__WEBPACK_IMPORTED_MODULE_0__editor__["b" /* doRunCode */])(sel);
+        Object(__WEBPACK_IMPORTED_MODULE_0__editor__["c" /* flashRange */])(range);
+    }
+    stopAllTracks() {
+        lc.reset();
+    }
+    toggleTheme() {
+        this.lightTheme = !this.lightTheme;
+        if (this.lightTheme) {
+            $('body').removeClass('dark');
+            monaco.editor.setTheme('vs');
+            $('.logo > img').attr('src', 'img/logo.svg');
+        }
+        else {
+            $('body').addClass('dark');
+            monaco.editor.setTheme('vs-dark');
+            $('.logo > img').attr('src', 'img/logo-white.svg');
+        }
+        localStorage.walc_prefs_theme = this.lightTheme ? 'light' : 'dark';
+    }
+    reduceFont() {
+        let fs = this.getFontSize();
+        if (fs <= 1)
+            return;
+        this.editor.updateOptions({ fontSize: fs - 1 });
+    }
+    enlargeFont() {
+        this.editor.updateOptions({ fontSize: this.getFontSize() + 1 });
+    }
+    showPrevBuffer() {
+        Object(__WEBPACK_IMPORTED_MODULE_1__editor_buffers__["c" /* prevBuffer */])(this.editor);
+    }
+    showNextBuffer() {
+        Object(__WEBPACK_IMPORTED_MODULE_1__editor_buffers__["b" /* nextBuffer */])(this.editor);
+    }
+    getRange(range) {
+        let sel;
+        if (range.startLineNumber != range.endLineNumber
+            || range.startColumn != range.endColumn) {
+            sel = this.editor.getModel().getValueInRange(range);
+        }
+        else {
+            sel = this.editor.getModel().getLineContent(range.startLineNumber);
+            range.startColumn = 1;
+            range.endColumn = sel.length + 1;
+        }
+        return '\n'.repeat(range.startLineNumber - 1) + sel;
+    }
+    getFontSize() {
+        return this.editor.getConfiguration().fontInfo.fontSize;
+    }
+}
+
+
+/***/ }),
+/* 38 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = setupRing;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__random__ = __webpack_require__(19);
+
+class Ring extends Array {
+    constructor() {
+        super(...arguments);
+        this.tick_ct = 0;
+    }
+    tick() {
+        let result = this[this.tick_ct];
+        this.tick_ct++;
+        if (this.tick_ct >= this.length)
+            this.tick_ct = 0;
+        return result;
+    }
+    choose() {
+        return this[__WEBPACK_IMPORTED_MODULE_0__random__["a" /* random */].integer(0, this.length - 1)];
+    }
+    fromArray(arr) {
+        for (let x of arr)
+            this.push(x);
+        return this;
+    }
+    toArray() {
+        return new Array(...this);
+    }
+    clone() {
+        return copytick(this, this.toArray().ring());
+    }
+    reverse() {
+        return copytick(this, this.toArray().reverse().ring());
+    }
+    sort(compareFn) {
+        let r = this.toArray().sort(compareFn).ring();
+        return copytick(this, r);
+    }
+    shuffle() {
+        let r = this.clone();
+        for (let i = r.length - 1; i > 0; i--) {
+            let j = __WEBPACK_IMPORTED_MODULE_0__random__["a" /* random */].integer(0, i);
+            let temp = r[i];
+            r[i] = r[j];
+            r[j] = temp;
+        }
+        return copytick(this, r);
+    }
+    take(n) {
+        return copytick(this, this.slice(0, n));
+    }
+    drop(n) {
+        return copytick(this, this.slice(n));
+    }
+    butlast() {
+        return this.take(this.length - 1);
+    }
+    drop_last(n) {
+        return this.take(this.length - n);
+    }
+    take_last(n) {
+        return this.drop(this.length - n);
+    }
+    stretch(n) {
+        let r = new Ring();
+        for (let x of this)
+            for (let i = 0; i < n; i++)
+                r.push(x);
+        return copytick(this, r);
+    }
+    repeat(n) {
+        let r = new Ring();
+        for (let i = 0; i < n; i++)
+            for (let x of this)
+                r.push(x);
+        return copytick(this, r);
+    }
+    mirror() {
+        let r = this.concat(this.reverse());
+        return copytick(this, r);
+    }
+    reflect() {
+        let r = this.concat(this.reverse().drop(1));
+        return copytick(this, r);
+    }
+    scale(n) {
+        let r = this.clone();
+        for (let i = 0; i < r.length; i++)
+            r[i] *= n;
+        return copytick(this, r);
+    }
+    transpose(n) {
+        let r = this.clone();
+        for (let i = 0; i < r.length; i++)
+            r[i] += n;
+        return copytick(this, r);
+    }
+    toString() {
+        let arr = [];
+        for (let x of this)
+            arr.push(x.toString());
+        arr[this.tick_ct] = '>' + arr[this.tick_ct] + '<';
+        return '(' + arr.join(', ') + ')';
+    }
+}
+/* unused harmony export Ring */
+
+function setupRing() {
+    if (!Array.prototype.ring) {
+        Array.prototype.ring = function () {
+            return new Ring().fromArray(this);
+        };
+    }
+}
+function copytick(from, to) {
+    to.tick_ct = from.tick_ct;
+    if (to.tick_ct >= to.length)
+        to.tick_ct = to.length - 1;
+    return to;
+}
+
+
+/***/ }),
+/* 39 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// A library of seedable RNGs implemented in Javascript.
+//
+// Usage:
+//
+// var seedrandom = require('seedrandom');
+// var random = seedrandom(1); // or any seed.
+// var x = random();       // 0 <= x < 1.  Every bit is random.
+// var x = random.quick(); // 0 <= x < 1.  32 bits of randomness.
+
+// alea, a 53-bit multiply-with-carry generator by Johannes Baagøe.
+// Period: ~2^116
+// Reported to pass all BigCrush tests.
+var alea = __webpack_require__(40);
+
+// xor128, a pure xor-shift generator by George Marsaglia.
+// Period: 2^128-1.
+// Reported to fail: MatrixRank and LinearComp.
+var xor128 = __webpack_require__(41);
+
+// xorwow, George Marsaglia's 160-bit xor-shift combined plus weyl.
+// Period: 2^192-2^32
+// Reported to fail: CollisionOver, SimpPoker, and LinearComp.
+var xorwow = __webpack_require__(42);
+
+// xorshift7, by François Panneton and Pierre L'ecuyer, takes
+// a different approach: it adds robustness by allowing more shifts
+// than Marsaglia's original three.  It is a 7-shift generator
+// with 256 bits, that passes BigCrush with no systmatic failures.
+// Period 2^256-1.
+// No systematic BigCrush failures reported.
+var xorshift7 = __webpack_require__(43);
+
+// xor4096, by Richard Brent, is a 4096-bit xor-shift with a
+// very long period that also adds a Weyl generator. It also passes
+// BigCrush with no systematic failures.  Its long period may
+// be useful if you have many generators and need to avoid
+// collisions.
+// Period: 2^4128-2^32.
+// No systematic BigCrush failures reported.
+var xor4096 = __webpack_require__(44);
+
+// Tyche-i, by Samuel Neves and Filipe Araujo, is a bit-shifting random
+// number generator derived from ChaCha, a modern stream cipher.
+// https://eden.dei.uc.pt/~sneves/pubs/2011-snfa2.pdf
+// Period: ~2^127
+// No systematic BigCrush failures reported.
+var tychei = __webpack_require__(45);
+
+// The original ARC4-based prng included in this library.
+// Period: ~2^1600
+var sr = __webpack_require__(46);
+
+sr.alea = alea;
+sr.xor128 = xor128;
+sr.xorwow = xorwow;
+sr.xorshift7 = xorshift7;
+sr.xor4096 = xor4096;
+sr.tychei = tychei;
+
+module.exports = sr;
+
+
+/***/ }),
+/* 40 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(module) {var __WEBPACK_AMD_DEFINE_RESULT__;// A port of an algorithm by Johannes Baagøe <baagoe@baagoe.com>, 2010
+// http://baagoe.com/en/RandomMusings/javascript/
+// https://github.com/nquinlan/better-random-numbers-for-javascript-mirror
+// Original work is under MIT license -
+
+// Copyright (C) 2010 by Johannes Baagøe <baagoe@baagoe.org>
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+
+
+(function(global, module, define) {
+
+function Alea(seed) {
+  var me = this, mash = Mash();
+
+  me.next = function() {
+    var t = 2091639 * me.s0 + me.c * 2.3283064365386963e-10; // 2^-32
+    me.s0 = me.s1;
+    me.s1 = me.s2;
+    return me.s2 = t - (me.c = t | 0);
+  };
+
+  // Apply the seeding algorithm from Baagoe.
+  me.c = 1;
+  me.s0 = mash(' ');
+  me.s1 = mash(' ');
+  me.s2 = mash(' ');
+  me.s0 -= mash(seed);
+  if (me.s0 < 0) { me.s0 += 1; }
+  me.s1 -= mash(seed);
+  if (me.s1 < 0) { me.s1 += 1; }
+  me.s2 -= mash(seed);
+  if (me.s2 < 0) { me.s2 += 1; }
+  mash = null;
+}
+
+function copy(f, t) {
+  t.c = f.c;
+  t.s0 = f.s0;
+  t.s1 = f.s1;
+  t.s2 = f.s2;
+  return t;
+}
+
+function impl(seed, opts) {
+  var xg = new Alea(seed),
+      state = opts && opts.state,
+      prng = xg.next;
+  prng.int32 = function() { return (xg.next() * 0x100000000) | 0; }
+  prng.double = function() {
+    return prng() + (prng() * 0x200000 | 0) * 1.1102230246251565e-16; // 2^-53
+  };
+  prng.quick = prng;
+  if (state) {
+    if (typeof(state) == 'object') copy(state, xg);
+    prng.state = function() { return copy(xg, {}); }
+  }
+  return prng;
+}
+
+function Mash() {
+  var n = 0xefc8249d;
+
+  var mash = function(data) {
+    data = data.toString();
+    for (var i = 0; i < data.length; i++) {
+      n += data.charCodeAt(i);
+      var h = 0.02519603282416938 * n;
+      n = h >>> 0;
+      h -= n;
+      h *= n;
+      n = h >>> 0;
+      h -= n;
+      n += h * 0x100000000; // 2^32
+    }
+    return (n >>> 0) * 2.3283064365386963e-10; // 2^-32
+  };
+
+  return mash;
+}
+
+
+if (module && module.exports) {
+  module.exports = impl;
+} else if (__webpack_require__(0) && __webpack_require__(3)) {
+  !(__WEBPACK_AMD_DEFINE_RESULT__ = (function() { return impl; }).call(exports, __webpack_require__, exports, module),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+} else {
+  this.alea = impl;
+}
+
+})(
+  this,
+  (typeof module) == 'object' && module,    // present in node.js
+  __webpack_require__(0)   // present with an AMD loader
+);
+
+
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)(module)))
+
+/***/ }),
+/* 41 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(module) {var __WEBPACK_AMD_DEFINE_RESULT__;// A Javascript implementaion of the "xor128" prng algorithm by
+// George Marsaglia.  See http://www.jstatsoft.org/v08/i14/paper
+
+(function(global, module, define) {
+
+function XorGen(seed) {
+  var me = this, strseed = '';
+
+  me.x = 0;
+  me.y = 0;
+  me.z = 0;
+  me.w = 0;
+
+  // Set up generator function.
+  me.next = function() {
+    var t = me.x ^ (me.x << 11);
+    me.x = me.y;
+    me.y = me.z;
+    me.z = me.w;
+    return me.w ^= (me.w >>> 19) ^ t ^ (t >>> 8);
+  };
+
+  if (seed === (seed | 0)) {
+    // Integer seed.
+    me.x = seed;
+  } else {
+    // String seed.
+    strseed += seed;
+  }
+
+  // Mix in string seed, then discard an initial batch of 64 values.
+  for (var k = 0; k < strseed.length + 64; k++) {
+    me.x ^= strseed.charCodeAt(k) | 0;
+    me.next();
+  }
+}
+
+function copy(f, t) {
+  t.x = f.x;
+  t.y = f.y;
+  t.z = f.z;
+  t.w = f.w;
+  return t;
+}
+
+function impl(seed, opts) {
+  var xg = new XorGen(seed),
+      state = opts && opts.state,
+      prng = function() { return (xg.next() >>> 0) / 0x100000000; };
+  prng.double = function() {
+    do {
+      var top = xg.next() >>> 11,
+          bot = (xg.next() >>> 0) / 0x100000000,
+          result = (top + bot) / (1 << 21);
+    } while (result === 0);
+    return result;
+  };
+  prng.int32 = xg.next;
+  prng.quick = prng;
+  if (state) {
+    if (typeof(state) == 'object') copy(state, xg);
+    prng.state = function() { return copy(xg, {}); }
+  }
+  return prng;
+}
+
+if (module && module.exports) {
+  module.exports = impl;
+} else if (__webpack_require__(0) && __webpack_require__(3)) {
+  !(__WEBPACK_AMD_DEFINE_RESULT__ = (function() { return impl; }).call(exports, __webpack_require__, exports, module),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+} else {
+  this.xor128 = impl;
+}
+
+})(
+  this,
+  (typeof module) == 'object' && module,    // present in node.js
+  __webpack_require__(0)   // present with an AMD loader
+);
+
+
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)(module)))
+
+/***/ }),
+/* 42 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(module) {var __WEBPACK_AMD_DEFINE_RESULT__;// A Javascript implementaion of the "xorwow" prng algorithm by
+// George Marsaglia.  See http://www.jstatsoft.org/v08/i14/paper
+
+(function(global, module, define) {
+
+function XorGen(seed) {
+  var me = this, strseed = '';
+
+  // Set up generator function.
+  me.next = function() {
+    var t = (me.x ^ (me.x >>> 2));
+    me.x = me.y; me.y = me.z; me.z = me.w; me.w = me.v;
+    return (me.d = (me.d + 362437 | 0)) +
+       (me.v = (me.v ^ (me.v << 4)) ^ (t ^ (t << 1))) | 0;
+  };
+
+  me.x = 0;
+  me.y = 0;
+  me.z = 0;
+  me.w = 0;
+  me.v = 0;
+
+  if (seed === (seed | 0)) {
+    // Integer seed.
+    me.x = seed;
+  } else {
+    // String seed.
+    strseed += seed;
+  }
+
+  // Mix in string seed, then discard an initial batch of 64 values.
+  for (var k = 0; k < strseed.length + 64; k++) {
+    me.x ^= strseed.charCodeAt(k) | 0;
+    if (k == strseed.length) {
+      me.d = me.x << 10 ^ me.x >>> 4;
+    }
+    me.next();
+  }
+}
+
+function copy(f, t) {
+  t.x = f.x;
+  t.y = f.y;
+  t.z = f.z;
+  t.w = f.w;
+  t.v = f.v;
+  t.d = f.d;
+  return t;
+}
+
+function impl(seed, opts) {
+  var xg = new XorGen(seed),
+      state = opts && opts.state,
+      prng = function() { return (xg.next() >>> 0) / 0x100000000; };
+  prng.double = function() {
+    do {
+      var top = xg.next() >>> 11,
+          bot = (xg.next() >>> 0) / 0x100000000,
+          result = (top + bot) / (1 << 21);
+    } while (result === 0);
+    return result;
+  };
+  prng.int32 = xg.next;
+  prng.quick = prng;
+  if (state) {
+    if (typeof(state) == 'object') copy(state, xg);
+    prng.state = function() { return copy(xg, {}); }
+  }
+  return prng;
+}
+
+if (module && module.exports) {
+  module.exports = impl;
+} else if (__webpack_require__(0) && __webpack_require__(3)) {
+  !(__WEBPACK_AMD_DEFINE_RESULT__ = (function() { return impl; }).call(exports, __webpack_require__, exports, module),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+} else {
+  this.xorwow = impl;
+}
+
+})(
+  this,
+  (typeof module) == 'object' && module,    // present in node.js
+  __webpack_require__(0)   // present with an AMD loader
+);
+
+
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)(module)))
+
+/***/ }),
+/* 43 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(module) {var __WEBPACK_AMD_DEFINE_RESULT__;// A Javascript implementaion of the "xorshift7" algorithm by
+// François Panneton and Pierre L'ecuyer:
+// "On the Xorgshift Random Number Generators"
+// http://saluc.engr.uconn.edu/refs/crypto/rng/panneton05onthexorshift.pdf
+
+(function(global, module, define) {
+
+function XorGen(seed) {
+  var me = this;
+
+  // Set up generator function.
+  me.next = function() {
+    // Update xor generator.
+    var X = me.x, i = me.i, t, v, w;
+    t = X[i]; t ^= (t >>> 7); v = t ^ (t << 24);
+    t = X[(i + 1) & 7]; v ^= t ^ (t >>> 10);
+    t = X[(i + 3) & 7]; v ^= t ^ (t >>> 3);
+    t = X[(i + 4) & 7]; v ^= t ^ (t << 7);
+    t = X[(i + 7) & 7]; t = t ^ (t << 13); v ^= t ^ (t << 9);
+    X[i] = v;
+    me.i = (i + 1) & 7;
+    return v;
+  };
+
+  function init(me, seed) {
+    var j, w, X = [];
+
+    if (seed === (seed | 0)) {
+      // Seed state array using a 32-bit integer.
+      w = X[0] = seed;
+    } else {
+      // Seed state using a string.
+      seed = '' + seed;
+      for (j = 0; j < seed.length; ++j) {
+        X[j & 7] = (X[j & 7] << 15) ^
+            (seed.charCodeAt(j) + X[(j + 1) & 7] << 13);
+      }
+    }
+    // Enforce an array length of 8, not all zeroes.
+    while (X.length < 8) X.push(0);
+    for (j = 0; j < 8 && X[j] === 0; ++j);
+    if (j == 8) w = X[7] = -1; else w = X[j];
+
+    me.x = X;
+    me.i = 0;
+
+    // Discard an initial 256 values.
+    for (j = 256; j > 0; --j) {
+      me.next();
+    }
+  }
+
+  init(me, seed);
+}
+
+function copy(f, t) {
+  t.x = f.x.slice();
+  t.i = f.i;
+  return t;
+}
+
+function impl(seed, opts) {
+  if (seed == null) seed = +(new Date);
+  var xg = new XorGen(seed),
+      state = opts && opts.state,
+      prng = function() { return (xg.next() >>> 0) / 0x100000000; };
+  prng.double = function() {
+    do {
+      var top = xg.next() >>> 11,
+          bot = (xg.next() >>> 0) / 0x100000000,
+          result = (top + bot) / (1 << 21);
+    } while (result === 0);
+    return result;
+  };
+  prng.int32 = xg.next;
+  prng.quick = prng;
+  if (state) {
+    if (state.x) copy(state, xg);
+    prng.state = function() { return copy(xg, {}); }
+  }
+  return prng;
+}
+
+if (module && module.exports) {
+  module.exports = impl;
+} else if (__webpack_require__(0) && __webpack_require__(3)) {
+  !(__WEBPACK_AMD_DEFINE_RESULT__ = (function() { return impl; }).call(exports, __webpack_require__, exports, module),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+} else {
+  this.xorshift7 = impl;
+}
+
+})(
+  this,
+  (typeof module) == 'object' && module,    // present in node.js
+  __webpack_require__(0)   // present with an AMD loader
+);
+
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)(module)))
+
+/***/ }),
+/* 44 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(module) {var __WEBPACK_AMD_DEFINE_RESULT__;// A Javascript implementaion of Richard Brent's Xorgens xor4096 algorithm.
+//
+// This fast non-cryptographic random number generator is designed for
+// use in Monte-Carlo algorithms. It combines a long-period xorshift
+// generator with a Weyl generator, and it passes all common batteries
+// of stasticial tests for randomness while consuming only a few nanoseconds
+// for each prng generated.  For background on the generator, see Brent's
+// paper: "Some long-period random number generators using shifts and xors."
+// http://arxiv.org/pdf/1004.3115v1.pdf
+//
+// Usage:
+//
+// var xor4096 = require('xor4096');
+// random = xor4096(1);                        // Seed with int32 or string.
+// assert.equal(random(), 0.1520436450538547); // (0, 1) range, 53 bits.
+// assert.equal(random.int32(), 1806534897);   // signed int32, 32 bits.
+//
+// For nonzero numeric keys, this impelementation provides a sequence
+// identical to that by Brent's xorgens 3 implementaion in C.  This
+// implementation also provides for initalizing the generator with
+// string seeds, or for saving and restoring the state of the generator.
+//
+// On Chrome, this prng benchmarks about 2.1 times slower than
+// Javascript's built-in Math.random().
+
+(function(global, module, define) {
+
+function XorGen(seed) {
+  var me = this;
+
+  // Set up generator function.
+  me.next = function() {
+    var w = me.w,
+        X = me.X, i = me.i, t, v;
+    // Update Weyl generator.
+    me.w = w = (w + 0x61c88647) | 0;
+    // Update xor generator.
+    v = X[(i + 34) & 127];
+    t = X[i = ((i + 1) & 127)];
+    v ^= v << 13;
+    t ^= t << 17;
+    v ^= v >>> 15;
+    t ^= t >>> 12;
+    // Update Xor generator array state.
+    v = X[i] = v ^ t;
+    me.i = i;
+    // Result is the combination.
+    return (v + (w ^ (w >>> 16))) | 0;
+  };
+
+  function init(me, seed) {
+    var t, v, i, j, w, X = [], limit = 128;
+    if (seed === (seed | 0)) {
+      // Numeric seeds initialize v, which is used to generates X.
+      v = seed;
+      seed = null;
+    } else {
+      // String seeds are mixed into v and X one character at a time.
+      seed = seed + '\0';
+      v = 0;
+      limit = Math.max(limit, seed.length);
+    }
+    // Initialize circular array and weyl value.
+    for (i = 0, j = -32; j < limit; ++j) {
+      // Put the unicode characters into the array, and shuffle them.
+      if (seed) v ^= seed.charCodeAt((j + 32) % seed.length);
+      // After 32 shuffles, take v as the starting w value.
+      if (j === 0) w = v;
+      v ^= v << 10;
+      v ^= v >>> 15;
+      v ^= v << 4;
+      v ^= v >>> 13;
+      if (j >= 0) {
+        w = (w + 0x61c88647) | 0;     // Weyl.
+        t = (X[j & 127] ^= (v + w));  // Combine xor and weyl to init array.
+        i = (0 == t) ? i + 1 : 0;     // Count zeroes.
+      }
+    }
+    // We have detected all zeroes; make the key nonzero.
+    if (i >= 128) {
+      X[(seed && seed.length || 0) & 127] = -1;
+    }
+    // Run the generator 512 times to further mix the state before using it.
+    // Factoring this as a function slows the main generator, so it is just
+    // unrolled here.  The weyl generator is not advanced while warming up.
+    i = 127;
+    for (j = 4 * 128; j > 0; --j) {
+      v = X[(i + 34) & 127];
+      t = X[i = ((i + 1) & 127)];
+      v ^= v << 13;
+      t ^= t << 17;
+      v ^= v >>> 15;
+      t ^= t >>> 12;
+      X[i] = v ^ t;
+    }
+    // Storing state as object members is faster than using closure variables.
+    me.w = w;
+    me.X = X;
+    me.i = i;
+  }
+
+  init(me, seed);
+}
+
+function copy(f, t) {
+  t.i = f.i;
+  t.w = f.w;
+  t.X = f.X.slice();
+  return t;
+};
+
+function impl(seed, opts) {
+  if (seed == null) seed = +(new Date);
+  var xg = new XorGen(seed),
+      state = opts && opts.state,
+      prng = function() { return (xg.next() >>> 0) / 0x100000000; };
+  prng.double = function() {
+    do {
+      var top = xg.next() >>> 11,
+          bot = (xg.next() >>> 0) / 0x100000000,
+          result = (top + bot) / (1 << 21);
+    } while (result === 0);
+    return result;
+  };
+  prng.int32 = xg.next;
+  prng.quick = prng;
+  if (state) {
+    if (state.X) copy(state, xg);
+    prng.state = function() { return copy(xg, {}); }
+  }
+  return prng;
+}
+
+if (module && module.exports) {
+  module.exports = impl;
+} else if (__webpack_require__(0) && __webpack_require__(3)) {
+  !(__WEBPACK_AMD_DEFINE_RESULT__ = (function() { return impl; }).call(exports, __webpack_require__, exports, module),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+} else {
+  this.xor4096 = impl;
+}
+
+})(
+  this,                                     // window object or global
+  (typeof module) == 'object' && module,    // present in node.js
+  __webpack_require__(0)   // present with an AMD loader
+);
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)(module)))
+
+/***/ }),
+/* 45 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(module) {var __WEBPACK_AMD_DEFINE_RESULT__;// A Javascript implementaion of the "Tyche-i" prng algorithm by
+// Samuel Neves and Filipe Araujo.
+// See https://eden.dei.uc.pt/~sneves/pubs/2011-snfa2.pdf
+
+(function(global, module, define) {
+
+function XorGen(seed) {
+  var me = this, strseed = '';
+
+  // Set up generator function.
+  me.next = function() {
+    var b = me.b, c = me.c, d = me.d, a = me.a;
+    b = (b << 25) ^ (b >>> 7) ^ c;
+    c = (c - d) | 0;
+    d = (d << 24) ^ (d >>> 8) ^ a;
+    a = (a - b) | 0;
+    me.b = b = (b << 20) ^ (b >>> 12) ^ c;
+    me.c = c = (c - d) | 0;
+    me.d = (d << 16) ^ (c >>> 16) ^ a;
+    return me.a = (a - b) | 0;
+  };
+
+  /* The following is non-inverted tyche, which has better internal
+   * bit diffusion, but which is about 25% slower than tyche-i in JS.
+  me.next = function() {
+    var a = me.a, b = me.b, c = me.c, d = me.d;
+    a = (me.a + me.b | 0) >>> 0;
+    d = me.d ^ a; d = d << 16 ^ d >>> 16;
+    c = me.c + d | 0;
+    b = me.b ^ c; b = b << 12 ^ d >>> 20;
+    me.a = a = a + b | 0;
+    d = d ^ a; me.d = d = d << 8 ^ d >>> 24;
+    me.c = c = c + d | 0;
+    b = b ^ c;
+    return me.b = (b << 7 ^ b >>> 25);
+  }
+  */
+
+  me.a = 0;
+  me.b = 0;
+  me.c = 2654435769 | 0;
+  me.d = 1367130551;
+
+  if (seed === Math.floor(seed)) {
+    // Integer seed.
+    me.a = (seed / 0x100000000) | 0;
+    me.b = seed | 0;
+  } else {
+    // String seed.
+    strseed += seed;
+  }
+
+  // Mix in string seed, then discard an initial batch of 64 values.
+  for (var k = 0; k < strseed.length + 20; k++) {
+    me.b ^= strseed.charCodeAt(k) | 0;
+    me.next();
+  }
+}
+
+function copy(f, t) {
+  t.a = f.a;
+  t.b = f.b;
+  t.c = f.c;
+  t.d = f.d;
+  return t;
+};
+
+function impl(seed, opts) {
+  var xg = new XorGen(seed),
+      state = opts && opts.state,
+      prng = function() { return (xg.next() >>> 0) / 0x100000000; };
+  prng.double = function() {
+    do {
+      var top = xg.next() >>> 11,
+          bot = (xg.next() >>> 0) / 0x100000000,
+          result = (top + bot) / (1 << 21);
+    } while (result === 0);
+    return result;
+  };
+  prng.int32 = xg.next;
+  prng.quick = prng;
+  if (state) {
+    if (typeof(state) == 'object') copy(state, xg);
+    prng.state = function() { return copy(xg, {}); }
+  }
+  return prng;
+}
+
+if (module && module.exports) {
+  module.exports = impl;
+} else if (__webpack_require__(0) && __webpack_require__(3)) {
+  !(__WEBPACK_AMD_DEFINE_RESULT__ = (function() { return impl; }).call(exports, __webpack_require__, exports, module),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+} else {
+  this.tychei = impl;
+}
+
+})(
+  this,
+  (typeof module) == 'object' && module,    // present in node.js
+  __webpack_require__(0)   // present with an AMD loader
+);
+
+
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)(module)))
+
+/***/ }),
+/* 46 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var __WEBPACK_AMD_DEFINE_RESULT__;/*
+Copyright 2014 David Bau.
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+*/
+
+(function (pool, math) {
+//
+// The following constants are related to IEEE 754 limits.
+//
+var global = this,
+    width = 256,        // each RC4 output is 0 <= x < 256
+    chunks = 6,         // at least six RC4 outputs for each double
+    digits = 52,        // there are 52 significant digits in a double
+    rngname = 'random', // rngname: name for Math.random and Math.seedrandom
+    startdenom = math.pow(width, chunks),
+    significance = math.pow(2, digits),
+    overflow = significance * 2,
+    mask = width - 1,
+    nodecrypto;         // node.js crypto module, initialized at the bottom.
+
+//
+// seedrandom()
+// This is the seedrandom function described above.
+//
+function seedrandom(seed, options, callback) {
+  var key = [];
+  options = (options == true) ? { entropy: true } : (options || {});
+
+  // Flatten the seed string or build one from local entropy if needed.
+  var shortseed = mixkey(flatten(
+    options.entropy ? [seed, tostring(pool)] :
+    (seed == null) ? autoseed() : seed, 3), key);
+
+  // Use the seed to initialize an ARC4 generator.
+  var arc4 = new ARC4(key);
+
+  // This function returns a random double in [0, 1) that contains
+  // randomness in every bit of the mantissa of the IEEE 754 value.
+  var prng = function() {
+    var n = arc4.g(chunks),             // Start with a numerator n < 2 ^ 48
+        d = startdenom,                 //   and denominator d = 2 ^ 48.
+        x = 0;                          //   and no 'extra last byte'.
+    while (n < significance) {          // Fill up all significant digits by
+      n = (n + x) * width;              //   shifting numerator and
+      d *= width;                       //   denominator and generating a
+      x = arc4.g(1);                    //   new least-significant-byte.
+    }
+    while (n >= overflow) {             // To avoid rounding up, before adding
+      n /= 2;                           //   last byte, shift everything
+      d /= 2;                           //   right using integer math until
+      x >>>= 1;                         //   we have exactly the desired bits.
+    }
+    return (n + x) / d;                 // Form the number within [0, 1).
+  };
+
+  prng.int32 = function() { return arc4.g(4) | 0; }
+  prng.quick = function() { return arc4.g(4) / 0x100000000; }
+  prng.double = prng;
+
+  // Mix the randomness into accumulated entropy.
+  mixkey(tostring(arc4.S), pool);
+
+  // Calling convention: what to return as a function of prng, seed, is_math.
+  return (options.pass || callback ||
+      function(prng, seed, is_math_call, state) {
+        if (state) {
+          // Load the arc4 state from the given state if it has an S array.
+          if (state.S) { copy(state, arc4); }
+          // Only provide the .state method if requested via options.state.
+          prng.state = function() { return copy(arc4, {}); }
+        }
+
+        // If called as a method of Math (Math.seedrandom()), mutate
+        // Math.random because that is how seedrandom.js has worked since v1.0.
+        if (is_math_call) { math[rngname] = prng; return seed; }
+
+        // Otherwise, it is a newer calling convention, so return the
+        // prng directly.
+        else return prng;
+      })(
+  prng,
+  shortseed,
+  'global' in options ? options.global : (this == math),
+  options.state);
+}
+math['seed' + rngname] = seedrandom;
+
+//
+// ARC4
+//
+// An ARC4 implementation.  The constructor takes a key in the form of
+// an array of at most (width) integers that should be 0 <= x < (width).
+//
+// The g(count) method returns a pseudorandom integer that concatenates
+// the next (count) outputs from ARC4.  Its return value is a number x
+// that is in the range 0 <= x < (width ^ count).
+//
+function ARC4(key) {
+  var t, keylen = key.length,
+      me = this, i = 0, j = me.i = me.j = 0, s = me.S = [];
+
+  // The empty key [] is treated as [0].
+  if (!keylen) { key = [keylen++]; }
+
+  // Set up S using the standard key scheduling algorithm.
+  while (i < width) {
+    s[i] = i++;
+  }
+  for (i = 0; i < width; i++) {
+    s[i] = s[j = mask & (j + key[i % keylen] + (t = s[i]))];
+    s[j] = t;
+  }
+
+  // The "g" method returns the next (count) outputs as one number.
+  (me.g = function(count) {
+    // Using instance members instead of closure state nearly doubles speed.
+    var t, r = 0,
+        i = me.i, j = me.j, s = me.S;
+    while (count--) {
+      t = s[i = mask & (i + 1)];
+      r = r * width + s[mask & ((s[i] = s[j = mask & (j + t)]) + (s[j] = t))];
+    }
+    me.i = i; me.j = j;
+    return r;
+    // For robust unpredictability, the function call below automatically
+    // discards an initial batch of values.  This is called RC4-drop[256].
+    // See http://google.com/search?q=rsa+fluhrer+response&btnI
+  })(width);
+}
+
+//
+// copy()
+// Copies internal state of ARC4 to or from a plain object.
+//
+function copy(f, t) {
+  t.i = f.i;
+  t.j = f.j;
+  t.S = f.S.slice();
+  return t;
+};
+
+//
+// flatten()
+// Converts an object tree to nested arrays of strings.
+//
+function flatten(obj, depth) {
+  var result = [], typ = (typeof obj), prop;
+  if (depth && typ == 'object') {
+    for (prop in obj) {
+      try { result.push(flatten(obj[prop], depth - 1)); } catch (e) {}
+    }
+  }
+  return (result.length ? result : typ == 'string' ? obj : obj + '\0');
+}
+
+//
+// mixkey()
+// Mixes a string seed into a key that is an array of integers, and
+// returns a shortened string seed that is equivalent to the result key.
+//
+function mixkey(seed, key) {
+  var stringseed = seed + '', smear, j = 0;
+  while (j < stringseed.length) {
+    key[mask & j] =
+      mask & ((smear ^= key[mask & j] * 19) + stringseed.charCodeAt(j++));
+  }
+  return tostring(key);
+}
+
+//
+// autoseed()
+// Returns an object for autoseeding, using window.crypto and Node crypto
+// module if available.
+//
+function autoseed() {
+  try {
+    var out;
+    if (nodecrypto && (out = nodecrypto.randomBytes)) {
+      // The use of 'out' to remember randomBytes makes tight minified code.
+      out = out(width);
+    } else {
+      out = new Uint8Array(width);
+      (global.crypto || global.msCrypto).getRandomValues(out);
+    }
+    return tostring(out);
+  } catch (e) {
+    var browser = global.navigator,
+        plugins = browser && browser.plugins;
+    return [+new Date, global, plugins, global.screen, tostring(pool)];
+  }
+}
+
+//
+// tostring()
+// Converts an array of charcodes to a string
+//
+function tostring(a) {
+  return String.fromCharCode.apply(0, a);
+}
+
+//
+// When seedrandom.js is loaded, we immediately mix a few bits
+// from the built-in RNG into the entropy pool.  Because we do
+// not want to interfere with deterministic PRNG state later,
+// seedrandom will not call math.random on its own again after
+// initialization.
+//
+mixkey(math.random(), pool);
+
+//
+// Nodejs and AMD support: export the implementation as a module using
+// either convention.
+//
+if ((typeof module) == 'object' && module.exports) {
+  module.exports = seedrandom;
+  // When in node.js, try using crypto package for autoseeding.
+  try {
+    nodecrypto = __webpack_require__(47);
+  } catch (ex) {}
+} else if (true) {
+  !(__WEBPACK_AMD_DEFINE_RESULT__ = (function() { return seedrandom; }).call(exports, __webpack_require__, exports, module),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+}
+
+// End anonymous scope, and pass initial values.
+})(
+  [],     // pool: entropy pool starts empty
+  Math    // math: package containing random, pow, and seedrandom
+);
+
+
+/***/ }),
+/* 47 */
+/***/ (function(module, exports) {
+
+/* (ignored) */
+
+/***/ }),
+/* 48 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = setupRoutes;
+let oldPage;
+let mainRoute;
+function setupRoutes(initialRoute) {
+    window.onhashchange = showPageFromHash;
+    mainRoute = initialRoute;
+    showPageFromHash();
+    return loadPages();
+}
+function showPageFromHash() {
+    const hash = location.hash || mainRoute;
+    $('#page > div').hide();
+    $(hash).show().css('outline', 'none').focus();
+    if (oldPage)
+        $(document).trigger('route:hide', oldPage);
+    $(document).trigger('route:show', hash);
+    oldPage = hash;
+    window.scrollTo(0, 0);
+}
+function loadPages() {
+    return Promise.all([
+        loadPage('live-coding'),
+        loadPage('synth')
+    ]);
+}
+function loadPage(pname) {
+    return new Promise(resolve => {
+        $.get(pname + '.html', data => {
+            $('#' + pname).empty().append(data);
+            resolve();
+        });
+    });
+}
+
+
+/***/ })
+/******/ ]);
+//# sourceMappingURL=bundle.js.map

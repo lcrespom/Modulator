@@ -2,8 +2,11 @@ import { Timer } from '../synth/timer'
 
 import { LCInstrument } from './instruments'
 import { Effect } from './effects'
-import { tracks, NoteInfo, NoteOptions, userTracks } from './scheduler'
-import { TrackCallback } from './live-coding';
+import {
+	tracks, NoteInfo, NoteOptions, userTracks, instruments
+} from './scheduler'
+import { TrackCallback } from './live-coding'
+import { TidalParser } from './tidal-parser'
 
 
 class TrackControl {
@@ -130,6 +133,24 @@ export class Track extends TrackControl {
 			.play(rnotes.tick(), rdurs ? rdurs.tick() : undefined)
 			.sleep(rtimes.tick())
 		)
+		return this
+	}
+
+	play_tidal(code: string, time = 1, baseNote = 69) {
+		let parser = new TidalParser()
+		let ntevs = parser.parse(code, time)
+		if (!ntevs && parser.error) throw new Error(
+			`Tidal parsing error in position ${parser.error.tk.pos}: ${parser.error.msg}`
+		)
+		if (!ntevs || ntevs.length == 0) return
+		let oldt = 0
+		for (let ev of ntevs) {
+			this.sleep(ev.time - oldt)
+			this.instrument(instruments[ev.instr])
+				.play(baseNote)
+			oldt = ev.time
+		}
+		this.sleep(time - oldt)
 		return this
 	}
 
