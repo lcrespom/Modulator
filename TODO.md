@@ -43,7 +43,9 @@
 	- [x] Examples
 	- [x] Document API
 - Synth API / runtime
-	- [ ] Test 3D graphics with p5
+	- [ ] TidalCycles simplified rhythm parser
+		- [x] Implement
+		- [ ] Document
 	- [ ] Improve note event accuracy in the listen function
 	- [ ] Do not require an instrument for track playing
 		- Use the first instrument in the instruments table
