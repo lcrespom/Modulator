@@ -136,18 +136,19 @@ export class Track extends TrackControl {
 		return this
 	}
 
-	play_tidal(code: string, time = 1, baseNote = 69) {
+	play_cycle(code: string, time = 1) {
 		let parser = new TidalParser()
 		let ntevs = parser.parse(code, time)
 		if (!ntevs && parser.error) throw new Error(
-			`Tidal parsing error in position ${parser.error.tk.pos}: ${parser.error.msg}`
+			`Cycle parsing error in position ${parser.error.tk.pos}: ${parser.error.msg}`
 		)
 		if (!ntevs || ntevs.length == 0) return
 		let oldt = 0
 		for (let ev of ntevs) {
+			let instr = instruments[ev.instr]
 			this.sleep(ev.time - oldt)
-			this.instrument(instruments[ev.instr])
-				.play(baseNote)
+			this.instrument(instr)
+				.play(instr.baseNote)
 			oldt = ev.time
 		}
 		this.sleep(time - oldt)

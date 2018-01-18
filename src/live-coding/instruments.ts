@@ -8,6 +8,7 @@ import { logToPanel, txt2html } from './log'
 export interface LCInstrument {
 	name: string
 	duration: number
+	baseNote: number
 	param(pname: string, value?: number,
 		rampTime?: number, exponential?: boolean): number | this
 	paramNames(): string[]
@@ -91,6 +92,7 @@ function sampleInstrProvider(
 class ModulatorInstrument extends Instrument implements LCInstrument {
 	name: string
 	duration: number
+	baseNote = 57
 
 	async initialize() {
 		logInstrReady(this.name)
@@ -193,6 +195,7 @@ function findNoteDuration(preset: any) {
 class WavetableInstrument implements LCInstrument {
 	name: string
 	duration: number
+	baseNote: number
 	preset: object
 	destination: AudioNode
 	envelopes: any[] = []
@@ -201,6 +204,9 @@ class WavetableInstrument implements LCInstrument {
 		this.duration = 0
 		if (name === undefined) name = presetName
 		this.name = name
+		this.baseNote = 69
+		let m = presetName.match(/^128(\d\d)_/)
+		if (m && m[1]) this.baseNote = parseInt(m[1], 10)
 	}
 
 	async initialize() {
@@ -363,7 +369,7 @@ class SampleInstrument implements LCInstrument {
 
 	paramNames() {
 		// TODO 'attack' and 'release'
-		return ['baseNote', 'ignoreNote', 'loops', 'loopStart', 'loopEnd']
+		return ['ignoreNote', 'loops', 'loopStart', 'loopEnd']
 	}
 
 	noteOn(midi: number, velocity: number, when?: number) {

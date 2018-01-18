@@ -2177,6 +2177,10 @@ function sampleInstrProvider(lc, preset, name, numVoices = 4) {
 }
 // ------------------------- Modulator instrument -------------------------
 class ModulatorInstrument extends __WEBPACK_IMPORTED_MODULE_0__synth_instrument__["a" /* Instrument */] {
+    constructor() {
+        super(...arguments);
+        this.baseNote = 57;
+    }
     initialize() {
         return __awaiter(this, void 0, void 0, function* () {
             logInstrReady(this.name);
@@ -2268,6 +2272,10 @@ class WavetableInstrument {
         if (name === undefined)
             name = presetName;
         this.name = name;
+        this.baseNote = 69;
+        let m = presetName.match(/^128(\d\d)_/);
+        if (m && m[1])
+            this.baseNote = parseInt(m[1], 10);
     }
     initialize() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -2411,7 +2419,7 @@ class SampleInstrument {
     }
     paramNames() {
         // TODO 'attack' and 'release'
-        return ['baseNote', 'ignoreNote', 'loops', 'loopStart', 'loopEnd'];
+        return ['ignoreNote', 'loops', 'loopStart', 'loopEnd'];
     }
     noteOn(midi, velocity, when) {
         let bufferNode = this.ctx.createBufferSource();
@@ -4633,18 +4641,19 @@ class Track extends TrackControl {
             .sleep(rtimes.tick()));
         return this;
     }
-    play_tidal(code, time = 1, baseNote = 69) {
+    play_cycle(code, time = 1) {
         let parser = new __WEBPACK_IMPORTED_MODULE_1__tidal_parser__["a" /* TidalParser */]();
         let ntevs = parser.parse(code, time);
         if (!ntevs && parser.error)
-            throw new Error(`Tidal parsing error in position ${parser.error.tk.pos}: ${parser.error.msg}`);
+            throw new Error(`Cycle parsing error in position ${parser.error.tk.pos}: ${parser.error.msg}`);
         if (!ntevs || ntevs.length == 0)
             return;
         let oldt = 0;
         for (let ev of ntevs) {
+            let instr = __WEBPACK_IMPORTED_MODULE_0__scheduler__["c" /* instruments */][ev.instr];
             this.sleep(ev.time - oldt);
-            this.instrument(__WEBPACK_IMPORTED_MODULE_0__scheduler__["c" /* instruments */][ev.instr])
-                .play(baseNote);
+            this.instrument(instr)
+                .play(instr.baseNote);
             oldt = ev.time;
         }
         this.sleep(time - oldt);
