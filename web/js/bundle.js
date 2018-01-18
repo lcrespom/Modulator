@@ -4652,8 +4652,8 @@ class Track extends TrackControl {
         for (let ev of ntevs) {
             let instr = __WEBPACK_IMPORTED_MODULE_0__scheduler__["c" /* instruments */][ev.instr];
             this.sleep(ev.time - oldt);
-            this.instrument(instr)
-                .play(instr.baseNote);
+            if (instr)
+                this.instrument(instr).play(instr.baseNote);
             oldt = ev.time;
         }
         this.sleep(time - oldt);
@@ -4838,7 +4838,8 @@ function isIdentifier(c) {
     return isNumber(c) ||
         c >= 'A' && c <= 'Z' ||
         c >= 'a' && c <= 'z' ||
-        c == '_';
+        c == '_' ||
+        c == '~';
 }
 var TokenType;
 (function (TokenType) {

@@ -147,8 +147,7 @@ export class Track extends TrackControl {
 		for (let ev of ntevs) {
 			let instr = instruments[ev.instr]
 			this.sleep(ev.time - oldt)
-			this.instrument(instr)
-				.play(instr.baseNote)
+			if (instr) this.instrument(instr).play(instr.baseNote)
 			oldt = ev.time
 		}
 		this.sleep(time - oldt)

@@ -154,7 +154,8 @@ function isIdentifier(c: string) {
 	return isNumber(c) ||
 		c >= 'A' && c <= 'Z' ||
 		c >= 'a' && c <= 'z' ||
-		c == '_'
+		c == '_' ||
+		c == '~'
 }
 
 
