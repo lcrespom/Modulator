@@ -65,7 +65,7 @@ function isLowerCase(ch) {
     return ch >= 'a' && ch <= 'z'
 }
 
-function playPatterns(t, patts, notes) {
+function playPatterns(t, patts) {
     let ct = 0
     cleanup_patts(patts)
     let played = true
@@ -74,10 +74,11 @@ function playPatterns(t, patts, notes) {
         for (let iname in patts) {
             let patt = patts[iname]
             let ch = patt[ct]
+            let instr = instruments[iname]
             if (ch && ch != '-') t
-                .instrument(instruments[iname])
+                .instrument(instr)
                 .volume(isLowerCase(ch) ? 0.5 : 1)
-                .play(notes[iname])
+                .play(instr.baseNote)
             if (ch)
                 played = true
         }
@@ -92,8 +93,6 @@ lc.loop_track('drums', t =>
         clap:   '---- X--- ---- X---',
         chihat: '-x-- -x-x -x-- xxxx',
         ohihat: '---x ---- ---x ----'
-    }, {
-        drum: 35, clap: 39, chihat: 42, ohihat: 46
     })
 )
 ```
@@ -175,6 +174,23 @@ lc.track('drums', t => t
 )
 ```
 
+## Breakbeats
+```javascript
+lc.bpm(65)
+lc.instrument('wavetable/12835_0_Chaos_sf2_file', 'drum')
+lc.instrument('wavetable/12839_0_Chaos_sf2_file', 'clap')
+lc.instrument('wavetable/12842_0_Chaos_sf2_file', 'chihat')
+lc.instrument('wavetable/12846_0_Chaos_sf2_file', 'ohihat')
+lc.instrument('wavetable/12875_0_Chaos_sf2_file', 'clave')
+for (let i in instruments) instruments[i].duration = 1
+
+lc.loop_track('drums', t => t
+    .play_cycle('drum*2 [chihat*2 drum] drum [clap ohihat]', 2)
+    .play_cycle('chihat clap chihat clap', 0.5)
+    .play_cycle('drum*2 [chihat*4] drum [clap*2]', 2)
+    .play_cycle('clave*4 clave*2')
+)
+```
 
 ## Figures dancing to the rhythm
 This code makes use of the [p5j library](https://p5js.org), so it needs to be run from the [p5j.html page](../p5j.html), which loads the p5 library and sets up the drawing canvas.
@@ -231,7 +247,6 @@ function checkNotes() {
 
 
 // -------------------- Musical part --------------------
-
 lc.bpm(90)
 lc.instrument('wavetable/12835_0_Chaos_sf2_file', 'drum')
 lc.instrument('wavetable/12839_0_Chaos_sf2_file', 'clap')
@@ -247,7 +262,7 @@ function isLowerCase(ch) {
     return ch >= 'a' && ch <= 'z'
 }
 
-function playPatterns(t, patts, notes, swing = 0) {
+function playPatterns(t, patts, swing = 0) {
     let ct = 0
     cleanup_patts(patts)
     let played = true
@@ -256,10 +271,11 @@ function playPatterns(t, patts, notes, swing = 0) {
         for (let iname in patts) {
             let patt = patts[iname]
             let ch = patt[ct]
+            let instr = instruments[iname]
             if (ch && ch != '-') t
-                .instrument(instruments[iname])
+                .instrument(instr)
                 .volume(isLowerCase(ch) ? 0.5 : 1)
-                .play(notes[iname])
+                .play(instr.baseNote)
             if (ch)
                 played = true
         }
@@ -276,9 +292,7 @@ lc.loop_track('drums', t =>
         clap:   '---- X--- ---- X---',
         chihat: '-x-- -x-x -x-- xxxx',
         ohihat: '---x ---- ---x ----'
-    }, {
-        drum: 35, clap: 39, chihat: 42, ohihat: 46
-    }, 0)
+    })
 )
 
 global.notes = []

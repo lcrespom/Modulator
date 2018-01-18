@@ -144,6 +144,8 @@ interface Instrument {
 	the sound is held during note playback.
 	 */
 	duration: number
+	/** Default note number to be played when the note number is not specified. */
+	baseNote: number
 	/** Gets or sets the value of an instrument parameter.
 	If no value is provided, then the current parameter value is returned.
 	If a value is provided, the instrument parameter is modified, probably altering how the instrument will sound.
@@ -233,6 +235,11 @@ interface Track {
 	 */
 	play_notes(notes: number[],
 		times?: number | number[], durations?: number | number[]): this
+	/** Plays the baseNote of a sequence of instruments whose names are specified in a string. This function works well with rhythmical patterns, and is inspired by the TidalCycles LiveCoding language (only much simpler, of course).
+	@param code a sequence of instrument names, e.g. `"drum clap drum hihat"`. When instruments are enclosed between `[` and `]` they take the same time as an individual instrument. The form `instr*times` can be used as a shorthand, e.g. `clap*2` is a shorthand of `[clap clap]`.
+	@param time Optional. The total duration of the cycle, defaults to one beat.
+	*/
+	play_cycle(code: string, time?: number): this
 	/** Transposes the notes to be played after this point in the specified amount of semitones. */
 	transpose(notes: number): this
 	/** Changes a parameter of the current instrument.
