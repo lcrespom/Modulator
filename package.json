@@ -38,7 +38,7 @@
 		"typescript": "^2.6.2",
 		"uglifyjs-webpack-plugin": "^1.1.4",
 		"webpack": "^3.10.0",
-		"webpack-dev-server": "^2.9.7"
+		"webpack-dev-server": "^3.1.11"
 	},
 	"dependencies": {
 		"seedrandom": "^2.4.3"
