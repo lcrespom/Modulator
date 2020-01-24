@@ -18,7 +18,7 @@ FireFox or Safari, but has no server-side code.
 	and this time it will be removed
 - Use the keyboard to play notes: note **C3** is in `Z`, note **C4** is in `Q`.
 
-You can directly try it out [here](//lcrespom.github.io/synth/).
+You can directly try it out [here](https://lcrespom.github.io/live-coding/).
 
 ## Contributing
 Contributions are welcome. You can reach me via [@lcrespom](https://twitter.com/lcrespom)
